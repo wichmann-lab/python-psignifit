@@ -467,7 +467,7 @@ def getSlope(result, stimLevel):
     """ 
     function slope = getSlope(result, stimLevel)
     This function finds the slope of the psychometric function at a given
-    stimulus level
+    performance level in percent correct. 
     
     result is a result dictionary from psignifit
     
@@ -491,42 +491,43 @@ def getSlope(result, stimLevel):
     else:
         PC = 0.5
     
-    ''' find the (normalized) stimulus level, where the given percent correct is
-    reached and evaluate slope there'''
-    sigName = result['options']['sigmoidName'] 
+    if result['options']['sigmoidName'][0:3]=='neg':
+        PC = 1-PC;
+
+
+    sigName = result['options']['sigmoidName']
     
-    if sigName in ['norm', 'gauss']:
+    if sigName in ['norm','gauss','neg_norm','neg_gauss']:
         C         = _my_norminv(1-alpha,0,1) - _my_norminv(alpha,0,1)
         normalizedStimLevel = (stimLevel-theta0[0])/theta0[1]*C
-        
         slopeNormalized = scipy.stats.norm.pdf(normalizedStimLevel)
         slope = slopeNormalized *C/theta0[1]
-    elif sigName == 'logistic':
+    elif sigName in ['logistic','neg_logistic']:
         C = 2 * np.log(1/alpha - 1) / theta0[1]
         d = np.log(1/PC-1)
         slope = C*np.exp(-C*(stimLevel-theta0[0])+d)/(1+np.exp(-C*(stimLevel-theta0[0])+d))**2
-    elif sigName ==  'gumbel':
+    elif sigName in  ['gumbel','neg_gumbel']:
         C      = np.log(-np.log(alpha)) - np.log(-np.log(1-alpha))
         stimLevel = C/theta0[1]*(stimLevel-theta0[0])+np.log(-np.log(1-PC))
         slope = C/theta0[1]*np.exp(-np.exp(stimLevel))*np.exp(stimLevel)
-    elif sigName == 'rgumbel':                  #reversed gumbel
+    elif sigName in ['rgumbel','neg_rgumbel']:                  #reversed gumbel
         C      = np.log(-np.log(1-alpha)) - np.log(-np.log(alpha))
         stimLevel = C/theta0[1]*(stimLevel-theta0[0])+np.log(-np.log(PC))
         slope = -C/theta0[1]*np.exp(-np.exp(stimLevel))*np.exp(stimLevel)
-    elif sigName == 'logn':
+    elif sigName in ['logn','neg_logn']:
         C      = _my_norminv(1-alpha,0,1) - _my_norminv(alpha,0,1)
         normalizedStimLevel = (np.log(stimLevel)-theta0[0])/theta0[1]
         slopeNormalized = scipy.stats.norm.pdf(normalizedStimLevel)
         slope = slopeNormalized *C/theta0[1]/stimLevel 
-    elif sigName in ['Weibull','weibull']:
+    elif sigName in ['Weibull','weibull','neg_Weibull','neg_weibull']:
         C      = np.log(-np.log(alpha)) - np.log(-np.log(1-alpha))
         stimLevelNormalized = C/theta0[1]*(np.log(stimLevel)-theta0[0])+np.log(-np.log(1-PC))
         slope = C/theta0[1]*np.exp(-np.exp(stimLevelNormalized))*np.exp(stimLevelNormalized)
         slope = slope/stimLevel
-    elif sigName in ['tdist','student','heavytail']:
+    elif sigName in ['tdist','student','heavytail','neg_tdist','neg_student','neg_heavytail']:
         # student T distribution with 1 df --> heavy tail distribution
-        C      = (_my_t1icdf(1-alpha) - _my_t1icdf(alpha))
-        stimLevel = (stimLevel-theta0[0])/theta0[1]*C+_my_t1icdf(PC)
+        C      = (my_t1icdf(1-alpha) - my_t1icdf(alpha))
+        stimLevel = (stimLevel-theta0[0])/theta0[1]*C+my_t1icdf(PC)
         slope = C/theta0[1]*t.pdf(stimLevel,df=1)
     else:
         raise ValueError('unknown sigmoid function')
@@ -534,11 +535,23 @@ def getSlope(result, stimLevel):
 
     slope   = (1-theta0[2]-theta0[3])*slope
     
+    if result['options']['sigmoidName'][0:3]=='neg':
+        slope = -slope
     return slope
     
 
 def getSlopePC(result, pCorrect, unscaled = False):
+    """ 
+    function slope = getSlopePC(result, pCorrect, unscaled = False)
+    This function finds the slope of the psychometric function at a given
+    performance level in percent correct. 
     
+    result is a result dictionary from psignifit
+    
+    pCorrrect is the proportion correct at which to evaluate the slope
+    
+    This function cannot provide credible intervals. 
+    """
     if 'Fit' in result.keys():
         theta0 = result['Fit']
     else:
@@ -561,41 +574,48 @@ def getSlopePC(result, pCorrect, unscaled = False):
         assert ((pCorrect > theta0[3]) & (pCorrect < (1-theta0[2]))), 'pCorrect must lay btw {:.2f} and {:.2f}'.format(theta0[3], (1-theta0[2]))
         pCorrectUnscaled = (pCorrect-theta0[3])/(1-theta0[2] - theta0[3])
         
+
+
     ''' find the (normalized) stimulus level, where the given percent correct is
     reached and evaluate slope there'''
-    sigName = result['options']['sigmoidName'] 
+    sigName = result['options']['sigmoidName'].lower()
     
-    if sigName in ['norm', 'gauss']:
+    if sigName[0:3]=='neg':
+        pCorrectUnscaled = 1-pCorrectUnscaled
+        PC = 1-PC
+
+
+    if sigName in ['norm', 'gauss','neg_norm', 'neg_gauss']:
         C         = _my_norminv(1-alpha,0,1) - _my_norminv(alpha,0,1)
         normalizedStimLevel = _my_norminv(pCorrectUnscaled,0,1)
         slopeNormalized = scipy.stats.norm.pdf(normalizedStimLevel)
         slope = slopeNormalized *C/theta0[1]
-    elif sigName == 'logistic':
+    elif sigName in ['logistic','neg_logistic']:
         stimLevel = theta0[0] - theta0[1]*np.log((1/pCorrectUnscaled-1)-np.log(1/PC-1))/2/np.log(1/alpha-1)
         C = 2 * np.log(1/alpha - 1) / theta0[1]
         d = np.log(1/PC-1)
         slope = C*np.exp(-C*(stimLevel-theta0[0])+d)/(1+np.exp(-C*(stimLevel-theta0[0])+d))**2
-    elif sigName ==  'gumbel':
+    elif sigName in  ['gumbel','neg_gumbel']:
         C      = np.log(-np.log(alpha)) - np.log(-np.log(1-alpha))
         stimLevel = np.log(-np.log(1-pCorrectUnscaled))
         slope = C/theta0[1]*np.exp(-np.exp(stimLevel))*np.exp(stimLevel)
-    elif sigName == 'rgumbel':                  #reversed gumbel
+    elif sigName in ['rgumbel','neg_rgumbel']:                  #reversed gumbel
         C      = np.log(-np.log(1-alpha)) - np.log(-np.log(alpha))
         stimLevel = np.log(-np.log(pCorrectUnscaled))
         slope = -C/theta0[1]*np.exp(-np.exp(stimLevel))*np.exp(stimLevel)       
-    elif sigName == 'logn':
+    elif sigName in['logn', 'neg_logn']:
         C      = _my_norminv(1-alpha,0,1) - _my_norminv(alpha,0,1)
         stimLevel = np.exp(_my_norminv(pCorrectUnscaled, theta0[0]-_my_norminv(PC,0,theta0[1]/C), theta0[1] / C))
         normalizedStimLevel = _my_norminv(pCorrectUnscaled, 0,1)        
         slopeNormalized = scipy.stats.norm.pdf(normalizedStimLevel)
         slope = slopeNormalized *C/theta0[1]/stimLevel 
-    elif sigName in ['Weibull','weibull']:
+    elif sigName in ['Weibull','weibull','neg_Weibull','neg_weibull']:
         C      = np.log(-np.log(alpha)) - np.log(-np.log(1-alpha))
         stimLevel = np.exp(theta0[0]+theta0[1]/C*(np.log(-np.log(1-pCorrectUnscaled))-np.log(-np.log(1-PC))))
         stimLevelNormalized = np.log(-np.log(1-pCorrectUnscaled))
         slope = C/theta0[1]*np.exp(-np.exp(stimLevelNormalized))*np.exp(stimLevelNormalized)
         slope = slope/stimLevel
-    elif sigName in ['tdist','student','heavytail']:
+    elif sigName in ['tdist','student','heavytail','neg_tdist','neg_student','neg_heavytail']:
         # student T distribution with 1 df --> heavy tail distribution
         C      = (_my_t1icdf(1-alpha) - _my_t1icdf(alpha))
         stimLevel = _my_t1icdf(pCorrectUnscaled)
@@ -606,6 +626,8 @@ def getSlopePC(result, pCorrect, unscaled = False):
 
     slope   = (1-theta0[2]-theta0[3])*slope
     
+    if sigName[0:3]=='neg':
+        slope = -slope
     return slope
     
     
@@ -650,7 +672,7 @@ def getThreshold(result,pCorrect, unscaled=False):
     if unscaled: # set asymptotes to 0 for everything.
         theta0[2]  = 0
         theta0[3]  = 0
-        CIs[2:5,:] = 0
+        CIs[2:4,:] = 0
         
     
     assert ((np.array(pCorrect)>theta0[3]) & (np.array(pCorrect)<(1-theta0[2]))), 'The threshold percent correct is not reached by the sigmoid!'
@@ -662,25 +684,29 @@ def getThreshold(result,pCorrect, unscaled=False):
     else :
         PC = 0.5
 
-    sigName = result['options']['sigmoidName']
-    if sigName in ['norm', 'gauss']:
+    sigName = result['options']['sigmoidName'].lower()
+    if sigName[0:3]=='neg':
+        PC = 1-PC
+        pCorrectUnscaled = 1-pCorrectUnscaled
+
+    if sigName in ['norm', 'gauss','neg_norm', 'neg_gauss']:
         C         = _my_norminv(1-alpha,0,1) - _my_norminv(alpha,0,1)
         threshold = _my_norminv(pCorrectUnscaled, theta0[0]-_my_norminv(PC,0,theta0[1]/C), theta0[1] / C)
-    elif sigName ==  'logistic':
+    elif sigName in ['logistic','neg_logistic']:
         threshold = theta0[0]-theta0[1]*(np.log(1/pCorrectUnscaled-1)-np.log(1/PC-1))/2/np.log(1/alpha-1)
-    elif sigName == 'gumbel' :
+    elif sigName in ['gumbel','neg_gumbel']:
         C      = np.log(-np.log(alpha)) - np.log(-np.log(1-alpha))
         threshold = theta0[0] + (np.log(-np.log(1-pCorrectUnscaled))-np.log(-np.log(1-PC)))*theta0[1]/C
-    elif sigName == 'rgumbel':
+    elif sigName in ['rgumbel','neg_rgumbel']:
         C      = np.log(-np.log(1-alpha)) - np.log(-np.log(alpha))
         threshold = theta0[0] + (log(-log(pCorrectUnscaled))-log(-log(PC)))*theta0[1]/C
-    elif sigName == 'logn':
+    elif sigName in ['logn','neg_logn']:
         C      = _my_norminv(1-alpha,0,1) - _my_norminv(alpha,0,1)
         threshold = np.exp(_my_norminv(pCorrectUnscaled, theta0[0]-_my_norminv(PC,0,theta0[1]/C), theta0[1] / C))
-    elif sigName in ['Weibull','weibull']:
+    elif sigName in ['Weibull','weibull','neg_Weibull','neg_weibull']:
         C      = np.log(-np.log(alpha)) - np.log(-np.log(1-alpha))
         threshold = np.exp(theta0[0]+theta0[1]/C*(np.log(-np.log(1-pCorrectUnscaled))-np.log(-np.log(1-PC))))
-    elif sigName in ['tdist','student','heavytail']:
+    elif sigName in ['tdist','student','heavytail','neg_tdist','neg_student','neg_heavytail']:
         C      = (_my_t1icdf(1-alpha) - _my_t1icdf(alpha))
         threshold = (_my_t1icdf(pCorrectUnscaled)-_my_t1icdf(PC))*theta0[1] / C + theta0[0]
     else:
@@ -691,33 +717,42 @@ def getThreshold(result,pCorrect, unscaled=False):
     warnings.warn('The CIs computed by this method are only upper bounds. For more accurate inference change threshPC in the options.')
     CI = np.zeros([len(result['options']['confP']),2])
     for iConfP in range(0,len(result['options']['confP'])):
-        if pCorrectUnscaled > PC:
-            thetaMin = [CIs[0,0,iConfP],CIs[1,0,iConfP],CIs[2,0,iConfP],CIs[3,0,iConfP],0]
-            thetaMax = [CIs[0,1,iConfP],CIs[1,1,iConfP],CIs[2,1,iConfP],CIs[3,1,iConfP],0]
+
+        if sigName[0:3]=='neg':
+            if pCorrectUnscaled < PC:
+                thetaMax = [CIs[0,1,iConfP],CIs[1,0,iConfP],CIs[2,0,iConfP],CIs[3,1,iConfP],0]
+                thetaMin = [CIs[0,0,iConfP],CIs[1,1,iConfP],CIs[2,1,iConfP],CIs[3,0,iConfP],0]
+            else:
+                thetaMin = [CIs[0,1,iConfP],CIs[1,1,iConfP],CIs[2,0,iConfP],CIs[3,1,iConfP],0]
+                thetaMax = [CIs[0,0,iConfP],CIs[1,0,iConfP],CIs[2,1,iConfP],CIs[3,0,iConfP],0]
         else:
-            thetaMin = [CIs[0,0,iConfP],CIs[1,1,iConfP],CIs[2,0,iConfP],CIs[3,1,iConfP],0]
-            thetaMax = [CIs[0,1,iConfP],CIs[1,0,iConfP],CIs[2,1,iConfP],CIs[3,0,iConfP],0]
+            if pCorrectUnscaled > PC:
+                thetaMin = [CIs[0,0,iConfP],CIs[1,0,iConfP],CIs[2,0,iConfP],CIs[3,1,iConfP],0]
+                thetaMax = [CIs[0,1,iConfP],CIs[1,1,iConfP],CIs[2,1,iConfP],CIs[3,0,iConfP],0]
+            else:
+                thetaMin = [CIs[0,0,iConfP],CIs[1,1,iConfP],CIs[2,0,iConfP],CIs[3,1,iConfP],0]
+                thetaMax = [CIs[0,1,iConfP],CIs[1,0,iConfP],CIs[2,1,iConfP],CIs[3,0,iConfP],0]
         pCorrMin = (pCorrect-thetaMin[3])/(1-thetaMin[2]-thetaMin[3])
         pCorrMax = (pCorrect-thetaMax[3])/(1-thetaMax[2]-thetaMax[3])
-        if sigName in ['norm', 'gauss']:
+        if sigName in ['norm', 'gauss','neg_norm', 'neg_gauss']:
             CI[iConfP,0]     = _my_norminv(pCorrMin, thetaMin[0]-_my_norminv(PC,0,thetaMin[1]/C), thetaMin[1] / C)
             CI[iConfP,1]     = _my_norminv(pCorrMax, thetaMax[0]-_my_norminv(PC,0,thetaMax[1]/C), thetaMax[1] / C)
-        elif sigName =='logistic':
+        elif sigName in ['logistic','neg_logistic']:
             CI[iConfP,0]     = thetaMin[0]-thetaMin[1]*(np.log(1/pCorrMin-1)-np.log(1/PC-1))/2/np.log(1/alpha-1)
             CI[iConfP,1]     = thetaMax[0]-thetaMax[1]*(np.log(1/pCorrMax-1)-np.log(1/PC-1))/2/np.log(1/alpha-1)
-        elif sigName == 'gumbel':
+        elif sigName in ['gumbel','neg_gumbel']:
             CI[iConfP,0] = thetaMin[0] + (np.log(-np.log(1-pCorrMin))-np.log(-np.log(1-PC)))*thetaMin[1]/C
             CI[iConfP,1] = thetaMax[0] + (np.log(-np.log(1-pCorrMax))-np.log(-np.log(1-PC)))*thetaMax[1]/C
-        elif sigName == 'rgumbel':
+        elif sigName in ['rgumbel','neg_rgumbel']:
             CI[iConfP,0] = thetaMin[0] + (np.log(-np.log(pCorrMin))-np.log(-np.log(PC)))*thetaMin[1]/C
             CI[iConfP,1] = thetaMax[0] + (np.log(-np.log(pCorrMax))-np.log(-np.log(PC)))*thetaMax[1]/C
-        elif sigName =='logn':
+        elif sigName in ['logn','neg_logn']:
             CI[iConfP,0] = np.exp(_my_norminv(pCorrMin, thetaMin[0]-_my_norminv(PC,0,thetaMin[1]/C), thetaMin[1]/ C))
             CI[iConfP,1] = np.exp(_my_norminv(pCorrMax, thetaMax[0]-_my_norminv(PC,0,thetaMax[1]/C), thetaMax[1] / C))
-        elif sigName in ['Weibull','weibull']:
+        elif sigName in ['Weibull','weibull','neg_Weibull','neg_weibull']:
             CI[iConfP,0] = np.exp(thetaMin[0]+thetaMin[1]/C*(np.log(-np.log(1-pCorrMin))-np.log(-np.log(1-PC))))
             CI[iConfP,1] = np.exp(thetaMax[0]+thetaMax[1]/C*(np.log(-np.log(1-pCorrMax))-np.log(-np.log(1-PC))))
-        elif sigName in ['tdist','student','heavytail']:
+        elif sigName in ['tdist','student','heavytail','neg_tdist','neg_student','neg_heavytail']:
             CI[iConfP,0] = (_my_t1icdf(pCorrMin)-_my_t1icdf(PC))*thetaMin[1] / C + thetaMin[0]
             CI[iConfP,1] = (_my_t1icdf(pCorrMax)-_my_t1icdf(PC))*thetaMax[1] / C + thetaMax[0]
         else:
