@@ -9,22 +9,22 @@ import warnings
 from copy import deepcopy as _deepcopy
 import scipy
 
-import likelihood as _l 
-import priors as _p
-import borders as _b
-from utils import my_norminv as _my_norminv
-from utils import my_t1icdf as _my_t1icdf
+from . import likelihood as _l
+from . import priors as _p
+from . import borders as _b
+from .utils import my_norminv as _my_norminv
+from .utils import my_t1icdf as _my_t1icdf
 
 
-from gridSetting import gridSetting
-from getWeights import getWeights
-from getConfRegion import getConfRegion
-from getSeed import getSeed
-from marginalize import marginalize
-from poolData import poolData 
-from getSigmoidHandle import getSigmoidHandle
+from .gridSetting import gridSetting
+from .getWeights import getWeights
+from .getConfRegion import getConfRegion
+from .getSeed import getSeed
+from .marginalize import marginalize
+from .poolData import poolData
+from .getSigmoidHandle import getSigmoidHandle
 
-import psigniplot as plot
+from . import psigniplot as plot
 
 def psignifit(data, optionsIn):
     """

@@ -20,7 +20,7 @@ confidence levels. (any shape of confP will be interpreted as a vector)
 
 """
 import numpy as np
-from marginalize import marginalize 
+from .marginalize import marginalize
 def getConfRegion(result):
     
     mode = result['options']['CImethod']

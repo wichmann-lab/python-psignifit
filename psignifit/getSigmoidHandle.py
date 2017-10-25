@@ -5,7 +5,7 @@ Created on Sun Jan 31 21:33:31 2016
 @author: root
 """
 from numpy import log, exp
-from utils import *
+from .utils import *
     
 def getSigmoidHandle(options):
     '''
