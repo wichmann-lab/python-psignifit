@@ -3,9 +3,6 @@
 import os as _os
 import sys as _sys
 
-# Put this folder on the path to find submodules surely
-_sys.path.append(_os.path.split(__file__)[0])
-
 import numpy as np
 import datetime as _dt
 import warnings
