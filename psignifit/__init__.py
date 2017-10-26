@@ -29,3 +29,8 @@ for cmd in ('git describe --tags --dirty=+'), ('git rev-parse HEAD'):
     except Exception:
         # ok, don't bother
         pass
+
+# have a way to test from python
+def test():
+    import pytest
+    pytest.main([CWD,])
