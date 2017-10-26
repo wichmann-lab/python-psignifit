@@ -6,6 +6,9 @@ Felix Wichmann, Jakob Macke and Stefan Harmeling.
 import os
 import subprocess
 
+# import here the main function
+from .psignifit import psignifit
+
 __name__ =        'psignifit'
 __description__ = 'toolbox for Bayesian psychometric function estimation'
 __version__ =     '0.1'
@@ -29,3 +32,8 @@ for cmd in ('git describe --tags --dirty=+'), ('git rev-parse HEAD'):
     except Exception:
         # ok, don't bother
         pass
+
+# have a way to test from python
+def test():
+    import pytest
+    pytest.main([CWD,])

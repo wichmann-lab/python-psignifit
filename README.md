@@ -3,7 +3,7 @@
 Python toolbox for Bayesian psychometric function estimation.
 
 ## Installation
-For user
+For users
 
 ```
 pip install https://github.com/wichmann-lab/python-psignifit/zipball/master
@@ -13,6 +13,19 @@ For developers, from within the git repo clone:
 
 ```
 pip install -e .
+```
+## Testing
+For users within Python console
+
+```
+>>> import psignifit
+>>> psignifit.test()
+```
+
+For developers, from within the git repo clone:
+
+```
+pytest
 ```
 
 ## Contributors
