@@ -27,7 +27,7 @@ def parse_keyword(key):
 
 # pick the relevant keywords from the __init__.py file
 metadata_vars = ('name', 'version', 'description', 'author', 'license', 'url')
-metadata = dict((var, parse_keyword(f'__{var}__')) for var in metadata_vars)
+metadata = dict((var, parse_keyword('__%s__'%var)) for var in metadata_vars)
 
 # Get the long description from the README file
 with open(os.path.join(CWD, 'README.md'), encoding='utf-8') as f:
