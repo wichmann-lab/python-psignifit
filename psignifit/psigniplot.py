@@ -13,8 +13,8 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as _mcolors
 from matplotlib import cm as _cm
 
-from marginalize import marginalize
-import utils as _utils
+from .marginalize import marginalize
+from . import utils as _utils
 
 def plotPsych(result,
               dataColor      = [0, 105./255, 170./255],

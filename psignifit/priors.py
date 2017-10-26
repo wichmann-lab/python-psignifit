@@ -10,7 +10,7 @@ import numpy as np
 import warnings
 
 
-from utils import my_betapdf, my_norminv
+from .utils import my_betapdf, my_norminv
 
 def prior1(x, xspread, stimRange):
     

@@ -9,10 +9,10 @@ Created on Sat Mar  5 17:14:59 2016
 import numpy as np
 import warnings 
 
-from utils import my_norminv
-from getWeights import getWeights 
-from likelihood import likelihood
-from marginalize import marginalize
+from .utils import my_norminv
+from .getWeights import getWeights
+from .likelihood import likelihood
+from .marginalize import marginalize
 
 def setBorders(data,options):
     """ 

@@ -47,10 +47,10 @@ def getWeights(X1D):
         dims = tile(2,[1,d])
         dims[0,where(Xlength == 1)] = 1
         d = sum(Xlength > 1)
-        weight = (2**(-d))*convn(weight, ones(dims.ravel()), mode='full')
+        weight = (2.**(-d))*convn(weight, ones(dims.ravel()), mode='full')
     else:
-        weight = (2**(-1))*convolve(weight, array([[1],[1]]))
-        
+        weight = (2.**(-1))*convolve(weight, array([[1],[1]]))
+
     return weight
 
 if __name__ == "__main__":

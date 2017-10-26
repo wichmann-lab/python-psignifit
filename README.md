@@ -1,21 +1,25 @@
-# python-psignifit
+# psignifit
 
-Python clone of psignifit providing basic functionality.
+Python toolbox for Bayesian psychometric function estimation.
 
-    (c) Sophie Laturnus, AG NIP, University of Tübingen
-    www.wichmann-lab.org
-    based on psignifit by Heiko Schütt with help from Felix Wichmann, 
-    Jakob Macke and Stefan Harmeling
-    
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+## Installation
+For user
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU General Public License for more details.
+```
+pip install https://github.com/wichmann-lab/python-psignifit/zipball/master
+```
 
-    You should have received a copy of the GNU General Public License
-    along with this program. If not, see <http://www.gnu.org/licenses/>.
+For developers, from within the git repo clone:
+
+```
+pip install -e .
+```
+
+## Contributors
+
+See the [CONTRIBUTORS](https://github.com/wichmann-lab/python-psignifit/blob/master/CONTRIBUTORS) file
+
+## License and COPYRIGHT
+
+See the [COPYRIGHT](https://github.com/wichmann-lab/python-psignifit/blob/master/COPYRIGHT) file
+

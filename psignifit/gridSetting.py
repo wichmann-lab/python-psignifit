@@ -14,7 +14,7 @@ from scipy.stats import beta as b
 import numpy as np
 import copy
 
-from likelihood import likelihood
+from .likelihood import likelihood
 
 def gridSetting(data,options,Seed):
     
