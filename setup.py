@@ -34,7 +34,6 @@ with open(os.path.join(CWD, 'README.md'), encoding='utf-8') as f:
     metadata['long_description'] = f.read()
 
 setup(
-    **metadata,
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -54,5 +53,6 @@ setup(
     #        'sample=sample:main',
     #    ],
     #},
+    **metadata,
 )
 
