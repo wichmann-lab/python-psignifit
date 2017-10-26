@@ -11,8 +11,6 @@ INITFILE = os.path.join('psignifit', '__init__.py')
 # the directory we are in
 CWD = os.path.abspath(os.path.dirname(__file__))
 
-print('Here')
-
 def parse_keyword(key):
     """Get metadata from psignifit/__init__.py using an AST"""
     with open(os.path.join(CWD, INITFILE), encoding='utf-8') as f:
@@ -21,7 +19,6 @@ def parse_keyword(key):
             if type(node) is ast.Assign:
                 try:
                     if node.targets[0].id == key:
-                        print(f'got {node.value.s}')
                         return node.value.s
                 except:
                     pass
