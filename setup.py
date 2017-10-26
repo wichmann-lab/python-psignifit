@@ -11,8 +11,6 @@ INITFILE = os.path.join('psignifit', '__init__.py')
 # the directory we are in
 CWD = os.path.abspath(os.path.dirname(__file__))
 
-print('Here')
-
 def parse_keyword(key):
     """Get metadata from psignifit/__init__.py using an AST"""
     with open(os.path.join(CWD, INITFILE), encoding='utf-8') as f:
@@ -21,7 +19,6 @@ def parse_keyword(key):
             if type(node) is ast.Assign:
                 try:
                     if node.targets[0].id == key:
-                        print(f'got {node.value.s}')
                         return node.value.s
                 except:
                     pass
@@ -30,14 +27,13 @@ def parse_keyword(key):
 
 # pick the relevant keywords from the __init__.py file
 metadata_vars = ('name', 'version', 'description', 'author', 'license', 'url')
-metadata = dict((var, parse_keyword(f'__{var}__')) for var in metadata_vars)
+metadata = dict((var, parse_keyword('__%s__'%var)) for var in metadata_vars)
 
 # Get the long description from the README file
 with open(os.path.join(CWD, 'README.md'), encoding='utf-8') as f:
     metadata['long_description'] = f.read()
 
 setup(
-    **metadata,
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -57,5 +53,6 @@ setup(
     #        'sample=sample:main',
     #    ],
     #},
+    **metadata
 )
 
