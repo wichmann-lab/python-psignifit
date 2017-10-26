@@ -53,6 +53,6 @@ setup(
     #        'sample=sample:main',
     #    ],
     #},
-    **metadata,
+    **metadata
 )
 
