@@ -6,6 +6,9 @@ Felix Wichmann, Jakob Macke and Stefan Harmeling.
 import os
 import subprocess
 
+# import here the main function
+from .psignifit import psignifit
+
 __name__ =        'psignifit'
 __description__ = 'toolbox for Bayesian psychometric function estimation'
 __version__ =     '0.1'
