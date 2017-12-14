@@ -62,10 +62,10 @@ def plotPsych(result,
     
     
     # PLOT DATA
-    holdState = plt.ishold()
-    if not holdState: 
-        plt.cla()
-        plt.hold(True)
+    #holdState = plt.ishold()
+    #if not holdState: 
+    #    plt.cla()
+    #    plt.hold(True)
     xData = data[:,0]
     if plotData:
         yData = data[:,1] / data[:,2]
@@ -132,9 +132,9 @@ def plotPsych(result,
     for side in ['top','right']: axisHandle.spines[side].set_visible(False)
     plt.ticklabel_format(style='sci',scilimits=(-2,4))
     
-    plt.hold(holdState)
+    #plt.hold(holdState)
     if (showImediate):
-        plt.show()
+        plt.show(0)
     return axisHandle
 
 def plotsModelfit(result,
@@ -231,7 +231,7 @@ def plotsModelfit(result,
     
     plt.tight_layout()
     if (showImediate):
-        plt.show()
+        plt.show(0)
 
 
 def plotMarginal(result,                  
@@ -254,8 +254,7 @@ def plotMarginal(result,
     dim          is the parameter to plot:
                    1=threshold, 2=width, 3=lambda, 4=gamma, 5=sigma
     """
-    from utils import strToDim
-    if isinstance(dim,str): dim = strToDim(dim)
+    if isinstance(dim,str): dim = _utils.strToDim(dim)
 
     if len(result['marginals'][dim]) <= 1:
         print('Error: The parameter you wanted to plot was fixed in the analysis!')
@@ -278,9 +277,9 @@ def plotMarginal(result,
     CI       = np.hstack(result['conf_Intervals'][dim].T)
     Fit      = result['Fit'][dim]
     
-    holdState = plt.ishold()
-    if not holdState: plt.cla()
-    plt.hold(True)
+    #holdState = plt.ishold()
+    #if not holdState: plt.cla()
+    #plt.hold(True)
     
     # patch for confidence region
     if CIpatch:
@@ -288,9 +287,9 @@ def plotMarginal(result,
         xCI = np.insert(xCI, 1, x[np.logical_and(x>=CI[0], x<=CI[1])])
         yCI = np.array([np.interp(CI[0], x, marginal), np.interp(CI[1], x, marginal), 0, 0])
         yCI = np.insert(yCI, 1, marginal[np.logical_and(x>=CI[0], x<=CI[1])])
-        from matplotlib.patches import Polygon as patch
         color = .5*np.array(lineColor) + .5* np.array([1,1,1])
-        axisHandle.add_patch(patch(np.array([xCI,yCI]).T, fc=color, ec=color))
+        pat = plt.Polygon(np.array([xCI,yCI]).T, facecolor=color, edgecolor=color)
+        axisHandle.add_patch(pat)
     
     # plot prior
     if prior:
@@ -310,11 +309,11 @@ def plotMarginal(result,
     for side in ['top','right']: axisHandle.spines[side].set_visible(False)
     plt.ticklabel_format(style='sci', scilimits=(-2,4))
     
-    plt.hold(holdState)
+    #plt.hold(holdState)
     if (showImediate):
         plt.xlim([min(x), max(x)])
         plt.ylim([0, 1.1*max(marginal)])
-        plt.show()
+        plt.show(0)
     return axisHandle
     
 
@@ -405,14 +404,14 @@ def plotPrior(result,
     
     plt.subplot(2,3,1)
     plt.plot(xthresh,ythresh, lw = lineWidth, c= lineColor)
-    plt.hold(True)
+    #plt.hold(True)
     plt.xlim(xLimit)
     plt.title('Threshold', fontsize = 18)
     plt.ylabel('Density',  fontsize = 18)
     
     plt.subplot(2,3,4)    
     plt.plot(data[:,0], np.zeros(data[:,0].shape), 'k.', ms = markerSize*.75 )
-    plt.hold(True)
+    #plt.hold(True)
     plt.ylabel('Percent Correct', fontsize = 18)
     plt.xlim(xLimit)
     
@@ -450,13 +449,13 @@ def plotPrior(result,
 
     plt.subplot(2,3,2)
     plt.plot(xwidth,ywidth,lw=lineWidth,c=lineColor)
-    plt.hold(True)
+    #plt.hold(True)
     plt.xlim([widthmin,3/Cfactor*widthmax])
     plt.title('Width',fontsize=18)
 
     plt.subplot(2,3,5)
     plt.plot(data[:,0],np.zeros(data[:,0].size),'k.',ms =markerSize*.75)
-    plt.hold(True)
+    #plt.hold(True)
     plt.xlim(xLimit)
     plt.xlabel('Stimulus Level',fontsize=18)
 
@@ -494,13 +493,13 @@ def plotPrior(result,
     clapse = np.cumsum(ylapse*wlapse)
     plt.subplot(2,3,3)
     plt.plot(xlapse,ylapse,lw=lineWidth,c=lineColor)
-    plt.hold(True)
+    #plt.hold(True)
     plt.xlim([0,.5])
     plt.title('\lambda',fontsize=18)
 
     plt.subplot(2,3,6)
     plt.plot(data[:,0],np.zeros(data[:,0].size),'k.',ms=markerSize*.75)
-    plt.hold(True)
+    #plt.hold(True)
     plt.xlim(xLimit)
 
 
@@ -529,7 +528,7 @@ def plotPrior(result,
         plt.subplot(2,3,3)
         plt.plot(np.array(xcurrent),result['options']['priors'][2](np.array(xcurrent)),'.',c=color,ms=markerSize)
     if (showImediate):
-        plt.show()
+        plt.show(0)
 
 
 def plot2D(result,par1,par2, 
@@ -553,10 +552,9 @@ def plot2D(result,par1,par2,
         
     Further plotting options may be passed.
     """
-    from utils import strToDim
     # convert strings to dimension number
-    par1,label1 = strToDim(str(par1))
-    par2,label2 = strToDim(str(par2))
+    par1,label1 = _utils.strToDim(str(par1))
+    par2,label2 = _utils.strToDim(str(par2))
 
     assert (par1 != par2), 'par1 and par2 must be different numbers to code for the parameters to plot'
     
@@ -592,4 +590,4 @@ def plot2D(result,par1,par2,
     for side in ['top','right']: axisHandle.spines[side].set_visible(False)
     plt.ticklabel_format(style='sci',scilimits=(-2,4))
     if (showImediate):
-        plt.show()
+        plt.show(0)
