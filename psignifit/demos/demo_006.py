@@ -291,7 +291,7 @@ ps.biasAna(data31,data32,options)
  It can be run with the following command follows:
 '''
 
-ps.plot.plotsModelfit(res)
+ps.psigniplot.plotsModelfit(res)
 
 '''
  This method will show you three plots, based on the deviance residuals,

@@ -101,7 +101,7 @@ res = ps.psignifit(data, options)
  function with the data:
 """
 
-ps.plot.plotPsych(res)
+ps.psigniplot.plotPsych(res)
 
 """
  --- REMARK FOR INSUFFICIENT MEMORY ISSUES ---

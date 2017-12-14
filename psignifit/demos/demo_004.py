@@ -52,7 +52,7 @@ options['sigmoidName'] = 'norm'
 
 res = ps.psignifit(data, options)
 
-ps.plot.plotPrior(res)
+ps.psigniplot.plotPrior(res)
 
 '''
 You should check that the assumptions we make for the heuristic to work
@@ -112,7 +112,7 @@ res = ps.psignifit(data, options)
 
 # We first have a look at the fitted function
 plt.figure()
-ps.plot.plotPsych(res)
+ps.psigniplot.plotPsych(res)
 
 '''
  You should notice that the percent correct is larger than 50 and we did 
@@ -127,7 +127,7 @@ ps.plot.plotPsych(res)
  marginal plot for the threshold as well:
 '''
 #plt.figure()
-ps.plot.plotMarginal(res,0)
+ps.psigniplot.plotMarginal(res,0)
 
 '''
  note that the dashed grey line, which marks the prior goes down where
@@ -147,22 +147,21 @@ options['stimulusRange'] = np.array([.5,1.5])
 resRange = ps.psignifit(data,options)
 
 # We can now have a look how the prior changed:
-ps.plot.plotPrior(resRange)
+ps.psigniplot.plotPrior(resRange)
 
 # By having a look at the marginal plot we can see that there is no area
 # where the prior dominates the posterior anymore. Thus our result for the
 # threshold is now dominated by the data everywhere.
 
 plt.figure()
-ps.plot.plotMarginal(resRange,0)
+ps.psigniplot.plotMarginal(resRange,0)
 
 # Finally we can also compare our new fitted psychometric function,
 # to see that even the point estimate for the psychometric function was
 # influenced by the prior here:
 plt.figure()
-ps.plot.plotPsych(resRange)
-plt.hold(True)      
-ps.plot.plotPsych(res)
+ps.psigniplot.plotPsych(resRange)    
+ps.psigniplot.plotPsych(res)
 
 """
 The prior on the betabinomial variance- adjusting how conservative to be
@@ -277,10 +276,8 @@ options['priors'][2] = priorLambda
  automatically and state only the borders for lambda, which is the third
  parameter. '''
 
-a = empty((5,2))
-a[:] = nan
-options['borders'] = a
-options['borders'][2,:]=array([0,.1])
+options['borders'] = np.nan*np.ones((5,2))
+options['borders'][2,:]=np.array([0,.1])
 
 res = ps.psignifit(data,options)
 
@@ -292,8 +289,8 @@ res = ps.psignifit(data,options)
  With these commands you have set the priors manually: Have a look at
  them: '''
 plt.figure()
-ps.plot.plotPrior(res)
+ps.psigniplot.plotPrior(res)
 
 plt.figure()
-ps.plot.plotPsych(res)
+ps.psigniplot.plotPsych(res)
 

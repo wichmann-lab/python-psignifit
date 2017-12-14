@@ -61,7 +61,7 @@ res = ps.psignifit(data, options)
 'CIthresh': False 
 '''
 plt.figure()
-ps.plot.plotPsych(res,lineWidth = 5)
+ps.psigniplot.plotPsych(res,lineWidth = 5)
 
 """ plotMarginal """
 '''This function plots the marginal posterior density for a single parameter. 
@@ -70,7 +70,7 @@ plotting options and a handle to an axis to plot in.
 (As usual 1 = threshold, 2 = width, 3 = lambda, 4 = gamma, 5 = eta)'''
 
 plt.figure()
-ps.plot.plotMarginal(res)
+ps.psigniplot.plotMarginal(res)
 
 '''The gray shadow corresponds to the chosen confidence interval and the black 
 line shows the point estimate for the plotted parameter. 
@@ -98,7 +98,7 @@ to plot against each other and optionally a handle h to the axis to plot in
 and plotting options. '''
 
 plt.figure()
-ps.plot.plot2D(res,0,1)
+ps.psigniplot.plot2D(res,0,1)
 
 '''As options the following fields in plotOptions can be set:
 'axisHandle'  = plt.gca()    # axes handle to plot in
@@ -113,7 +113,7 @@ ps.plot.plot2D(res,0,1)
 '''As a tool this function plots the actually used priors of the provided 
 result dictionary. '''
 plt.figure()
-ps.plot.plotPrior(res)
+ps.psigniplot.plotPrior(res)
  
  
  
