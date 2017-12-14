@@ -256,8 +256,8 @@ def psignifit(data, optionsIn):
     
     border_idx = np.where(np.isnan(options['fixedPars']) == False);
     if (border_idx[0].size > 0):
-        options['borders'][border_idx[0],0] = options['fixedPars'][border_idx[0]]
-        options['borders'][border_idx[0],1] = options['fixedPars'][border_idx[0]]
+        options['borders'][border_idx[0],0] = border_idx[1]
+        options['borders'][border_idx[0],1] = border_idx[1]
             
     # normalize priors to first choice of borders
     options['priors'] = _p.normalizePriors(options)
