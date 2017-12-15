@@ -1,8 +1,5 @@
 import psignifit as ps
 import numpy as np
-import matplotlib as mpl
-mpl.use('Agg')
-import matplotlib.pyplot as plt
 
 
 
@@ -33,6 +30,9 @@ def test_runPsignifit():
 
 
 def test_runPlots():
+    import matplotlib as mpl
+    mpl.use('PS')
+    import matplotlib.pyplot as plt
     data = np.array([[0.0010,   45.0000,   90.0000],
                  [0.0015,   50.0000,   90.0000],
                  [0.0020,   44.0000,   90.0000],
