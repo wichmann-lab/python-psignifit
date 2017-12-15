@@ -56,11 +56,11 @@ def test_runPlots():
     res=ps.psignifit(data,options)
 
     ps.psigniplot.plotPsych(res,showImediate=False)
-    plt.figure()
+    #plt.figure()
     ps.psigniplot.plotMarginal(res,0,showImediate=False)
-    plt.figure()
+    #plt.figure()
     ps.psigniplot.plot2D(res,0,1,showImediate=False)
-    plt.figure()
+    #plt.figure()
     ps.psigniplot.plotsModelfit(res,showImediate=False)
     plt.close('all')
     assert True
