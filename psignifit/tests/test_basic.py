@@ -59,6 +59,6 @@ def test_runPlots():
     plt.figure()
     ps.psigniplot.plot2D(res,0,1,showImediate=False)
     plt.figure()
-    ps.psigniplot.plotsModelfit(res,showImediate=False)
+    #ps.psigniplot.plotsModelfit(res,showImediate=False)
     plt.close('all')
     assert True
