@@ -30,7 +30,6 @@ def test_runPsignifit():
 
 
 def test_runPlots():
-    import matplotlib as mpl
     import matplotlib.pyplot as plt
     data = np.array([[0.0010,   45.0000,   90.0000],
                  [0.0015,   50.0000,   90.0000],
@@ -55,11 +54,11 @@ def test_runPlots():
     res=ps.psignifit(data,options)
 
     ps.psigniplot.plotPsych(res,showImediate=False)
-    #plt.figure()
+    plt.figure()
     ps.psigniplot.plotMarginal(res,0,showImediate=False)
-    #plt.figure()
+    plt.figure()
     ps.psigniplot.plot2D(res,0,1,showImediate=False)
-    #plt.figure()
+    plt.figure()
     ps.psigniplot.plotsModelfit(res,showImediate=False)
     plt.close('all')
     assert True
