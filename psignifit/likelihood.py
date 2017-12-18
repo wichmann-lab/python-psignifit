@@ -90,12 +90,17 @@ def logLikelihood(data,options, args):
             gamma = options['fixedPars'][3]
         if np.isfinite(np.array(options['fixedPars'][4])):
             varscale = options['fixedPars'][4]
-            
-    #issues for automization: limit range for lambda & gamma
-    
-    lamb[np.logical_or(lamb < 0 ,lamb > (1-np.max(gamma)))] = np.nan
-    gamma[np.logical_or(gamma < 0, gamma > (1-np.max(lamb)))] = np.nan
-    varscale[np.logical_or(varscale < 0, varscale > 1)] = np.nan
+        if (lamb<0) or (lamb>(1-gamma)):
+            lamb = np.nan
+        if (gamma<0) or (gamma>(1-lamb)):
+            gamma = np.nan
+        if (varscale<0) or (varscale>1):
+            varscale = np.nan
+    else:        
+        #issues for automization: limit range for lambda & gamma
+        lamb[np.logical_or(lamb < 0 ,lamb > (1-np.max(gamma)))] = np.nan
+        gamma[np.logical_or(gamma < 0, gamma > (1-np.max(lamb)))] = np.nan
+        varscale[np.logical_or(varscale < 0, varscale > 1)] = np.nan
     
     varscaleOrig = np.reshape(varscale, [1,1,1,1,-1]);
 

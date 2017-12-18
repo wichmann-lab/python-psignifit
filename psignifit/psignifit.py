@@ -101,10 +101,9 @@ def psignifit(data, optionsIn):
         options['gridSetType'] = 'cumDist'
         
     if not( 'fixedPars' in options.keys()):
-        a = np.empty((5,1))
-        a[:] = np.NaN
-        options['fixedPars'] = a
-        
+        options['fixedPars'] = np.ones(5)*np.nan
+    elif len(options['fixedPars'].shape)>1:
+        options['fixedPars'] = np.squeeze(op['fixedPars'])
     if not('nblocks' in options.keys()):
         options['nblocks'] = 25
     
@@ -255,9 +254,10 @@ def psignifit(data, optionsIn):
         options['borders'] = _b.setBorders(data,options)
     
     border_idx = np.where(np.isnan(options['fixedPars']) == False);
+    print(border_idx)
     if (border_idx[0].size > 0):
-        options['borders'][border_idx[0],0] = border_idx[1]
-        options['borders'][border_idx[0],1] = border_idx[1]
+        options['borders'][border_idx[0],0] = options['fixedPars'][border_idx[0]]
+        options['borders'][border_idx[0],1] = options['fixedPars'][border_idx[0]]
             
     # normalize priors to first choice of borders
     options['priors'] = _p.normalizePriors(options)
@@ -314,7 +314,7 @@ def psignifitFast(data,options):
 
     options['stepN']     = [20,20,10,10,1]
     options['mbStepN']  = [20,20,10,10,1]
-    options['fixedPars'] = [np.NaN,np.NaN,np.NaN,np.NaN,np.array(0.0)]
+    options['fixedPars'] = np.array([np.NaN,np.NaN,np.NaN,np.NaN,0.0])
     options['fastOptim'] = True
     
     res = psignifit(data,options)
