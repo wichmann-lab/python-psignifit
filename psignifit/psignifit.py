@@ -103,7 +103,7 @@ def psignifit(data, optionsIn):
     if not( 'fixedPars' in options.keys()):
         options['fixedPars'] = np.ones(5)*np.nan
     elif len(options['fixedPars'].shape)>1:
-        options['fixedPars'] = np.squeeze(op['fixedPars'])
+        options['fixedPars'] = np.squeeze(options['fixedPars'])
     if not('nblocks' in options.keys()):
         options['nblocks'] = 25
     
