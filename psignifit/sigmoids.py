@@ -43,7 +43,7 @@ def neg_logn(X, m, width, PC=0.5, alpha=0.05):
 def neg_weibull(X, m, width, PC=0.5, alpha=0.05):
     return 1 - weibull(X, m, width, 1-PC, alpha)
 
-def neg_tdist(X, m, width, PC=0.5, alpha=0.05)
+def neg_tdist(X, m, width, PC=0.5, alpha=0.05):
     return 1 - tdist(X, m, width, 1-PC, alpha)
 
 # an alias for gauss
