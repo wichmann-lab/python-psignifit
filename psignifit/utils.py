@@ -50,10 +50,10 @@ def my_betapdf(x,a,b):
     y = np.zeros_like(x)
 
     if len(np.ravel(a)) == 1:
-        a = np.tile(a, x.shape())
+        a = np.tile(a, x.shape)
 
     if len(np.ravel(b)) == 1:
-        b = np.tile(b, x.shape())
+        b = np.tile(b, x.shape)
 
     # Special cases
     y[np.logical_and(a==1, x==0)] = b[np.logical_and(a==1 , x==0)]
@@ -77,7 +77,7 @@ def my_betapdf(x,a,b):
 
     loga = (a-1)*np.log(x)
 
-    logb = np.zeros(x.shape())
+    logb = np.zeros(x.shape)
     logb[smallx] = (b[smallx]-1) * np.log1p(-x[smallx])
     logb[~smallx] = (b[~smallx]-1) * np.log(1-x[~smallx])
 
