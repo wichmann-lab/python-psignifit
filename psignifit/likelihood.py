@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
+import functools
 import numpy as np
 import scipy.special as sp
+
+from . import sigmoids
 
 def likelihood(data, options, args):
     """
@@ -40,7 +43,10 @@ def logLikelihood(data,options, args):
     """
 
     
-    sigmoidHandle = options['sigmoidHandle']
+    sigmoidHandle = getattr(sigmoids, options['sigmoidName'])
+    # curry sigmoid function to fix alpha and threshPC
+    sigmoidHandle = functools.partial(sigmoidHandle, PC=options['threshPC'], alpha=options['widthalpha'])
+
     if len(args) < 2:
         raise ValueError('not enough input parameters')
     else:

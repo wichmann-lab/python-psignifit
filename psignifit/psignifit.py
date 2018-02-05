@@ -244,7 +244,7 @@ def psignifit(data, optionsIn):
     
     
     # create function handle of sigmoid
-    options['sigmoidHandle'] = getSigmoidHandle(options)
+    #options['sigmoidHandle'] = getSigmoidHandle(options)
     
     # borders of integration
     if 'borders' in options.keys():
