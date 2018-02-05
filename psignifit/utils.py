@@ -3,18 +3,18 @@
 Utils class capsulating all custom made probabilistic functions
 """
 import numpy as np
-import scipy.special as ss
+import scipy.special as sp
 
 def my_norminv(p,mu,sigma):
 
-    x0 = -np.sqrt(2)*ss.erfcinv(2*p)
+    x0 = -np.sqrt(2)*sp.erfcinv(2*p)
     x = sigma*x0 + mu
 
     return x
 
 def my_normcdf(x,mu,sigma):
     z = (x-mu) /sigma
-    p = .5*ss.erfc(-z/np.sqrt(2))
+    p = .5*sp.erfc(-z/np.sqrt(2))
 
     return p
 
@@ -31,7 +31,7 @@ def my_t1cdf(x):
     see also: tcdf 
     '''
     xsq=x*x;
-    p = ss.betainc(1/2, 1/2,1 / (1 + xsq)) / 2
+    p = sp.betainc(1/2, 1/2,1 / (1 + xsq)) / 2
     p[x>0]=1-p[x>0]
 
     return p
@@ -81,7 +81,7 @@ def my_betapdf(x,a,b):
     logb[smallx] = (b[smallx]-1) * np.log1p(-x[smallx])
     logb[~smallx] = (b[~smallx]-1) * np.log(1-x[~smallx])
 
-    y[k] = np.exp(loga+logb - ss.betaln(a,b))
+    y[k] = np.exp(loga+logb - sp.betaln(a,b))
 
     return y
 
