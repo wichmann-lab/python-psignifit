@@ -48,6 +48,7 @@ class Conf:
              'threshPC',
              'uniform_weight',
              'width_alpha',
+             'width_min',
              )
 
     def __init__(self, **kwargs):
