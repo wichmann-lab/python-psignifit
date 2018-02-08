@@ -49,7 +49,7 @@ class Conf:
              'sigmoid',
              'steps',
              'steps_moving_borders',
-             'stimulus_range'
+             'stimulus_range',
              'thresh_PC',
              'uniform_weight',
              'verbose',
