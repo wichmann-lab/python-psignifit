@@ -119,14 +119,8 @@ class Conf:
         cond2 = re.match('[0-9]AFC', value)
         if not (cond1 or cond2):
             raise PsignifitConfException(f'Invalid experiment type: "{value}"!')
-        # if after setting the experiment type the steps are still not set, set
-        # here some defaults
-        if value == 'YesNo':
-            self.steps = [40,40,20,20,20]
-            self.steps_moving_borders = [25,30, 10,10,15]
-        else:
-            self.steps = [40,40,20,1,20]
-            self.steps_moving_borders = [30,40,10,1,20]
+        self.steps = [40,40,20,20,20] if value=='YesNo' else [40,40,20,1,20]
+        self.steps_moving_borders = [25,30, 10,10,15] if value=='YesNo' else [30,40,10,1,20]
 
     def check_sigmoid(self, value):
         cond1 = value in dir(sigmoids)
