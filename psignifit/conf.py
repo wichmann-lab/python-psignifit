@@ -1,8 +1,10 @@
 """This module defines the basic configuration object for psignifit.
-
-
 """
+import re
 
+import numpy as np
+
+from . import sigmoids
 
 class PsignifitConfException(Exception):
     pass
@@ -31,22 +33,26 @@ class Conf:
              'dynamic_grid',
              'estimate_type',
              'experiment_type',
-             'grid_set_eval',
+             'fast_optim',
+             'fixed_pars',
+             'grid_eval',
+             'grid_set_type',
              'instant_plot',
+             'logspace',
              'max_border_value',
-             'mb_stepN',
              'move_borders',
              'nblocks',
-             'pool_maxgap',
+             'pool_max_gap',
              'pool_max_length',
              'pool_xtol',
              'priors',
-             'set_borders_type',
              'sigmoid',
-             'stepN',
+             'steps',
+             'steps_moving_borders',
              'stimulus_range'
-             'threshPC',
+             'thresh_PC',
              'uniform_weight',
+             'verbose',
              'width_alpha',
              'width_min',
              )
@@ -55,7 +61,30 @@ class Conf:
         # we only allow keyword arguments
         #
         # - first set defaults
-        #    ... no defaults yet ...
+        self.beta_prior = 10
+        self.CI_method = 'percentiles'
+        self.confP = (.95, .9, .68)
+        self.dynamic_grid = False
+        self.estimate_type = 'MAP'
+        self.experiment_type = 'YesNo'
+        self.fast_optim = False
+        self.fixed_pars = (None, )*5
+        self.grid_eval = None
+        self.grid_set_type = 'cumDist'
+        self.instant_plot = False
+        self.max_border_value = 1e-05
+        self.move_borders = True
+        self.nblocks = 25
+        self.pool_max_gap = np.inf
+        self.pool_max_length = np.inf
+        self.pool_xtol = 0
+        self.sigmoid = 'norm'
+        self.stimulus_range = False
+        self.thresh_PC = 0.5
+        self.uniform_weight = None
+        self.verbose = False
+        self.width_alpha = 0.05
+
         # - overwrite defaults with user preferences
         for arg in kwargs:
             setattr(self, arg, kwargs[arg])
@@ -85,3 +114,27 @@ class Conf:
             _str.append(f'{name}: {value}')
         return '\n'.join(_str)
 
+    def check_experiment_type(self, value):
+        cond1 = value in ('YesNo', 'equalAsymptote')
+        cond2 = re.match('[0-9]AFC', value)
+        if not (cond1 or cond2):
+            raise PsignifitConfException(f'Invalid experiment type: "{value}"!')
+        # if after setting the experiment type the steps are still not set, set
+        # here some defaults
+        if value == 'YesNo':
+            self.steps = [40,40,20,20,20]
+            self.steps_moving_borders = [25,30, 10,10,15]
+        else:
+            self.steps = [40,40,20,1,20]
+            self.steps_moving_borders = [30,40,10,1,20]
+
+    def check_sigmoid(self, value):
+        cond1 = value in dir(sigmoids)
+        cond2 = value.startswith('_') or value.startswith('my_')
+        if (not cond1) or (cond2):
+            raise PsignifitConfException(f'Invalid sigmoid: "{value}"!')
+        # set logspace when appropriate
+        if value in ('weibull', 'logn', 'neg_weibull', 'neg_logn'):
+            self.logspace = True
+        else:
+            self.logspace = False
