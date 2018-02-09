@@ -19,12 +19,10 @@ def rgumbel(X, m, width, PC=0.5, alpha=0.05):
     return np.exp(-np.exp(C/width*(X-m)+np.log(-np.log(PC))))
 
 def logn(X, m, width, PC=0.5, alpha=0.05):
-    C = width/(my_norminv(1-alpha,0,1) - my_norminv(alpha,0,1))
-    return my_normcdf(np.log(X), m-my_norminv(PC,0,C), C)
+    return gauss(np.log(X), m, width, PC, alpha)
 
 def weibull(X, m, width, PC=0.5, alpha=0.05):
-    C = np.log(-np.log(alpha)) - np.log(-np.log(1-alpha))
-    return 1 - np.exp(-np.exp(C/width*(np.log(X)-m)+np.log(-np.log(1-PC))))
+    return gumbel(np.log(X), m, width, PC, alpha)
 
 def tdist(X, m, width, PC=0.5, alpha=0.05):
     C = (my_t1icdf(1-alpha) - my_t1icdf(alpha))
