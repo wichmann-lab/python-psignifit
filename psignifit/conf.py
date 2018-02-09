@@ -82,12 +82,14 @@ class Conf:
         self.pool_max_gap = np.inf
         self.pool_max_length = np.inf
         self.pool_xtol = 0
+        self.priors = None
         self.sigmoid = 'norm'
-        self.stimulus_range = False
+        self.stimulus_range = None
         self.thresh_PC = 0.5
         self.uniform_weight = None
         self.verbose = False
         self.width_alpha = 0.05
+        self.width_min = None
 
         # overwrite defaults with user preferences
         for arg in kwargs:
