@@ -41,7 +41,6 @@ class Conf:
              'grid_eval',
              'grid_set_type',
              'instant_plot',
-             'logspace',
              'max_border_value',
              'move_borders',
              'nblocks',
@@ -62,8 +61,10 @@ class Conf:
 
     def __init__(self, **kwargs):
         # we only allow keyword arguments
-        #
-        # - first set defaults
+        # set private attributes defaults
+        self._logspace = False
+
+        # set public defaults
         self.beta_prior = 10
         self.CI_method = 'percentiles'
         self.confP = (.95, .9, .68)
@@ -88,7 +89,7 @@ class Conf:
         self.verbose = False
         self.width_alpha = 0.05
 
-        # - overwrite defaults with user preferences
+        # overwrite defaults with user preferences
         for arg in kwargs:
             setattr(self, arg, kwargs[arg])
 
@@ -134,6 +135,4 @@ class Conf:
             raise PsignifitConfException(f'Invalid sigmoid: "{value}"!')
         # set logspace when appropriate
         if value in ('weibull', 'logn', 'neg_weibull', 'neg_logn'):
-            self.logspace = True
-        else:
-            self.logspace = False
+            self._logspace = True
