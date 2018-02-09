@@ -18,6 +18,9 @@ class Conf:
     It raises `PsignifitConfException` if an invalid option is specified or
     if a valid option is specified with a value outside of the allowed range.
 
+    Note: attributes and methods starting with `_` are considered private and
+    used internally. Do not change them unlsess you know what you are doing
+
     Note for the developer: if you want to add a new valid option `foobar`,
     expand the `Conf.valid_opts` tuple (in alphabetical order) and add any
     check in a newly defined method `def check_foobar(self, value)`, which
@@ -25,7 +28,7 @@ class Conf:
     for `foobar`.
     """
     # set of valid options for psignifit. Add new attributes to this tuple
-    valid_opts = (
+    _valid_opts = (
              'beta_prior',
              'borders',
              'CI_method',
@@ -90,7 +93,9 @@ class Conf:
             setattr(self, arg, kwargs[arg])
 
     def __setattr__(self, name, value):
-        if name in self.valid_opts:
+        if name.startswith('_'):
+            super().__setattr__(name, value)
+        elif name in self._valid_opts:
             # first run checks for the supplied option, if any are available
             if hasattr(self, 'check_'+name):
                 # run the check
@@ -108,7 +113,7 @@ class Conf:
     def __repr__(self):
         # give an nice string representation of ourselves
         _str = []
-        for name in sorted(self.valid_opts):
+        for name in sorted(self._valid_opts):
             # if name is not defined, returns None
             value = getattr(self, name, None)
             _str.append(f'{name}: {value}')
