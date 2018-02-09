@@ -7,10 +7,11 @@ translated by Sophie Laturnus
 
 """
 import numpy as np
+import scipy.stats as ss
 import warnings
 
 
-from .utils import my_betapdf, my_norminv
+from .utils import my_norminv
 
 def prior1(x, xspread, stimRange):
     
@@ -62,12 +63,12 @@ def getStandardPriors(data, options):
     knowledge obtained from 9 correct trials at infinite stimulus level
     """
     
-    priors.append(lambda x: my_betapdf(x,1,10))
-    priors.append(lambda x: my_betapdf(x,1,10))
+    priors.append(lambda x: ss.beta.pdf(x, 1, 10))
+    priors.append(lambda x: ss.beta.pdf(x, 1, 10))
     
     """ sigma """
     be = options['betaPrior']
-    priors.append(lambda x: my_betapdf(x,1,be))
+    priors.append(lambda x: ss.beta.pdf(x, 1, be))
     
     return priors
     

@@ -5,7 +5,7 @@ Utils class capsulating all custom made probabilistic functions
 import numpy as np
 import scipy.special as sp
 
-def my_norminv(p,mu,sigma):
+def my_norminv(p, mu, sigma):
 
     x0 = -np.sqrt(2)*sp.erfcinv(2*p)
     x = sigma*x0 + mu
@@ -39,51 +39,6 @@ def my_t1cdf(x):
 def my_t1icdf(p):
     x = np.tan(np.pi * (p - 0.5));
     return x
-
-def my_betapdf(x,a,b):
-    ''' this implements the betapdf with less input checks '''
-
-    if type(x) is int or float:
-        x = np.array(x)
-
-    # Initialize y to zero.
-    y = np.zeros_like(x)
-
-    if len(np.ravel(a)) == 1:
-        a = np.tile(a, x.shape)
-
-    if len(np.ravel(b)) == 1:
-        b = np.tile(b, x.shape)
-
-    # Special cases
-    y[np.logical_and(a==1, x==0)] = b[np.logical_and(a==1 , x==0)]
-    y[np.logical_and(b==1 , x==1)] = a[np.logical_and(b==1 , x==1)]
-    y[np.logical_and(a<1 , x==0)] = np.inf
-    y[np.logical_and(b<1 , x==1)] = np.inf
-
-    # Return NaN for out of range parameters.
-    y[a<=0] = np.nan
-    y[b<=0] = np.nan
-    y[np.logical_or(np.logical_or(np.isnan(a), np.isnan(b)), np.isnan(x))] = np.nan
-
-    # Normal values
-    k = np.logical_and(np.logical_and(a>0, b>0),np.logical_and(x>0 , x<1))
-    a = a[k]
-    b = b[k]
-    x = x[k]
-
-    # Compute logs
-    smallx = x<0.1
-
-    loga = (a-1)*np.log(x)
-
-    logb = np.zeros(x.shape)
-    logb[smallx] = (b[smallx]-1) * np.log1p(-x[smallx])
-    logb[~smallx] = (b[~smallx]-1) * np.log(1-x[~smallx])
-
-    y[k] = np.exp(loga+logb - sp.betaln(a,b))
-
-    return y
 
 def fill_kwargs(kw_args, values):
     '''
