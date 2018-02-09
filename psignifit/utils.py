@@ -5,12 +5,13 @@ Utils class capsulating all custom made probabilistic functions
 import numpy as np
 import scipy.special as sp
 
-def my_norminv(p, mu, sigma):
-
-    x0 = -np.sqrt(2)*sp.erfcinv(2*p)
-    x = sigma*x0 + mu
-
-    return x
+# Freeze a normal distribution to be reused al over the place.
+# This one is useful when we want mean=0, std=1
+# Percent point function -> inverse of cumulative normal distribution function
+# returns percentiles
+norminv = scipy.stats.norm(loc=0, scale=1).ppf
+# also instantiate a generic version
+norminvg = scipy.stats.norm.ppf
 
 def my_normcdf(x,mu,sigma):
     z = (x-mu) /sigma

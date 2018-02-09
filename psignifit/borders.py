@@ -9,10 +9,11 @@ Created on Sat Mar  5 17:14:59 2016
 import numpy as np
 import warnings 
 
-from .utils import my_norminv
 from .getWeights import getWeights
 from .likelihood import likelihood
 from .marginalize import marginalize
+from .utils import norminv
+
 
 def setBorders(data,options):
     """ 
@@ -73,8 +74,8 @@ def setBorders(data,options):
     
     ''' We use the same prior as we previously used... e.g. we use the factor by
     which they differ for the cumulative normal function '''
-    
-    Cfactor = (my_norminv(.95,0,1) - my_norminv(.05, 0,1))/(my_norminv(1- options['widthalpha'], 0,1) - my_norminv(options['widthalpha'], 0,1))
+
+    Cfactor = (norminv(.95) - norminv(.05))/(norminv(1- options['widthalpha']) - norminv(options['widthalpha'])
     betaB  = np.array([widthmin, 3/Cfactor*dataspread])
     
     borders =[[alphaB], [betaB], [lapseB], [gammaB], [varscaleB]]

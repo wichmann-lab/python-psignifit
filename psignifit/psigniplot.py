@@ -365,9 +365,9 @@ def plotPrior(result,
 
     # We use the same prior as we previously used... e.g. we use the factor by
     # which they differ for the cumulative normal function
-    Cfactor = (_utils.my_norminv(.95,0,1) - _utils.my_norminv(.05,0,1))/          \
-            (_utils.my_norminv(1-result['options']['widthalpha'], 0,1) -   \
-             _utils.my_norminv(result['options']['widthalpha'], 0,1))
+    Cfactor = (_utils.norminv(.95) - _utils.norminv(.05))/          \
+            (_utils.norminv(1-result['options']['widthalpha']) -   \
+             _utils.norminv(result['options']['widthalpha']))
     widthmax = r
     
     steps = 10000

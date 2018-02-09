@@ -1,9 +1,11 @@
 import numpy as np
-from .utils import my_norminv, my_normcdf, my_t1icdf
+import scipy.stats
+from .utils import norminv as _norminv
+from .utils import norminvg as _norminvg
 
 def gauss(X, m, width, PC=0.5, alpha=0.05):
-    C = width/(my_norminv(1-alpha, 0,1) - my_norminv(alpha,0,1))
-    return my_normcdf(X, (m-my_norminv(PC, 0, C)), C)
+    C = width/(_norminv(1-alpha) - _norminv(alpha))
+    return my_normcdf(X, (m-_norminvg(PC, 0, C)), C)
 
 def logistic(X, m, width, PC=0.5, alpha=0.05):
     return 1/(1 + np.exp(-2*np.log(1/alpha -1)/width*(X-m)+np.log(1/PC -1)))

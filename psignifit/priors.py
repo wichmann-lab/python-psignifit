@@ -7,11 +7,9 @@ translated by Sophie Laturnus
 
 """
 import numpy as np
-import scipy.stats as ss
 import warnings
 
-
-from .utils import my_norminv
+from .utils import norminv
 
 def prior1(x, xspread, stimRange):
     
@@ -54,7 +52,7 @@ def getStandardPriors(data, options):
     widthmax = xspread
     ''' We use the same prior as we previously used... e.g. we use the factor by
         which they differ for the cumulative normal function'''
-    Cfactor = (my_norminv(.95,0,1) - my_norminv(.05,0,1))/( my_norminv(1-options['widthalpha'],0,1) - my_norminv(options['widthalpha'],0,1))
+    Cfactor = (norminv(.95) - norminv(.05))/(norminv(1-options['widthalpha']) - norminv(options['widthalpha']))
     
     priors.append(lambda x: prior2(x,Cfactor, widthmin, widthmax))
     
