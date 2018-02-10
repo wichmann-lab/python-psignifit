@@ -5,41 +5,21 @@ Utils class capsulating all custom made probabilistic functions
 import numpy as np
 import scipy.special as sp
 
-# Freeze a normal distribution to be reused al over the place.
-# This one is useful when we want mean=0, std=1
-# Percent point function -> inverse of cumulative normal distribution function
-# returns percentiles
+# Alias common statistical distribution to be reused all over the place.
+
+# - Normal distribution:
+#   - This one is useful when we want mean=0, std=1
+#     Percent point function -> inverse of cumulative normal distribution function
+#     returns percentiles
 norminv = scipy.stats.norm(loc=0, scale=1).ppf
-# also instantiate a generic version
+#   - also instantiate a generic version
 norminvg = scipy.stats.norm.ppf
+#   - Cumulative normal distribution function
+normcdf - scipy.stats.norm.cdf
 
-def my_normcdf(x,mu,sigma):
-    z = (x-mu) /sigma
-    p = .5*sp.erfc(-z/np.sqrt(2))
-
-    return p
-
-
-def my_t1cdf(x):
-    '''
-    cumulative distribution function of a t-dist. with 1 degree of freedom
-    function p=my_t1cdf(x)
-    input
-          x = point
-          output
-          p = cumulative probability
-
-    see also: tcdf 
-    '''
-    xsq=x*x;
-    p = sp.betainc(1/2, 1/2,1 / (1 + xsq)) / 2
-    p[x>0]=1-p[x>0]
-
-    return p
-
-def my_t1icdf(p):
-    x = np.tan(np.pi * (p - 0.5));
-    return x
+# T-Student with df=1
+t1cdf = ss.t(1).cdf
+t1icdf = ss.t(1).ppf
 
 def fill_kwargs(kw_args, values):
     '''
