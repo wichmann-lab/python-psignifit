@@ -24,23 +24,25 @@ from .getSigmoidHandle import getSigmoidHandle
 
 from . import psigniplot as plot
 
-def psignifit(data, optionsIn):
+
+
+def psignifit(data, conf):
     """
     main function for fitting psychometric functions
     function result=psignifit(data,options)
     This function is the user interface for fitting psychometric functions to data.
-        
+
     pass your data in the n x 3 matrix of the form:
     [x-value, number correct, number of trials]
 
     options should be a dictionary in which you set the options for your fit.
     You can find a full overview over the options in demo002
-    
+
     The result of this function is a dictionary, which contains all information the 
     program produced for your fit. You can pass this as whole to all further 
     processing function provided with psignifit. Especially to the plot functions.
     You can find an explanation for all fields of the result in demo006
-        
+
     To get an introduction to basic usage start with demo001
     """
     #--------------------------------------------------------------------------
@@ -48,9 +50,13 @@ def psignifit(data, optionsIn):
     #--------------------------------------------------------------------------
     # data
     data = np.array(data)
-                # percent correct in data
+
+    # this is a very dangerous procedure!!! we should instead exit with an error and ask the user
+    # to comply! (don't try to be smarter than the user)
+    # percent correct in data
     if all( np.logical_and(data[:,1] <= 1, data[:,1] >= 0)) and any(np.logical_and(data[:,1] > 0, data[:,1] < 1)):
         data[:,1] = round(map( lambda x, y: x*y, data[:,2],data[:,1])) # we try to convert into our notation
+
     # options
 
     #if options['expType'] in ['2AFC', '3AFC', '4AFC']:            
@@ -86,32 +92,49 @@ def psignifit(data, optionsIn):
     #    stimRangeSet = True
     #    if options['logspace']:
     #        options['stimulusRange'] = np.log(options['stimulusRange'])
+    stimulus_range = conf.stimulus_range
+    if stimulus_range is None:
+        stimulus_range = np.log([data[:,0].min(),data[:,0].max()])
+    if conf._logspace:
+        stimulus_range = np.lof(stimulus_range)
 
-    if not('widthmin' in options.keys()):
-        if len(np.unique(data[:,0])) >1 and not(stimRangeSet):
-            if options['logspace']:
-                options['widthmin']  = min(np.diff(np.sort(np.unique(np.log(data[:,0])))))
+    #if not('widthmin' in options.keys()):
+    #    if len(np.unique(data[:,0])) >1 and not(stimRangeSet):
+    #        if options['logspace']:
+    #            options['widthmin']  = min(np.diff(np.sort(np.unique(np.log(data[:,0])))))
+    #        else:
+    #            options['widthmin']  = min(np.diff(np.sort(np.unique(data[:,0]))))
+    #    else:
+    #        options['widthmin'] = 100*np.spacing(options['stimulusRange'][1])
+    width_min = conf.width_min
+    if width_min is None:
+        if conf.stimulus_range is None:
+            if conf._logspace:
+                width_min = min(np.diff(np.sort(np.unique(np.log(data[:,0])))))
             else:
-                options['widthmin']  = min(np.diff(np.sort(np.unique(data[:,0]))))
+                width_min = min(np.diff(np.sort(np.unique(data[:,0]))))
         else:
-            options['widthmin'] = 100*np.spacing(options['stimulusRange'][1])
+            width_min = 100*np.spacing(stimulus_range[1])
 
     # add priors
-    if options['threshPC'] != .5 and not(hasattr(options, 'priors')):
-        warnings.warn('psignifit:TresholdPCchanged\n'\
-            'You changed the percent correct corresponding to the threshold\n')    
+    #if options['threshPC'] != .5 and not(hasattr(options, 'priors')):
+    #    warnings.warn('psignifit:TresholdPCchanged\n'\
+    #        'You changed the percent correct corresponding to the threshold\n')    
+
+    #if not('priors' in options.keys()):
+    #    options['priors'] = _p.getStandardPriors(data, options)
+    #else:
+    #
+    #    priors = _p.getStandardPriors(data, options)
+    #
+    #    for ipar in range(5):
+    #        if not(hasattr(options['priors'][ipar], '__call__')):
+    #            options['priors'][ipar] = priors[ipar]
+    #
+    #    p.checkPriors(data, options)
+    if conf.priors is None:
+        priors = get_standard_priors()
     
-    if not('priors' in options.keys()):
-        options['priors'] = _p.getStandardPriors(data, options)
-    else:
-        
-        priors = _p.getStandardPriors(data, options)
-        
-        for ipar in range(5):
-            if not(hasattr(options['priors'][ipar], '__call__')):
-                options['priors'][ipar] = priors[ipar]
-                
-        _p.checkPriors(data, options)
     if options['dynamicGrid'] and not('GridSetEval' in options.keys()):
         options['GridSetEval'] = 10000
     if options['dynamicGrid'] and not('UniformWeight' in options.keys()):
