@@ -2,10 +2,13 @@ import numpy as np
 import scipy.stats
 from .utils import norminv as _norminv
 from .utils import norminvg as _norminvg
+from .utils import normcdf as _normcdf
+from .utils import t1cdf as _t1cdf
+from .utils import t1icdf as _t1icd
 
 def gauss(X, m, width, PC=0.5, alpha=0.05):
     C = width/(_norminv(1-alpha) - _norminv(alpha))
-    return my_normcdf(X, (m-_norminvg(PC, 0, C)), C)
+    return _normcdf(X, (m-_norminvg(PC, 0, C)), C)
 
 def logistic(X, m, width, PC=0.5, alpha=0.05):
     return 1/(1 + np.exp(-2*np.log(1/alpha -1)/width*(X-m)+np.log(1/PC -1)))
@@ -25,8 +28,8 @@ def weibull(X, m, width, PC=0.5, alpha=0.05):
     return gumbel(np.log(X), m, width, PC, alpha)
 
 def tdist(X, m, width, PC=0.5, alpha=0.05):
-    C = (my_t1icdf(1-alpha) - my_t1icdf(alpha))
-    return my_t1cdf(C*(X-m)/width + my_t1icdf(PC))
+    C = (_t1icdf(1-alpha) - _t1icdf(alpha))
+    return _t1cdf(C*(X-m)/width + _t1icdf(PC))
 
 def neg_gauss(X, m, width, PC=0.5, alpha=0.05):
     return 1 - gauss(X, m, width, 1-PC, alpha)
