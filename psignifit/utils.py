@@ -3,7 +3,7 @@
 Utils class capsulating all custom made probabilistic functions
 """
 import numpy as np
-import scipy.special as sp
+import scipy.stats
 
 # Alias common statistical distribution to be reused all over the place.
 
@@ -15,11 +15,11 @@ norminv = scipy.stats.norm(loc=0, scale=1).ppf
 #   - also instantiate a generic version
 norminvg = scipy.stats.norm.ppf
 #   - Cumulative normal distribution function
-normcdf - scipy.stats.norm.cdf
+normcdf = scipy.stats.norm.cdf
 
 # T-Student with df=1
-t1cdf = ss.t(1).cdf
-t1icdf = ss.t(1).ppf
+t1cdf = scipy.stats.t(1).cdf
+t1icdf = scipy.stats.t(1).ppf
 
 def fill_kwargs(kw_args, values):
     '''
