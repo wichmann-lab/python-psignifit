@@ -4,7 +4,7 @@ from .utils import norminv as _norminv
 from .utils import norminvg as _norminvg
 from .utils import normcdf as _normcdf
 from .utils import t1cdf as _t1cdf
-from .utils import t1icdf as _t1icd
+from .utils import t1icdf as _t1icdf
 
 def gauss(X, m, width, PC=0.5, alpha=0.05):
     C = width/(_norminv(1-alpha) - _norminv(alpha))
