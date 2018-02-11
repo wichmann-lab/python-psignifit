@@ -11,7 +11,7 @@ from .psignifit import psignifit
 
 __name__ =        'psignifit'
 __description__ = 'toolbox for Bayesian psychometric function estimation'
-__version__ =     '0.1'
+__version__ =     '4.0a'
 __url__ =         'https://github.com/wichmann-lab/python-psignifit'
 __author__ =      'psignifit contributors, www.wichmann-lab.org'
 __license__ =     'GPLv3+'
