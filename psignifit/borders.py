@@ -74,8 +74,7 @@ def setBorders(data,options):
     
     ''' We use the same prior as we previously used... e.g. we use the factor by
     which they differ for the cumulative normal function '''
-
-    Cfactor = (norminv(.95) - norminv(.05))/(norminv(1- options['widthalpha']) - norminv(options['widthalpha'])
+    Cfactor = (norminv(.95) - norminv(.05))/(norminv(1- options['widthalpha']) - norminv(options['widthalpha']))
     betaB  = np.array([widthmin, 3/Cfactor*dataspread])
     
     borders =[[alphaB], [betaB], [lapseB], [gammaB], [varscaleB]]
