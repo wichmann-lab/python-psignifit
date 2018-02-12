@@ -19,25 +19,31 @@ def prior_threshold(x, st_range):
     sp = st_range[1] - st_range[0]
     s0 = st_range[0]
     s1 = st_range[1]
-    return ( (x > s0) * (x < s1) +
-             (x >= (s0-sp/2))*(x <= s0) * (1+np.cos(2*np.pi*(s0-x)/sp))/2 +
-             (x <= (s1+sp/2))*(x >= s1) * (1+np.cos(2*np.pi*(x-s1)/sp))/2 )
+    p = np.zeros_like(x)
+    p[(s0 < x) & (x < s1)] = 1.
+    left = ((s0-sp/2) <= x) & (x <= s0)
+    p[left] = (1+np.cos(2*np.pi*(s0-x[left])/sp))/2
+    right =  (s1 <= x) & (x <= (s1+sp/2))
+    p[right] = (1+np.cos(2*np.pi*(x[right]-s1)/sp))/2
+    return p
 
-def prior_width(x, st_range, alpha, w_min):
-    """Default prior fir the width parameter
+def prior_width(x, alpha, wmin, wmax):
+    """Default prior for the width parameter
 
     A uniform prior between two times the minimal distance of two tested stimulus
     levels and the range of the stimulus levels with cosine fall offs to 0 at
     the minimal difference of two stimulus levels and at 3 times the range of the
     tested stimulus levels"""
-    Cfactor = (norminv(.95)-norminv(.05))/(norminv(1-alpha)-norminv(alpha))
+    # rescaling for alpha
+    y = x*(norminv(.95)-norminv(.05))/(norminv(1-alpha)-norminv(alpha))
+    p = np.zeros_like(x)
+    p[((2*wmin) < y) & (y < wmax)] = 1.
+    left = (wmin <= y) & (y <= (2*wmin))
+    p[left] = (1-np.cos(np.pi*(y[left]-wmin)/wmin))/2
+    right = (wmax <= y) & (y<= (3*wmax))
+    p[right] = (1+np.cos(np.pi/2*(y[right]-wmax)/wmax))/2
+    return p
 
-    r = ((x*Cfactor)>=wmin)*((x*Cfactor)<=2*wmin)*(.5-.5*np.cos(np.pi*((x*Cfactor)-wmin)/wmin)) \
-        + ((x*Cfactor)>2*wmin)*((x*Cfactor)<wmax) \
-        + ((x*Cfactor)>=wmax)*((x*Cfactor)<=3*wmax)*(.5+.5*np.cos(np.pi/2*(((x*Cfactor)-wmax)/wmax)))
-
-    return r
-    
 def getStandardPriors(data, options):
     """sets the standard Priors
     function priors = getStandardPriors(data,options)
