@@ -5,7 +5,7 @@ import numpy as np
 import warnings
 
 from .utils import norminv
-v
+
 def prior_threshold(x, st_range):
     """Default prior for the threshold parameter
 
