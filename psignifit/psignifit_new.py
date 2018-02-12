@@ -96,7 +96,7 @@ def psignifit(data, conf):
     if stimulus_range is None:
         stimulus_range = np.log([data[:,0].min(),data[:,0].max()])
     if conf._logspace:
-        stimulus_range = np.lof(stimulus_range)
+        stimulus_range = np.log(stimulus_range)
 
     #if not('widthmin' in options.keys()):
     #    if len(np.unique(data[:,0])) >1 and not(stimRangeSet):
