@@ -1,25 +1,37 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Nov 26 23:09:42 2015
-
-@author = Wichmann Lab
-translated by Sophie Laturnus
-
 """
 import numpy as np
 import warnings
 
 from .utils import norminv
+v
+def prior_threshold(x, st_range):
+    """Default prior for the threshold parameter
 
-def prior1(x, xspread, stimRange):
-    
-    r = (x >= (stimRange[0]-.5*xspread))*(x<=stimRange[0])*(.5+.5*np.cos(2*np.pi*(stimRange[0]-x)/xspread)) \
-    + (x>stimRange[0])*(x<stimRange[1]) + (x>=stimRange[1])*(x<=stimRange[1]+.5*xspread)*(.5+.5*np.cos(2*np.pi*(x-stimRange[1])/xspread))
-        
-    return r
+    A uniform prior over the range `st_range` of the data with a cosine fall off
+    to 0 over half the range of the data.
 
-def prior2(x, Cfactor, wmin, wmax):
-    
+    This prior expresses the belief that the threshold is anywhere in the range
+    of the tested stimulus levels with equal probability and may be up to 50% of
+    the spread of the data outside the range with decreasing probability"""
+    # spread
+    sp = st_range[1] - st_range[0]
+    s0 = st_range[0]
+    s1 = st_range[1]
+    return ( (x > s0) * (x < s1) +
+             (x >= (s0-sp/2))*(x <= s0) * (1+np.cos(2*np.pi*(s0-x)/sp))/2 +
+             (x <= (s1+sp/2))*(x >= s1) * (1+np.cos(2*np.pi*(x-s1)/sp))/2 )
+
+def prior_width(x, st_range, alpha, w_min):
+    """Default prior fir the width parameter
+
+    A uniform prior between two times the minimal distance of two tested stimulus
+    levels and the range of the stimulus levels with cosine fall offs to 0 at
+    the minimal difference of two stimulus levels and at 3 times the range of the
+    tested stimulus levels"""
+    Cfactor = (norminv(.95)-norminv(.05))/(norminv(1-alpha)-norminv(alpha))
+
     r = ((x*Cfactor)>=wmin)*((x*Cfactor)<=2*wmin)*(.5-.5*np.cos(np.pi*((x*Cfactor)-wmin)/wmin)) \
         + ((x*Cfactor)>2*wmin)*((x*Cfactor)<wmax) \
         + ((x*Cfactor)>=wmax)*((x*Cfactor)<=3*wmax)*(.5+.5*np.cos(np.pi/2*(((x*Cfactor)-wmax)/wmax)))
