@@ -93,12 +93,18 @@ def psignifit(data, conf):
     # width_min is the minimum difference between two different stimulus levels
     width_min = conf.width_min
     if width_min is None:
+        # if it wasn't overriden by the user, derive it from the data
         if conf.stimulus_range is None:
+            # if the stimulus range is spanned by the input data
             if conf._logspace:
-                width_min = min(np.diff(np.sort(np.unique(np.log(data[:,0])))))
+                width_min = np.diff(np.unique(np.log(data[:,0]))).min()
             else:
-                width_min = min(np.diff(np.sort(np.unique(data[:,0]))))
+                width_min = np.diff(np.unique(data[:,0])).min()
         else:
+            # if the stimulus range was set manually, we can not derive width_min
+            # from the data, so we will instead use a very conservative estimate,
+            # i.e. 100 ULP from the largest end of the stimulus range
+            # for ULP, see https://en.wikipedia.org/wiki/Unit_in_the_last_place
             width_min = 100*np.spacing(stimulus_range[1])
 
     # get priors
