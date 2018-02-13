@@ -54,7 +54,7 @@ def psignifit(data, conf):
     # this is a very dangerous procedure!!! we should instead exit with an error and ask the user
     # to comply! (don't try to be smarter than the user)
     # percent correct in data
-    if (0 <= data[:,1].min() <=1) and (0 <= data[:,1].max() <=1)
+    if (0 <= data[:,1].min() <=1) and (0 <= data[:,1].max() <=1):
         data[:,1] = np.round(data[:,2]*data[:,1]) # we try to convert into our notation
 
     # options
