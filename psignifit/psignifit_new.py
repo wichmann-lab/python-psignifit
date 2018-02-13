@@ -50,7 +50,7 @@ def psignifit(data, conf):
     #input parsing
     #--------------------------------------------------------------------------
     # data
-    data = np.array(data)
+    data = np.asarray(data, dtype=float)
 
     # this is a very dangerous procedure!!! we should instead exit with an error and ask the user
     # to comply! (don't try to be smarter than the user)
