@@ -81,32 +81,16 @@ def psignifit(data, conf):
     #else:
     #    options['logspace'] = 0
 
-    #if range was not given take from data
-    #if len(np.ravel(options['stimulusRange'])) <=1 :
-    #    if options['logspace']:
-    #        options['stimulusRange'] = np.array(np.log([min(data[:,0]),max(data[:,0])]))
-    #    else :
-    #        options['stimulusRange'] = np.array([min(data[:,0]),max(data[:,0])])
-    #
-    #    stimRangeSet = False
-    #else:
-    #    stimRangeSet = True
-    #    if options['logspace']:
-    #        options['stimulusRange'] = np.log(options['stimulusRange'])
+    # stimulus range settings
     stimulus_range = conf.stimulus_range
     if stimulus_range is None:
-        stimulus_range = np.log([data[:,0].min(),data[:,0].max()])
+        # derive the stimulus range from the data
+        stimulus_range = (data[:,0].min(), data[:,0].max())
     if conf._logspace:
-        stimulus_range = np.log(stimulus_range)
+        # change it to logspace if needed
+        stimulus_range = (np.log(stimulus_range[0]), np.log(stimulus_range[1]))
 
-    #if not('widthmin' in options.keys()):
-    #    if len(np.unique(data[:,0])) >1 and not(stimRangeSet):
-    #        if options['logspace']:
-    #            options['widthmin']  = min(np.diff(np.sort(np.unique(np.log(data[:,0])))))
-    #        else:
-    #            options['widthmin']  = min(np.diff(np.sort(np.unique(data[:,0]))))
-    #    else:
-    #        options['widthmin'] = 100*np.spacing(options['stimulusRange'][1])
+    # width_min is the minimum difference between two different stimulus levels
     width_min = conf.width_min
     if width_min is None:
         if conf.stimulus_range is None:
