@@ -2,11 +2,12 @@
 """
 """
 import numpy as np
+import scipy.special
 import warnings
 
 from .utils import norminv
 
-def prior_threshold(x, st_range):
+def pthreshold(x, st_range):
     """Default prior for the threshold parameter
 
     A uniform prior over the range `st_range` of the data with a cosine fall off
@@ -27,7 +28,7 @@ def prior_threshold(x, st_range):
     p[right] = (1+np.cos(2*np.pi*(x[right]-s1)/sp))/2
     return p
 
-def prior_width(x, alpha, wmin, wmax):
+def pwidth(x, alpha, wmin, wmax):
     """Default prior for the width parameter
 
     A uniform prior between two times the minimal distance of two tested stimulus
@@ -44,56 +45,23 @@ def prior_width(x, alpha, wmin, wmax):
     p[right] = (1+np.cos(np.pi/2*(y[right]-wmax)/wmax))/2
     return p
 
-def getStandardPriors(data, options):
-    """sets the standard Priors
-    function priors = getStandardPriors(data,options)
-    The priors set here are the ones used if the user does supply own priors.
-    Thus this functions constitutes a way to change the priors permanently
-    note here that the priors here are not normalized. Psignifit takes care
-    of the normalization implicitly. """
+def plambda(x):
+    """Default prior for the lapse rate
 
+    A Beta distribution, wit parameters 1 and 10."""
+    scipy.special.beta.pdf(x, 1, 10)
 
-    priors = []    
-    
-    """ threshold """
-    xspread = options['stimulusRange'][1]-options['stimulusRange'][0]
-    ''' we assume the threshold is in the range of the data, for larger or
-        smaller values we tapre down to 0 with a raised cosine across half the
-        dataspread '''
+def pgamma(x):
+    """Default prior for the guess rate
 
-    priors.append(lambda x: prior1(x,xspread,options['stimulusRange']))
-    
-    """width"""
-    # minimum = minimal difference of two stimulus levels
-    widthmin = options['widthmin']
-    
-    widthmax = xspread
-    ''' We use the same prior as we previously used... e.g. we use the factor by
-        which they differ for the cumulative normal function'''
-    Cfactor = (norminv(.95) - norminv(.05))/(norminv(1-options['widthalpha']) - norminv(options['widthalpha']))
-    
-    priors.append(lambda x: prior2(x,Cfactor, widthmin, widthmax))
-    
-    """ asymptotes 
-    set asymptote prior to the 1, 10 beta prior, which corresponds to the
-    knowledge obtained from 9 correct trials at infinite stimulus level
-    """
-    
-    priors.append(lambda x: ss.beta.pdf(x, 1, 10))
-    priors.append(lambda x: ss.beta.pdf(x, 1, 10))
-    
-    """ sigma """
-    be = options['betaPrior']
-    priors.append(lambda x: ss.beta.pdf(x, 1, be))
-    
-    return priors
-    
-    
-    def __call__(self):
-        import sys
-        
-        return getStandardPriors(sys.argv[1], sys.argv[2])
+    A Beta distribution, wit parameters 1 and 10."""
+    scipy.special.beta.pdf(x, 1, 10)
 
+def peta(x, k):
+    """Default prior for overdispersion
+
+    A Beta distribution, wit parameters 1 and k."""
+    scipy.special.beta.pdf(x, 1, k)
 
 def checkPriors(data,options):
     """
@@ -199,8 +167,3 @@ def normalizePriors(options):
     
 
 
-
-if __name__ == "__main__":
-    import sys
-    getStandardPriors(sys.argv[1], sys.argv[2]) #TODO change accordingly?
-    
