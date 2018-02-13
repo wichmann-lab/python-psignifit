@@ -13,14 +13,13 @@ import scipy
 from . import priors
 from . import likelihood as _l
 from . import borders as _b
-from .utils import norminv, norminvg, t1icdf
+from .utils import norminv, norminvg, t1icdf, pool_data
 
 from .gridSetting import gridSetting
 from .getWeights import getWeights
 from .getConfRegion import getConfRegion
 from .getSeed import getSeed
 from .marginalize import marginalize
-from .poolData import poolData
 from .getSigmoidHandle import getSigmoidHandle
 
 from . import psigniplot as plot
@@ -162,9 +161,9 @@ def psignifit(data, conf):
         warnings.warn('psignifit:pooling\n'
             'We pooled your data, to avoid problems with n=1 blocks or to save time fitting because you have a lot of blocks\n'
             'You can force acceptance of your blocks by increasing options.nblocks')
-        data = poolData(data, options)
-    
-    
+        data = pool_data(data, xtol=conf.pool_xtol, max_gap=conf.pool_max_gap,
+                               max_length=conf.pool_max_length)
+
     # create function handle of sigmoid
     #options['sigmoidHandle'] = getSigmoidHandle(options)
     
