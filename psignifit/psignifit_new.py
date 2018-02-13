@@ -67,7 +67,7 @@ def psignifit(data, conf):
     #if options['expType'] == 'nAFC' and not('expN' in options.keys()):
     #    raise ValueError('For nAFC experiments please also pass the number of alternatives (options.expN)')
 
-    assert (max(data[:,0]) - min(data[:,0]) > 0), 'Your data does not have variance on the x-axis! This makes fitting impossible'
+    assert (data[:,0].max() - data[:,0].min()) > 0, 'Your data does not have variance on the x-axis! This makes fitting impossible'
 
     # log space sigmoids
     # we fit these functions with a log transformed physical axis
