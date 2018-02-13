@@ -2,6 +2,7 @@
 
 import os as _os
 import sys as _sys
+from functools import partial
 
 import numpy as np
 import datetime as _dt
@@ -9,8 +10,8 @@ import warnings
 from copy import deepcopy as _deepcopy
 import scipy
 
+from . import priors
 from . import likelihood as _l
-from . import priors as _p
 from . import borders as _b
 from .utils import norminv, norminvg, t1icdf
 
@@ -116,7 +117,7 @@ def psignifit(data, conf):
         else:
             width_min = 100*np.spacing(stimulus_range[1])
 
-    # add priors
+    # get priors
     #if options['threshPC'] != .5 and not(hasattr(options, 'priors')):
     #    warnings.warn('psignifit:TresholdPCchanged\n'\
     #        'You changed the percent correct corresponding to the threshold\n')    
@@ -133,8 +134,20 @@ def psignifit(data, conf):
     #
     #    p.checkPriors(data, options)
     if conf.priors is None:
-        priors = get_standard_priors()
-    
+        priors = {
+        'threshold': partial(priors.threshold, st_range=stimulus_range),
+        'width': partial(priors.pwidth, wmin=width_min,
+                                        wmax=stimulus_range[1]-stimulus_range[0],
+                                        alpha=conf.width_alpha),
+        'lambda': priors.plambda,
+        'gamma': priors.pgamma,
+        'eta' : partial(priors.peta, k=conf.beta_prior),
+        }
+    else:
+        # will take care of user-specified priors later!
+        #XXX TODO!
+        raise NotImplementedError
+
     if options['dynamicGrid'] and not('GridSetEval' in options.keys()):
         options['GridSetEval'] = 10000
     if options['dynamicGrid'] and not('UniformWeight' in options.keys()):
