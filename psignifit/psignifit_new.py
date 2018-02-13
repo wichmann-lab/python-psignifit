@@ -138,15 +138,6 @@ def psignifit(data, conf):
         #XXX TODO!
         raise NotImplementedError
 
-    if options['dynamicGrid'] and not('GridSetEval' in options.keys()):
-        options['GridSetEval'] = 10000
-    if options['dynamicGrid'] and not('UniformWeight' in options.keys()):
-        options['UniformWeight'] = 1
-
-    '''
-    initialize
-    '''        
-    
     #warning if many blocks were measured
     if (len(np.unique(data[:,0])) >= 25) and (np.ravel(options['stimulusRange']).size == 1):
         warnings.warn('psignifit:probablyAdaptive\n'\

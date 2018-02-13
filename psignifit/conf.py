@@ -138,3 +138,10 @@ class Conf:
         # set logspace when appropriate
         if value in ('weibull', 'logn', 'neg_weibull', 'neg_logn'):
             self._logspace = True
+
+    def check_dynamic_grid(self, value):
+        if value:
+            if self.grid_eval is None:
+                self.grid_eval = 10000
+            if self.uniform_weigth is None:
+                self.uniform_weigth = 1.
