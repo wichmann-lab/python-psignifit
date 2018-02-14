@@ -148,26 +148,27 @@ def psignifit(data, conf):
         raise NotImplementedError
 
     #warning if many blocks were measured
-    if (len(np.unique(data[:,0])) >= 25) and not conf.stimulus_range:
-        warnings.warn('psignifit:probablyAdaptive\n'
-            'The data you supplied contained >= 25 stimulus levels.\n'
-            'Did you sample adaptively?\n'
-            'If so please specify a range which contains the whole psychometric function in options.stimulusRange.\n'
-            'This will allow psignifit to choose an appropriate prior.\n'
-            'For now we use the standard heuristic, assuming that the psychometric function is covered by the stimulus levels,\n'
-            'which is frequently invalid for adaptive procedures!')
+    if verbose and len(levels)) >= 25 and not conf.stimulus_range:
+        print(
+f"""The data you supplied contained {len(levels}>= 25 stimulus levels.
+Did you sample adaptively?
+If so please specify a range which contains the whole psychometric function in
+conf.stimulus_range.
+An appropriate prior prior will be then chosen. For now we use the standard
+heuristic, assuming that the psychometric function is covered by the stimulus
+levels,which is frequently invalid for adaptive procedures!""")
 
-    if data[:,2].max() <= 5 and not conf.stimulus_range:
-        warnings.warn('psignifit:probablyAdaptive\n'
-            'All provided data blocks contain <= 5 trials \n'
-            'Did you sample adaptively?\n'
-            'If so please specify a range which contains the whole psychometric function in options.stimulusRange.\n'
-            'This will allow psignifit to choose an appropriate prior.\n'
-            'For now we use the standard heuristic, assuming that the psychometric function is covered by the stimulus levels,\n'
-            'which is frequently invalid for adaptive procedures!')
+    if ntrials.max() <= 5 and not conf.stimulus_range:
+        print(
+"""All provided data blocks contain <= 5 trials.
+Did you sample adaptively?
+If so please specify a range which contains the whole psychometric function in
+conf.stimulus_range.
+An appropriate prior prior will be then chosen. For now we use the standard
+heuristic, assuming that the psychometric function is covered by the stimulus
+levels, which is frequently invalid for adaptive procedures!""")
 
-    #pool data if necessary: more than options.nblocks blocks or only 1 trial per block
-    if data[:,2].max() == 1 or len(data[:,0]) > conf.nblocks:
+    if ntrials.max() == 1 or len(levels) > conf.pool_max_blocks:
         warnings.warn('psignifit:pooling\n'
             'We pooled your data, to avoid problems with n=1 blocks or to save time fitting because you have a lot of blocks\n'
             'You can force acceptance of your blocks by increasing options.nblocks')
