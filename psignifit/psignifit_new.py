@@ -48,17 +48,26 @@ def psignifit(data, conf):
 
     To get an introduction to basic usage start with demo001
     """
-    #--------------------------------------------------------------------------
-    #input parsing
-    #--------------------------------------------------------------------------
-    # data
+    verbose = conf.verbose
+
     data = np.asarray(data, dtype=float)
 
-    # this is a very dangerous procedure!!! we should instead exit with an error and ask the user
-    # to comply! (don't try to be smarter than the user)
-    # percent correct in data
-    if (0 <= data[:,1].min() <=1) and (0 <= data[:,1].max() <=1):
-        data[:,1] = np.round(data[:,2]*data[:,1]) # we try to convert into our notation
+    # check that the data are plausible
+    levels, ncorrect, ntrials = data[:,0], data[:,1], data[:,2]
+
+    # levels should show some variance
+    if levels.max() == levels.min():
+        raise PsignifitException('Your stimulus levels are all identical.'
+                                 ' They can not be fitted by a sigmoid!')
+
+    # ncorrect and ntrials should be integers
+    if not np.allclose(ncorrect, ncorrect.astype(int)):
+        raise PsignifitException('The number correct column contains non integer'
+                                 ' numbers!')
+
+    if not np.allclose(ntrials, ntrials.astype(int)):
+        raise PsignifitException('The number of trials column contains non'
+                                 ' integer numbers!')
 
     # options
 
@@ -68,8 +77,6 @@ def psignifit(data, conf):
 
     #if options['expType'] == 'nAFC' and not('expN' in options.keys()):
     #    raise ValueError('For nAFC experiments please also pass the number of alternatives (options.expN)')
-
-    assert (data[:,0].max() - data[:,0].min()) > 0, 'Your data does not have variance on the x-axis! This makes fitting impossible'
 
     # log space sigmoids
     # we fit these functions with a log transformed physical axis
