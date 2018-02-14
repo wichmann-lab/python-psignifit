@@ -28,31 +28,28 @@ def pool_data(data, xtol=0, max_gap=np.inf, max_length=np.inf):
     at max pool_max_length trials appart in general.
     """
     ndata = data.shape[0]
-    seen = [False]*ndata        # which elements we already counted
-    cum_ntrials = [0] + data[:,2].cumsum().tolist()
+    seen = [False]*ndata
+    cum_ntrials = [0] + list(data[:,2].cumsum())
 
     pool = []
-    i = 0
     for  i in range(ndata):
         if not seen[i]:
             current = data[i,0]
             block = []
             gap = 0
             for j in range(i, ndata):
-                if (cum_ntrials[j+1]-cum_ntrials[i]) > max_length:
+                if (cum_ntrials[j+1]-cum_ntrials[i])>max_length or gap>max_gap:
                     break
-                if abs(data[j,0] - current) <= xtol and not seen[j]:
+                level, ncorrect, ntotal = data[j,:]
+                if abs(level - current) <= xtol and not seen[j]:
                     seen[j] = True
-                    block.append(data[j,:])
                     gap = 0
+                    block.append((level*ntotal, ncorrect, ntotal))
                 else:
-                    gap += data[j,2]
-                if gap > max_gap:
-                    break
-            block = np.array(block)
-            _, ncorrect, ntotal = block.sum(axis=0)
-            level = (block[:,0]*block[:,2]).sum()/ntotal
-            pool.append([level,ncorrect, ntotal])
+                    gap += ntotal
+
+            level, ncorrect, ntotal = np.sum(block, axis=0)
+            pool.append((level/ntotal, ncorrect, ntotal))
 
     return np.array(pool)
 
