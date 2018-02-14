@@ -4,11 +4,11 @@ from psignifit import conf
 
 def test_setting_valid_option():
     c = conf.Conf()
-    c.nblocks = 10
-    assert c.nblocks == 10
+    c.verbose = 10
+    assert c.verbose == 10
     # assignment shortcut
-    c = conf.Conf(nblocks=20)
-    assert c.nblocks == 20
+    c = conf.Conf(verbose=20)
+    assert c.verbose == 20
 
 def test_setting_invalid_option():
     with pytest.raises(conf.PsignifitConfException):
