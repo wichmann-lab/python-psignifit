@@ -123,11 +123,13 @@ class Conf:
         return '\n'.join(_str)
 
     def check_experiment_type(self, value):
-        cond1 = value in ('YesNo', 'equalAsymptote')
+        cond1 = value in ('yes/no', 'equal asymptote')
         cond2 = re.match('[0-9]AFC', value)
         if not (cond1 or cond2):
-            raise PsignifitConfException(f'Invalid experiment type: "{value}"!')
-        self.steps = [40,40,20,20,20] if value=='YesNo' else [40,40,20,1,20]
+            raise PsignifitConfException(f'Invalid experiment type: "{value}"!\n'
+                    'Valid types: "yes/no", "equal asymptote", "2AFC", "3AFC",'
+                    ' etc...')
+        self.steps = [40,40,20,20,20] if value=='yes/no' else [40,40,20,1,20]
         self.steps_moving_borders = [25,30, 10,10,15] if value=='YesNo' else [30,40,10,1,20]
 
     def check_sigmoid(self, value):
