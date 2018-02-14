@@ -43,7 +43,7 @@ class Conf:
              'instant_plot',
              'max_border_value',
              'move_borders',
-             'nblocks',
+             'pool_max_blocks',
              'pool_max_gap',
              'pool_max_length',
              'pool_xtol',
@@ -78,7 +78,7 @@ class Conf:
         self.instant_plot = False
         self.max_border_value = 1e-05
         self.move_borders = True
-        self.nblocks = 25
+        self.pool_max_blocks = 25
         self.pool_max_gap = np.inf
         self.pool_max_length = np.inf
         self.pool_xtol = 0

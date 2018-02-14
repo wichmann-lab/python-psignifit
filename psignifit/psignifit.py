@@ -169,13 +169,13 @@ heuristic, assuming that the psychometric function is covered by the stimulus
 levels, which is frequently invalid for adaptive procedures!""")
 
     if ntrials.max() == 1 or len(levels) > conf.pool_max_blocks:
-        warnings.warn('psignifit:pooling\n'
-            'We pooled your data, to avoid problems with n=1 blocks or to save time fitting because you have a lot of blocks\n'
-            'You can force acceptance of your blocks by increasing options.nblocks')
+        print(
+"""Pooling data, to avoid problems with n=1 blocks or to save time fitting
+because you have more than 25 blocks.
+You can force acceptance of your blocks by increasing conf.pool_max_blocks""")
         data = pool_data(data, xtol=conf.pool_xtol, max_gap=conf.pool_max_gap,
                                max_length=conf.pool_max_length)
 
-    # create function handle of sigmoid
     #options['sigmoidHandle'] = getSigmoidHandle(options)
     
     # borders of integration
