@@ -7,7 +7,7 @@ import os
 import subprocess
 
 # import here the main function
-from .psignifit_new import psignifit
+from .psignifit import psignifit
 
 __name__ =        'psignifit'
 __description__ = 'toolbox for Bayesian psychometric function estimation'
