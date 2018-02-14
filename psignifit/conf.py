@@ -124,7 +124,7 @@ class Conf:
 
     def check_experiment_type(self, value):
         cond1 = value in ('YesNo', 'equalAsymptote')
-        cond2 = re.match('[0-9]AFC', value)
+        cond2 = re.match('[0-9]+AFC', value)
         if not (cond1 or cond2):
             raise PsignifitConfException(f'Invalid experiment type: "{value}"!')
         self.steps = [40,40,20,20,20] if value=='YesNo' else [40,40,20,1,20]
