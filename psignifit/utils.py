@@ -40,16 +40,16 @@ def pool_data(data, xtol=0, max_gap=np.inf, max_length=np.inf):
             for j in range(i, ndata):
                 if (cum_ntrials[j+1]-cum_ntrials[i])>max_length or gap>max_gap:
                     break
-                level, ncorrect, ntotal = data[j,:]
+                level, ncorrect, ntrials = data[j,:]
                 if abs(level - current) <= xtol and not seen[j]:
                     seen[j] = True
                     gap = 0
-                    block.append((level*ntotal, ncorrect, ntotal))
+                    block.append((level*ntrials, ncorrect, ntrials))
                 else:
-                    gap += ntotal
+                    gap += ntrials
 
-            level, ncorrect, ntotal = np.sum(block, axis=0)
-            pool.append((level/ntotal, ncorrect, ntotal))
+            level, ncorrect, ntrials = np.sum(block, axis=0)
+            pool.append((level/ntrials, ncorrect, ntrials))
 
     return np.array(pool)
 
