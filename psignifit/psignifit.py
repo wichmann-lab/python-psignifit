@@ -178,11 +178,12 @@ You can force acceptance of your blocks by increasing conf.pool_max_blocks""")
                                max_length=conf.pool_max_length)
 
     # borders of integration
-    if 'borders' in options.keys():
-        borders = _b.setBorders(data, options)
-        options['borders'][np.isnan(options['borders'])] = borders[np.isnan(options['borders'])]
-    else:
-        options['borders'] = _b.setBorders(data,options)
+    exp_type = conf.experiment_type
+    borders = set_borders(data, wmin=width_min, etype=exp_type,
+                          srange=stimulus_range, alpha=width_alpha)
+    # override at user request
+    if conf.borders is not None:
+        borders.update(conf.borders)
 
     border_idx = np.where(np.isnan(options['fixedPars']) == False);
     print(border_idx)
