@@ -87,7 +87,7 @@ class Conf:
         self.stimulus_range = None
         self.thresh_PC = 0.5
         self.uniform_weight = None
-        self.verbose = False
+        self.verbose = True
         self.width_alpha = 0.05
         self.width_min = None
 
