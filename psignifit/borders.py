@@ -7,8 +7,8 @@ from .marginalize import marginalize
 from .utils import norminv
 
 
-def set_borders(data, width_min=None, exp_type=None, stimulus_range=None,
-                      width_alpha=None):
+def set_borders(data, wmin=None, etype=None, srange=None,
+                      alpha=None):
     """
     Set borders of the grid for the parameter optimization
 
@@ -26,25 +26,25 @@ def set_borders(data, width_min=None, exp_type=None, stimulus_range=None,
     """
 
     # Threshold is assumed to be within the data spread +/- 50%
-    spread = stimulus_range[1] - stimulus_range[0]
-    threshold = (stimulus_range[0]-spread/2, stimulus_range[1]+spread/2)
+    spread = srange[1] - srange[0]
+    threshold = (srange[0]-spread/2, srange[1]+spread/2)
 
     # The width is assumed to be between half the minimal distance of
     # two points and 3 times the range of data
-    spread /= (norminv(.95)-norminv(.05))/(norminv(1-width_alpha)-norminv(width_alpha))
-    width  = (width_min, 3*spread)
+    spread /= (norminv(.95)-norminv(.05))/(norminv(1-alpha)-norminv(alpha))
+    width  = (wmin, 3*spread)
 
     # The lapse rate lambda
     lambda_ = (0., 0.5)
 
     # The guess rate gamma
-    if exp_type == 'yes/no':
+    if etype == 'yes/no':
         gamma = (0., 0.5)
-    elif exp_time == 'equal asymptote':
+    elif etype == 'equal asymptote':
         gamma = None
     else:
         # this is a nAFC experiment
-        n = int(exp_type[0])
+        n = int(etype[0])
         gamma = (1./n, 1./n)
 
     # The overdispersion parameter eta
