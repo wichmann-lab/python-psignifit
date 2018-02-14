@@ -25,6 +25,9 @@ from .getSigmoidHandle import getSigmoidHandle
 from . import psigniplot as plot
 
 
+# our own Exception class
+class PsignifitException(Exception):
+    pass
 
 def psignifit(data, conf):
     """
