@@ -132,12 +132,13 @@ def psignifit(data, conf):
     #            options['priors'][ipar] = priors[ipar]
     #
     #    p.checkPriors(data, options)
+    width_alpha = conf.width_alpha
     if conf.priors is None:
         priors = {
         'threshold': partial(priors.threshold, st_range=stimulus_range),
         'width': partial(priors.pwidth, wmin=width_min,
                                         wmax=stimulus_range[1]-stimulus_range[0],
-                                        alpha=conf.width_alpha),
+                                        alpha=width_alpha),
         'lambda': priors.plambda,
         'gamma': priors.pgamma,
         'eta' : partial(priors.peta, k=conf.beta_prior),
