@@ -56,3 +56,38 @@ def test_private_attr():
     assert c._foobar == 10
     # it shouldn't appear in the str representation
     assert str(c).find('_foobar: 10') == -1
+
+def test_set_wrong_experiment_type():
+    with pytest.raises(conf.PsignifitConfException):
+        conf.Conf(experiment_type = 'foobar')
+
+def test_set_borders_with_nondict():
+    with pytest.raises(conf.PsignifitConfException):
+        conf.Conf(borders = (1, 2, 3))
+
+def test_set_wrong_sigmoid():
+    with pytest.raises(conf.PsignifitConfException):
+        conf.Conf(sigmoid='foobaro')
+
+def test_set_stimulus_range_wrong_type():
+    with pytest.raises(conf.PsignifitConfException):
+        conf.Conf(stimulus_range=10)
+
+def test_set_stimulus_range_wrong_length():
+    with pytest.raises(conf.PsignifitConfException):
+        conf.Conf(stimulus_range=(1,2,3))
+
+def test_set_width_alpha_wrong_type():
+    with pytest.raises(conf.PsignifitConfException):
+        conf.Conf(width_alpha=(1,2,3))
+
+def test_set_width_alpha_wrong_range():
+    with pytest.raises(conf.PsignifitConfException):
+        conf.Conf(width_alpha=1.2)
+    with pytest.raises(conf.PsignifitConfException):
+        conf.Conf(width_alpha=-1)
+
+def test_set_width_min_wrong_type():
+    with pytest.raises(conf.PsignifitConfException):
+        conf.Conf(width_min=(1,2,3))
+

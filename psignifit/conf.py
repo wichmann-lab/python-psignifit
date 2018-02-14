@@ -70,7 +70,7 @@ class Conf:
         self.confP = (.95, .9, .68)
         self.dynamic_grid = False
         self.estimate_type = 'MAP'
-        self.experiment_type = 'YesNo'
+        self.experiment_type = 'yes/no'
         self.fast_optim = False
         self.fixed_pars = (None, )*5
         self.grid_eval = None
@@ -122,13 +122,22 @@ class Conf:
             _str.append(f'{name}: {value}')
         return '\n'.join(_str)
 
+    def check_borders(self, value):
+        if value is not None:
+            # borders is a dictionary in the form {'parameter_name': (left, right)}
+            if type(value) != dict:
+                raise PsignifitConfException(
+f'Option borders must be a dictionary ({type(value).__name__} given)!')
+
+
     def check_experiment_type(self, value):
         cond1 = value in ('yes/no', 'equal asymptote')
         cond2 = re.match('[0-9]AFC', value)
         if not (cond1 or cond2):
-            raise PsignifitConfException(f'Invalid experiment type: "{value}"!\n'
-                    'Valid types: "yes/no", "equal asymptote", "2AFC", "3AFC",'
-                    ' etc...')
+            raise PsignifitConfException(
+f"""Invalid experiment type: "{value}"
+Valid types: "yes/no", "equal asymptote", "2AFC", "3AFC", etc...""")
+
         self.steps = [40,40,20,20,20] if value=='yes/no' else [40,40,20,1,20]
         self.steps_moving_borders = [25,30, 10,10,15] if value=='YesNo' else [30,40,10,1,20]
 
@@ -147,3 +156,35 @@ class Conf:
                 self.grid_eval = 10000
             if self.uniform_weigth is None:
                 self.uniform_weigth = 1.
+
+    def check_stimulus_range(self, value):
+        if value:
+            try:
+                len_ = len(value)
+                wrong_type = False
+            except TypeError:
+                wrong_type = True
+            if wrong_type or len_ != 2:
+                raise PsignifitConfException(
+f"""Option stimulus range must be a sequence of two items!""")
+
+    def check_width_alpha(self, value):
+        try:
+            # check that it is a number:
+            diff = 1 - value
+            wrong_type = False
+        except Exception:
+            wrong_type = True
+        if wrong_type or not ( 0 < diff < 1):
+            raise PsignifitConfException(
+f"""Option width_alpha must be between 0 and 1 ({value} given)!""")
+
+    def check_width_min(self, value):
+        if value:
+            try:
+                _ = value + 1
+            except Exception:
+                raise PsignifitConfException("Option width_min must be a number")
+
+
+
