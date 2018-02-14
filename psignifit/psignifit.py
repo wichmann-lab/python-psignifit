@@ -148,9 +148,9 @@ def psignifit(data, conf):
         raise NotImplementedError
 
     #warning if many blocks were measured
-    if verbose and len(levels)) >= 25 and not conf.stimulus_range:
+    if verbose and len(levels) >= 25 and not conf.stimulus_range:
         print(
-f"""The data you supplied contained {len(levels}>= 25 stimulus levels.
+f"""The data you supplied contained {len(levels)}>= 25 stimulus levels.
 Did you sample adaptively?
 If so please specify a range which contains the whole psychometric function in
 conf.stimulus_range.
@@ -158,7 +158,7 @@ An appropriate prior prior will be then chosen. For now we use the standard
 heuristic, assuming that the psychometric function is covered by the stimulus
 levels,which is frequently invalid for adaptive procedures!""")
 
-    if ntrials.max() <= 5 and not conf.stimulus_range:
+    if verbose and ntrials.max() <= 5 and not conf.stimulus_range:
         print(
 """All provided data blocks contain <= 5 trials.
 Did you sample adaptively?
@@ -168,7 +168,7 @@ An appropriate prior prior will be then chosen. For now we use the standard
 heuristic, assuming that the psychometric function is covered by the stimulus
 levels, which is frequently invalid for adaptive procedures!""")
 
-    if ntrials.max() == 1 or len(levels) > conf.pool_max_blocks:
+    if verbose and ntrials.max() == 1 or len(levels) > conf.pool_max_blocks:
         print(
 """Pooling data, to avoid problems with n=1 blocks or to save time fitting
 because you have more than 25 blocks.
