@@ -41,8 +41,8 @@ def psignifit(data, conf):
     options should be a dictionary in which you set the options for your fit.
     You can find a full overview over the options in demo002
 
-    The result of this function is a dictionary, which contains all information the 
-    program produced for your fit. You can pass this as whole to all further 
+    The result of this function is a dictionary, which contains all information the
+    program produced for your fit. You can pass this as whole to all further
     processing function provided with psignifit. Especially to the plot functions.
     You can find an explanation for all fields of the result in demo006
 
@@ -71,7 +71,7 @@ def psignifit(data, conf):
 
     # options
 
-    #if options['expType'] in ['2AFC', '3AFC', '4AFC']:            
+    #if options['expType'] in ['2AFC', '3AFC', '4AFC']:
     #    options['expN'] = int(float(options['expType'][0]))
     #    options['expType'] = 'nAFC'
 
@@ -119,7 +119,7 @@ def psignifit(data, conf):
     # get priors
     #if options['threshPC'] != .5 and not(hasattr(options, 'priors')):
     #    warnings.warn('psignifit:TresholdPCchanged\n'\
-    #        'You changed the percent correct corresponding to the threshold\n')    
+    #        'You changed the percent correct corresponding to the threshold\n')
 
     #if not('priors' in options.keys()):
     #    options['priors'] = _p.getStandardPriors(data, options)
@@ -176,33 +176,31 @@ You can force acceptance of your blocks by increasing conf.pool_max_blocks""")
         data = pool_data(data, xtol=conf.pool_xtol, max_gap=conf.pool_max_gap,
                                max_length=conf.pool_max_length)
 
-    #options['sigmoidHandle'] = getSigmoidHandle(options)
-    
     # borders of integration
     if 'borders' in options.keys():
         borders = _b.setBorders(data, options)
         options['borders'][np.isnan(options['borders'])] = borders[np.isnan(options['borders'])]
     else:
         options['borders'] = _b.setBorders(data,options)
-    
+
     border_idx = np.where(np.isnan(options['fixedPars']) == False);
     print(border_idx)
     if (border_idx[0].size > 0):
         options['borders'][border_idx[0],0] = options['fixedPars'][border_idx[0]]
         options['borders'][border_idx[0],1] = options['fixedPars'][border_idx[0]]
-            
+
     # normalize priors to first choice of borders
     options['priors'] = _p.normalizePriors(options)
     if options['moveBorders']:
         options['borders'] = _b.moveBorders(data, options)
-    
+
     ''' core '''
     result = psignifitCore(data,options)
-        
+
     ''' after processing '''
     # check that the marginals go to nearly 0 at the borders of the grid
     if options['verbose'] > -5:
-    
+
         if result['marginals'][0][0] * result['marginalsW'][0][0] > .001:
             warnings.warn('psignifit:borderWarning\n'\
                 'The marginal for the threshold is not near 0 at the lower border.\n'\
@@ -222,24 +220,24 @@ You can force acceptance of your blocks by increasing conf.pool_max_blocks""")
                 'The marginal for the width is not near 0 at the lower border.\n'\
                 'This indicates that your data is not sufficient to exclude much higher widths.\n'\
                 'Refer to the paper or the manual for more info on this topic.')
-    
+
     result['timestamp'] = _dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
+
     if options['instantPlot']:
         plot.plotPsych(result)
-    
-       
-    
+
+
+
     return result
-    
+
 def psignifitFast(data,options):
     """
     this uses changed settings for the fit to obtain a fast point estimate to
-    your data. 
+    your data.
     The mean estimate with these settings is very crude, the MAP estimate is
     better, but takes a bit of time for the optimization (~100 ms)
     """
-    
+
     warnings.warn('You use the speed optimized version of this program. \n' \
     'This is NOT suitable for the final analysis, but meant for online analysis, adaptive methods etc. \n'  \
     'It has not been tested how good the estimates from this method are!')
@@ -248,11 +246,11 @@ def psignifitFast(data,options):
     options['mbStepN']  = [20,20,10,10,1]
     options['fixedPars'] = np.array([np.NaN,np.NaN,np.NaN,np.NaN,0.0])
     options['fastOptim'] = True
-    
+
     res = psignifit(data,options)
-    
-    return res 
-    
+
+    return res
+
 
 def psignifitCore(data, options):
     """
@@ -265,15 +263,15 @@ def psignifitCore(data, options):
     parameters(1) should correspond to the threshold and parameters(2) to
     the width (distance containing 95% of the function.
     """
-    
+
     d = len(options['borders'])
     result = {'X1D': [], 'marginals': [], 'marginalsX': [], 'marginalsW': []}
-    
+
     '''Choose grid dynamically from data'''
     if options['dynamicGrid']:
         # get seed from linear regression with logit transform
         Seed = getSeed(data,options)
-        
+
         # further optimize the logliklihood to obtain a good estimate of the MAP
         if options['expType'] == 'YesNo':
             calcSeed = lambda X: -_l.logLikelihood(data, options, X[0], X[1], X[2], X[3], X[4])
@@ -282,60 +280,60 @@ def psignifitCore(data, options):
             calcSeed = lambda X: -_l.logLikelihood(data, options, X[0], X[1], X[2], 1/options['expN'], X[3])
             Seed = scipy.optimize.fmin(func=calcSeed, x0 = [Seed[0:2], Seed[4]])
             Seed = [Seed[0:2], 1/options['expN'], Seed[3]] #ToDo check whether row or colum vector
-        result['X1D'] = gridSetting(data,options, Seed) 
-    
-    
+        result['X1D'] = gridSetting(data,options, Seed)
+
+
     else: # for types which do not need a MAP estimate
         if (options['gridSetType'] == 'priorlike' or options['gridSetType'] == 'STD'
             or options['gridSetType'] == 'exp' or options['gridSetType'] == '4power'):
-                result['X1D'] = gridSetting(data,options) 
+                result['X1D'] = gridSetting(data,options)
         else: # Use a linear grid
             for idx in range(0,d):
                 # If there is an actual Interval
-                if options['borders'][idx, 0] < options['borders'][idx,1]: 
-                    
+                if options['borders'][idx, 0] < options['borders'][idx,1]:
+
                     result['X1D'].append(np.linspace(options['borders'][idx,0], options['borders'][idx,1],
                                     num=options['stepN'][idx]))
                 # if parameter was fixed
                 else:
                     result['X1D'].append(np.array([options['borders'][idx,0]]))
-                    
+
     '''Evaluate likelihood and form it into a posterior'''
-    
+
     (result['Posterior'], result['logPmax']) = _l.likelihood(data, options, result['X1D'])
     result['weight'] = getWeights(result['X1D'])
     integral = np.sum(np.array(result['Posterior'][:])*np.array(result['weight'][:]))
     result['Posterior'] = result['Posterior']/integral
     result['integral'] = integral
-    
+
     '''Compute marginal distributions'''
-    
+
     for idx in range(0,d):
         m, mX, mW = marginalize(result, np.array([idx]))
         result['marginals'].append(m)
         result['marginalsX'].append(mX)
-        result['marginalsW'].append(mW) 
-    
+        result['marginalsW'].append(mW)
+
     result['marginals'] = np.squeeze(result['marginals'])
     result['marginalsX'] = np.squeeze(result['marginalsX'])
     result['marginalsW'] = np.squeeze(result['marginalsW'])
-        
+
     '''Find point estimate'''
     if (options['estimateType'] in ['MAP','MLE']):
         # get MLE estimate
-    
+
         #start at most likely grid point
         index = np.where(result['Posterior'] == np.max(result['Posterior'].ravel()))
-      
+
         Fit = np.zeros([d,1])
         for idx in range(0,d):
-            Fit[idx] = result['X1D'][idx][index[idx]] 
-        
+            Fit[idx] = result['X1D'][idx][index[idx]]
+
         if options['expType'] == 'YesNo':
             fun = lambda X, f: -_l.logLikelihood(data, options, [X[0],X[1],X[2],X[3],X[4]])
             x0 = _deepcopy(Fit)
             a = None
-            
+
         elif options['expType'] == 'nAFC':
             #def func(X,f):
             #    return -_l.logLikelihood(data,options, [X[0], X[1], X[2], f, X[3]])
@@ -344,25 +342,25 @@ def psignifitCore(data, options):
             x0 = _deepcopy(Fit[0:3]) # Fit[3]  is excluded
             x0 = np.append(x0,_deepcopy(Fit[4]))
             a = np.array([1/options['expN']])
-            
+
         elif options['expType'] == 'equalAsymptote':
             fun = lambda X, f: -_l.logLikelihood(data,options,[X[0], X[1], X[2], f, X[3]])
             x0 = _deepcopy(Fit[0:3])
             x0 = np.append(x0,_deepcopy(Fit[4]))
             a =  np.array([np.nan])
-           
+
         else:
             raise ValueError('unknown expType')
-            
-        if options['fastOptim']:           
+
+        if options['fastOptim']:
             Fit = scipy.optimize.fmin(fun, x0, args = (a,), xtol=0, ftol = 0, maxiter = 100, maxfun=100)
             warnings.warn('changed options for optimization')
-        else:            
+        else:
             Fit = scipy.optimize.fmin(fun, x0, args = (a,), disp = False)
-        
+
         if options['expType'] == 'YesNo':
             result['Fit'] = _deepcopy(Fit)
-        elif options['expType'] == 'nAFC': 
+        elif options['expType'] == 'nAFC':
             fit = _deepcopy(Fit[0:3])
             fit = np.append(fit, np.array([1/options['expN']]))
             fit = np.append(fit, _deepcopy(Fit[3]))
@@ -374,48 +372,48 @@ def psignifitCore(data, options):
             result['Fit'] = fit
         else:
             raise ValueError('unknown expType')
-        
+
         par_idx = np.where(np.isnan(options['fixedPars']) == False)
         for idx in par_idx[0]:
             result['Fit'][idx] = options['fixedPars'][idx]
-            
+
     elif options['estimateType'] == 'mean':
         # get mean estimate
         Fit = np.zeros([d,1])
         for idx in range[0:d]:
             Fit[idx] = np.sum(result['marginals'][idx]*result['marginalsW'][idx]*result['marginalsX'][idx])
-        
+
         result['Fit'] = _deepcopy(Fit)
         Fit = np.empty(Fit.shape)
     '''Include input into result'''
     result['options'] = options # no copies here, because they are not changing
     result['data'] = data
-    
+
     '''Compute confidence intervals'''
     if ~options['fastOptim']:
         result['conf_Intervals'] = getConfRegion(result)
-        
+
     return result
 
 
 def getSlope(result, stimLevel):
-    """ 
+    """
     function slope = getSlope(result, stimLevel)
     This function finds the slope of the psychometric function at a given
-    performance level in percent correct. 
-    
+    performance level in percent correct.
+
     result is a result dictionary from psignifit
-    
+
     stimLevel is the stimuluslevel at where to evaluate the slope
-    
-    This function cannot provide credible intervals. 
+
+    This function cannot provide credible intervals.
     """
 
     if 'Fit' in result.keys():
         theta0 = result['Fit']
     else:
         raise ValueError('Result needs to contain a resulting fit generated by psignifit')
-        
+
 
 
     #calculate point estimate -> transform only the fit
@@ -425,13 +423,13 @@ def getSlope(result, stimLevel):
         PC    = result['options']['threshPC']
     else:
         PC = 0.5
-    
+
     if result['options']['sigmoidName'][0:3]=='neg':
         PC = 1-PC;
 
 
     sigName = result['options']['sigmoidName']
-    
+
     if sigName in ['norm','gauss','neg_norm','neg_gauss']:
         C         = norminv(1-alpha) - norminv(alpha)
         normalizedStimLevel = (stimLevel-theta0[0])/theta0[1]*C
@@ -453,7 +451,7 @@ def getSlope(result, stimLevel):
         C      = norminv(1-alpha) - norminv(alpha)
         normalizedStimLevel = (np.log(stimLevel)-theta0[0])/theta0[1]
         slopeNormalized = scipy.stats.norm.pdf(normalizedStimLevel)
-        slope = slopeNormalized *C/theta0[1]/stimLevel 
+        slope = slopeNormalized *C/theta0[1]/stimLevel
     elif sigName in ['Weibull','weibull','neg_Weibull','neg_weibull']:
         C      = np.log(-np.log(alpha)) - np.log(-np.log(1-alpha))
         stimLevelNormalized = C/theta0[1]*(np.log(stimLevel)-theta0[0])+np.log(-np.log(1-PC))
@@ -469,29 +467,29 @@ def getSlope(result, stimLevel):
 
 
     slope   = (1-theta0[2]-theta0[3])*slope
-    
+
     if result['options']['sigmoidName'][0:3]=='neg':
         slope = -slope
     return slope
-    
+
 
 def getSlopePC(result, pCorrect, unscaled = False):
-    """ 
+    """
     function slope = getSlopePC(result, pCorrect, unscaled = False)
     This function finds the slope of the psychometric function at a given
-    performance level in percent correct. 
-    
+    performance level in percent correct.
+
     result is a result dictionary from psignifit
-    
+
     pCorrrect is the proportion correct at which to evaluate the slope
-    
-    This function cannot provide credible intervals. 
+
+    This function cannot provide credible intervals.
     """
     if 'Fit' in result.keys():
         theta0 = result['Fit']
     else:
         raise ValueError('Result needs to contain a resulting fit generated by psignifit')
-        
+
 
 
     #calculate point estimate -> transform only the fit
@@ -508,13 +506,13 @@ def getSlopePC(result, pCorrect, unscaled = False):
     else:
         assert ((pCorrect > theta0[3]) & (pCorrect < (1-theta0[2]))), 'pCorrect must lay btw {:.2f} and {:.2f}'.format(theta0[3], (1-theta0[2]))
         pCorrectUnscaled = (pCorrect-theta0[3])/(1-theta0[2] - theta0[3])
-        
+
 
 
     ''' find the (normalized) stimulus level, where the given percent correct is
     reached and evaluate slope there'''
     sigName = result['options']['sigmoidName'].lower()
-    
+
     if sigName[0:3]=='neg':
         pCorrectUnscaled = 1-pCorrectUnscaled
         PC = 1-PC
@@ -537,13 +535,13 @@ def getSlopePC(result, pCorrect, unscaled = False):
     elif sigName in ['rgumbel','neg_rgumbel']:                  #reversed gumbel
         C      = np.log(-np.log(1-alpha)) - np.log(-np.log(alpha))
         stimLevel = np.log(-np.log(pCorrectUnscaled))
-        slope = -C/theta0[1]*np.exp(-np.exp(stimLevel))*np.exp(stimLevel)       
+        slope = -C/theta0[1]*np.exp(-np.exp(stimLevel))*np.exp(stimLevel)
     elif sigName in['logn', 'neg_logn']:
         C      = norminv(1-alpha) - norminv(alpha)
         stimLevel = np.exp(norminvg(pCorrectUnscaled, theta0[0]-norminvg(PC,0,theta0[1]/C), theta0[1] / C))
         normalizedStimLevel = norminv(pCorrectUnscaled)
         slopeNormalized = scipy.stats.norm.pdf(normalizedStimLevel)
-        slope = slopeNormalized *C/theta0[1]/stimLevel 
+        slope = slopeNormalized *C/theta0[1]/stimLevel
     elif sigName in ['Weibull','weibull','neg_Weibull','neg_weibull']:
         C      = np.log(-np.log(alpha)) - np.log(-np.log(1-alpha))
         stimLevel = np.exp(theta0[0]+theta0[1]/C*(np.log(-np.log(1-pCorrectUnscaled))-np.log(-np.log(1-PC))))
@@ -560,35 +558,35 @@ def getSlopePC(result, pCorrect, unscaled = False):
 
 
     slope   = (1-theta0[2]-theta0[3])*slope
-    
+
     if sigName[0:3]=='neg':
         slope = -slope
     return slope
-    
-    
+
+
 def getThreshold(result,pCorrect, unscaled=False):
     """
     function [threshold,CI] = getThreshold(result, pCorrect,unscaled)
      this function finds a threshold value for a given fit for different
      percent correct cutoffs
-    
+
      result is a result dict from psignifit
-    
+
      pCorrect is the percent correct at the threshold you want to calculate
-    
+
      unscaled is whether the percent correct you provide are for the unscaled
      sigmoid or for the one scaled by lambda and gamma. By default this
      function returns the one for the scaled sigmoid.
-    
+
      The CIs you may obtain from this are calculated based on the confidence
      intervals only, e.g. with the shallowest and the steepest psychometric
      function and may thus broaden if you move away from the standard
      threshold of unscaled sigmoid = .5 /= options['threshPC']
-    
+
      For the sigmoids in logspace this also returns values in the linear
      stimulus level domain.
-    
-    
+
+
      For a more accurate inference use the changed level of percent correct
      directly to define the threshold in the inference by setting
      options['threshPC'] and adjusting the priors.
@@ -602,16 +600,16 @@ def getThreshold(result,pCorrect, unscaled=False):
         CIs = _deepcopy(result['conf_Intervals'])
     else:
         raise ValueError('Result needs to contain confidence intervals for the fitted parameter.')
-    
+
 
     if unscaled: # set asymptotes to 0 for everything.
         theta0[2]  = 0
         theta0[3]  = 0
         CIs[2:4,:] = 0
-        
-    
+
+
     assert ((np.array(pCorrect)>theta0[3]) & (np.array(pCorrect)<(1-theta0[2]))), 'The threshold percent correct is not reached by the sigmoid!'
-        
+
     pCorrectUnscaled = (pCorrect-theta0[3])/(1-theta0[2]-theta0[3])
     alpha = result['options']['widthalpha']
     if  'threshPC' in result['options'].keys():
@@ -648,7 +646,7 @@ def getThreshold(result,pCorrect, unscaled=False):
         raise ValueError('unknown sigmoid function')
 
     """ calculate CI -> worst case in parameter confidence intervals """
-    
+
     warnings.warn('The CIs computed by this method are only upper bounds. For more accurate inference change threshPC in the options.')
     CI = np.zeros([len(result['options']['confP']),2])
     for iConfP in range(0,len(result['options']['confP'])):
@@ -692,15 +690,15 @@ def getThreshold(result,pCorrect, unscaled=False):
             CI[iConfP,1] = (t1icdf(pCorrMax)-t1icdf(PC))*thetaMax[1] / C + thetaMax[0]
         else:
              raise ValueError('unknown sigmoid function')
-        
+
         if (pCorrMin>1) | (pCorrMin<0):
             CI[iConfP,0] = np.nan
-        
+
         if (pCorrMax>1) | (pCorrMax<0):
             CI[iConfP,1] = np.nan
-            
+
     return (threshold,CI)
-    
+
 
 def biasAna(data1, data2,options):
     """ function biasAna(data1,data2,options)
@@ -713,7 +711,7 @@ def biasAna(data1, data2,options):
     options['expType'] = 'YesNo'
 
     options['priors'] = [None]*5
-    options['priors'][3] = lambda x: scipy.stats.beta.pdf(x,2,2)    
+    options['priors'][3] = lambda x: scipy.stats.beta.pdf(x,2,2)
     options['borders'][2,:] = np.array([0,.1])
     options['borders'][3,:] = np.array([.11,.89])
     options['fixedPars'] = np.ones([5,1])*np.nan
@@ -730,7 +728,7 @@ def biasAna(data1, data2,options):
 
     plot.plotPsych(resAll,showImediate=False)
     plot.plt.hold(True)
-    
+
     plot.plotPsych(res1, lineColor= [1,0,0], dataColor = [1,0,0],showImediate=False)
     plot.plotPsych(res2,lineColor= [0,0,1], dataColor = [0,0,1],showImediate=False)
     plot.plt.ylim([0,1])
@@ -739,7 +737,7 @@ def biasAna(data1, data2,options):
 
     plot.plotMarginal(resAll,dim = 0,prior = False, CIpatch = False, lineColor = [0,0,0],showImediate=False)
     plot.plt.hold(True)
-    
+
     plot.plotMarginal(res1,dim = 0,lineColor = [1,0,0],showImediate=False)
     plot.plotMarginal(res2,dim = 0,lineColor=[0,0,1],showImediate=False)
     a2.relim()
@@ -758,22 +756,22 @@ def biasAna(data1, data2,options):
 
     plot.plotMarginal(resAll,dim = 2, prior = False, CIpatch = False, lineColor = [0,0,0],showImediate=False)
     plot.plt.hold(True)
-    
+
     plot.plotMarginal(res1,dim = 2, lineColor=[1,0,0],showImediate=False)
     plot.plotMarginal(res2,dim=2, lineColor=[0,0,1],showImediate=False)
     a4.relim()
     a4.autoscale_view()
-    
+
     a5 = plot.plt.axes([0.15,0.35/6,0.75,0.5/6])
 
     plot.plotMarginal(resAll,dim = 3, prior = False, CIpatch = False, lineColor = [0,0,0],showImediate=False)
     plot.plt.hold(True)
-    
+
     plot.plotMarginal(res1,dim = 3, lineColor=[1,0,0],showImediate=False)
     plot.plotMarginal(res2,dim = 3, lineColor=[0,0,1],showImediate=False)
     a5.set_xlim([0,1])
     a5.relim()
     a5.autoscale_view()
-    
+
     plot.plt.draw()
-    
+
