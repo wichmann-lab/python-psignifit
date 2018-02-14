@@ -94,7 +94,7 @@ def psignifit(data, conf):
     stimulus_range = conf.stimulus_range
     if stimulus_range is None:
         # derive the stimulus range from the data
-        stimulus_range = (data[:,0].min(), data[:,0].max())
+        stimulus_range = (levels.min(), levels.max())
     if conf._logspace:
         # change it to logspace if needed
         stimulus_range = (np.log(stimulus_range[0]), np.log(stimulus_range[1]))
@@ -106,9 +106,9 @@ def psignifit(data, conf):
         if conf.stimulus_range is None:
             # if the stimulus range is spanned by the input data
             if conf._logspace:
-                width_min = np.diff(np.unique(np.log(data[:,0]))).min()
+                width_min = np.diff(np.unique(np.log(levels))).min()
             else:
-                width_min = np.diff(np.unique(data[:,0])).min()
+                width_min = np.diff(np.unique(levels)).min()
         else:
             # if the stimulus range was set manually, we can not derive width_min
             # from the data, so we will instead use a very conservative estimate,
