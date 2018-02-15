@@ -63,6 +63,7 @@ def peta(x, k):
     A Beta distribution, wit parameters 1 and k."""
     scipy.special.beta.pdf(x, 1, k)
 
+
 def checkPriors(data,options):
     """
     this runs a short test whether the provided priors are functional
@@ -76,15 +77,15 @@ def checkPriors(data,options):
 
     if options['logspace'] :
         data[:,0] = np.log(data[:,0])
-    
-    """ on threshold 
-    values chosen according to standard boarders 
+
+    """ on threshold
+    values chosen according to standard boarders
     at the borders it may be 0 -> a little inwards """
     data_min = np.min(data[:,0])
     data_max = np.max(data[:,0])
     dataspread = data_max - data_min
     testValues = np.linspace(data_min - .4*dataspread, data_max + .4*dataspread, 25)
-    
+
     testResult = options['priors'][0](testValues)
 
     testForWarnings(testResult, "the threshold")
@@ -93,77 +94,41 @@ def checkPriors(data,options):
     """
     testValues = np.linspace(1.1*np.min(np.diff(np.sort(np.unique(data[:,0])))), 2.9*dataspread, 25)
     testResult = options['priors'][1](testValues)
-    
+
     testForWarnings(testResult, "the width")
-    
+
     """ on lambda
     values 0 to .9
     """
     testValues = np.linspace(0.0001,.9,25)
     testResult = options['priors'][2](testValues)
-    
+
     testForWarnings(testResult, "lambda")
-    
+
     """ on gamma
     values 0 to .9
     """
     testValues = np.linspace(0.0001,.9,25)
     testResult = options['priors'][3](testValues)
-    
+
     testForWarnings(testResult, "gamma")
-    
+
     """ on eta
     values 0 to .9
     """
     testValues = np.linspace(0,.9,25)
     testResult = options['priors'][4](testValues)
-    
-    testForWarnings(testResult, "eta")    
-   
-    
+
+    testForWarnings(testResult, "eta")
+
+
 def testForWarnings(testResult, parameter):
-    
+
     assert all(np.isfinite(testResult)), "the prior you provided for %s returns non-finite values" %parameter
     assert all(testResult >= 0), "the prior you provided for %s returns negative values" % parameter
 
     if any(testResult == 0):
         warnings.warn("the prior you provided for %s returns zeros" % parameter)
 
-def normalizeFunction(func, integral):
-        
-    l = lambda x: func(x)/integral
-    return l
-
-def normalizePriors(options):
-    """ 
-    normalization of given priors
-    function Priors=normalizePriors(options)
-    This function normalizes the priors from the given options dict, to
-    obtain normalized priors.
-    This normalization makes later computations for the Bayesfactor and
-    plotting of the prior easier.
-
-     This should be run with the original borders to obtain the correct
-     normalization
-     
-    """
-    
-    priors = []
-
-    for idx in range(0,len(options['priors'])):
-        if options['borders'][idx][1] > options['borders'][idx][0]:
-            #choose xValues for calculation of the integral
-            x = np.linspace(options['borders'][idx][0], options['borders'][idx][1], 1000)
-            # evaluate unnormalized prior
-            y = options['priors'][idx](x)
-            w = np.convolve(np.diff(x), np.array([.5,.5]))
-            integral = sum(y[:]*w[:])
-            func = options['priors'][idx]
-            priors.append(normalizeFunction(func,integral))
-        else:
-            priors.append(lambda x: np.ones_like(x,dtype='float'))
-    
-    return priors
-    
 
 
