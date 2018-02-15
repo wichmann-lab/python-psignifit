@@ -94,7 +94,7 @@ def fill_kwargs(kw_args, values):
 
 def strToDim(string):
     """
-    Finds the number corresponding to a dim/parameter given as a string. 
+    Finds the number corresponding to a dim/parameter given as a string.
     """
     s = string.lower()
     if s in ['threshold','thresh','m','t','alpha', '0']:    return 0,'Threshold'
