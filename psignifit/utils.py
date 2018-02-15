@@ -25,6 +25,21 @@ t1icdf = scipy.stats.t(1).ppf
 class PsignifitException(Exception):
     pass
 
+def normalize(func, interval, steps=10000):
+    """
+    Return a normalized function, which has integral 1 within the interval.
+
+    - `func` is a vectorized function that takes one single argument
+    - `interval` is a tuple (lo, hi)
+
+    Intregration is done using the composite trapezoidal rule.
+    """
+    x = np.linspace(interval[0], interval[1], steps)
+    integral = np.trapz(func(x), x=x)
+    def nfunc(y):
+        return func(y)/integral
+    return nfunc
+
 def pool_data(data, xtol=0, max_gap=np.inf, max_length=np.inf):
     """
     Pool trials together which differ at maximum pool_xtol from the first one
