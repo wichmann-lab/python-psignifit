@@ -181,11 +181,12 @@ You can force acceptance of your blocks by increasing conf.pool_max_blocks""")
     if conf.borders is not None:
         borders.update(conf.borders)
 
-    border_idx = np.where(np.isnan(options['fixedPars']) == False);
-    print(border_idx)
-    if (border_idx[0].size > 0):
-        options['borders'][border_idx[0],0] = options['fixedPars'][border_idx[0]]
-        options['borders'][border_idx[0],1] = options['fixedPars'][border_idx[0]]
+    # XXX FIXME: take care of fixed parameters later!
+    # border_idx = np.where(np.isnan(options['fixedPars']) == False);
+    # print(border_idx)
+    # if (border_idx[0].size > 0):
+        # options['borders'][border_idx[0],0] = options['fixedPars'][border_idx[0]]
+        # options['borders'][border_idx[0],1] = options['fixedPars'][border_idx[0]]
 
     # normalize priors to first choice of borders
     for parameter, prior in priors.items():
