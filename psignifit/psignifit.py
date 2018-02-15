@@ -13,7 +13,8 @@ import scipy
 from . import priors
 from . import likelihood as _l
 from . import borders as _b
-from .utils import norminv, norminvg, t1icdf, pool_data, PsignifitException
+from .utils import (norminv, norminvg, t1icdf, pool_data,
+                    PsignifitException, normalize)
 
 from .gridSetting import gridSetting
 from .getWeights import getWeights
@@ -187,7 +188,9 @@ You can force acceptance of your blocks by increasing conf.pool_max_blocks""")
         options['borders'][border_idx[0],1] = options['fixedPars'][border_idx[0]]
 
     # normalize priors to first choice of borders
-    options['priors'] = _p.normalizePriors(options)
+    for parameter, prior in priors.items():
+        priors[parameter] = normalize(prior, borders[parameter])
+
     if options['moveBorders']:
         options['borders'] = _b.moveBorders(data, options)
 
