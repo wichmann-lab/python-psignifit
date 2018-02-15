@@ -1,6 +1,7 @@
 import pytest
 
 from psignifit import conf
+from psignifit.utils import PsignifitException
 
 def test_setting_valid_option():
     c = conf.Conf()
@@ -11,11 +12,11 @@ def test_setting_valid_option():
     assert c.verbose == 20
 
 def test_setting_invalid_option():
-    with pytest.raises(conf.PsignifitConfException):
+    with pytest.raises(PsignifitException):
         c = conf.Conf()
         c.foobar = 10
     # assignment shortcut
-    with pytest.raises(conf.PsignifitConfException):
+    with pytest.raises(PsignifitException):
         c = conf.Conf(foobar=10)
 
 def test_setting_nonkw_argument():
@@ -29,7 +30,7 @@ def test_check_option():
     # add a check for the fake option
     def check_foobar(self, value):
         if value > 10:
-            raise conf.PsignifitConfException
+            raise PsignifitException
     B.check_foobar = check_foobar
     # instantiate the new conf
     c = B()
@@ -37,7 +38,7 @@ def test_check_option():
     c.foobar = 10
     assert c.foobar == 10
     # try going out of range and catch the resulting exception
-    with pytest.raises(conf.PsignifitConfException):
+    with pytest.raises(PsignifitException):
         c.foobar = 11
 
 def test_repr():
@@ -58,36 +59,39 @@ def test_private_attr():
     assert str(c).find('_foobar: 10') == -1
 
 def test_set_wrong_experiment_type():
-    with pytest.raises(conf.PsignifitConfException):
+    with pytest.raises(PsignifitException):
         conf.Conf(experiment_type = 'foobar')
 
 def test_set_borders_with_nondict():
-    with pytest.raises(conf.PsignifitConfException):
+    with pytest.raises(PsignifitException):
         conf.Conf(borders = (1, 2, 3))
 
+def test_set_borders_with_wrong_key():
+    raise Exception
+
 def test_set_wrong_sigmoid():
-    with pytest.raises(conf.PsignifitConfException):
+    with pytest.raises(PsignifitException):
         conf.Conf(sigmoid='foobaro')
 
 def test_set_stimulus_range_wrong_type():
-    with pytest.raises(conf.PsignifitConfException):
+    with pytest.raises(PsignifitException):
         conf.Conf(stimulus_range=10)
 
 def test_set_stimulus_range_wrong_length():
-    with pytest.raises(conf.PsignifitConfException):
+    with pytest.raises(PsignifitException):
         conf.Conf(stimulus_range=(1,2,3))
 
 def test_set_width_alpha_wrong_type():
-    with pytest.raises(conf.PsignifitConfException):
+    with pytest.raises(PsignifitException):
         conf.Conf(width_alpha=(1,2,3))
 
 def test_set_width_alpha_wrong_range():
-    with pytest.raises(conf.PsignifitConfException):
+    with pytest.raises(PsignifitException):
         conf.Conf(width_alpha=1.2)
-    with pytest.raises(conf.PsignifitConfException):
+    with pytest.raises(PsignifitException):
         conf.Conf(width_alpha=-1)
 
 def test_set_width_min_wrong_type():
-    with pytest.raises(conf.PsignifitConfException):
+    with pytest.raises(PsignifitException):
         conf.Conf(width_min=(1,2,3))
 

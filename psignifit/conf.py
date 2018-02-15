@@ -4,10 +4,9 @@ import re
 
 import numpy as np
 
+from .utils import PsignifitException
 from . import sigmoids
 
-class PsignifitConfException(Exception):
-    pass
 
 class Conf:
     """The basic configuration object for psignifit.
@@ -15,7 +14,7 @@ class Conf:
     This class contains a set of valid options and the corresponding sanity
     checks.
 
-    It raises `PsignifitConfException` if an invalid option is specified or
+    It raises `PsignifitException` if an invalid option is specified or
     if a valid option is specified with a value outside of the allowed range.
 
     Note: attributes and methods starting with `_` are considered private and
@@ -24,7 +23,7 @@ class Conf:
     Note for the developer: if you want to add a new valid option `foobar`,
     expand the `Conf.valid_opts` tuple (in alphabetical order) and add any
     check in a newly defined method `def check_foobar(self, value)`, which
-    raises `PsignifitConfException` if `value` is outside of the accepted range
+    raises `PsignifitException` if `value` is outside of the accepted range
     for `foobar`.
     """
     # set of valid options for psignifit. Add new attributes to this tuple
@@ -106,12 +105,12 @@ class Conf:
                 getattr(self, 'check_'+name)(value)
             super().__setattr__(name, value)
         else:
-            raise PsignifitConfException(f'Invalid option "{name}"!')
+            raise PsignifitException(f'Invalid option "{name}"!')
 
     # template for an option checking method
     # def check_foobar(self, value):
     #    if value > 10:
-    #       raise PsignifitConfException(f'Foobar must be < 10: {value} given!')
+    #       raise PsignifitException(f'Foobar must be < 10: {value} given!')
 
     def __repr__(self):
         # give an nice string representation of ourselves
@@ -124,19 +123,19 @@ class Conf:
 
     def check_borders(self, value):
         if value is not None:
-            # borders is a dictionary in the form {'parameter_name': (left, right)}
+            # borders is a dict in the form {'parameter_name': (left, right)}
             if type(value) != dict:
-                raise PsignifitConfException(
-f'Option borders must be a dictionary ({type(value).__name__} given)!')
+                raise PsignifitException(
+         f'Option borders must be a dictionary ({type(value).__name__} given)!')
 
 
     def check_experiment_type(self, value):
         cond1 = value in ('yes/no', 'equal asymptote')
         cond2 = re.match('[0-9]AFC', value)
         if not (cond1 or cond2):
-            raise PsignifitConfException(
-f"""Invalid experiment type: "{value}"
-Valid types: "yes/no", "equal asymptote", "2AFC", "3AFC", etc...""")
+            raise PsignifitException(
+        f'Invalid experiment type: "{value}"\nValid types: "yes/no",'+
+         ' "equal asymptote", "2AFC", "3AFC", etc...')
 
         self.steps = [40,40,20,20,20] if value=='yes/no' else [40,40,20,1,20]
         self.steps_moving_borders = [25,30, 10,10,15] if value=='YesNo' else [30,40,10,1,20]
@@ -145,7 +144,7 @@ Valid types: "yes/no", "equal asymptote", "2AFC", "3AFC", etc...""")
         cond1 = value in dir(sigmoids)
         cond2 = value.startswith('_') or value.startswith('my_')
         if (not cond1) or (cond2):
-            raise PsignifitConfException(f'Invalid sigmoid: "{value}"!')
+            raise PsignifitException(f'Invalid sigmoid: "{value}"!')
         # set logspace when appropriate
         if value in ('weibull', 'logn', 'neg_weibull', 'neg_logn'):
             self._logspace = True
@@ -165,8 +164,8 @@ Valid types: "yes/no", "equal asymptote", "2AFC", "3AFC", etc...""")
             except TypeError:
                 wrong_type = True
             if wrong_type or len_ != 2:
-                raise PsignifitConfException(
-f"""Option stimulus range must be a sequence of two items!""")
+                raise PsignifitException(
+                  f"Option stimulus range must be a sequence of two items!")
 
     def check_width_alpha(self, value):
         try:
@@ -176,15 +175,15 @@ f"""Option stimulus range must be a sequence of two items!""")
         except Exception:
             wrong_type = True
         if wrong_type or not ( 0 < diff < 1):
-            raise PsignifitConfException(
-f"""Option width_alpha must be between 0 and 1 ({value} given)!""")
+            raise PsignifitException(
+             f"Option width_alpha must be between 0 and 1 ({value} given)!")
 
     def check_width_min(self, value):
         if value:
             try:
                 _ = value + 1
             except Exception:
-                raise PsignifitConfException("Option width_min must be a number")
+                raise PsignifitException("Option width_min must be a number")
 
 
 
