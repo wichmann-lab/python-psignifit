@@ -84,8 +84,6 @@ def moveBorders(data,options):
 
 
     MBresult['weight'] = getWeights(MBresult['X1D'])
-    #kwargs = {'alpha': None, 'beta':None , 'lambda': None,'gamma':None , 'varscale':None }
-    #fill_kwargs(kwargs,MBresult['X1D'])
     MBresult['Posterior'] = likelihood(data, options, MBresult['X1D'])[0]
     integral = sum(np.reshape(MBresult['Posterior'], -1) * np.reshape(MBresult['weight'], -1))
     MBresult['Posterior'] /= integral
