@@ -21,6 +21,10 @@ normcdf = scipy.stats.norm.cdf
 t1cdf = scipy.stats.t(1).cdf
 t1icdf = scipy.stats.t(1).ppf
 
+# our own Exception class
+class PsignifitException(Exception):
+    pass
+
 def pool_data(data, xtol=0, max_gap=np.inf, max_length=np.inf):
     """
     Pool trials together which differ at maximum pool_xtol from the first one

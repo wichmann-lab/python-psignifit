@@ -13,7 +13,7 @@ import scipy
 from . import priors
 from . import likelihood as _l
 from . import borders as _b
-from .utils import norminv, norminvg, t1icdf, pool_data
+from .utils import norminv, norminvg, t1icdf, pool_data, PsignifitException
 
 from .gridSetting import gridSetting
 from .getWeights import getWeights
@@ -25,11 +25,6 @@ from .getSigmoidHandle import getSigmoidHandle
 from . import psigniplot as plot
 
 
-# our own Exception class
-class PsignifitException(Exception):
-    pass
-
-def psignifit(data, conf):
     """
     main function for fitting psychometric functions
     function result=psignifit(data,options)
