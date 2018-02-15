@@ -127,7 +127,20 @@ class Conf:
             if type(value) != dict:
                 raise PsignifitException(
          f'Option borders must be a dictionary ({type(value).__name__} given)!')
-
+            # now check that the keys in the dictionary are valid
+            vkeys = {'threshold', 'width', 'lambda', 'gamma', 'eta'}
+            if vkeys < set(value.keys()):
+                raise PsignifitException(
+         f'Option borders keys must be in {vkeys}. Given {list(value.keys())}!')
+            # now check that the values are sequences of length 2
+            for v in value.values():
+                try:
+                    correct_length = (len(v) == 2)
+                except Exception:
+                    correct_length = False
+                if not correct_length:
+                    raise PsignifitException(
+                           f'Borders must be a sequence of 2 items: {v} given!')
 
     def check_experiment_type(self, value):
         cond1 = value in ('yes/no', 'equal asymptote')

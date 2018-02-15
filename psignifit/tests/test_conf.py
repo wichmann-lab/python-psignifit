@@ -67,7 +67,16 @@ def test_set_borders_with_nondict():
         Conf(borders = (1, 2, 3))
 
 def test_set_borders_with_wrong_key():
-    raise Exception
+    with pytest.raises(PsignifitException):
+        Conf(borders={'foo': 'bar'})
+
+def test_set_borders_with_wrong_value1():
+    with pytest.raises(PsignifitException):
+        Conf(borders={'threshold': 10})
+
+def test_set_borders_with_wrong_value2():
+    with pytest.raises(PsignifitException):
+        Conf(borders={'threshold': (1,2,3)})
 
 def test_set_wrong_sigmoid():
     with pytest.raises(PsignifitException):
