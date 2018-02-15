@@ -192,44 +192,44 @@ You can force acceptance of your blocks by increasing conf.pool_max_blocks""")
     for parameter, prior in priors.items():
         priors[parameter] = normalize(prior, borders[parameter])
 
-    if options['moveBorders']:
-        options['borders'] = _b.moveBorders(data, options)
+    # XXX FIXME: take care later of moving borders
+    # if options['moveBorders']:
+        # options['borders'] = _b.moveBorders(data, options)
 
-    ''' core '''
-    result = psignifitCore(data,options)
+    # core
+    #result = psignifitCore(data,options)
 
-    ''' after processing '''
-    # check that the marginals go to nearly 0 at the borders of the grid
-    if options['verbose'] > -5:
+    # XXX FIXME: take care of post-ptocessing later
+    # ''' after processing '''
+    # # check that the marginals go to nearly 0 at the borders of the grid
+    # if options['verbose'] > -5:
 
-        if result['marginals'][0][0] * result['marginalsW'][0][0] > .001:
-            warnings.warn('psignifit:borderWarning\n'\
-                'The marginal for the threshold is not near 0 at the lower border.\n'\
-                'This indicates that smaller Thresholds would be possible.')
-        if result['marginals'][0][-1] * result['marginalsW'][0][-1] > .001:
-            warnings.warn('psignifit:borderWarning\n'\
-                'The marginal for the threshold is not near 0 at the upper border.\n'\
-                'This indicates that your data is not sufficient to exclude much higher thresholds.\n'\
-                'Refer to the paper or the manual for more info on this topic.')
-        if result['marginals'][1][0] * result['marginalsW'][1][0] > .001:
-            warnings.warn('psignifit:borderWarning\n'\
-                'The marginal for the width is not near 0 at the lower border.\n'\
-                'This indicates that your data is not sufficient to exclude much lower widths.\n'\
-                'Refer to the paper or the manual for more info on this topic.')
-        if result['marginals'][1][-1] * result['marginalsW'][1][-1] > .001:
-            warnings.warn('psignifit:borderWarning\n'\
-                'The marginal for the width is not near 0 at the lower border.\n'\
-                'This indicates that your data is not sufficient to exclude much higher widths.\n'\
-                'Refer to the paper or the manual for more info on this topic.')
+        # if result['marginals'][0][0] * result['marginalsW'][0][0] > .001:
+            # warnings.warn('psignifit:borderWarning\n'\
+                # 'The marginal for the threshold is not near 0 at the lower border.\n'\
+                # 'This indicates that smaller Thresholds would be possible.')
+        # if result['marginals'][0][-1] * result['marginalsW'][0][-1] > .001:
+            # warnings.warn('psignifit:borderWarning\n'\
+                # 'The marginal for the threshold is not near 0 at the upper border.\n'\
+                # 'This indicates that your data is not sufficient to exclude much higher thresholds.\n'\
+                # 'Refer to the paper or the manual for more info on this topic.')
+        # if result['marginals'][1][0] * result['marginalsW'][1][0] > .001:
+            # warnings.warn('psignifit:borderWarning\n'\
+                # 'The marginal for the width is not near 0 at the lower border.\n'\
+                # 'This indicates that your data is not sufficient to exclude much lower widths.\n'\
+                # 'Refer to the paper or the manual for more info on this topic.')
+        # if result['marginals'][1][-1] * result['marginalsW'][1][-1] > .001:
+            # warnings.warn('psignifit:borderWarning\n'\
+                # 'The marginal for the width is not near 0 at the lower border.\n'\
+                # 'This indicates that your data is not sufficient to exclude much higher widths.\n'\
+                # 'Refer to the paper or the manual for more info on this topic.')
 
-    result['timestamp'] = _dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    # result['timestamp'] = _dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    if options['instantPlot']:
-        plot.plotPsych(result)
+    # if options['instantPlot']:
+        # plot.plotPsych(result)
 
-
-
-    return result
+    return
 
 def psignifitFast(data,options):
     """
