@@ -5,6 +5,89 @@ import scipy.special as sp
 
 from . import sigmoids
 
+def log_likelihood(data, sigmoid=None, priors=None, grid=None):
+
+    thres = grid['threshold']
+    width = grid['width']
+    lambd = grid['lambda']
+    gamma = grid['gamma']
+    if grid['eta'] is None:
+        v = None
+        thres, width, lambd, gamma = np.meshgrid(thres, width, lambd, gamma,
+                                                 copy=False)
+    else:
+        eta = grid['eta']**2 # use variance instead of standard deviation
+        eta = eta[eta > 1e-09] # for smaller variance we use the binomial model
+        v = 1/eta - 1
+        thres, width, lambd, gamma, v = np.meshgrid(thres, width, lambd, gamma,
+                                                    v, copy=False)
+
+
+    levels = data[:,0]
+    ncorrect = data[:,1]
+    ntrials = data[:,2]
+
+    scale = 1 - gamma - lamb
+    ###FIXME: handle the case with equal_asymptote
+
+    pbin = 0
+    p = 0
+    for i in range(len(levels)):
+        x = levels[i]
+        # average predicted probability of correct
+        psi = sigmoid(x, thres, width)*scale + gamma
+        n = ntrials[i]
+        k = ncorrect[i]
+        if (k < n) and (k != 0):
+            ### FIXME following needed?
+            np.clip(psi, 1e-200, None, out=psi)
+            psi_r = 1-psi
+            ### FIXME following needed?
+            np.clip(psi_r, 1e-200, None, out=psi_r)
+            pbin += k*np.log(psi) + (n-k)*np.log(psi_r)
+            if v is not None:
+                a = psi*v
+                b = (1-psi)*v
+                p += ( sp.gammaln(k+a) + sp.gammaln(n-k+b) - sp.gammaln(n+v) -
+                        sp.gammaln(a) - sp.gammaln(b) + sp.gammaln(v))
+        elif (k == n) and (k != 0):
+            ###FIXME following needed?
+            np.clip(psi, 1e-200, None, out=psi)
+            pbin += k * np.log(psi)
+            if v is not None:
+                a = psi*v
+                p += (sp.gammaln(k+a) - sp.gammaln(n+v) - sp.gammaln(a) +
+                      sp.gammaln(v))
+        elif k == 0:
+            ###FIXME: what is 'k' doing in this equation???
+            pbin += pbin + (n-k) * np.log(1-psi)
+            if v is not None:
+                b = (1-psi)*v
+                p += (sp.gammaln(n-k+b) - sp.gammaln(n+v) - sp.gammaln(b) +
+                      sp.gammaln(v))
+        else:
+            # this is n==0, i.e. no trials done at this stimulus level
+            pass
+    ###TODO: go on to fix the value of p!!!!
+    ### FIXME do not understand this...
+    # concatenate pbin and p on the 4th axis (v), (what is sum(vbinom)???)
+    # tile is trying to create a grid again?
+    p = np.concatenate((np.tile(pbin, [1,1,1,1,np.sum(vbinom)]),p), axis=4)
+
+    # add priors on the corresponding axis
+    ### FIXME:
+    # axis should be correct already because of meshgrid? waste of time and memory?
+    p += np.log(priors['threshold'](thres))
+    p += np.log(priors['width'](width))
+    p += np.log(priors['lambd'](lambd))
+    ### FIXME equal asymptote case not contemplated here
+    p += np.log(priors['gamma'](gamma))
+    ### FIXME we need the original eta, but in the meshgrid form...
+    p += np.log(priors['eta'](XXX))
+    return p
+
+
+
 def likelihood(data, options, args):
     """
     Calculates the (normalized) likelihood for the data from given parameters
