@@ -39,6 +39,7 @@ class Conf:
              'fixed_parameters',
              'grid_eval',
              'grid_set_type',
+             'grid_steps',
              'instant_plot',
              'max_border_value',
              'move_borders',
@@ -49,7 +50,6 @@ class Conf:
              'pool_xtol',
              'priors',
              'sigmoid',
-             'steps',
              'steps_moving_borders',
              'stimulus_range',
              'thresh_PC',
@@ -75,6 +75,7 @@ class Conf:
         self.fixed_parameters = None
         self.grid_eval = None
         self.grid_set_type = 'cumDist'
+        self.grid_steps = None
         self.instant_plot = False
         self.max_border_value = 1e-05
         self.move_borders = True
@@ -165,8 +166,30 @@ f'Option fixed_parameters must be a dictionary ({type(value).__name__} given)!')
         f'Invalid experiment type: "{value}"\nValid types: "yes/no",'+
          ' "equal asymptote", "2AFC", "3AFC", etc...')
 
-        self.steps = [40,40,20,20,20] if value=='yes/no' else [40,40,20,1,20]
-        self.steps_moving_borders = [25,30, 10,10,15] if value=='YesNo' else [30,40,10,1,20]
+        self.grid_steps = {param: None for param in self.parameters}
+        self.steps_moving_borders = {param: None for param in self.parameters}
+        if value 'yes/no':
+            self.grid_steps['threshold'] = 40
+            self.grid_steps['width'] = 40
+            self.grid_steps['lambda'] = 20
+            self.grid_steps['gamma'] = 20
+            self.grid_steps['eta'] = 20
+            self.steps_moving_borders['threshold'] = 25
+            self.steps_moving_borders['width'] = 30
+            self.steps_moving_borders['lambda'] = 10
+            self.steps_moving_borders['gamma'] = 10
+            self.steps_moving_borders['eta'] = 15
+        else:
+            self.grid_steps['threshold'] = 40
+            self.grid_steps['width'] = 40
+            self.grid_steps['lambda'] = 20
+            self.grid_steps['gamma'] = 1
+            self.grid_steps['eta'] = 20
+            self.steps_moving_borders['threshold'] = 30
+            self.steps_moving_borders['width'] = 40
+            self.steps_moving_borders['lambda'] = 10
+            self.steps_moving_borders['gamma'] = 1
+            self.steps_moving_borders['eta'] = 20
 
     def check_sigmoid(self, value):
         cond1 = value in dir(sigmoids)
