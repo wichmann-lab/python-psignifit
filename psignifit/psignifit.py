@@ -11,6 +11,7 @@ from copy import deepcopy as _deepcopy
 import scipy
 
 from . import priors
+from . import sigmoids
 from . import likelihood as _l
 from . import borders as _b
 from .utils import (norminv, norminvg, t1icdf, pool_data,
@@ -199,6 +200,21 @@ You can force acceptance of your blocks by increasing conf.pool_max_blocks""")
     # core
     #result = psignifitCore(data,options)
 
+    # create a linear grid
+    grid = {}
+    for param in borders:
+        if borders[param] is None:
+            grid[param] == None
+        else:
+            grid[param] = np.linspace(*borders[param], num=conf.grid_steps[param])
+
+    # sigmoid
+    sigmoid = getattr(sigmoids, conf.sigmoid)
+    # fix thresh_PC and width_alpha parameters for the sigmoid
+    sigmoid = functools.partial(sigmoid, PC=conf.thresh_PC, alpha=conf.width_alpha)
+
+
+    results = _l.likelihood(data, options, grid)
     # XXX FIXME: take care of post-ptocessing later
     # ''' after processing '''
     # # check that the marginals go to nearly 0 at the borders of the grid
