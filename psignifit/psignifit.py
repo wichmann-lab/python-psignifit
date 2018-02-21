@@ -11,6 +11,7 @@ from copy import deepcopy as _deepcopy
 import scipy
 
 from . import priors
+from . import conf
 from . import sigmoids
 from . import likelihood as _l
 from . import borders as _b
@@ -27,6 +28,7 @@ from .getSigmoidHandle import getSigmoidHandle
 from . import psigniplot as plot
 
 
+def psignifit(data, conf=None, **kwargs):
     """
     main function for fitting psychometric functions
     function result=psignifit(data,options)
@@ -45,6 +47,13 @@ from . import psigniplot as plot
 
     To get an introduction to basic usage start with demo001
     """
+    if conf is None:
+        conf = conf.Conf(**kwargs)
+    elif len(kwargs) > 0:
+        # user shouldn't specify a conf object *and* kwargs simultaneously
+        raise PsignifitException(
+        "Can't handle conf together with other keyword arguments!")
+
     verbose = conf.verbose
 
     data = np.asarray(data, dtype=float)
