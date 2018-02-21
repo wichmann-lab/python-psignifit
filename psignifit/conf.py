@@ -36,12 +36,13 @@ class Conf:
              'estimate_type',
              'experiment_type',
              'fast_optim',
-             'fixed_pars',
+             'fixed_parameters',
              'grid_eval',
              'grid_set_type',
              'instant_plot',
              'max_border_value',
              'move_borders',
+             'parameters',
              'pool_max_blocks',
              'pool_max_gap',
              'pool_max_length',
@@ -71,7 +72,7 @@ class Conf:
         self.estimate_type = 'MAP'
         self.experiment_type = 'yes/no'
         self.fast_optim = False
-        self.fixed_pars = (None, )*5
+        self.fixed_parameters = None
         self.grid_eval = None
         self.grid_set_type = 'cumDist'
         self.instant_plot = False
@@ -81,6 +82,7 @@ class Conf:
         self.pool_max_gap = np.inf
         self.pool_max_length = np.inf
         self.pool_xtol = 0
+        self.parameters = {'threshold', 'width', 'lambda', 'gamma', 'eta'}
         self.priors = None
         self.sigmoid = 'norm'
         self.stimulus_range = None
@@ -128,7 +130,7 @@ class Conf:
                 raise PsignifitException(
          f'Option borders must be a dictionary ({type(value).__name__} given)!')
             # now check that the keys in the dictionary are valid
-            vkeys = {'threshold', 'width', 'lambda', 'gamma', 'eta'}
+            vkeys = self.parameters
             if vkeys < set(value.keys()):
                 raise PsignifitException(
          f'Option borders keys must be in {vkeys}. Given {list(value.keys())}!')
@@ -141,6 +143,19 @@ class Conf:
                 if not correct_length:
                     raise PsignifitException(
                            f'Borders must be a sequence of 2 items: {v} given!')
+
+    def check_fixed_parameters(self, value):
+        if value is not None:
+            # fixed parameters is a dict in the form {'parameter_name': value}
+            if type(value) != dict:
+                raise PsignifitException(
+f'Option fixed_parameters must be a dictionary ({type(value).__name__} given)!')
+            # now check that the keys in the dictionary are valid
+            vkeys = self.parameters
+            if vkeys < set(value.keys()):
+                raise PsignifitException(
+ f'Option fixed_paramters keys must be in {vkeys}. Given {list(value.keys())}!')
+
 
     def check_experiment_type(self, value):
         cond1 = value in ('yes/no', 'equal asymptote')
