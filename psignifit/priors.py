@@ -61,7 +61,7 @@ def peta(x, k):
     """Default prior for overdispersion
 
     A Beta distribution, wit parameters 1 and k."""
-    return scipy.special.beta.pdf(x, 1, k)
+    return scipy.stats.beta.pdf(x, 1, k)
 
 
 def checkPriors(data,options):
