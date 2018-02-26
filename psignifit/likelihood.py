@@ -27,7 +27,7 @@ def log_likelihood(data, sigmoid=None, priors=None, grid=None):
     ncorrect = data[:,1]
     ntrials = data[:,2]
 
-    scale = 1 - gamma - lamb
+    scale = 1 - gamma - lambd
     ###FIXME: handle the case with equal_asymptote
 
     pbin = 0
@@ -79,7 +79,7 @@ def log_likelihood(data, sigmoid=None, priors=None, grid=None):
     # axis should be correct already because of meshgrid? waste of time and memory?
     p += np.log(priors['threshold'](thres))
     p += np.log(priors['width'](width))
-    p += np.log(priors['lambd'](lambd))
+    p += np.log(priors['lambda'](lambd))
     ### FIXME equal asymptote case not contemplated here
     p += np.log(priors['gamma'](gamma))
     ### FIXME we need the original eta, but in the meshgrid form...
