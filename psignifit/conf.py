@@ -63,6 +63,7 @@ class Conf:
         # we only allow keyword arguments
         # set private attributes defaults
         self._logspace = False
+        self._parameters = {'threshold', 'width', 'lambda', 'gamma', 'eta'}
 
         # set public defaults
         self.beta_prior = 10
@@ -83,7 +84,6 @@ class Conf:
         self.pool_max_gap = np.inf
         self.pool_max_length = np.inf
         self.pool_xtol = 0
-        self.parameters = {'threshold', 'width', 'lambda', 'gamma', 'eta'}
         self.priors = None
         self.sigmoid = 'norm'
         self.stimulus_range = None
@@ -131,7 +131,7 @@ class Conf:
                 raise PsignifitException(
          f'Option borders must be a dictionary ({type(value).__name__} given)!')
             # now check that the keys in the dictionary are valid
-            vkeys = self.parameters
+            vkeys = self._parameters
             if vkeys < set(value.keys()):
                 raise PsignifitException(
          f'Option borders keys must be in {vkeys}. Given {list(value.keys())}!')
@@ -152,7 +152,7 @@ class Conf:
                 raise PsignifitException(
 f'Option fixed_parameters must be a dictionary ({type(value).__name__} given)!')
             # now check that the keys in the dictionary are valid
-            vkeys = self.parameters
+            vkeys = self._parameters
             if vkeys < set(value.keys()):
                 raise PsignifitException(
  f'Option fixed_paramters keys must be in {vkeys}. Given {list(value.keys())}!')
@@ -166,8 +166,8 @@ f'Option fixed_parameters must be a dictionary ({type(value).__name__} given)!')
         f'Invalid experiment type: "{value}"\nValid types: "yes/no",'+
          ' "equal asymptote", "2AFC", "3AFC", etc...')
 
-        self.grid_steps = {param: None for param in self.parameters}
-        self.steps_moving_borders = {param: None for param in self.parameters}
+        self.grid_steps = {param: None for param in self._parameters}
+        self.steps_moving_borders = {param: None for param in self._parameters}
         if value == 'yes/no':
             self.grid_steps['threshold'] = 40
             self.grid_steps['width'] = 40
