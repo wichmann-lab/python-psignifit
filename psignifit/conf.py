@@ -168,7 +168,7 @@ f'Option fixed_parameters must be a dictionary ({type(value).__name__} given)!')
 
         self.grid_steps = {param: None for param in self.parameters}
         self.steps_moving_borders = {param: None for param in self.parameters}
-        if value 'yes/no':
+        if value == 'yes/no':
             self.grid_steps['threshold'] = 40
             self.grid_steps['width'] = 40
             self.grid_steps['lambda'] = 20
