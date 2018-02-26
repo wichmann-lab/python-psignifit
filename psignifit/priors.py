@@ -49,19 +49,19 @@ def plambda(x):
     """Default prior for the lapse rate
 
     A Beta distribution, wit parameters 1 and 10."""
-    scipy.stats.beta.pdf(x, 1, 10)
+    return scipy.stats.beta.pdf(x, 1, 10)
 
 def pgamma(x):
     """Default prior for the guess rate
 
     A Beta distribution, wit parameters 1 and 10."""
-    scipy.stats.beta.pdf(x, 1, 10)
+    return scipy.stats.beta.pdf(x, 1, 10)
 
 def peta(x, k):
     """Default prior for overdispersion
 
     A Beta distribution, wit parameters 1 and k."""
-    scipy.special.beta.pdf(x, 1, k)
+    return scipy.special.beta.pdf(x, 1, k)
 
 
 def checkPriors(data,options):
