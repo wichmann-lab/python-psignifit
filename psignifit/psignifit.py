@@ -10,7 +10,7 @@ import warnings
 from copy import deepcopy as _deepcopy
 import scipy
 
-from . import priors
+from . import priors as _priors
 from .conf import Conf
 from . import sigmoids
 from . import likelihood as _l
@@ -141,13 +141,13 @@ def psignifit(data, conf=None, **kwargs):
     width_alpha = conf.width_alpha
     if conf.priors is None:
         priors = {
-        'threshold': partial(priors.threshold, st_range=stimulus_range),
-        'width': partial(priors.pwidth, wmin=width_min,
+        'threshold': partial(_priors.pthreshold, st_range=stimulus_range),
+        'width': partial(_priors.pwidth, wmin=width_min,
                                         wmax=stimulus_range[1]-stimulus_range[0],
                                         alpha=width_alpha),
-        'lambda': priors.plambda,
-        'gamma': priors.pgamma,
-        'eta' : partial(priors.peta, k=conf.beta_prior),
+        'lambda': _priors.plambda,
+        'gamma': _priors.pgamma,
+        'eta' : partial(_priors.peta, k=conf.beta_prior),
         }
     else:
         # will take care of user-specified priors later!
