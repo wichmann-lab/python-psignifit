@@ -254,7 +254,7 @@ You can force acceptance of your blocks by increasing conf.pool_max_blocks""")
     # if options['instantPlot']:
         # plot.plotPsych(result)
 
-    return
+    return results
 
 def psignifitFast(data,options):
     """
