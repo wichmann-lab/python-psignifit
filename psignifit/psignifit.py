@@ -220,7 +220,7 @@ You can force acceptance of your blocks by increasing conf.pool_max_blocks""")
     # sigmoid
     sigmoid = getattr(sigmoids, conf.sigmoid)
     # fix thresh_PC and width_alpha parameters for the sigmoid
-    sigmoid = functools.partial(sigmoid, PC=conf.thresh_PC, alpha=conf.width_alpha)
+    sigmoid = partial(sigmoid, PC=conf.thresh_PC, alpha=conf.width_alpha)
 
 
     results = _l.likelihood(data, options, grid)
