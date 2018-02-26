@@ -154,6 +154,11 @@ def psignifit(data, conf=None, **kwargs):
         #XXX TODO!
         raise NotImplementedError
 
+    # sigmoid
+    sigmoid = getattr(sigmoids, conf.sigmoid)
+    # fix thresh_PC and width_alpha parameters for the sigmoid
+    sigmoid = partial(sigmoid, PC=conf.thresh_PC, alpha=conf.width_alpha)
+
     #warning if many blocks were measured
     if verbose and len(levels) >= 25 and not conf.stimulus_range:
         print(
@@ -187,6 +192,7 @@ You can force acceptance of your blocks by increasing conf.pool_max_blocks""")
     exp_type = conf.experiment_type
     borders = set_borders(data, wmin=width_min, etype=exp_type,
                           srange=stimulus_range, alpha=width_alpha)
+
     # override at user request
     if conf.borders is not None:
         borders.update(conf.borders)
@@ -202,9 +208,15 @@ You can force acceptance of your blocks by increasing conf.pool_max_blocks""")
     for parameter, prior in priors.items():
         priors[parameter] = normalize(prior, borders[parameter])
 
+
     # XXX FIXME: take care later of moving borders
     # if options['moveBorders']:
         # options['borders'] = _b.moveBorders(data, options)
+    if conf.move_borders:
+        borders = _b.move_borders(data, borders=borders,
+                                  steps=conf.steps_moving_borders,
+                                  tol=conf.max_border_value,
+                                  )
 
     # core
     #result = psignifitCore(data,options)
@@ -217,13 +229,8 @@ You can force acceptance of your blocks by increasing conf.pool_max_blocks""")
         else:
             grid[param] = np.linspace(*borders[param], num=conf.grid_steps[param])
 
-    # sigmoid
-    sigmoid = getattr(sigmoids, conf.sigmoid)
-    # fix thresh_PC and width_alpha parameters for the sigmoid
-    sigmoid = partial(sigmoid, PC=conf.thresh_PC, alpha=conf.width_alpha)
 
-
-    results = _l.likelihood(data, options, grid)
+    results = _l.likelihood(data, sigmoid=sigmoid, priors=priors, grid=grid)
     # XXX FIXME: take care of post-ptocessing later
     # ''' after processing '''
     # # check that the marginals go to nearly 0 at the borders of the grid
