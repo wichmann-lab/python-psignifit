@@ -14,7 +14,7 @@ from . import priors as _priors
 from .conf import Conf
 from . import sigmoids
 from . import likelihood as _l
-from . import borders as _b
+from .borders import set_borders
 from .utils import (norminv, norminvg, t1icdf, pool_data,
                     PsignifitException, normalize)
 
