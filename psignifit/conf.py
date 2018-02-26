@@ -67,6 +67,7 @@ class Conf:
 
         # set public defaults
         self.beta_prior = 10
+        self.borders = None
         self.CI_method = 'percentiles'
         self.confP = (.95, .9, .68)
         self.dynamic_grid = False
