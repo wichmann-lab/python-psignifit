@@ -86,9 +86,14 @@ def log_likelihood(data, sigmoid=None, priors=None, grid=None):
     p += np.log(priors['eta'](XXX))
     return p
 
+def likelihood(data, sigmoid=None, priors=None, grid=None):
+    p = log_likelihood(data, sigmoid=sigmoid, priors=priors, grid=grid)
+    logmax = np.max(p)
+    p -= logmax
+    p = np.exp(p)
+    return p, logmax
 
-
-def likelihood(data, options, args):
+def likelihoodi_old(data, options, args):
     """
     Calculates the (normalized) likelihood for the data from given parameters
     function [p,logPmax] = likelihood(typeHandle,data,alpha,beta,lambda,gamma)
