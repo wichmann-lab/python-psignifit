@@ -11,7 +11,7 @@ from copy import deepcopy as _deepcopy
 import scipy
 
 from . import priors
-from . import conf
+from .conf import Conf
 from . import sigmoids
 from . import likelihood as _l
 from . import borders as _b
@@ -48,7 +48,7 @@ def psignifit(data, conf=None, **kwargs):
     To get an introduction to basic usage start with demo001
     """
     if conf is None:
-        conf = conf.Conf(**kwargs)
+        conf = Conf(**kwargs)
     elif len(kwargs) > 0:
         # user shouldn't specify a conf object *and* kwargs simultaneously
         raise PsignifitException(
