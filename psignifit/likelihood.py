@@ -40,33 +40,26 @@ def log_likelihood(data, sigmoid=None, priors=None, grid=None):
         psi = sigmoid(x, thres, width)*scale + gamma
         n = ntrials[i]
         k = ncorrect[i]
-        if (k < n) and (k != 0):
-            ### FIXME following needed?
-            np.clip(psi, 1e-200, None, out=psi)
+        if k == 0:
+            pbin += pbin + n * np.log(1-psi)
+            if v is not None:
+                b = (1-psi)*v
+                p += (sp.gammaln(n+b) - sp.gammaln(n+v) - sp.gammaln(b) +
+                      sp.gammaln(v))
+        elif k == n:
+            pbin += k * np.log(psi)
+            if v is not None:
+                a = psi*v
+                p += (sp.gammaln(k+a) - sp.gammaln(n+v) - sp.gammaln(a) +
+                      sp.gammaln(v))
+        elif k < n:
             psi_r = 1-psi
-            ### FIXME following needed?
-            np.clip(psi_r, 1e-200, None, out=psi_r)
             pbin += k*np.log(psi) + (n-k)*np.log(psi_r)
             if v is not None:
                 a = psi*v
                 b = (1-psi)*v
                 p += ( sp.gammaln(k+a) + sp.gammaln(n-k+b) - sp.gammaln(n+v) -
                         sp.gammaln(a) - sp.gammaln(b) + sp.gammaln(v))
-        elif (k == n) and (k != 0):
-            ###FIXME following needed?
-            np.clip(psi, 1e-200, None, out=psi)
-            pbin += k * np.log(psi)
-            if v is not None:
-                a = psi*v
-                p += (sp.gammaln(k+a) - sp.gammaln(n+v) - sp.gammaln(a) +
-                      sp.gammaln(v))
-        elif k == 0:
-            ###FIXME: what is 'k' doing in this equation???
-            pbin += pbin + (n-k) * np.log(1-psi)
-            if v is not None:
-                b = (1-psi)*v
-                p += (sp.gammaln(n-k+b) - sp.gammaln(n+v) - sp.gammaln(b) +
-                      sp.gammaln(v))
         else:
             # this is n==0, i.e. no trials done at this stimulus level
             pass
