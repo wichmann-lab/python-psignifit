@@ -34,10 +34,14 @@ def normalize(func, interval, steps=10000):
 
     Intregration is done using the composite trapezoidal rule.
     """
-    x = np.linspace(interval[0], interval[1], steps)
-    integral = np.trapz(func(x), x=x)
-    def nfunc(y):
-        return func(y)/integral
+    if interval[0] == interval[1]:
+        def nfunc(y):
+            return np.ones_like(y)
+    else:
+        x = np.linspace(interval[0], interval[1], steps)
+        integral = np.trapz(func(x), x=x)
+        def nfunc(y):
+            return func(y)/integral
     return nfunc
 
 def pool_data(data, xtol=0, max_gap=np.inf, max_length=np.inf):
