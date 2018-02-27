@@ -63,22 +63,19 @@ def log_likelihood(data, sigmoid=None, priors=None, grid=None):
         else:
             # this is n==0, i.e. no trials done at this stimulus level
             pass
-    ###TODO: go on to fix the value of p!!!!
-    ### FIXME do not understand this...
-    # concatenate pbin and p on the 4th axis (v), (what is sum(vbinom)???)
-    # tile is trying to create a grid again?
-    p = np.concatenate((np.tile(pbin, [1,1,1,1,np.sum(vbinom)]),p), axis=4)
 
-    # add priors on the corresponding axis
-    ### FIXME:
-    # axis should be correct already because of meshgrid? waste of time and memory?
+    pbin = np.broadcast_to(pbin, pbin.shape[:4]+(vbinom,))
+    p = np.concatenate((pbin, p), axis=4)
+
+    # add priors on the corresponding axis (they get added on the right axis
+    # because of the meshgrid
     p += np.log(priors['threshold'](thres))
     p += np.log(priors['width'](width))
     p += np.log(priors['lambda'](lambd))
-    ### FIXME equal asymptote case not contemplated here
+    ## FIXME equal asymptote case not contemplated here
     p += np.log(priors['gamma'](gamma))
-    ### FIXME we need the original eta, but in the meshgrid form...
-    p += np.log(priors['eta'](XXX))
+    p += np.log(priors['eta'](eta_std))
+    print(p.min(), p.max())
     return p
 
 def likelihood(data, sigmoid=None, priors=None, grid=None):
