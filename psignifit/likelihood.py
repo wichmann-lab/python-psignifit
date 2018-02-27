@@ -16,12 +16,12 @@ def log_likelihood(data, sigmoid=None, priors=None, grid=None):
         thres, width, lambd, gamma = np.meshgrid(thres, width, lambd, gamma,
                                                  copy=False, sparse=True)
     else:
-        eta = grid['eta']**2 # use variance instead of standard deviation
-        eta = eta[eta > 1e-09] # for smaller variance we use the binomial model
-        v = 1/eta - 1
-        thres, width, lambd, gamma, v = np.meshgrid(thres, width, lambd, gamma,
-                                                    v, copy=False)
+        eta_std = grid['eta']
+        eta = eta_std**2 # use variance instead of standard deviation
+        v = 1/eta[eta > 1e-09] - 1
 
+        # for smaller variance we use the binomial model
+        vbinom = (eta <= 1e-09).sum()
         thres, width, lambd, gamma, v = np.meshgrid(thres, width, lambd, gamma,
                                                     v, copy=False, sparse=True)
 
