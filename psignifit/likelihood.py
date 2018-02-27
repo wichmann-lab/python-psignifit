@@ -14,7 +14,7 @@ def log_likelihood(data, sigmoid=None, priors=None, grid=None):
     if grid['eta'] is None:
         v = None
         thres, width, lambd, gamma = np.meshgrid(thres, width, lambd, gamma,
-                                                 copy=False)
+                                                 copy=False, sparse=True)
     else:
         eta = grid['eta']**2 # use variance instead of standard deviation
         eta = eta[eta > 1e-09] # for smaller variance we use the binomial model
@@ -22,6 +22,8 @@ def log_likelihood(data, sigmoid=None, priors=None, grid=None):
         thres, width, lambd, gamma, v = np.meshgrid(thres, width, lambd, gamma,
                                                     v, copy=False)
 
+        thres, width, lambd, gamma, v = np.meshgrid(thres, width, lambd, gamma,
+                                                    v, copy=False, sparse=True)
 
     levels = data[:,0]
     ncorrect = data[:,1]
