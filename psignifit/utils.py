@@ -2,6 +2,7 @@
 """
 Utils class capsulating all custom made probabilistic functions
 """
+import contextlib
 import numpy as np
 import scipy.stats
 
@@ -23,6 +24,12 @@ t1icdf = scipy.stats.t(1).ppf
 
 # our own Exception class
 class PsignifitException(Exception):
+    pass
+
+# create a decorator from the numpy errstate contextmanager, used to handle
+# floating point errors. In our case divide-by-zero errors are usually harmless,
+# because we are working in log space and log(0)==-inf is a valid result
+class fp_error_handler(contextlib.ContextDecorator, np.errstate):
     pass
 
 def normalize(func, interval, steps=10000):
