@@ -16,7 +16,7 @@ from . import sigmoids
 from . import likelihood as _l
 from .borders import set_borders
 from .utils import (norminv, norminvg, t1icdf, pool_data,
-                    PsignifitException, normalize)
+                    PsignifitException, normalize, fp_error_handler)
 
 from .gridSetting import gridSetting
 from .getWeights import getWeights
@@ -28,6 +28,7 @@ from .getSigmoidHandle import getSigmoidHandle
 from . import psigniplot as plot
 
 
+@fp_error_handler(divide='ignore')
 def psignifit(data, conf=None, **kwargs):
     """
     main function for fitting psychometric functions
