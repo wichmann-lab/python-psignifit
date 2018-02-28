@@ -75,11 +75,19 @@ def normalize(func, interval, steps=10000):
     return nfunc
 
 def nd_integrate(func, grid):
-    """Return integral of multivariate function using composite trapezoidal rule
+    """Calculate integral of multivariate function using composite trapezoidal rule
 
-      - `func` is an array of dimensions n_1 x n_2 x ... x n_m
-      - `grid` is a tuple (s_1, s_2, ..., s_m), where `s_i` are the points
-         on dimension `i` along which `func` has been evaluated
+    Input parameters:
+       -  `func` is an array of dimensions n_1 x n_2 x ... x n_m
+       - `grid` is a tuple (s_1, s_2, ..., s_m), where `s_i` are the points
+          on dimension `i` along which `func` has been evaluated
+
+    Outputs;
+       - integral is a number
+       - `deltas` is the grid of deltas used for the integration, for each
+         dimension these are:
+         (x1-x0)/2, x1-x0, x2-x1, ..., x(m-1)-x(m-2), (xm-x(m-1))/2
+         `weights` has the same shape as `func`
     """
     M = len(grid)
     deltas = []
@@ -98,7 +106,7 @@ def nd_integrate(func, grid):
     # create a meshgrid for each dimension
     mesh_grids = np.meshgrid(*deltas, copy=False, sparse=True, indexing='ij')
     weights = np.prod(mesh_grids, axis=0)
-    return (func*weights).sum()
+    return (func*weights).sum(), weights
 
 
 def pool_data(data, xtol=0, max_gap=np.inf, max_length=np.inf):
