@@ -4,7 +4,9 @@ import numpy as np
 import scipy.special as sp
 
 from . import sigmoids
+from .utils import fp_error_handler
 
+@fp_error_handler(divide='ignore')
 def log_likelihood(data, sigmoid=None, priors=None, grid=None):
 
     thres = grid['threshold']

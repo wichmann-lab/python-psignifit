@@ -28,7 +28,6 @@ from .getSigmoidHandle import getSigmoidHandle
 from . import psigniplot as plot
 
 
-@fp_error_handler(divide='ignore')
 def psignifit(data, conf=None, **kwargs):
     """
     main function for fitting psychometric functions
