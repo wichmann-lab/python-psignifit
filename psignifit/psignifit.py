@@ -15,8 +15,8 @@ from .conf import Conf
 from . import sigmoids
 from . import likelihood as _l
 from .borders import set_borders
-from .utils import (norminv, norminvg, t1icdf, pool_data,
-                    PsignifitException, normalize, fp_error_handler)
+from .utils import (norminv, norminvg, t1icdf, pool_data, nd_integrate,
+                    PsignifitException, normalize, get_grid)
 
 from .gridSetting import gridSetting
 from .getWeights import getWeights
@@ -217,6 +217,12 @@ You can force acceptance of your blocks by increasing conf.pool_max_blocks""")
                                   steps=conf.steps_moving_borders,
                                   tol=conf.max_border_value,
                                   )
+    # do first sparse grid likelihood evaluation
+    grid = get_grid(borders, conf.steps_moving_borders)
+    llh_sparse, llh_max, p_idx = _l.likelihood(data, sigmoid=sigmoid, priors=priors, grid=grid)
+    # normalize the likelihood
+    integral = nd_integrate(llh_sparse, [grid[parm] for parm in p_idx])
+    print(llh_max)
 
     # core
     #result = psignifitCore(data,options)
@@ -229,6 +235,8 @@ You can force acceptance of your blocks by increasing conf.pool_max_blocks""")
         else:
             grid[param] = np.linspace(*borders[param], num=conf.grid_steps[param])
 
+    # do dense grid likelihood evaluation
+    grid = get_grid(borders, conf.grid_steps)
 
     results = _l.likelihood(data, sigmoid=sigmoid, priors=priors, grid=grid)
     # XXX FIXME: take care of post-ptocessing later
