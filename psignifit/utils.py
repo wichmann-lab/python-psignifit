@@ -96,7 +96,7 @@ def nd_integrate(func, grid):
             delta[-1] = delta[-1]/2
             deltas.append(delta)
     # create a meshgrid for each dimension
-    mesh_grids = np.meshgrid(*deltas, copy=False, sparse=True)
+    mesh_grids = np.meshgrid(*deltas, copy=False, sparse=True, indexing='ij')
     weights = np.prod(mesh_grids, axis=0)
     return (func*weights).sum()
 

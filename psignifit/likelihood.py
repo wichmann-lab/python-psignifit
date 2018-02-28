@@ -14,10 +14,12 @@ def log_likelihood(data, sigmoid=None, priors=None, grid=None):
     lambd = grid['lambda']
     gamma = grid['gamma']
     parm_order = ('threshold', 'width', 'lambda', 'gamma')
+
     if grid['eta'] is None:
         v = None
         thres, width, lambd, gamma = np.meshgrid(thres, width, lambd, gamma,
-                                                 copy=False, sparse=True)
+                                                 copy=False, sparse=True,
+                                                 indexing='ij')
     else:
         parm_order = parm_order + ('eta', )
         eta_std = grid['eta']
@@ -27,7 +29,8 @@ def log_likelihood(data, sigmoid=None, priors=None, grid=None):
         # for smaller variance we use the binomial model
         vbinom = (eta <= 1e-09).sum()
         thres, width, lambd, gamma, v = np.meshgrid(thres, width, lambd, gamma,
-                                                    v, copy=False, sparse=True)
+                                                    v, copy=False, sparse=True,
+                                                    indexing='ij')
 
     levels = data[:,0]
     ncorrect = data[:,1]
