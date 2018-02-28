@@ -13,11 +13,13 @@ def log_likelihood(data, sigmoid=None, priors=None, grid=None):
     width = grid['width']
     lambd = grid['lambda']
     gamma = grid['gamma']
+    parm_order = ('threshold', 'width', 'lambda', 'gamma')
     if grid['eta'] is None:
         v = None
         thres, width, lambd, gamma = np.meshgrid(thres, width, lambd, gamma,
                                                  copy=False, sparse=True)
     else:
+        parm_order = parm_order + ('eta', )
         eta_std = grid['eta']
         eta = eta_std**2 # use variance instead of standard deviation
         v = 1/eta[eta > 1e-09] - 1
@@ -76,14 +78,14 @@ def log_likelihood(data, sigmoid=None, priors=None, grid=None):
     p += np.log(priors['lambda'](lambd))
     ## FIXME equal asymptote case not contemplated here
     p += np.log(priors['gamma'](gamma))
-    p += np.log(priors['eta'](eta_std))
-    print(p.min(), p.max())
-    return p
+    if grid['eta'] is not None:
+        p += np.log(priors['eta'](eta_std))
+    return p, parm_order
 
 def likelihood(data, sigmoid=None, priors=None, grid=None):
-    p = log_likelihood(data, sigmoid=sigmoid, priors=priors, grid=grid)
+    p, p_order = log_likelihood(data, sigmoid=sigmoid, priors=priors, grid=grid)
     logmax = np.max(p)
     p -= logmax
     p = np.exp(p)
-    return p, logmax
+    return p, logmax, p_order
 
