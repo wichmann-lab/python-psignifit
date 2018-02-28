@@ -209,14 +209,6 @@ You can force acceptance of your blocks by increasing conf.pool_max_blocks""")
         priors[parameter] = normalize(prior, borders[parameter])
 
 
-    # XXX FIXME: take care later of moving borders
-    # if options['moveBorders']:
-        # options['borders'] = _b.moveBorders(data, options)
-    if conf.move_borders:
-        borders = _b.move_borders(data, borders=borders,
-                                  steps=conf.steps_moving_borders,
-                                  tol=conf.max_border_value,
-                                  )
     # do first sparse grid likelihood evaluation
     grid = get_grid(borders, conf.steps_moving_borders)
     llh_sparse, llh_max, p_idx = _l.likelihood(data, sigmoid=sigmoid, priors=priors, grid=grid)
