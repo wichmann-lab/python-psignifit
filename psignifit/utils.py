@@ -97,10 +97,7 @@ def nd_integrate(func, grid):
             deltas.append(delta)
     # create a meshgrid for each dimension
     mesh_grids = np.meshgrid(*deltas, copy=False, sparse=True)
-    # multiply all meshgrids together to get the m-dimensional weight array
-    weights = np.ones_like(func)
-    for deltas in mesh_grids:
-        weights *= deltas
+    weights = np.multiply.reduce(mesh_grids, axis=0)
     return (func*weights).sum()
 
 
