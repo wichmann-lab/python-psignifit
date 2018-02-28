@@ -74,6 +74,36 @@ def normalize(func, interval, steps=10000):
             return func(y)/integral
     return nfunc
 
+def nd_integrate(func, grid):
+    """Return integral of multivariate function using composite trapezoidal rule
+
+      - `func` is an array of dimensions n_1 x n_2 x ... x n_m
+      - `grid` is a tuple (s_1, s_2, ..., s_m), where `s_i` are the points
+         on dimension `i` along which `func` has been evaluated
+    """
+    M = len(grid)
+    deltas = []
+    # loop over all dimensions and gather the deltas (dx_1, dx_2, ..., dx_m)
+    for steps in grid:
+        # handle singleton dimensions
+        if len(steps) == 1:
+            deltas.append(1)
+        else:
+            delta = np.empty_like(steps)
+            delta[1:] = np.diff(steps)
+            # delta weight is half at the borders of the integration interval
+            delta[0] = delta[1]/2
+            delta[-1] = delta[-1]/2
+            deltas.append(delta)
+    # create a meshgrid for each dimension
+    mesh_grids = np.meshgrid(*deltas, copy=False, sparse=True)
+    # multiply all meshgrids together to get the m-dimensional weight array
+    weights = np.ones_like(func)
+    for deltas in mesh_grids:
+        weights *= deltas
+    return (func*weights).sum()
+
+
 def pool_data(data, xtol=0, max_gap=np.inf, max_length=np.inf):
     """
     Pool trials together which differ at maximum pool_xtol from the first one
