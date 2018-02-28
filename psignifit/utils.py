@@ -32,6 +32,29 @@ class PsignifitException(Exception):
 class fp_error_handler(contextlib.ContextDecorator, np.errstate):
     pass
 
+def get_grid(borders, steps):
+    """Return uniformely spaced grid within given borders.
+
+    Input Parameters:
+
+       borders  - a dictionary {parameter : (min_val, max_val)}
+       steps    - a dictionary {parameter : nsteps}
+
+    where `nsteps` is the number of steps in the grid.
+
+    Returns:
+
+        grid    - a dictionary {parameter: (min_val, val1, val2, ..., max_val)}
+    """
+    grid = {}
+    for param in borders:
+        if borders[param] is None:
+            grid[param] == None
+        else:
+            grid[param] = np.linspace(*borders[param], num=steps[param])
+    return grid
+
+
 def normalize(func, interval, steps=10000):
     """
     Return a normalized function, which has integral 1 within the interval.
