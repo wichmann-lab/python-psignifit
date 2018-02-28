@@ -211,26 +211,35 @@ You can force acceptance of your blocks by increasing conf.pool_max_blocks""")
 
     # do first sparse grid likelihood evaluation
     grid = get_grid(borders, conf.steps_moving_borders)
-    llh_sparse, llh_max, p_idx = _l.likelihood(data, sigmoid=sigmoid, priors=priors, grid=grid)
+    llh_sparse, llh_max, p_idx = _l.likelihood(data, sigmoid=sigmoid,
+                                               priors=priors, grid=grid)
     # normalize the likelihood
-    integral = nd_integrate(llh_sparse, [grid[parm] for parm in p_idx])
-    print(llh_max)
-
-    # core
-    #result = psignifitCore(data,options)
-
-    # create a linear grid
-    grid = {}
-    for param in borders:
-        if borders[param] is None:
-            grid[param] == None
-        else:
-            grid[param] = np.linspace(*borders[param], num=conf.grid_steps[param])
+    integral, weights = nd_integrate(llh_sparse, [grid[parm] for parm in p_idx])
+    llh_sparse /= integral
+    #FIXME: maybe we don't need the nd_integrate function, because here we are
+    # we are doing part of the same work again...
+    # - integral under each grid point
+    tol = conf.max_border_value
+    volumes = llh_sparse*weights
+    # indices on the grid of the volumes that contribute more than `tol` to the
+    # overall integral
+    mask = np.nonzero(volumes >= tol)
+    for idx, parm in enumerate(p_idx):
+        pgrid = grid[parm]
+        # get the indeces for this parameter's axis and sort it
+        axis = np.sort(mask[idx])
+        # new borders are the extrema of this axis, but enlarged of one element
+        # in both directions
+        left = max(0, axis[0]-1)
+        right = min(axis[-1]+1, len(pgrid)-1)
+        # update the borders
+        borders[parm] = (pgrid[left], pgrid[right])
 
     # do dense grid likelihood evaluation
     grid = get_grid(borders, conf.grid_steps)
 
     results = _l.likelihood(data, sigmoid=sigmoid, priors=priors, grid=grid)
+    print(results[1])
     # XXX FIXME: take care of post-ptocessing later
     # ''' after processing '''
     # # check that the marginals go to nearly 0 at the borders of the grid
