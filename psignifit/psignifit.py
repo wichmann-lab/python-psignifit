@@ -770,12 +770,12 @@ def getThreshold(result,pCorrect, unscaled=False):
     return (threshold,CI)
     
 
-def biasAna(data1, data2,options):
+def biasAna(data1, data2,options=dict()):
     """ function biasAna(data1,data2,options)
  runs a short analysis to see whether two 2AFC datasets have a bias and
  whether it can be explained with a "finger bias"-> a bias in guessing """
 
-    options = dict()
+    options = _deepcopy(options)
     options['borders'] = np.empty([5,2])
     options['borders'][:] = np.nan
     options['expType'] = 'YesNo'
