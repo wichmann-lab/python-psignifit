@@ -12,10 +12,14 @@ PARM_ORDER = ('threshold', 'width', 'lambda', 'gamma', 'eta')
 
 def likelihood(data, sigmoid=None, priors=None, grid=None):
     p = log_likelihood(data, sigmoid=sigmoid, priors=priors, grid=grid)
-    logmax = np.max(p)
+    # locate the maximum
+    ind_max = np.unravel_index(p.argmax(), p.shape)
+    logmax = p[ind_max]
     p -= logmax
     p = np.exp(p)
-    return p, logmax
+    # get the value of the parameters on the grid corresponding to the maximum
+    grid_max = [grid[parm][i] for (i, parm) in zip(ind_max, PARM_ORDER)]
+    return p, logmax, ind_max, grid_max
 
 
 @fp_error_handler(divide='ignore')
@@ -138,4 +142,4 @@ def get_optm_llh(data, sigmoid=None, priors=None, grid=None):
         lgrid = {parm:y[idx] for idx, parm in enumerate(PARM_ORDER)}
         return -log_likelihood(data, sigmoid=sigmoid, priors=priors, grid=lgrid)
 
-    return cllh
+    return cllh, fixed
