@@ -9,11 +9,12 @@ import datetime as _dt
 import warnings
 from copy import deepcopy as _deepcopy
 import scipy
+import scipy.optimize as spo
 
 from . import priors as _priors
 from .conf import Conf
 from . import sigmoids
-from . import likelihood as _l
+from .likelihood import likelihood, log_likelihood, PARM_ORDER, get_optm_llh
 from .borders import set_borders
 from .utils import (norminv, norminvg, t1icdf, pool_data, nd_integrate,
                     PsignifitException, normalize, get_grid)
@@ -198,6 +199,7 @@ You can force acceptance of your blocks by increasing conf.pool_max_blocks""")
         borders.update(conf.borders)
 
     # XXX FIXME: take care of fixed parameters later!
+    ##### plan would be to just define left_border=right_border
     # border_idx = np.where(np.isnan(options['fixedPars']) == False);
     # print(border_idx)
     # if (border_idx[0].size > 0):
@@ -211,20 +213,25 @@ You can force acceptance of your blocks by increasing conf.pool_max_blocks""")
 
     # do first sparse grid likelihood evaluation
     grid = get_grid(borders, conf.steps_moving_borders)
-    llh_sparse, llh_max, p_idx = _l.likelihood(data, sigmoid=sigmoid,
-                                               priors=priors, grid=grid)
+    llh_sparse, llh_max, llh_max_idx, grid_max  = likelihood(data, sigmoid=sigmoid,
+                                                         priors=priors, grid=grid)
+    print('\nsparsegrid logmax', llh_max)
+
     # normalize the likelihood
-    integral, weights = nd_integrate(llh_sparse, [grid[parm] for parm in p_idx])
+    integral, weights = nd_integrate(llh_sparse, [grid[parm] for parm in PARM_ORDER ])
     llh_sparse /= integral
     #FIXME: maybe we don't need the nd_integrate function, because here we are
     # we are doing part of the same work again...
     # - integral under each grid point
+    #     ###TODO!!!###
+    #     new_tol = (old_told*grid_1*grid_2*grid_3)/(grid_1*grid_2*grid_3)
+    #     set a minimum though, should never be less than 1e-05
     tol = conf.max_border_value
     volumes = llh_sparse*weights
     # indices on the grid of the volumes that contribute more than `tol` to the
     # overall integral
     mask = np.nonzero(volumes >= tol)
-    for idx, parm in enumerate(p_idx):
+    for idx, parm in enumerate(PARM_ORDER):
         pgrid = grid[parm]
         # get the indeces for this parameter's axis and sort it
         axis = np.sort(mask[idx])
@@ -238,13 +245,56 @@ You can force acceptance of your blocks by increasing conf.pool_max_blocks""")
     # do dense grid likelihood evaluation
     grid = get_grid(borders, conf.grid_steps)
 
-    results = _l.likelihood(data, sigmoid=sigmoid, priors=priors, grid=grid)
-    print(results[1])
+    llh, llh_max, llh_max_idx, grid_max = likelihood(data, sigmoid=sigmoid,
+                                                     priors=priors, grid=grid)
+
+    print('logmax', llh_max)
+    print('fit0', grid_max)
+    optm_likelihood, fixed = get_optm_llh(data, sigmoid=sigmoid, priors=priors, grid=grid)
+    # start optimization at the maximum of the llh on the grid -> grid_max
+    # remove fixed parameters, so that the optimization doesn't touch them
+    for fidx, fval in fixed:
+        grid_max.pop(fidx)
+
+    fit = list(spo.fmin(optm_likelihood, grid_max, disp=False))
+
+    for fidx, fval in fixed:
+        fit.insert(fidx, fval)
+    #bounds = [borders[parm] for parm in parm_order]
+    #print(bounds)
+    # fit = spo.minimize(optm_likelihood, grid_max, method='SLSQP', bounds=bounds,
+                 # options={'disp':True})
+
+    print('fit', list(fit))
+
+    # to verify that the differences here are not relevant,
+    # the thing to do is to calculare the confidence interval, and then
+    # verify that the difference is well within the confidence interval, let's
+    # say 1/3 of it
+    fit_heiko = [0.0046448472488663396, 0.004683837353547434, 1.0676339572811912e-07, 0.5, 0.00011599137494786461]
+    diff_fits = [(abs(n-o)/((n+o)/2))*100 for n, o in zip(fit, fit_heiko)]
+    print('rel diff (%)', diff_fits)
+    print('abs diff', [abs(n-o) for n, o in zip(fit, fit_heiko)])
+    fitted_parm = list(PARM_ORDER)
+    fitted_parm.remove('gamma')
+    print('fitted parms', fitted_parm)
+
+    # take care of confidence intervals/condifence region
+
+
     # XXX FIXME: take care of post-ptocessing later
     # ''' after processing '''
     # # check that the marginals go to nearly 0 at the borders of the grid
     # if options['verbose'] > -5:
-
+    ### TODO ###
+    # when the marginal on the borders not smaller than 1/1000 of the peak
+    # it means that the prior of the corresponding parameter has an influence of
+    # the result ( 1)prior may be too narrow, 2) you know what you are doing).
+    # if they were using the default, this is a bug in the software or your data
+    # are highly unusual, if they changed the defaults the error can be more verbose
+    # "the choice of your prior or of your borders has a significant influence on the
+    # confidence interval widths and or the max likelihood estimate"
+    #########
         # if result['marginals'][0][0] * result['marginalsW'][0][0] > .001:
             # warnings.warn('psignifit:borderWarning\n'\
                 # 'The marginal for the threshold is not near 0 at the lower border.\n'\
@@ -270,7 +320,7 @@ You can force acceptance of your blocks by increasing conf.pool_max_blocks""")
     # if options['instantPlot']:
         # plot.plotPsych(result)
 
-    return results
+    #return results
 
 def psignifitFast(data,options):
     """
