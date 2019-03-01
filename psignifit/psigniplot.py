@@ -46,7 +46,7 @@ def plotPsych(result,
     
     if axisHandle == None: axisHandle = plt.gca()
     try:
-        plt.axes(axisHandle)
+        plt.sca(axisHandle)
     except TypeError:
         raise ValueError('Invalid axes handle provided to plot in.')
     
@@ -128,7 +128,7 @@ def plotPsych(result,
 
     plt.ylim([ymin, 1])
     # tried to mimic box('off') in matlab, as box('off') in python works differently
-    plt.tick_params(direction='out',right='off',top='off')
+    plt.tick_params(direction='out',right=False,top=False)
     for side in ['top','right']: axisHandle.spines[side].set_visible(False)
     plt.ticklabel_format(style='sci',scilimits=(-2,4))
     
@@ -183,7 +183,7 @@ def plotsModelfit(result,
     plt.xlabel('Stimulus Level',  fontsize=14)
     plt.ylabel('Percent Correct', fontsize=14)
     plt.title('Psychometric Function', fontsize=20)
-    plt.tick_params(right='off',top='off')
+    plt.tick_params(right=False,top=False)
     for side in ['top','right']: ax.spines[side].set_visible(False)
     plt.ticklabel_format(style='sci',scilimits=(-2,4))   
     
@@ -206,7 +206,7 @@ def plotsModelfit(result,
     plt.xlabel('Stimulus Level',  fontsize=14)
     plt.ylabel('Deviance', fontsize=14)
     plt.title('Shape Check', fontsize=20)
-    plt.tick_params(right='off',top='off')
+    plt.tick_params(right=False,top=False)
     for side in ['top','right']: ax.spines[side].set_visible(False)
     plt.ticklabel_format(style='sci',scilimits=(-2,4))
     
@@ -222,10 +222,10 @@ def plotsModelfit(result,
     linefit = np.polyfit(blockN,deviance,3)
     plt.plot(xValues, np.polyval(linefit,xValues),'k:', clip_on=False)
     
-    plt.xlabel('Block #',  fontsize=14)
+    plt.xlabel('Block Number',  fontsize=14)
     plt.ylabel('Deviance', fontsize=14)
     plt.title('Time Dependence?', fontsize=20)
-    plt.tick_params(right='off',top='off')
+    plt.tick_params(right=False,top=False)
     for side in ['top','right']: ax.spines[side].set_visible(False)
     plt.ticklabel_format(style='sci',scilimits=(-2,4))
     
@@ -261,7 +261,7 @@ def plotMarginal(result,
         return
     if axisHandle == None: axisHandle = plt.gca()
     try:
-        plt.axes(axisHandle)
+        plt.sca(axisHandle)
         plt.rc('text', usetex=True)
     except TypeError:
         raise ValueError('Invalid axes handle provided to plot in.')
@@ -297,7 +297,7 @@ def plotMarginal(result,
         plt.plot(xprior, result['options']['priors'][dim](xprior), '--', c=priorColor, clip_on=False)
     
     # posterior
-    plt.plot(x, marginal, lw=lineWidth, c=lineColor, clip_on=False)
+    plt.plot(x, marginal, lw=lineWidth, c=np.array(lineColor), clip_on=False)
     # point estimate
     if plotPE:
         plt.plot([Fit,Fit], [0, np.interp(Fit, x, marginal)], 'k', clip_on=False)
@@ -305,7 +305,7 @@ def plotMarginal(result,
     
     plt.xlabel(xLabel, fontsize=labelSize, visible=True)
     plt.ylabel(yLabel, fontsize=labelSize, visible=True)
-    plt.tick_params(direction='out', right='off', top='off')
+    plt.tick_params(direction='out', right=False, top=False)
     for side in ['top','right']: axisHandle.spines[side].set_visible(False)
     plt.ticklabel_format(style='sci', scilimits=(-2,4))
     
@@ -562,7 +562,7 @@ def plot2D(result,par1,par2,
         axisHandle = plt.gca()
         
     try:
-        plt.axes(axisHandle)
+        plt.sca(axisHandle)
     except TypeError:
         raise ValueError('Invalid axes handle provided to plot in.')
 
@@ -586,7 +586,7 @@ def plot2D(result,par1,par2,
         plt.ylabel(label1,fontsize = labelSize)
         plt.xlabel(label2,fontsize = labelSize)
         
-    plt.tick_params(direction='out',right='off',top='off')
+    plt.tick_params(direction='out',right=False,top=False)
     for side in ['top','right']: axisHandle.spines[side].set_visible(False)
     plt.ticklabel_format(style='sci',scilimits=(-2,4))
     if (showImediate):
