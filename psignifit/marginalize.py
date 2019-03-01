@@ -53,7 +53,7 @@ def marginalize(result, dimension):
               marginal = marginal/weight
               
               marginal = np.squeeze(marginal)
-              weight = np.squeeze(marginal)
+              weight = np.squeeze(weight)
               if len(dimension) == 1:
                   x = x.flatten()
                   marginal = marginal.flatten()
