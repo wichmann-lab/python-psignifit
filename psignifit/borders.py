@@ -59,7 +59,7 @@ def setBorders(data,options):
      The threshold is assumed to be within the range of the data +/-
      .5 times it's spread
     '''
-    dataspread = np.diff(options['stimulusRange'])
+    dataspread = options['stimulusRange'][1] - options['stimulusRange'][0]
     alphaB = np.array([options['stimulusRange'][0] - .5*dataspread, options['stimulusRange'][1] +.5*dataspread]).squeeze()
 
     ''' the width we assume to be between half the minimal distance of
@@ -123,8 +123,12 @@ def moveBorders(data,options):
     
     for idx in range(0,d):
         (L1D,x,w) = marginalize(MBresult, np.array([idx]))
-        x1 = x[np.max([np.where(L1D*w >= tol)[0][0] - 1, 0])]
-        x2 = x[np.min([np.where(L1D*w >= tol)[0][-1]+1, len(x)-1])]
+        if len(x.shape)>0:
+            x1 = x[np.max([np.where(L1D*w >= tol)[0][0] - 1, 0])]
+            x2 = x[np.min([np.where(L1D*w >= tol)[0][-1]+1, len(x)-1])]
+        else:
+            x1 = x
+            x2 = x
         
         borders[idx,:] = [x1,x2]
     

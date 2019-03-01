@@ -379,7 +379,7 @@ def psignifitCore(data, options):
     '''Compute marginal distributions'''
     
     for idx in range(0,d):
-        m, mX, mW = marginalize(result, np.array([idx]))
+        m, mX, mW = marginalize(result,np.array(idx))
         result['marginals'].append(m)
         result['marginalsX'].append(mX)
         result['marginalsW'].append(mW) 
@@ -772,8 +772,8 @@ def getThreshold(result,pCorrect, unscaled=False):
 
 def biasAna(data1, data2,options=dict()):
     """ function biasAna(data1,data2,options)
- runs a short analysis to see whether two 2AFC datasets have a bias and
- whether it can be explained with a "finger bias"-> a bias in guessing """
+    runs a short analysis to see whether two 2AFC datasets have a bias and
+    whether it can be explained with a "finger bias"-> a bias in guessing """
 
     options = _deepcopy(options)
     options['borders'] = np.empty([5,2])
@@ -797,7 +797,6 @@ def biasAna(data1, data2,options=dict()):
     a1 = plot.plt.axes([0.15,4.35/6,0.75,1.5/6])
 
     plot.plotPsych(resAll,showImediate=False)
-    plot.plt.hold(True)
     
     plot.plotPsych(res1, lineColor= [1,0,0], dataColor = [1,0,0],showImediate=False)
     plot.plotPsych(res2,lineColor= [0,0,1], dataColor = [0,0,1],showImediate=False)
@@ -806,7 +805,6 @@ def biasAna(data1, data2,options=dict()):
     a2 = plot.plt.axes([0.15,3.35/6,0.75,0.5/6])
 
     plot.plotMarginal(resAll,dim = 0,prior = False, CIpatch = False, lineColor = [0,0,0],showImediate=False)
-    plot.plt.hold(True)
     
     plot.plotMarginal(res1,dim = 0,lineColor = [1,0,0],showImediate=False)
     plot.plotMarginal(res2,dim = 0,lineColor=[0,0,1],showImediate=False)
@@ -815,7 +813,6 @@ def biasAna(data1, data2,options=dict()):
 
     a3 = plot.plt.axes([0.15,2.35/6,0.75,0.5/6])
     plot.plotMarginal(resAll,dim = 1,prior = False, CIpatch=False, lineColor = [0,0,0],showImediate=False)
-    plot.plt.hold(True)
 
     plot.plotMarginal(res1,dim = 1,lineColor=[1,0,0],showImediate=False)
     plot.plotMarginal(res2,dim = 1,lineColor=[0,0,1],showImediate=False)
@@ -825,7 +822,6 @@ def biasAna(data1, data2,options=dict()):
     a4 = plot.plt.axes([0.15,1.35/6,0.75,0.5/6])
 
     plot.plotMarginal(resAll,dim = 2, prior = False, CIpatch = False, lineColor = [0,0,0],showImediate=False)
-    plot.plt.hold(True)
     
     plot.plotMarginal(res1,dim = 2, lineColor=[1,0,0],showImediate=False)
     plot.plotMarginal(res2,dim=2, lineColor=[0,0,1],showImediate=False)
@@ -835,7 +831,6 @@ def biasAna(data1, data2,options=dict()):
     a5 = plot.plt.axes([0.15,0.35/6,0.75,0.5/6])
 
     plot.plotMarginal(resAll,dim = 3, prior = False, CIpatch = False, lineColor = [0,0,0],showImediate=False)
-    plot.plt.hold(True)
     
     plot.plotMarginal(res1,dim = 3, lineColor=[1,0,0],showImediate=False)
     plot.plotMarginal(res2,dim = 3, lineColor=[0,0,1],showImediate=False)
