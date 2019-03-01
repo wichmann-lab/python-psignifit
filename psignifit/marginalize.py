@@ -17,7 +17,9 @@ of the grid.
 import numpy as np
 
 def marginalize(result, dimension):
-   
+      if not isinstance(dimension,np.ndarray):
+          dimension = np.array(dimension)
+      dimension = dimension.flatten()
       if isinstance(dimension, (int,float)):
           assert dimension in range(0,5), 'the dimensions you want to marginalize to should be given as a number between 0 and 4'
           d = 1
@@ -50,13 +52,13 @@ def marginalize(result, dimension):
                       weight = np.sum(weight,i, keepdims=True)/(np.max(result['X1D'][i])-np.min(result['X1D'][i]))
               marginal = marginal/weight
               
+              marginal = np.squeeze(marginal)
+              weight = np.squeeze(marginal)
               if len(dimension) == 1:
-                  marginal = np.reshape(marginal, -1,1)
-                  weight = np.reshape(weight, -1,1)
-                  x = np.reshape(x,-1,1)
+                  x = x.flatten()
+                  marginal = marginal.flatten()
+                  weight = weight.flatten()
               else:
-                  marginal = np.squeeze(marginal)
-                  weight = np.squeeze(marginal)
                   x = []
                   for ix in np.sort(dimension) : x.append(result['X1D'][ix]) 
                   

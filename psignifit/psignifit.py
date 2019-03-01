@@ -379,7 +379,7 @@ def psignifitCore(data, options):
     '''Compute marginal distributions'''
     
     for idx in range(0,d):
-        m, mX, mW = marginalize(result, np.array([idx]))
+        m, mX, mW = marginalize(result,np.array(idx))
         result['marginals'].append(m)
         result['marginalsX'].append(mX)
         result['marginalsW'].append(mW) 
@@ -772,8 +772,8 @@ def getThreshold(result,pCorrect, unscaled=False):
 
 def biasAna(data1, data2,options=dict()):
     """ function biasAna(data1,data2,options)
- runs a short analysis to see whether two 2AFC datasets have a bias and
- whether it can be explained with a "finger bias"-> a bias in guessing """
+    runs a short analysis to see whether two 2AFC datasets have a bias and
+    whether it can be explained with a "finger bias"-> a bias in guessing """
 
     options = _deepcopy(options)
     options['borders'] = np.empty([5,2])
