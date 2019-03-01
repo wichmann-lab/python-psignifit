@@ -19,7 +19,7 @@ def getSigmoidHandle(options):
     where psi^(-1) is the inverse of the sigmoid function.
     '''
     
-    if hasattr(options, 'widthalpha'):
+    if not hasattr(options, 'widthalpha'):
         options['widthalpha'] = .05
     
     alpha = options['widthalpha']
