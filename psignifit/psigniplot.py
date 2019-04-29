@@ -12,6 +12,7 @@ from scipy.signal import convolve as _convn
 import matplotlib.pyplot as plt
 import matplotlib.colors as _mcolors
 from matplotlib import cm as _cm
+from matplotlib.ticker import ScalarFormatter
 
 from .marginalize import marginalize
 from . import utils as _utils
@@ -130,6 +131,7 @@ def plotPsych(result,
     # tried to mimic box('off') in matlab, as box('off') in python works differently
     plt.tick_params(direction='out',right=False,top=False)
     for side in ['top','right']: axisHandle.spines[side].set_visible(False)
+    plt.gca().xaxis.set_major_formatter(ScalarFormatter())
     plt.ticklabel_format(style='sci',scilimits=(-2,4))
     
     #plt.hold(holdState)
@@ -227,6 +229,7 @@ def plotsModelfit(result,
     plt.title('Time Dependence?', fontsize=20)
     plt.tick_params(right=False,top=False)
     for side in ['top','right']: ax.spines[side].set_visible(False)
+    plt.gca().xaxis.set_major_formatter(ScalarFormatter())
     plt.ticklabel_format(style='sci',scilimits=(-2,4))
     
     plt.tight_layout()
@@ -254,11 +257,12 @@ def plotMarginal(result,
     dim          is the parameter to plot:
                    1=threshold, 2=width, 3=lambda, 4=gamma, 5=sigma
     """
+    axisHandle = None
     if isinstance(dim,str): dim = _utils.strToDim(dim)
 
     if len(result['marginals'][dim]) <= 1:
         print('Error: The parameter you wanted to plot was fixed in the analysis!')
-        return
+        #return
     if axisHandle == None: axisHandle = plt.gca()
     try:
         plt.sca(axisHandle)
@@ -288,7 +292,7 @@ def plotMarginal(result,
         yCI = np.array([np.interp(CI[0], x, marginal), np.interp(CI[1], x, marginal), 0, 0])
         yCI = np.insert(yCI, 1, marginal[np.logical_and(x>=CI[0], x<=CI[1])])
         color = .5*np.array(lineColor) + .5* np.array([1,1,1])
-        pat = plt.Polygon(np.array([xCI,yCI]).T, facecolor=color, edgecolor=color)
+        pat = plt.Polygon(np.array([xCI,yCI]).T, facecolor=color, edgecolor=color,alpha=1)
         axisHandle.add_patch(pat)
     
     # plot prior
@@ -307,6 +311,7 @@ def plotMarginal(result,
     plt.ylabel(yLabel, fontsize=labelSize, visible=True)
     plt.tick_params(direction='out', right=False, top=False)
     for side in ['top','right']: axisHandle.spines[side].set_visible(False)
+    plt.gca().xaxis.set_major_formatter(ScalarFormatter())
     plt.ticklabel_format(style='sci', scilimits=(-2,4))
     
     #plt.hold(holdState)
