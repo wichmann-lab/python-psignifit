@@ -114,7 +114,7 @@ def plotPsych(result,
         plt.plot([min(xLow), max(xHigh)], [fit[3], fit[3]],     ':', c=lineColor, clip_on=False)
     # CI-THRESHOLD
     if CIthresh:
-        CIs = result['confIntervals']
+        CIs = result['conf_Intervals']
         y = np.array([fit[3] + .5*(1 - fit[2] - fit[3]) for i in range(2)])
         plt.plot(CIs[0,:,0],               y,               c=lineColor)
         plt.plot([CIs[0,0,0], CIs[0,0,0]], y + [-.01, .01], c=lineColor)
