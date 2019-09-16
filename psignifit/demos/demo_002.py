@@ -222,18 +222,6 @@ options['borders']= [ 1,2, .1,5,.05,.05, .5,.5, np.exp(-20),.2]
 ''' NOTE: By this you artificially exclude all values out of this range. Only
  exclude parameter values, which are truely impossible!'''
       
-
-""" options['setBordersType'] = 0 """
-''' The method to set the outer borders of the grid. You find it's use in
- setBorders
- defaults to reasonable estimates for the threshold and width parameter: '''
-options['setBordersType'] = 0
-
-# To set the borders for arbitrary parameterizations change to 
-options['setBordersType'] = 1
-#TODO But also see demo_XXX on how to implement other parameterizations as all
-# build in functions are parameterized by threshold and width
-
 """ options['maxBorderValue'] = exp(-10)    """
 ''' Parts of the grid which produce marginal values below this are considered
  0 and are excluded from the calculation in moveBorders.m 
