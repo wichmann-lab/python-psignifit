@@ -76,9 +76,6 @@ def psignifit(data, optionsIn):
     if not('instantPlot' in options.keys()):
         options['instantPlot'] = 0
         
-    if not('setBordersType' in options.keys()):
-        options['setBordersType'] = 0
-        
     if not('maxBorderValue' in options.keys()):
         options['maxBorderValue'] = .00001
         
