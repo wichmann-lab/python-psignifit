@@ -257,7 +257,6 @@ def plotMarginal(result,
     dim          is the parameter to plot:
                    1=threshold, 2=width, 3=lambda, 4=gamma, 5=sigma
     """
-    axisHandle = None
     if isinstance(dim,str): dim = _utils.strToDim(dim)
 
     if len(result['marginals'][dim]) <= 1:
