@@ -19,50 +19,79 @@ are a 5x2xN array then containting the confidence intervals at the different
 confidence levels. (any shape of confP will be interpreted as a vector)
 
 """
+
+####TODO: 'project' should be default, is a HDI (highest density interval) method
+####      'percentiles' should be an option
+####      'stripes' can be removed
+### R implementation of project:
+# HDIofGrid = function( probMassVec , credMass=0.95 ) {
+  # # Arguments:
+  # #   probMassVec is a vector of probability masses at each grid point.
+  # #   credMass is the desired mass of the HDI region.
+  # # Return value:
+  # #   A list with components:
+  # #   indices is a vector of indices that are in the HDI
+  # #   mass is the total mass of the included indices
+  # #   height is the smallest component probability mass in the HDI
+  # # Example of use: For determining HDI of a beta(30,12) distribution
+  # #   approximated on a grid:
+  # #   > probDensityVec = dbeta( seq(0,1,length=201) , 30 , 12 )
+  # #   > probMassVec = probDensityVec / sum( probDensityVec )
+  # #   > HDIinfo = HDIofGrid( probMassVec )
+  # #   > show( HDIinfo )
+  # sortedProbMass = sort( probMassVec , decreasing=TRUE )
+  # HDIheightIdx = min( which( cumsum( sortedProbMass ) >= credMass ) )
+  # HDIheight = sortedProbMass[ HDIheightIdx ]
+  # HDImass = sum( probMassVec[ probMassVec >= HDIheight ] )
+  # return( list( indices = which( probMassVec >= HDIheight ) ,
+                # mass = HDImass , height = HDIheight ) )
+# }
+
+
 import numpy as np
 from .marginalize import marginalize
 def getConfRegion(result):
-    
+
     mode = result['options']['CImethod']
     d = len(result['X1D'])
-    
+
     ''' get confidence intervals for each parameter --> marginalize'''
     conf_Intervals = np.zeros((d,2, len(result['options']['confP'])))
     confRegion = 0
     i = 0
     for iConfP in result['options']['confP']:
-    
+
         if mode == 'project':
             order = np.array(result['Posterior'][:]).argsort()[::-1]
             Mass = result['Posterior']*result['weight']
-            Mass = np.cumsum(Mass[order])        
+            Mass = np.cumsum(Mass[order])
 
-            confRegion = np.reshape(np.array([True]*np.size(result['Posterior']),result['Posterior'].shape))            
-            confRegion[order[Mass >= iConfP]] = False  
+            confRegion = np.reshape(np.array([True]*np.size(result['Posterior']),result['Posterior'].shape))
+            confRegion[order[Mass >= iConfP]] = False
             for idx in range(0,d):
                 confRegionM = confRegion
                 for idx2 in range(0,d):
                     if idx != idx2:
                         confRegionM = np.any(confRegionM,idx2)
-                start = result['X1D'][idx].flatten().nonzero()[0][0]  
+                start = result['X1D'][idx].flatten().nonzero()[0][0]
                 stop = result['X1D'][idx].flatten().nonzero()[0][-1]
                 conf_Intervals[idx,:,i] = [start,stop]
         elif mode == 'stripes':
             for idx in range(0,d):
                 (margin, x, weight1D) = marginalize(result, idx)
                 order = np.array(margin).argsort()[::-1]
-                
+
                 Mass = margin*weight1D
                 MassSort = np.cumsum(Mass[order])
                 #find smallest possible percentage above confP
                 confP1 = min(MassSort[MassSort > iConfP])
                 confRegionM = np.reshape(np.array([True]*np.size(margin),np.shape(margin)))
                 confRegionM[order[MassSort>confP1]] = False
-                '''             
+                '''
                 Now we have the confidence regions
                 put the borders between the nearest contained and the first
                 not contained point
-                
+
                 we move in from the outer points to collect the half of the
                 leftover confidence from each side
                 '''
@@ -74,7 +103,7 @@ def getConfRegion(result):
                 else:
                     start = x[startIndex]
                     pleft *= 2
-                
+
                 stopIndex = confRegionM.flatten().nonzero()[0][-1]
                 if stopIndex < len(x):
                     stop = (x[stopIndex]+x[stopIndex+1])/2
@@ -93,7 +122,7 @@ def getConfRegion(result):
                 else:
                     Mass = margin*weight1D
                     cumMass = np.cumsum(Mass)
-                    
+
                     confRegionM = np.logical_and(cumMass > (1-iConfP)/2,cumMass < (1-(1-iConfP)/2))
                     if any(confRegionM):
                         alpha = (1-iConfP)/2
@@ -102,7 +131,7 @@ def getConfRegion(result):
                             start = (x[startIndex-1]+x[startIndex])/2 + (alpha-cumMass[startIndex-1])/margin[startIndex]
                         else:
                             start = x[startIndex] + alpha/margin[startIndex]
-                        
+
                         stopIndex = confRegionM.flatten().nonzero()[0][-1]
                         if stopIndex < len(x):
                             stop = (x[stopIndex]+x[stopIndex+1])/2 + (1-alpha-cumMass[stopIndex])/margin[stopIndex+1]
@@ -115,10 +144,10 @@ def getConfRegion(result):
                         start = x[index] + ((1-iConfP)/2 - MMid)/margin[index]
                         stop = x[index] + ((1-(1-iConfP)/2)-MMid)/margin[index]
                 conf_Intervals[idx,:,i] = np.array([start, stop])
-                       
+
         else:
             raise ValueError('You specified an invalid mode')
-                
+
         i += 1
     return conf_Intervals
 
