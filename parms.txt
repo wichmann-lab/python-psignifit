@@ -1,0 +1,83 @@
+# classic
+lambda = lapse rate = (1-upper asymptote)
+gamma = guess rate = lower asymptote
+w = width = (x_0.95 - x_0.05), where S(x_0.95)==0.95 and S(x_0.05)==0.05
+[parameter width_alpha= -> alpha = 0.05 ⟶ scaling of the width such
+that: width = psi^(-1)(1-alpha) - psi^(-1)(alpha)]
+m = threshold = x_0.5, where S(x_0.5)==0.5
+
+D = deviance = goodness of fit
+
+# overdispersion parameter
+eta = varscale = 0 < eta <=1 (classic eta==0)
+
+# likelihood of the parameter vector
+# wrong ⟶ theta = (lambda, gamma, w, m, eta)
+theta = (m, w, lambda, gamma, eta)
+
+
+# NAFC -> gamma = 1/N
+# Equal asymptote -> lambda==gamma
+# yes/no -> lambda, gamma are free
+
+# problems: 
+- automatically generated code
+- interdependencies and global variables everywhere (absolutely
+  impossible to test, if not running the whole thing)
+- several relics of abandoned attempts (border type, dynamic grid,
+  grid types)
+- software looks more like it was used to produce the paper instead
+  of being a tool for users
+- intermix of user-set and automatically-set things
+- overwriting of user-set things
+- annoying warnings
+- language using "we", "could", "probably", "maybe", etc...,
+- completely ignores Ingos work, interface, and documentation
+- it is called psignifit 4 but has nothing to do with 3 nor with 2.5
+- parameters are called inconsistenly through the code
+  (alpha/threshold, beta/width, alpha/rescaling of width,
+  eta/varscale/interdispersion,
+- several copy&paste spread all over the place
+- paramters are indeces in a 1-d array, but their mapping to the
+  real parameters depends on which one are fixed, so
+  parms = [1,2,3]
+  it could be that 1 is threshold, but it could be width if
+  threshold was a fixed parameter...
+- the choice of using ncorrect instead of perc_correct doesn't seem
+  consistent through the code, in fact even psignifitCore.m is
+  mentioning expecting perc_correct in the docs of the function
+  while instead it expects ncorrect 
+- the "tests" in the paper are tests of the soundness of the method,
+  but do not show *at all* the the software is doing what it is
+  promising
+- the *main* calculations are happening in two functions called
+  "moveBorders" and "gridSettings" (confusing names, doesn't match
+  description in the paper)...
+- point estimate type, in the paper it says: MAP, mean, median, in
+  the code it is MAP/MEL (no difference between the two) and mean
+
+Details:
+- pooling utility: what is the rationale behind it? IMHO it should
+be used *before* fitting and *outside* of psignifit, maybe as
+a utility, but *not* forced on the user automatically! 
+- why use number correct instead of percent correct? (like in the
+old version?)
+- question: why running the optimization routine after the grid
+  search with an unconstrained method? Couldn't that escape from the 
+  grid borders? what is the tradeoff between having less gridpoints
+  and let the optimization run longer? why not refining the grid
+  even more until a certain convergence criterium is met? is the
+  likelihood a convex function? If not, how do we know we are not
+  stuck in a local minimum? how do we know that the grid is dense
+  enough not to misinterpret local minima for global minima?
+- nitpicking: university of tuebingen colormap in plots? really?
+- shouldn't the tolerance used in deciding how to restrict the grid
+  after evaluating the likelihood on the sparse grid be dependent on
+  the number of cuboids? Right now it is a fix proportion of the
+  total integral, 1e-05, but how big a proportion this is for cuboid
+  depends on the total cuboid number...
+
+- Heiko: current move_borders estimates the integral over the
+  marginals (but given that the parameters are not independent, that
+  will overestimate it), we can do it more easily by going directly
+  in the 5-d integral of the posterior
