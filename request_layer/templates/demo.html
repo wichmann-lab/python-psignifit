@@ -5,8 +5,6 @@
 		<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 		<script>
 			
-			console.log('start');
-
 			let payload = {
 				faked_data: [
 					[0.10,   45.0000,   90.0000],
@@ -31,8 +29,7 @@
 				data: payload
 			})
 			.then(function (response) {
-				console.log(response);
-				console.log('response log');
+				console.log("response:", response);
 			})
 			.catch(function (error) {
 				console.log(error);

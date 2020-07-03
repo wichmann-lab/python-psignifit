@@ -1,56 +1,44 @@
 from flask import Flask, request, render_template, jsonify
-#import json
 import numpy as np
 import psignifit as ps
 
-app = Flask(__name__, root_path='request_layer/')
+app = Flask(__name__, root_path='request_layer/') # make Flask look in the 'request_layer/' dir for templates etc, instead of in the root dir
 
 @app.route('/')
-def output():
+def output(): # serve the demo script - can delete if not needed or point at your experiment file
     return render_template('demo.html')
 
 @app.route("/psignifit", methods=['POST'])
-def calculate(): 
-    if request.get_json() is None: # some sanitising here - only allow JSON
-        # we should also check the the content length here
-        abort(404)
-    else:
-        recieved_data = request.get_json()
-        converted_data = recieved_data['faked_data']
-        faked_data = np.array([[0.10,   45.0000,   90.0000],
-                                 [0.15,   50.0000,   90.0000],
-                                 [0.20,   44.0000,   90.0000],
-                                 [0.25,   44.0000,   90.0000],
-                                 [0.30,   52.0000,   90.0000],
-                                 [0.35,   53.0000,   90.0000],
-                                 [0.40,   62.0000,   90.0000],
-                                 [0.45,   64.0000,   90.0000],
-                                 [0.50,   76.0000,   90.0000],
-                                 [0.60,   79.0000,   90.0000],
-                                 [0.70,   88.0000,   90.0000],
-                                 [0.80,   90.0000,   90.0000],
-                                 [0.90,   90.0000,   90.0000]]);
+def calculate():
+    if request.get_json() is None: # abort if not JSON (sanitise input)
+        abort(400)
+    elif request.content_length is not None and request.content_length > 1024: # let's also limit the size of permitted payloads to 1 KB
+        abort(413)
+    else: # if JSON, continue
+        recieved_data = request.get_json() # pull the data out of the POST request 
+        converted_data = recieved_data['faked_data'] # format of the POST comes in as a dict, so just select the array
 
-        options = dict();   # initialize as an empty dictionary
-        options['sigmoidName'] = 'norm';   # choose a cumulative Gauss as the sigmoid  
-        options['expType']     = '2AFC';   # choose 2-AFC as the experiment type  
-                                                                           # this sets the guessing rate to .5 (fixed) and  
-                                                                           # fits the rest of the parameters
+        # set up psignifit with some standard options
+        options = dict();
+        options['sigmoidName'] = 'norm';
+        options['expType']     = '2AFC';
+        # add any options here
+
+        # then run psignifit
+        # result = ps.psignifit(converted_data,options);
+
         options['threshPC']    = 0.9;
         result_upper = ps.psignifit(converted_data,options);
         options['threshPC']    = 0.7;
         result_lower = ps.psignifit(converted_data,options);
 
-        # example display all fit values as strings
-        # fit_info = ''
-        # for item in result['Fit']:
-        #	fit_info += str(item) + '\n'
-        # return fit_info
-        
-        thresholds = [result_upper['Fit'][0],result_lower['Fit'][0]]
+        ## example: pull threshold value and return it
+        # threshold = result['Fit'][0]
+        # response = jsonify(threshold) # we must first convert it to JSON
+        # return response # then return the JSON for the axios request to pick up
+        ## we could do the above in one line if we wanted: return jsonify(result['Fit'][0])
 
-        #upper_thresh = str(result_upper['Fit'][0]) 
-        #lower_thresh = str(result_lower['Fit'][0])
+        thresholds = [result_upper['Fit'][0],result_lower['Fit'][0]]
 
         return jsonify(thresholds)
 
