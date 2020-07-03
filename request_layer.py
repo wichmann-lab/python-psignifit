@@ -25,22 +25,13 @@ def calculate():
         # add any options here
 
         # then run psignifit
-        # result = ps.psignifit(converted_data,options);
+        result = ps.psignifit(converted_data,options);
 
-        options['threshPC']    = 0.9;
-        result_upper = ps.psignifit(converted_data,options);
-        options['threshPC']    = 0.7;
-        result_lower = ps.psignifit(converted_data,options);
-
-        ## example: pull threshold value and return it
-        # threshold = result['Fit'][0]
-        # response = jsonify(threshold) # we must first convert it to JSON
-        # return response # then return the JSON for the axios request to pick up
-        ## we could do the above in one line if we wanted: return jsonify(result['Fit'][0])
-
-        thresholds = [result_upper['Fit'][0],result_lower['Fit'][0]]
-
-        return jsonify(thresholds)
+        # example: pull threshold value and return it
+        threshold = result['Fit'][0]
+        response = jsonify(threshold) # we must first convert it to JSON
+        return response # then return the JSON for the axios request to pick up
+        # we could do the above in one line if we wanted: `return jsonify(result['Fit'][0])`
 
 if __name__ == "__main__":
 	app.run()
