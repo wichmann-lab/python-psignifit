@@ -3,7 +3,7 @@ from flask import Flask, request, render_template, jsonify
 import numpy as np
 import psignifit as ps
 
-app = Flask(__name__)
+app = Flask(__name__, root_path='request_layer/')
 
 @app.route('/')
 def output():
