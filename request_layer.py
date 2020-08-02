@@ -1,6 +1,22 @@
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, request, render_template, jsonify # import Flask and Flask dependencies
+import argparse # for dealing with command line argument inputs
+# import psignifit resources
 import numpy as np
 import psignifit as ps
+
+# create options to change host and port
+parser = argparse.ArgumentParser()
+parser.add_argument("-H", "--host", help="specify host")
+parser.add_argument("-P", "--port", help="specify port")
+args = parser.parse_args()
+if args.host:
+    print(" * changing host from default to {}".format(args.host))
+else:
+    print(" * running with default host 127.0.0.1")
+if args.port:
+    print(" * changing port from default to {}".format(args.port))
+else:
+    print(" * running with default port 5000")
 
 app = Flask(__name__, root_path='request_layer/') # make Flask look in the 'request_layer/' dir for templates etc, instead of in the root dir
 
@@ -34,4 +50,4 @@ def calculate():
         # we could do the above in one line if we wanted: `return jsonify(result['Fit'][0])`
 
 if __name__ == "__main__":
-	app.run()
+	app.run(host=args.host if args.host else None, port=args.port if args.port else None)
