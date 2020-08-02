@@ -40,6 +40,18 @@ Done!
 
 ## Usage
 
+### Quickstart
+
+Run the command:
+`python3 request_layer.py`
+
+By default, this will launch a Flask server on `localhost:5000`.
+
+To change the host use the flags `-H` or `--host`. To change the port use the flags `-P` or `--port`.
+
+For example to open the server to the network, and change the port to 8000:
+`python3 request_layer.py -H 0.0.0.0 -P 8000`
+
 ### Demo
 
 To demo the default behaviour, run
