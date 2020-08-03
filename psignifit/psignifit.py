@@ -401,7 +401,7 @@ def psignifitCore(data, options):
     '''Compute marginal distributions'''
 
     for idx in range(0,d):
-        m, mX, mW = marginalize(result, np.array([idx]))
+        m, mX, mW = marginalize(result,np.array(idx))
         result['marginals'].append(m)
         result['marginalsX'].append(mX)
         result['marginalsW'].append(mW)
@@ -724,7 +724,7 @@ def getThreshold(result,pCorrect, unscaled=False):
         threshold = theta0[0] + (np.log(-np.log(1-pCorrectUnscaled))-np.log(-np.log(1-PC)))*theta0[1]/C
     elif sigName in ['rgumbel','neg_rgumbel']:
         C      = np.log(-np.log(1-alpha)) - np.log(-np.log(alpha))
-        threshold = theta0[0] + (log(-log(pCorrectUnscaled))-log(-log(PC)))*theta0[1]/C
+        threshold = theta0[0] + (np.log(-np.log(pCorrectUnscaled))-np.log(-np.log(PC)))*theta0[1]/C
     elif sigName in ['logn','neg_logn']:
         C      = norminv(1-alpha) - norminv(alpha)
         threshold = np.exp(norminvg(pCorrectUnscaled, theta0[0]-norminvg(PC,0,theta0[1]/C), theta0[1] / C))
@@ -792,12 +792,12 @@ def getThreshold(result,pCorrect, unscaled=False):
     return (threshold,CI)
 
 
-def biasAna(data1, data2,options):
+def biasAna(data1, data2,options=dict()):
     """ function biasAna(data1,data2,options)
- runs a short analysis to see whether two 2AFC datasets have a bias and
- whether it can be explained with a "finger bias"-> a bias in guessing """
+    runs a short analysis to see whether two 2AFC datasets have a bias and
+    whether it can be explained with a "finger bias"-> a bias in guessing """
 
-    options = dict()
+    options = _deepcopy(options)
     options['borders'] = np.empty([5,2])
     options['borders'][:] = np.nan
     options['expType'] = 'YesNo'
@@ -819,7 +819,6 @@ def biasAna(data1, data2,options):
     a1 = plot.plt.axes([0.15,4.35/6,0.75,1.5/6])
 
     plot.plotPsych(resAll,showImediate=False)
-    plot.plt.hold(True)
 
     plot.plotPsych(res1, lineColor= [1,0,0], dataColor = [1,0,0],showImediate=False)
     plot.plotPsych(res2,lineColor= [0,0,1], dataColor = [0,0,1],showImediate=False)
@@ -828,7 +827,6 @@ def biasAna(data1, data2,options):
     a2 = plot.plt.axes([0.15,3.35/6,0.75,0.5/6])
 
     plot.plotMarginal(resAll,dim = 0,prior = False, CIpatch = False, lineColor = [0,0,0],showImediate=False)
-    plot.plt.hold(True)
 
     plot.plotMarginal(res1,dim = 0,lineColor = [1,0,0],showImediate=False)
     plot.plotMarginal(res2,dim = 0,lineColor=[0,0,1],showImediate=False)
@@ -837,7 +835,6 @@ def biasAna(data1, data2,options):
 
     a3 = plot.plt.axes([0.15,2.35/6,0.75,0.5/6])
     plot.plotMarginal(resAll,dim = 1,prior = False, CIpatch=False, lineColor = [0,0,0],showImediate=False)
-    plot.plt.hold(True)
 
     plot.plotMarginal(res1,dim = 1,lineColor=[1,0,0],showImediate=False)
     plot.plotMarginal(res2,dim = 1,lineColor=[0,0,1],showImediate=False)
@@ -847,7 +844,6 @@ def biasAna(data1, data2,options):
     a4 = plot.plt.axes([0.15,1.35/6,0.75,0.5/6])
 
     plot.plotMarginal(resAll,dim = 2, prior = False, CIpatch = False, lineColor = [0,0,0],showImediate=False)
-    plot.plt.hold(True)
 
     plot.plotMarginal(res1,dim = 2, lineColor=[1,0,0],showImediate=False)
     plot.plotMarginal(res2,dim=2, lineColor=[0,0,1],showImediate=False)
@@ -857,7 +853,6 @@ def biasAna(data1, data2,options):
     a5 = plot.plt.axes([0.15,0.35/6,0.75,0.5/6])
 
     plot.plotMarginal(resAll,dim = 3, prior = False, CIpatch = False, lineColor = [0,0,0],showImediate=False)
-    plot.plt.hold(True)
 
     plot.plotMarginal(res1,dim = 3, lineColor=[1,0,0],showImediate=False)
     plot.plotMarginal(res2,dim = 3, lineColor=[0,0,1],showImediate=False)
@@ -866,4 +861,33 @@ def biasAna(data1, data2,options):
     a5.autoscale_view()
 
     plot.plt.draw()
+
+def getDeviance(result,Nsamples=None):
+    fit = result['Fit']
+    data = result['data']
+    pPred = fit[3] + (1-fit[2]-fit[3]) * result['options']['sigmoidHandle'](data[:,0], fit[0], fit[1])
+
+    pMeasured = data[:,1]/data[:,2]
+    loglikelihoodPred = data[:,1]*np.log(pPred)+(data[:,2]-data[:,1])*np.log((1-pPred))
+    loglikelihoodMeasured = data[:,1]*np.log(pMeasured)+(data[:,2]-data[:,1])*np.log((1-pMeasured))
+    loglikelihoodMeasured[pMeasured==1] = 0;
+    loglikelihoodMeasured[pMeasured==0] = 0;
+
+    devianceResiduals = -2*np.sign(pMeasured-pPred)*(loglikelihoodMeasured - loglikelihoodPred)
+    deviance = np.sum(np.abs(devianceResiduals))
+
+    if Nsamples is None:
+        return devianceResiduals,deviance
+    else:
+        samples_devianceResiduals = np.zeros((Nsamples,data.shape[0]))
+        for iData in range(data.shape[0]):
+            samp_dat = np.random.binomial(data[iData,2],pPred[iData],Nsamples)
+            pMeasured = samp_dat/data[iData,2]
+            loglikelihoodPred = samp_dat*np.log(pPred[iData])+(data[iData,2]-samp_dat)*np.log(1-pPred[iData])
+            loglikelihoodMeasured = samp_dat*np.log(pMeasured)+(data[iData,2]-samp_dat)*np.log(1-pMeasured)
+            loglikelihoodMeasured[pMeasured==1] = 0
+            loglikelihoodMeasured[pMeasured==0] = 0
+            samples_devianceResiduals[:,iData] = -2*np.sign(pMeasured-pPred[iData])*(loglikelihoodMeasured - loglikelihoodPred)
+        samples_deviance = np.sum(np.abs(samples_devianceResiduals),axis=1)
+        return devianceResiduals,deviance,samples_devianceResiduals,samples_deviance
 

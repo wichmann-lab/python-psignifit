@@ -4,7 +4,7 @@
 """
 import numpy as np
 import psignifit as ps
-
+import matplotlib.pyplot as plt
 """
  --- SAVE DATA IN RIGHT FORMAT ---
 
@@ -102,6 +102,8 @@ res = ps.psignifit(data, options)
 """
 
 ps.psigniplot.plotPsych(res)
+
+plt.show()
 
 """
  --- REMARK FOR INSUFFICIENT MEMORY ISSUES ---
