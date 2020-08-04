@@ -4,8 +4,8 @@ import re
 
 import numpy as np
 
-from .utils import PsignifitException
 from . import sigmoids
+from .utils import PsignifitException
 
 
 class Conf:
@@ -28,36 +28,36 @@ class Conf:
     """
     # set of valid options for psignifit. Add new attributes to this tuple
     _valid_opts = (
-             'beta_prior',
-             'borders',
-             'CI_method',
-             'confP',
-             'dynamic_grid',
-             'estimate_type',
-             'experiment_type',
-             'fast_optim',
-             'fixed_parameters',
-             'grid_eval',
-             'grid_set_type',
-             'grid_steps',
-             'instant_plot',
-             'max_border_value',
-             'move_borders',
-             'parameters',
-             'pool_max_blocks',
-             'pool_max_gap',
-             'pool_max_length',
-             'pool_xtol',
-             'priors',
-             'sigmoid',
-             'steps_moving_borders',
-             'stimulus_range',
-             'thresh_PC',
-             'uniform_weight',
-             'verbose',
-             'width_alpha',
-             'width_min',
-             )
+        'beta_prior',
+        'borders',
+        'CI_method',
+        'confP',
+        'dynamic_grid',
+        'estimate_type',
+        'experiment_type',
+        'fast_optim',
+        'fixed_parameters',
+        'grid_eval',
+        'grid_set_type',
+        'grid_steps',
+        'instant_plot',
+        'max_border_value',
+        'move_borders',
+        'parameters',
+        'pool_max_blocks',
+        'pool_max_gap',
+        'pool_max_length',
+        'pool_xtol',
+        'priors',
+        'sigmoid',
+        'steps_moving_borders',
+        'stimulus_range',
+        'thresh_PC',
+        'uniform_weight',
+        'verbose',
+        'width_alpha',
+        'width_min',
+    )
 
     def __init__(self, **kwargs):
         # we only allow keyword arguments
@@ -103,10 +103,10 @@ class Conf:
             super().__setattr__(name, value)
         elif name in self._valid_opts:
             # first run checks for the supplied option, if any are available
-            if hasattr(self, 'check_'+name):
+            if hasattr(self, 'check_' + name):
                 # run the check
                 # the check method should raise if value is not valid
-                getattr(self, 'check_'+name)(value)
+                getattr(self, 'check_' + name)(value)
             super().__setattr__(name, value)
         else:
             raise PsignifitException(f'Invalid option "{name}"!')
@@ -130,12 +130,14 @@ class Conf:
             # borders is a dict in the form {'parameter_name': (left, right)}
             if type(value) != dict:
                 raise PsignifitException(
-         f'Option borders must be a dictionary ({type(value).__name__} given)!')
+                    f'Option borders must be a dictionary ({type(value).__name__} given)!'
+                )
             # now check that the keys in the dictionary are valid
             vkeys = self._parameters
             if vkeys < set(value.keys()):
                 raise PsignifitException(
-         f'Option borders keys must be in {vkeys}. Given {list(value.keys())}!')
+                    f'Option borders keys must be in {vkeys}. Given {list(value.keys())}!'
+                )
             # now check that the values are sequences of length 2
             for v in value.values():
                 try:
@@ -144,28 +146,29 @@ class Conf:
                     correct_length = False
                 if not correct_length:
                     raise PsignifitException(
-                           f'Borders must be a sequence of 2 items: {v} given!')
+                        f'Borders must be a sequence of 2 items: {v} given!')
 
     def check_fixed_parameters(self, value):
         if value is not None:
             # fixed parameters is a dict in the form {'parameter_name': value}
             if type(value) != dict:
                 raise PsignifitException(
-f'Option fixed_parameters must be a dictionary ({type(value).__name__} given)!')
+                    f'Option fixed_parameters must be a dictionary ({type(value).__name__} given)!'
+                )
             # now check that the keys in the dictionary are valid
             vkeys = self._parameters
             if vkeys < set(value.keys()):
                 raise PsignifitException(
- f'Option fixed_paramters keys must be in {vkeys}. Given {list(value.keys())}!')
-
+                    f'Option fixed_paramters keys must be in {vkeys}. Given {list(value.keys())}!'
+                )
 
     def check_experiment_type(self, value):
         cond1 = value in ('yes/no', 'equal asymptote')
         cond2 = re.match('[0-9]AFC', value)
         if not (cond1 or cond2):
             raise PsignifitException(
-        f'Invalid experiment type: "{value}"\nValid types: "yes/no",'+
-         ' "equal asymptote", "2AFC", "3AFC", etc...')
+                f'Invalid experiment type: "{value}"\nValid types: "yes/no",' +
+                ' "equal asymptote", "2AFC", "3AFC", etc...')
 
         self.grid_steps = {param: None for param in self._parameters}
         self.steps_moving_borders = {param: None for param in self._parameters}
@@ -217,7 +220,7 @@ f'Option fixed_parameters must be a dictionary ({type(value).__name__} given)!')
                 wrong_type = True
             if wrong_type or len_ != 2:
                 raise PsignifitException(
-                  f"Option stimulus range must be a sequence of two items!")
+                    f"Option stimulus range must be a sequence of two items!")
 
     def check_width_alpha(self, value):
         try:
@@ -226,9 +229,9 @@ f'Option fixed_parameters must be a dictionary ({type(value).__name__} given)!')
             wrong_type = False
         except Exception:
             wrong_type = True
-        if wrong_type or not ( 0 < diff < 1):
+        if wrong_type or not (0 < diff < 1):
             raise PsignifitException(
-             f"Option width_alpha must be between 0 and 1 ({value} given)!")
+                f"Option width_alpha must be between 0 and 1 ({value} given)!")
 
     def check_width_min(self, value):
         if value:
@@ -236,6 +239,3 @@ f'Option fixed_parameters must be a dictionary ({type(value).__name__} given)!')
                 _ = value + 1
             except Exception:
                 raise PsignifitException("Option width_min must be a number")
-
-
-

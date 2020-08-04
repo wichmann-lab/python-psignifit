@@ -2,9 +2,10 @@
  DEMO_001 BASIC USAGE
  The Psignifit 101
 """
-import numpy as np
-import psignifit as ps
 import matplotlib.pyplot as plt
+import numpy as np
+
+import psignifit as ps
 """
  --- SAVE DATA IN RIGHT FORMAT ---
 
@@ -14,19 +15,13 @@ import matplotlib.pyplot as plt
  detection experiment.
 """
 
-data = np.array([[0.0010,   45.0000,   90.0000],
-                 [0.0015,   50.0000,   90.0000],
-                 [0.0020,   44.0000,   90.0000],
-                 [0.0025,   44.0000,   90.0000],
-                 [0.0030,   52.0000,   90.0000],
-                 [0.0035,   53.0000,   90.0000],
-                 [0.0040,   62.0000,   90.0000],
-                 [0.0045,   64.0000,   90.0000],
-                 [0.0050,   76.0000,   90.0000],
-                 [0.0060,   79.0000,   90.0000],
-                 [0.0070,   88.0000,   90.0000],
-                 [0.0080,   90.0000,   90.0000],
-                 [0.0100,   90.0000,   90.0000]]);
+data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
+                 [0.0020, 44.0000, 90.0000], [0.0025, 44.0000, 90.0000],
+                 [0.0030, 52.0000, 90.0000], [0.0035, 53.0000, 90.0000],
+                 [0.0040, 62.0000, 90.0000], [0.0045, 64.0000, 90.0000],
+                 [0.0050, 76.0000, 90.0000], [0.0060, 79.0000, 90.0000],
+                 [0.0070, 88.0000, 90.0000], [0.0080, 90.0000, 90.0000],
+                 [0.0100, 90.0000, 90.0000]])
 """
  remark: This format differs slightly from the format used in older
  psignifit versions. You can convert your data by using the reformat
@@ -42,18 +37,16 @@ data = np.array([[0.0010,   45.0000,   90.0000],
  You can create an empty dictionary by simply calling <name> = dict()
 """
 
-options                = dict()   # initialize as an empty dict
-
+options = dict()  # initialize as an empty dict
 """
  Now you can set the different options with lines of the form
  <name>['<key>'] as in the following lines:
 """
 
-options['sigmoidName'] = 'norm'   # choose a cumulative Gauss as the sigmoid
-options['expType']     = '2AFC'   # choose 2-AFC as the paradigm of the experiment
-                                  # this sets the guessing rate to .5 and
-                                  # fits the rest of the parameters '''
-
+options['sigmoidName'] = 'norm'  # choose a cumulative Gauss as the sigmoid
+options['expType'] = '2AFC'  # choose 2-AFC as the paradigm of the experiment
+# this sets the guessing rate to .5 and
+# fits the rest of the parameters '''
 """
  There are 3 other types of experiments supported out of the box:
  
@@ -93,7 +86,6 @@ options['expType']     = '2AFC'   # choose 2-AFC as the paradigm of the experime
 """
 
 res = ps.psignifit(data, options)
-
 """
  --- VISUALIZE THE RESULTS ---
  
@@ -104,7 +96,6 @@ res = ps.psignifit(data, options)
 ps.psigniplot.plotPsych(res)
 
 plt.show()
-
 """
  --- REMARK FOR INSUFFICIENT MEMORY ISSUES ---
  
@@ -115,7 +106,6 @@ plt.show()
 
 del res['Posterior']
 del res['weight']
-
 """
  Without these fields you will not be able to use the 2D Bayesian plots
  anymore and the equalityTest will fail. All other functions work without

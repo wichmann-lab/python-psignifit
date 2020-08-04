@@ -8,7 +8,6 @@ psychometric function are considered for fitting and all confidence
 statements.
 There is no way to do Bayesian statistics without a prior.
 """
-
 """
 Staying with the standard
 
@@ -24,27 +23,20 @@ Staying with the standard
  data or with decreasing probability up two 3 times the range of the data.
 
 """
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 import psignifit as ps
-
 '''to illustrate this we plot the priors from our original example from
 demo_001: '''
 
-data = np.array([[0.0010,   45.0000,   90.0000],
-                 [0.0015,   50.0000,   90.0000],
-                 [0.0020,   44.0000,   90.0000],
-                 [0.0025,   44.0000,   90.0000],
-                 [0.0030,   52.0000,   90.0000],
-                 [0.0035,   53.0000,   90.0000],
-                 [0.0040,   62.0000,   90.0000],
-                 [0.0045,   64.0000,   90.0000],
-                 [0.0050,   76.0000,   90.0000],
-                 [0.0060,   79.0000,   90.0000],
-                 [0.0070,   88.0000,   90.0000],
-                 [0.0080,   90.0000,   90.0000],
-                 [0.0100,   90.0000,   90.0000]])
+data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
+                 [0.0020, 44.0000, 90.0000], [0.0025, 44.0000, 90.0000],
+                 [0.0030, 52.0000, 90.0000], [0.0035, 53.0000, 90.0000],
+                 [0.0040, 62.0000, 90.0000], [0.0045, 64.0000, 90.0000],
+                 [0.0050, 76.0000, 90.0000], [0.0060, 79.0000, 90.0000],
+                 [0.0070, 88.0000, 90.0000], [0.0080, 90.0000, 90.0000],
+                 [0.0100, 90.0000, 90.0000]])
 
 options = dict()
 options['expType'] = '2AFC'
@@ -53,7 +45,6 @@ options['sigmoidName'] = 'norm'
 res = ps.psignifit(data, options)
 
 ps.psigniplot.plotPrior(res)
-
 '''
 You should check that the assumptions we make for the heuristic to work
 are actually true in the case of your data.
@@ -65,7 +56,6 @@ threshold.
 (3) Your posterior concentrates on an area for which the prior was
 constant.
 '''
-
 """  
 adjusting the realistic range
  There are situations for which the assumptions for our standard prior
@@ -83,25 +73,16 @@ adjusting the realistic range
  the data is clearly violated.  
 '''
 
-data=np.array([[1.5000,   3.0000,   3.0000],
-            [1.3500,   3.0000,   3.0000],
-            [1.2150,   1.0000,   2.0000],
-            [1.3365,   2.0000,   3.0000],
-            [1.4702,   3.0000,   3.0000],
-            [1.3231,   3.0000,   3.0000],
-            [1.1908,   1.0000,   2.0000],
-            [1.3099,   3.0000,   3.0000],
-            [1.1789,   1.0000,   2.0000],
-            [1.2968,   2.0000,   3.0000],
-            [1.4265,   3.0000,   3.0000],
-            [1.2838,   1.0000,   2.0000],
-            [1.4122,   3.0000,   3.0000],
-            [1.2710,   1.0000,   2.0000],
-            [1.3981,   1.0000,   2.0000],
-            [1.5379,   1.0000,   2.0000],
-            [1.6917,   3.0000,   3.0000],
-            [1.5225,   3.0000,   3.0000],
-            [1.3703,   2.0000,   3.0000]])
+data = np.array([[1.5000, 3.0000, 3.0000], [1.3500, 3.0000, 3.0000],
+                 [1.2150, 1.0000, 2.0000], [1.3365, 2.0000, 3.0000],
+                 [1.4702, 3.0000, 3.0000], [1.3231, 3.0000, 3.0000],
+                 [1.1908, 1.0000, 2.0000], [1.3099, 3.0000, 3.0000],
+                 [1.1789, 1.0000, 2.0000], [1.2968, 2.0000, 3.0000],
+                 [1.4265, 3.0000, 3.0000], [1.2838, 1.0000, 2.0000],
+                 [1.4122, 3.0000, 3.0000], [1.2710, 1.0000, 2.0000],
+                 [1.3981, 1.0000, 2.0000], [1.5379, 1.0000, 2.0000],
+                 [1.6917, 3.0000, 3.0000], [1.5225, 3.0000, 3.0000],
+                 [1.3703, 2.0000, 3.0000]])
 
 # We fit this assuming the same lapse rate for yes and for no
 options = dict()
@@ -113,7 +94,6 @@ res = ps.psignifit(data, options)
 # We first have a look at the fitted function
 plt.figure()
 ps.psigniplot.plotPsych(res)
-
 '''
  You should notice that the percent correct is larger than 50 and we did 
  not measure a stimulus level clearly below threshold. Thus it might be 
@@ -126,9 +106,8 @@ ps.psigniplot.plotPsych(res)
  You can see how the prior influences the result by looking at the
  marginal plot for the threshold as well:
 '''
-#plt.figure()
-ps.psigniplot.plotMarginal(res,0)
-
+# plt.figure()
+ps.psigniplot.plotMarginal(res, 0)
 '''
  note that the dashed grey line, which marks the prior goes down where
  there is still posterior probability. This shows that the prior has an
@@ -143,8 +122,8 @@ ps.psigniplot.plotMarginal(res,0)
 options = dict()
 options['expType'] = 'equalAsymptote'
 
-options['stimulusRange'] = np.array([.5,1.5])
-resRange = ps.psignifit(data,options)
+options['stimulusRange'] = np.array([.5, 1.5])
+resRange = ps.psignifit(data, options)
 
 # We can now have a look how the prior changed:
 ps.psigniplot.plotPrior(resRange)
@@ -154,15 +133,14 @@ ps.psigniplot.plotPrior(resRange)
 # threshold is now dominated by the data everywhere.
 
 plt.figure()
-ps.psigniplot.plotMarginal(resRange,0)
+ps.psigniplot.plotMarginal(resRange, 0)
 
 # Finally we can also compare our new fitted psychometric function,
 # to see that even the point estimate for the psychometric function was
 # influenced by the prior here:
 plt.figure()
-ps.psigniplot.plotPsych(resRange)    
+ps.psigniplot.plotPsych(resRange)
 ps.psigniplot.plotPsych(res)
-
 """
 The prior on the betabinomial variance- adjusting how conservative to be
  With the betabinomial model we have an additional parameter which
@@ -186,54 +164,44 @@ The prior on the betabinomial variance- adjusting how conservative to be
 % conservative, once more progressively: '''
 
 # first again with standard settings:
-data = np.array([[0.0010,   45.0000,   90.0000],
-                 [0.0015,   50.0000,   90.0000],
-                 [0.0020,   44.0000,   90.0000],
-                 [0.0025,   44.0000,   90.0000],
-                 [0.0030,   52.0000,   90.0000],
-                 [0.0035,   53.0000,   90.0000],
-                 [0.0040,   62.0000,   90.0000],
-                 [0.0045,   64.0000,   90.0000],
-                 [0.0050,   76.0000,   90.0000],
-                 [0.0060,   79.0000,   90.0000],
-                 [0.0070,   88.0000,   90.0000],
-                 [0.0080,   90.0000,   90.0000],
-                 [0.0100,   90.0000,   90.0000]])
-                 
+data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
+                 [0.0020, 44.0000, 90.0000], [0.0025, 44.0000, 90.0000],
+                 [0.0030, 52.0000, 90.0000], [0.0035, 53.0000, 90.0000],
+                 [0.0040, 62.0000, 90.0000], [0.0045, 64.0000, 90.0000],
+                 [0.0050, 76.0000, 90.0000], [0.0060, 79.0000, 90.0000],
+                 [0.0070, 88.0000, 90.0000], [0.0080, 90.0000, 90.0000],
+                 [0.0100, 90.0000, 90.0000]])
+
 options = dict()
 options['expType'] = '2AFC'
 options['sigmoidName'] = 'norm'
 
 res = ps.psignifit(data, options)
 
-#first lets have a look at the results with the standard prior strength:
+# first lets have a look at the results with the standard prior strength:
 print('Fit:', res['Fit'])
 print('confidence Intervals:', res['conf_Intervals'])
 
 # now we recalculate with the smallest most conservative prior:
 options['betaPrior'] = 1
-res1 = ps.psignifit(data,options)
+res1 = ps.psignifit(data, options)
 
 # and with a very strong prior of 200
 options['betaPrior'] = 200
-res200 = ps.psignifit(data,options)
-
+res200 = ps.psignifit(data, options)
 ''' First see that the only parameter whose fit changes by this is the
  beta-variance parameter eta (the 5th) '''
 print('Fit with beta prior = 1: ', res1['Fit'])
 print('Fit with beta prior = 200: ', res200['Fit'])
 
-
 # Now we have a look at the confidence intervals
 print('confidence Intervals for beta prior = 1: ', res1['conf_Intervals'])
 print('confidence Intervals for beta prior = 200: ', res200['conf_Intervals'])
-
 '''They also do not change dramatically, but they are smaller for the 200 
  prior than for the 1 prior. 
 
  Our recommendation based on the simulations is to keep the 10 prior. If
  you have questions contact us. '''
-
 """ 
 passing custom priors
  This part explains how to use custom priors, when you do not want to use
@@ -245,13 +213,11 @@ passing custom priors
  of the psychometric funtion to a constant between 0 and .1 and zero
  elsewhere as it was done in the psignifit 2 toolbox.
  """
-
 ''' To use custom priors, first define the priors you want to use as function
  handles. '''
 # For our example this works as follows:
 
-priorLambda = lambda x: ((x>=0)*(x<=.1)).astype('float')
-
+priorLambda = lambda x: ((x >= 0) * (x <= .1)).astype('float')
 ''' Note that we did not normalize this prior. This is internally done by
  psignifit. 
  If you are not familiar with function handles and anonymous functions 
@@ -267,7 +233,6 @@ import copy
 options['priors'] = copy.deepcopy(res['options']['priors'])
 
 options['priors'][2] = priorLambda
-
 ''' 
  Most of the times you then have to adjust the borders of integration as
  well. This confines the region psignifit operates on. All values outside
@@ -276,11 +241,10 @@ options['priors'][2] = priorLambda
  automatically and state only the borders for lambda, which is the third
  parameter. '''
 
-options['borders'] = np.nan*np.ones((5,2))
-options['borders'][2,:]=np.array([0,.1])
+options['borders'] = np.nan * np.ones((5, 2))
+options['borders'][2, :] = np.array([0, .1])
 
-res = ps.psignifit(data,options)
-
+res = ps.psignifit(data, options)
 ''' 
  There will be a warning that the prior chosen here is zero at some
  values. This is true, but we intend it to be like this, constraining our
@@ -293,4 +257,3 @@ ps.psigniplot.plotPrior(res)
 
 plt.figure()
 ps.psigniplot.plotPsych(res)
-

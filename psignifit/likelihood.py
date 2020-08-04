@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
-import functools
 import numpy as np
 import scipy.special as sp
 
-from . import sigmoids
 from .utils import fp_error_handler, PsignifitException
 
 # this is the order in which the parameters are stored in the big
 # likelihood 5 dimensional matrix
 PARM_ORDER = ('threshold', 'width', 'lambda', 'gamma', 'eta')
+
 
 def likelihood(data, sigmoid=None, priors=None, grid=None):
     p = log_likelihood(data, sigmoid=sigmoid, priors=priors, grid=grid)
@@ -24,15 +23,14 @@ def likelihood(data, sigmoid=None, priors=None, grid=None):
 
 @fp_error_handler(divide='ignore')
 def log_likelihood(data, sigmoid=None, priors=None, grid=None):
-
     thres = grid['threshold']
     width = grid['width']
     lambd = grid['lambda']
     gamma = grid['gamma']
 
-    levels = data[:,0]
-    ncorrect = data[:,1]
-    ntrials = data[:,2]
+    levels = data[:, 0]
+    ncorrect = data[:, 1]
+    ntrials = data[:, 2]
 
     ###FIXME: fix treatment of no 'eta' configurations,
     # best choice is probably having grid['eta'] = [0]
@@ -43,20 +41,28 @@ def log_likelihood(data, sigmoid=None, priors=None, grid=None):
     # below, that currently does work for grid['eta'] -> None
     if grid['eta'] is None:
         v = None
-        thres, width, lambd, gamma = np.meshgrid(thres, width, lambd, gamma,
-                                                 copy=False, sparse=True,
+        thres, width, lambd, gamma = np.meshgrid(thres,
+                                                 width,
+                                                 lambd,
+                                                 gamma,
+                                                 copy=False,
+                                                 sparse=True,
                                                  indexing='ij')
     else:
         eta_std = grid['eta']
-        eta = eta_std**2 # use variance instead of standard deviation
-        v = 1/eta[eta > 1e-09] - 1
+        eta = eta_std**2  # use variance instead of standard deviation
+        v = 1 / eta[eta > 1e-09] - 1
 
         # for smaller variance we use the binomial model
         vbinom = (eta <= 1e-09).sum()
-        thres, width, lambd, gamma, v = np.meshgrid(thres, width, lambd, gamma,
-                                                    v, copy=False, sparse=True,
+        thres, width, lambd, gamma, v = np.meshgrid(thres,
+                                                    width,
+                                                    lambd,
+                                                    gamma,
+                                                    v,
+                                                    copy=False,
+                                                    sparse=True,
                                                     indexing='ij')
-
 
     scale = 1 - gamma - lambd
     ###FIXME: handle the case with equal_asymptote
@@ -76,38 +82,39 @@ def log_likelihood(data, sigmoid=None, priors=None, grid=None):
             # no trials at this stimulus level!
             continue
         # average predicted probability of correct
-        psi = sigmoid(x, thres, width)*scale + gamma
+        psi = sigmoid(x, thres, width) * scale + gamma
         if k == 0:
             # no correct
-            pbin += n * np.log(1-psi)
+            pbin += n * np.log(1 - psi)
             if v is not None:
-                b = (1-psi)*v
-                p += (sp.gammaln(n+b) - sp.gammaln(n+v) - sp.gammaln(b) +
+                b = (1 - psi) * v
+                p += (sp.gammaln(n + b) - sp.gammaln(n + v) - sp.gammaln(b) +
                       sp.gammaln(v))
         elif k == n:
             # all correct
             pbin += k * np.log(psi)
             if v is not None:
-                a = psi*v
-                p += (sp.gammaln(k+a) - sp.gammaln(n+v) - sp.gammaln(a) +
+                a = psi * v
+                p += (sp.gammaln(k + a) - sp.gammaln(n + v) - sp.gammaln(a) +
                       sp.gammaln(v))
         elif k < n:
             # some correct
-            psi_r = 1-psi
-            pbin += k*np.log(psi) + (n-k)*np.log(psi_r)
+            psi_r = 1 - psi
+            pbin += k * np.log(psi) + (n - k) * np.log(psi_r)
             if v is not None:
-                a = psi*v
-                b = (1-psi)*v
-                p += (sp.gammaln(k+a) + sp.gammaln(n-k+b) - sp.gammaln(n+v) -
-                      sp.gammaln(a) - sp.gammaln(b) + sp.gammaln(v))
+                a = psi * v
+                b = (1 - psi) * v
+                p += (sp.gammaln(k + a) + sp.gammaln(n - k + b) -
+                      sp.gammaln(n + v) - sp.gammaln(a) - sp.gammaln(b) +
+                      sp.gammaln(v))
         else:
             # we should never land here: we can't more ncorrect than ntrials
-            raise PsignifitException('ncorrect %d > ntrials %d!'%(k, n))
+            raise PsignifitException('ncorrect %d > ntrials %d!' % (k, n))
 
     if v is None:
         p = pbin
     else:
-        pbin = np.broadcast_to(pbin, pbin.shape[:4]+(vbinom,))
+        pbin = np.broadcast_to(pbin, pbin.shape[:4] + (vbinom,))
         p = np.concatenate((pbin, p), axis=4)
 
     # add priors on the corresponding axis (they get added on the right axis
@@ -139,7 +146,7 @@ def get_optm_llh(data, sigmoid=None, priors=None, grid=None):
             # insert value of fixed parameter at the right position
             y.insert(fidx, fval)
         # create a temporary grid with only one step (all params are fixed)
-        lgrid = {parm:y[idx] for idx, parm in enumerate(PARM_ORDER)}
+        lgrid = {parm: y[idx] for idx, parm in enumerate(PARM_ORDER)}
         return -log_likelihood(data, sigmoid=sigmoid, priors=priors, grid=lgrid)
 
     return cllh, fixed
