@@ -25,7 +25,7 @@ data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
                  [0.0100, 90.0000, 90.0000]])
 
 options = dict()
-options['expType'] = '2AFC'
+options.experiment_type = '2AFC'
 options['sigmoidName'] = 'norm'
 
 res = ps.psignifit(data, options)

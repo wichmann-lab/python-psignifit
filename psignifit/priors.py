@@ -85,7 +85,7 @@ def checkPriors(data, options):
         data[:, 0] = np.log(data[:, 0])
     """ on threshold
     values chosen according to standard boarders
-    at the borders it may be 0 -> a little inwards """
+    at the bounds it may be 0 -> a little inwards """
     data_min = np.min(data[:, 0])
     data_max = np.max(data[:, 0])
     dataspread = data_max - data_min

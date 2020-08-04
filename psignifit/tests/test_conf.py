@@ -73,24 +73,24 @@ def test_set_wrong_experiment_type():
         Conf(experiment_type='foobar')
 
 
-def test_set_borders_with_nondict():
+def test_set_bounds_with_nondict():
     with pytest.raises(PsignifitException):
-        Conf(borders=(1, 2, 3))
+        Conf(bounds=(1, 2, 3))
 
 
-def test_set_borders_with_wrong_key():
+def test_set_bounds_with_wrong_key():
     with pytest.raises(PsignifitException):
-        Conf(borders={'foo': 'bar'})
+        Conf(bounds={'foo': 'bar'})
 
 
-def test_set_borders_with_wrong_value1():
+def test_set_bounds_with_wrong_value1():
     with pytest.raises(PsignifitException):
-        Conf(borders={'threshold': 10})
+        Conf(bounds={'threshold': 10})
 
 
-def test_set_borders_with_wrong_value2():
+def test_set_bounds_with_wrong_value2():
     with pytest.raises(PsignifitException):
-        Conf(borders={'threshold': (1, 2, 3)})
+        Conf(bounds={'threshold': (1, 2, 3)})
 
 
 def test_set_wrong_sigmoid():

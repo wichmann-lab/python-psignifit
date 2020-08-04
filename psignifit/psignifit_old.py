@@ -7,7 +7,7 @@ from copy import deepcopy as _deepcopy
 import numpy as np
 import scipy
 
-from . import borders as _b
+from . import bounds as _b
 from . import likelihood as _l
 from . import priors as _p
 from . import psigniplot as plot
@@ -62,8 +62,8 @@ def psignifit(data, optionsIn):
     if not ('sigmoidName' in options.keys()):
         options['sigmoidName'] = 'norm'
 
-    if not ('expType' in options.keys()):
-        options['expType'] = 'YesNo'
+    if not ('experiment_type' in options.keys()):
+        options.experiment_type = ExperimentType.YES_NO
 
     if not ('estimateType' in options.keys()):
         options['estimateType'] = 'MAP'
@@ -74,14 +74,14 @@ def psignifit(data, optionsIn):
     if not ('instantPlot' in options.keys()):
         options['instantPlot'] = 0
 
-    if not ('setBordersType' in options.keys()):
-        options['setBordersType'] = 0
+    if not ('setBoundsType' in options.keys()):
+        options['setBoundsType'] = 0
 
-    if not ('maxBorderValue' in options.keys()):
-        options['maxBorderValue'] = .00001
+    if not ('maxBoundValue' in options.keys()):
+        options['maxBoundValue'] = .00001
 
-    if not ('moveBorders' in options.keys()):
-        options['moveBorders'] = 1
+    if not ('moveBounds' in options.keys()):
+        options['moveBounds'] = 1
 
     if not ('dynamicGrid' in options.keys()):
         options['dynamicGrid'] = 0
@@ -129,21 +129,21 @@ def psignifit(data, optionsIn):
     if not ('fastOptim' in options.keys()):
         options['fastOptim'] = False
 
-    if options['expType'] in ['2AFC', '3AFC', '4AFC']:
-        options['expN'] = int(float(options['expType'][0]))
-        options['expType'] = 'nAFC'
+    if options.experiment_type in ['2AFC', '3AFC', '4AFC']:
+        options.experiment_choices = int(float(options.experiment_type[0]))
+        options.experiment_type = ExperimentType.N_AFC
 
-    if options['expType'] == 'nAFC' and not ('expN' in options.keys()):
+    if options.experiment_type == ExperimentType.N_AFC and not ('experiment_choices' in options.keys()):
         raise ValueError(
-            'For nAFC experiments please also pass the number of alternatives (options.expN)'
+            'For nAFC experiments please also pass the number of alternatives (options.experiment_choices)'
         )
 
-    if options['expType'] == 'YesNo':
+    if options.experiment_type == ExperimentType.YES_NO:
         if not ('stepN' in options.keys()):
             options['stepN'] = [40, 40, 20, 20, 20]
         if not ('mbStepN' in options.keys()):
             options['mbStepN'] = [25, 30, 10, 10, 15]
-    elif options['expType'] == 'nAFC' or options['expType'] == 'equalAsymptote':
+    elif options.experiment_type == ExperimentType.N_AFC or options.experiment_type == ExperimentType.EQ_ASYMPTOTE:
         if not ('stepN' in options.keys()):
             options['stepN'] = [40, 40, 20, 1, 20]
         if not ('mbStepN' in options.keys()):
@@ -159,7 +159,7 @@ def psignifit(data, optionsIn):
     we fit these functions with a log transformed physical axis
     This is because it makes the paramterization easier and also the priors
     fit our expectations better then.
-    The flag is needed for the setting of the parameter bounds in setBorders
+    The flag is needed for the setting of the parameter bounds in setBounds
     '''
 
     if options['sigmoidName'] in ['Weibull', 'logn', 'weibull']:
@@ -250,49 +250,49 @@ def psignifit(data, optionsIn):
     # create function handle of sigmoid
     # options['sigmoidHandle'] = getSigmoidHandle(options)
 
-    # borders of integration
-    if 'borders' in options.keys():
-        borders = _b.setBorders(data, options)
-        options['borders'][np.isnan(options['borders'])] = borders[np.isnan(
-            options['borders'])]
+    # bounds of integration
+    if 'bounds' in options.keys():
+        bounds = _b.setBounds(data, options)
+        options['bounds'][np.isnan(options['bounds'])] = bounds[np.isnan(
+            options['bounds'])]
     else:
-        options['borders'] = _b.setBorders(data, options)
+        options['bounds'] = _b.setBounds(data, options)
 
-    border_idx = np.where(np.isnan(options['fixedPars']) == False)
-    print(border_idx)
-    if (border_idx[0].size > 0):
-        options['borders'][border_idx[0], 0] = options['fixedPars'][
-            border_idx[0]]
-        options['borders'][border_idx[0], 1] = options['fixedPars'][
-            border_idx[0]]
+    bound_idx = np.where(np.isnan(options['fixedPars']) == False)
+    print(bound_idx)
+    if (bound_idx[0].size > 0):
+        options['bounds'][bound_idx[0], 0] = options['fixedPars'][
+            bound_idx[0]]
+        options['bounds'][bound_idx[0], 1] = options['fixedPars'][
+            bound_idx[0]]
 
-    # normalize priors to first choice of borders
+    # normalize priors to first choice of bounds
     options['priors'] = _p.normalizePriors(options)
-    if options['moveBorders']:
-        options['borders'] = _b.moveBorders(data, options)
+    if options['moveBounds']:
+        options['bounds'] = _b.moveBounds(data, options)
     ''' core '''
     result = psignifitCore(data, options)
     ''' after processing '''
-    # check that the marginals go to nearly 0 at the borders of the grid
+    # check that the marginals go to nearly 0 at the bounds of the grid
     if options['verbose'] > -5:
 
         if result['marginals'][0][0] * result['marginalsW'][0][0] > .001:
-            warnings.warn('psignifit:borderWarning\n' \
-                          'The marginal for the threshold is not near 0 at the lower border.\n' \
+            warnings.warn('psignifit:boundWarning\n' \
+                          'The marginal for the threshold is not near 0 at the lower bound.\n' \
                           'This indicates that smaller Thresholds would be possible.')
         if result['marginals'][0][-1] * result['marginalsW'][0][-1] > .001:
-            warnings.warn('psignifit:borderWarning\n' \
-                          'The marginal for the threshold is not near 0 at the upper border.\n' \
+            warnings.warn('psignifit:boundWarning\n' \
+                          'The marginal for the threshold is not near 0 at the upper bound.\n' \
                           'This indicates that your data is not sufficient to exclude much higher thresholds.\n' \
                           'Refer to the paper or the manual for more info on this topic.')
         if result['marginals'][1][0] * result['marginalsW'][1][0] > .001:
-            warnings.warn('psignifit:borderWarning\n' \
-                          'The marginal for the width is not near 0 at the lower border.\n' \
+            warnings.warn('psignifit:boundWarning\n' \
+                          'The marginal for the width is not near 0 at the lower bound.\n' \
                           'This indicates that your data is not sufficient to exclude much lower widths.\n' \
                           'Refer to the paper or the manual for more info on this topic.')
         if result['marginals'][1][-1] * result['marginalsW'][1][-1] > .001:
-            warnings.warn('psignifit:borderWarning\n' \
-                          'The marginal for the width is not near 0 at the lower border.\n' \
+            warnings.warn('psignifit:boundWarning\n' \
+                          'The marginal for the width is not near 0 at the lower bound.\n' \
                           'This indicates that your data is not sufficient to exclude much higher widths.\n' \
                           'Refer to the paper or the manual for more info on this topic.')
 
@@ -338,7 +338,7 @@ def psignifitCore(data, options):
     the width (distance containing 95% of the function.
     """
 
-    d = len(options['borders'])
+    d = len(options['bounds'])
     result = {'X1D': [], 'marginals': [], 'marginalsX': [], 'marginalsW': []}
     '''Choose grid dynamically from data'''
     if options['dynamicGrid']:
@@ -346,15 +346,15 @@ def psignifitCore(data, options):
         Seed = getSeed(data, options)
 
         # further optimize the logliklihood to obtain a good estimate of the MAP
-        if options['expType'] == 'YesNo':
+        if options.experiment_type == ExperimentType.YES_NO:
             calcSeed = lambda X: -_l.logLikelihood(data, options, X[0], X[1], X[
                 2], X[3], X[4])
             Seed = scipy.optimize.fmin(func=calcSeed, x0=Seed)
-        elif options['expType'] == 'nAFC':
+        elif options.experiment_type == ExperimentType.N_AFC:
             calcSeed = lambda X: -_l.logLikelihood(data, options, X[0], X[1], X[
-                2], 1 / options['expN'], X[3])
+                2], 1 / options.experiment_choices, X[3])
             Seed = scipy.optimize.fmin(func=calcSeed, x0=[Seed[0:2], Seed[4]])
-            Seed = [Seed[0:2], 1 / options['expN'],
+            Seed = [Seed[0:2], 1 / options.experiment_choices,
                     Seed[3]]  # ToDo check whether row or colum vector
         result['X1D'] = gridSetting(data, options, Seed)
 
@@ -367,15 +367,15 @@ def psignifitCore(data, options):
         else:  # Use a linear grid
             for idx in range(0, d):
                 # If there is an actual Interval
-                if options['borders'][idx, 0] < options['borders'][idx, 1]:
+                if options['bounds'][idx, 0] < options['bounds'][idx, 1]:
 
                     result['X1D'].append(
-                        np.linspace(options['borders'][idx, 0],
-                                    options['borders'][idx, 1],
+                        np.linspace(options['bounds'][idx, 0],
+                                    options['bounds'][idx, 1],
                                     num=options['stepN'][idx]))
                 # if parameter was fixed
                 else:
-                    result['X1D'].append(np.array([options['borders'][idx, 0]]))
+                    result['X1D'].append(np.array([options['bounds'][idx, 0]]))
     '''Evaluate likelihood and form it into a posterior'''
 
     (result['Posterior'],
@@ -408,13 +408,13 @@ def psignifitCore(data, options):
         for idx in range(0, d):
             Fit[idx] = result['X1D'][idx][index[idx]]
 
-        if options['expType'] == 'YesNo':
+        if options.experiment_type == ExperimentType.YES_NO:
             fun = lambda X, f: -_l.logLikelihood(data, options,
                                                  [X[0], X[1], X[2], X[3], X[4]])
             x0 = _deepcopy(Fit)
             a = None
 
-        elif options['expType'] == 'nAFC':
+        elif options.experiment_type == ExperimentType.N_AFC:
             # def func(X,f):
             #    return -_l.logLikelihood(data,options, [X[0], X[1], X[2], f, X[3]])
             # fun = func
@@ -422,9 +422,9 @@ def psignifitCore(data, options):
                                                  [X[0], X[1], X[2], f, X[3]])
             x0 = _deepcopy(Fit[0:3])  # Fit[3]  is excluded
             x0 = np.append(x0, _deepcopy(Fit[4]))
-            a = np.array([1 / options['expN']])
+            a = np.array([1 / options.experiment_choices])
 
-        elif options['expType'] == 'equalAsymptote':
+        elif options.experiment_type == ExperimentType.EQ_ASYMPTOTE:
             fun = lambda X, f: -_l.logLikelihood(data, options,
                                                  [X[0], X[1], X[2], f, X[3]])
             x0 = _deepcopy(Fit[0:3])
@@ -432,7 +432,7 @@ def psignifitCore(data, options):
             a = np.array([np.nan])
 
         else:
-            raise ValueError('unknown expType')
+            raise ValueError('unknown experiment_type')
 
         if options['fastOptim']:
             Fit = scipy.optimize.fmin(fun,
@@ -446,20 +446,20 @@ def psignifitCore(data, options):
         else:
             Fit = scipy.optimize.fmin(fun, x0, args=(a,), disp=False)
 
-        if options['expType'] == 'YesNo':
+        if options.experiment_type == ExperimentType.YES_NO:
             result['Fit'] = _deepcopy(Fit)
-        elif options['expType'] == 'nAFC':
+        elif options.experiment_type == ExperimentType.N_AFC:
             fit = _deepcopy(Fit[0:3])
-            fit = np.append(fit, np.array([1 / options['expN']]))
+            fit = np.append(fit, np.array([1 / options.experiment_choices]))
             fit = np.append(fit, _deepcopy(Fit[3]))
             result['Fit'] = fit
-        elif options['expType'] == 'equalAsymptote':
+        elif options.experiment_type == ExperimentType.EQ_ASYMPTOTE:
             fit = _deepcopy(Fit[0:3])
             fit = np.append(fit, Fit[2])
             fit = np.append(fit, Fit[3])
             result['Fit'] = fit
         else:
-            raise ValueError('unknown expType')
+            raise ValueError('unknown experiment_type')
 
         par_idx = np.where(np.isnan(options['fixedPars']) == False)
         for idx in par_idx[0]:
@@ -882,14 +882,14 @@ def biasAna(data1, data2, options):
  whether it can be explained with a "finger bias"-> a bias in guessing """
 
     options = dict()
-    options['borders'] = np.empty([5, 2])
-    options['borders'][:] = np.nan
-    options['expType'] = 'YesNo'
+    options['bounds'] = np.empty([5, 2])
+    options['bounds'][:] = np.nan
+    options.experiment_type = ExperimentType.YES_NO
 
     options['priors'] = [None] * 5
     options['priors'][3] = lambda x: scipy.stats.beta.pdf(x, 2, 2)
-    options['borders'][2, :] = np.array([0, .1])
-    options['borders'][3, :] = np.array([.11, .89])
+    options['bounds'][2, :] = np.array([0, .1])
+    options['bounds'][3, :] = np.array([.11, .89])
     options['fixedPars'] = np.ones([5, 1]) * np.nan
     options['fixedPars'][4] = 0
     options['stepN'] = np.array([40, 40, 40, 40, 1])

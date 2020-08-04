@@ -3,7 +3,7 @@
 creates the weights for quadrature / numerical integration
 function weight=getWeights(X1D)
 this function calculates the weights for integration/the volume of the
-cuboids given by the 1 dimensional borders in X1D
+cuboids given by the 1 dimensional bounds in X1D
 
 """
 from numpy import tile, reshape, ones, array, newaxis, where, multiply, convolve

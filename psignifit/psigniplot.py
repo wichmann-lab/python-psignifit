@@ -56,8 +56,8 @@ def plotPsych(result,
     if data.size == 0: return
     if dataSize == 0: dataSize = 10000. / np.sum(data[:, 2])
 
-    if 'nAFC' in options['expType']:
-        ymin = 1. / options['expN']
+    if ExperimentType.N_AFC == options.experiment_type:
+        ymin = 1. / options.experiment_choices
         ymin = min([ymin, min(data[:, 1] / data[:, 2])])
     else:
         ymin = 0
@@ -201,8 +201,8 @@ def plotsModelfit(result, showImediate=True):
     plt.plot(data[:, 0], data[:, 1] / data[:, 2], '.k', ms=10, clip_on=False)
 
     plt.xlim(stimRange)
-    if options['expType'] == 'nAFC':
-        plt.ylim([min(1. / options['expN'], min(data[:, 1] / data[:, 2])), 1])
+    if options.experiment_type == ExperimentType.N_AFC:
+        plt.ylim([min(1. / options.experiment_choices, min(data[:, 1] / data[:, 2])), 1])
     else:
         plt.ylim([0, 1])
     plt.xlabel('Stimulus Level', fontsize=14)
@@ -404,7 +404,7 @@ def plotPrior(result,
     stimRange = result['options']['stimulusRange']
     r = stimRange[1] - stimRange[0]
 
-    # get borders for width
+    # get bounds for width
     # minimum = minimal difference of two stimulus levels
 
     if len(np.unique(data[:, 0])) > 1 and not (stimRangeSet):
@@ -438,10 +438,10 @@ def plotPrior(result,
         y = result['options']['priors'][itheta](x)
         theta[itheta] = np.sum(x * y) / np.sum(y)
 
-    if result['options']['expType'] == 'equalAsymptote':
+    if result['options'].experiment_type == ExperimentType.EQ_ASYMPTOTE:
         theta[3] = theta[2]
-    if result['options']['expType'] == 'nAFC':
-        theta[3] = 1 / result['options']['expN']
+    if result['options'].experiment_type == ExperimentType.N_AFC:
+        theta[3] = 1 / result['options'].experiment_choices
 
     # get limits for the psychometric function plots
     xLimit = [stimRange[0] - .5 * r, stimRange[1] + .5 * r]

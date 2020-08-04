@@ -34,12 +34,12 @@ class fp_error_handler(np.errstate):
     pass
 
 
-def get_grid(borders, steps):
-    """Return uniformely spaced grid within given borders.
+def get_grid(bounds, steps):
+    """Return uniformely spaced grid within given bounds.
 
     Input Parameters:
 
-       borders  - a dictionary {parameter : (min_val, max_val)}
+       bounds  - a dictionary {parameter : (min_val, max_val)}
        steps    - a dictionary {parameter : nsteps}
 
     where `nsteps` is the number of steps in the grid.
@@ -49,11 +49,11 @@ def get_grid(borders, steps):
         grid    - a dictionary {parameter: (min_val, val1, val2, ..., max_val)}
     """
     grid = {}
-    for param in borders:
-        if borders[param] is None:
+    for param in bounds:
+        if bounds[param] is None:
             grid[param] == None
         else:
-            grid[param] = np.linspace(*borders[param], num=steps[param])
+            grid[param] = np.linspace(*bounds[param], num=steps[param])
     return grid
 
 
@@ -105,7 +105,7 @@ def nd_integrate(func, grid):
         else:
             delta = np.empty_like(steps)
             delta[1:] = np.diff(steps)
-            # delta weight is half at the borders of the integration interval
+            # delta weight is half at the bounds of the integration interval
             delta[0] = delta[1] / 2
             delta[-1] = delta[-1] / 2
             deltas.append(delta)

@@ -32,7 +32,7 @@ def getSeed(data, options):
     # rescale y
     y = (y - gamma) / (1 - l - gamma)
     '''prevent 0 and 1 as bad input for the logit. This moves the data in 
-    from the borders by .25 of a trial from up and .25 of a trial from the
+    from the bounds by .25 of a trial from up and .25 of a trial from the
     bottom'''
     factor = .25 / np.array(data[:, 2])
     y = factor + (1 - 2 * factor) * y

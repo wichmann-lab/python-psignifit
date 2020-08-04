@@ -11,7 +11,7 @@ import scipy.optimize as spo
 from . import priors as _priors
 from . import psigniplot as plot
 from . import sigmoids
-from .borders import parameter_ranges
+from .bounds import parameter_bounds
 from .conf import Conf
 from .getConfRegion import getConfRegion
 from .getSeed import getSeed
@@ -19,6 +19,7 @@ from .getWeights import getWeights
 from .gridSetting import gridSetting
 from .likelihood import likelihood, PARM_ORDER, get_optm_llh
 from .marginalize import marginalize
+from .typing import ExperimentType
 from .utils import (norminv, norminvg, t1icdf, pool_data, nd_integrate,
                     PsignifitException, normalize, get_grid)
 
@@ -45,7 +46,7 @@ def psignifit(data, conf=None, **kwargs):
     if conf is None:
         conf = Conf(**kwargs)
     elif isinstance(conf, dict):
-        conf = Conf(**kwargs)
+        conf = Conf(**conf)
     elif len(kwargs) > 0:
         # user shouldn't specify a conf object *and* kwargs simultaneously
         raise PsignifitException(
@@ -75,18 +76,18 @@ def psignifit(data, conf=None, **kwargs):
 
     # options
 
-    # if options['expType'] in ['2AFC', '3AFC', '4AFC']:
-    #    options['expN'] = int(float(options['expType'][0]))
-    #    options['expType'] = 'nAFC'
+    # if options.experiment_type in ['2AFC', '3AFC', '4AFC']:
+    #    options.experiment_choices = int(float(options.experiment_type[0]))
+    #    options.experiment_type = ExperimentType.N_AFC
 
-    # if options['expType'] == 'nAFC' and not('expN' in options.keys()):
-    #    raise ValueError('For nAFC experiments please also pass the number of alternatives (options.expN)')
+    # if options.experiment_type == ExperimentType.N_AFC and not('experiment_choices' in options.keys()):
+    #    raise ValueError('For nAFC experiments please also pass the number of alternatives (options.experiment_choices)')
 
     # log space sigmoids
     # we fit these functions with a log transformed physical axis
     # This is because it makes the paramterization easier and also the priors
     # fit our expectations better then.
-    # The flag is needed for the setting of the parameter bounds in setBorders
+    # The flag is needed for the setting of the parameter bounds in setBounds
 
     # options['sigmoidName'] in ['Weibull','logn','weibull']:
     #        options['logspace'] = 1
@@ -194,32 +195,29 @@ levels,which is frequently invalid for adaptive procedures!""")
                          max_gap=conf.pool_max_gap,
                          max_length=conf.pool_max_length)
 
-    # borders of integration
+    # bounds of integration
     exp_type = conf.experiment_type
-    borders = parameter_ranges(data,
-                               wmin=width_min,
-                               etype=exp_type,
-                               srange=stimulus_range,
-                               alpha=width_alpha)
+    bounds = parameter_bounds(wmin=width_min, etype=exp_type, srange=stimulus_range,
+                              alpha=width_alpha, echoices = conf.experiment_choices)
 
     # override at user request
-    if conf.borders is not None:
-        borders.update(conf.borders)
+    if conf.bounds is not None:
+        bounds.update(conf.bounds)
 
     # XXX FIXME: take care of fixed parameters later!
-    ##### plan would be to just define left_border=right_border
-    # border_idx = np.where(np.isnan(options['fixedPars']) == False);
-    # print(border_idx)
-    # if (border_idx[0].size > 0):
-    # options['borders'][border_idx[0],0] = options['fixedPars'][border_idx[0]]
-    # options['borders'][border_idx[0],1] = options['fixedPars'][border_idx[0]]
+    ##### plan would be to just define left_bound=right_bound
+    # bound_idx = np.where(np.isnan(options['fixedPars']) == False);
+    # print(bound_idx)
+    # if (bound_idx[0].size > 0):
+    # options['bounds'][bound_idx[0],0] = options['fixedPars'][bound_idx[0]]
+    # options['bounds'][bound_idx[0],1] = options['fixedPars'][bound_idx[0]]
 
-    # normalize priors to first choice of borders
+    # normalize priors to first choice of bounds
     for parameter, prior in priors.items():
-        priors[parameter] = normalize(prior, borders[parameter])
+        priors[parameter] = normalize(prior, bounds[parameter])
 
     # do first sparse grid likelihood evaluation
-    grid = get_grid(borders, conf.steps_moving_borders)
+    grid = get_grid(bounds, conf.steps_moving_bounds)
     llh_sparse, llh_max, llh_max_idx, grid_max = likelihood(data,
                                                             sigmoid=sigmoid,
                                                             priors=priors,
@@ -236,7 +234,7 @@ levels,which is frequently invalid for adaptive procedures!""")
     #     ###TODO!!!###
     #     new_tol = (old_told*grid_1*grid_2*grid_3)/(grid_1*grid_2*grid_3)
     #     set a minimum though, should never be less than 1e-05
-    tol = conf.max_border_value
+    tol = conf.max_bound_value
     volumes = llh_sparse * weights
     # indices on the grid of the volumes that contribute more than `tol` to the
     # overall integral
@@ -245,15 +243,15 @@ levels,which is frequently invalid for adaptive procedures!""")
         pgrid = grid[parm]
         # get the indeces for this parameter's axis and sort it
         axis = np.sort(mask[idx])
-        # new borders are the extrema of this axis, but enlarged of one element
+        # new bounds are the extrema of this axis, but enlarged of one element
         # in both directions
         left = max(0, axis[0] - 1)
         right = min(axis[-1] + 1, len(pgrid) - 1)
-        # update the borders
-        borders[parm] = (pgrid[left], pgrid[right])
+        # update the bounds
+        bounds[parm] = (pgrid[left], pgrid[right])
 
     # do dense grid likelihood evaluation
-    grid = get_grid(borders, conf.grid_steps)
+    grid = get_grid(bounds, conf.grid_steps)
 
     llh, llh_max, llh_max_idx, grid_max = likelihood(data,
                                                      sigmoid=sigmoid,
@@ -275,7 +273,7 @@ levels,which is frequently invalid for adaptive procedures!""")
 
     for fidx, fval in fixed:
         fit.insert(fidx, fval)
-    # bounds = [borders[parm] for parm in parm_order]
+    # bounds = [bounds[parm] for parm in parm_order]
     # print(bounds)
     # fit = spo.minimize(optm_likelihood, grid_max, method='SLSQP', bounds=bounds,
     # options={'disp':True})
@@ -303,34 +301,34 @@ levels,which is frequently invalid for adaptive procedures!""")
 
     # XXX FIXME: take care of post-ptocessing later
     # ''' after processing '''
-    # # check that the marginals go to nearly 0 at the borders of the grid
+    # # check that the marginals go to nearly 0 at the bounds of the grid
     # if options['verbose'] > -5:
     ### TODO ###
-    # when the marginal on the borders not smaller than 1/1000 of the peak
+    # when the marginal on the bounds not smaller than 1/1000 of the peak
     # it means that the prior of the corresponding parameter has an influence of
     # the result ( 1)prior may be too narrow, 2) you know what you are doing).
     # if they were using the default, this is a bug in the software or your data
     # are highly unusual, if they changed the defaults the error can be more verbose
-    # "the choice of your prior or of your borders has a significant influence on the
+    # "the choice of your prior or of your bounds has a significant influence on the
     # confidence interval widths and or the max likelihood estimate"
     #########
     # if result['marginals'][0][0] * result['marginalsW'][0][0] > .001:
-    # warnings.warn('psignifit:borderWarning\n'\
-    # 'The marginal for the threshold is not near 0 at the lower border.\n'\
+    # warnings.warn('psignifit:boundWarning\n'\
+    # 'The marginal for the threshold is not near 0 at the lower bound.\n'\
     # 'This indicates that smaller Thresholds would be possible.')
     # if result['marginals'][0][-1] * result['marginalsW'][0][-1] > .001:
-    # warnings.warn('psignifit:borderWarning\n'\
-    # 'The marginal for the threshold is not near 0 at the upper border.\n'\
+    # warnings.warn('psignifit:boundWarning\n'\
+    # 'The marginal for the threshold is not near 0 at the upper bound.\n'\
     # 'This indicates that your data is not sufficient to exclude much higher thresholds.\n'\
     # 'Refer to the paper or the manual for more info on this topic.')
     # if result['marginals'][1][0] * result['marginalsW'][1][0] > .001:
-    # warnings.warn('psignifit:borderWarning\n'\
-    # 'The marginal for the width is not near 0 at the lower border.\n'\
+    # warnings.warn('psignifit:boundWarning\n'\
+    # 'The marginal for the width is not near 0 at the lower bound.\n'\
     # 'This indicates that your data is not sufficient to exclude much lower widths.\n'\
     # 'Refer to the paper or the manual for more info on this topic.')
     # if result['marginals'][1][-1] * result['marginalsW'][1][-1] > .001:
-    # warnings.warn('psignifit:borderWarning\n'\
-    # 'The marginal for the width is not near 0 at the lower border.\n'\
+    # warnings.warn('psignifit:boundWarning\n'\
+    # 'The marginal for the width is not near 0 at the lower bound.\n'\
     # 'This indicates that your data is not sufficient to exclude much higher widths.\n'\
     # 'Refer to the paper or the manual for more info on this topic.')
 
@@ -376,7 +374,7 @@ def psignifitCore(data, options):
     the width (distance containing 95% of the function.
     """
     print(options)
-    d = len(options['borders'])
+    d = len(options['bounds'])
     result = {'X1D': [], 'marginals': [], 'marginalsX': [], 'marginalsW': []}
     '''Choose grid dynamically from data'''
     if options['dynamicGrid']:
@@ -384,15 +382,15 @@ def psignifitCore(data, options):
         Seed = getSeed(data, options)
 
         # further optimize the logliklihood to obtain a good estimate of the MAP
-        if options['expType'] == 'YesNo':
+        if options.experiment_type == ExperimentType.YES_NO:
             calcSeed = lambda X: -_l.logLikelihood(data, options, X[0], X[1], X[
                 2], X[3], X[4])
             Seed = scipy.optimize.fmin(func=calcSeed, x0=Seed)
-        elif options['expType'] == 'nAFC':
+        elif options.experiment_type == ExperimentType.N_AFC:
             calcSeed = lambda X: -_l.logLikelihood(data, options, X[0], X[1], X[
-                2], 1 / options['expN'], X[3])
+                2], 1 / options.experiment_choices, X[3])
             Seed = scipy.optimize.fmin(func=calcSeed, x0=[Seed[0:2], Seed[4]])
-            Seed = [Seed[0:2], 1 / options['expN'],
+            Seed = [Seed[0:2], 1 / options.experiment_choices,
                     Seed[3]]  # ToDo check whether row or colum vector
         result['X1D'] = gridSetting(data, options, Seed)
 
@@ -405,15 +403,15 @@ def psignifitCore(data, options):
         else:  # Use a linear grid
             for idx in range(0, d):
                 # If there is an actual Interval
-                if options['borders'][idx, 0] < options['borders'][idx, 1]:
+                if options['bounds'][idx, 0] < options['bounds'][idx, 1]:
 
                     result['X1D'].append(
-                        np.linspace(options['borders'][idx, 0],
-                                    options['borders'][idx, 1],
+                        np.linspace(options['bounds'][idx, 0],
+                                    options['bounds'][idx, 1],
                                     num=options['stepN'][idx]))
                 # if parameter was fixed
                 else:
-                    result['X1D'].append(np.array([options['borders'][idx, 0]]))
+                    result['X1D'].append(np.array([options['bounds'][idx, 0]]))
     '''Evaluate likelihood and form it into a posterior'''
 
     (result['Posterior'],
@@ -446,13 +444,13 @@ def psignifitCore(data, options):
         for idx in range(0, d):
             Fit[idx] = result['X1D'][idx][index[idx]]
 
-        if options['expType'] == 'YesNo':
+        if options.experiment_type == ExperimentType.YES_NO:
             fun = lambda X, f: -_l.logLikelihood(data, options,
                                                  [X[0], X[1], X[2], X[3], X[4]])
             x0 = _deepcopy(Fit)
             a = None
 
-        elif options['expType'] == 'nAFC':
+        elif options.experiment_type == ExperimentType.N_AFC:
             # def func(X,f):
             #    return -_l.logLikelihood(data,options, [X[0], X[1], X[2], f, X[3]])
             # fun = func
@@ -460,9 +458,9 @@ def psignifitCore(data, options):
                                                  [X[0], X[1], X[2], f, X[3]])
             x0 = _deepcopy(Fit[0:3])  # Fit[3]  is excluded
             x0 = np.append(x0, _deepcopy(Fit[4]))
-            a = np.array([1 / options['expN']])
+            a = np.array([1 / options.experiment_choices])
 
-        elif options['expType'] == 'equalAsymptote':
+        elif options.experiment_type == ExperimentType.EQ_ASYMPTOTE:
             fun = lambda X, f: -_l.logLikelihood(data, options,
                                                  [X[0], X[1], X[2], f, X[3]])
             x0 = _deepcopy(Fit[0:3])
@@ -470,7 +468,7 @@ def psignifitCore(data, options):
             a = np.array([np.nan])
 
         else:
-            raise ValueError('unknown expType')
+            raise ValueError('unknown experiment_type')
 
         if options['fastOptim']:
             Fit = scipy.optimize.fmin(fun,
@@ -484,20 +482,20 @@ def psignifitCore(data, options):
         else:
             Fit = scipy.optimize.fmin(fun, x0, args=(a,), disp=False)
 
-        if options['expType'] == 'YesNo':
+        if options.experiment_type == ExperimentType.YES_NO:
             result['Fit'] = _deepcopy(Fit)
-        elif options['expType'] == 'nAFC':
+        elif options.experiment_type == ExperimentType.N_AFC:
             fit = _deepcopy(Fit[0:3])
-            fit = np.append(fit, np.array([1 / options['expN']]))
+            fit = np.append(fit, np.array([1 / options.experiment_choices]))
             fit = np.append(fit, _deepcopy(Fit[3]))
             result['Fit'] = fit
-        elif options['expType'] == 'equalAsymptote':
+        elif options.experiment_type == ExperimentType.EQ_ASYMPTOTE:
             fit = _deepcopy(Fit[0:3])
             fit = np.append(fit, Fit[2])
             fit = np.append(fit, Fit[3])
             result['Fit'] = fit
         else:
-            raise ValueError('unknown expType')
+            raise ValueError('unknown experiment_type')
 
         par_idx = np.where(np.isnan(options['fixedPars']) == False)
         for idx in par_idx[0]:
@@ -565,7 +563,7 @@ def getSlope(result, stimLevel):
         d = np.log(1 / PC - 1)
         slope = C * np.exp(-C * (stimLevel - theta0[0]) +
                            d) / (1 + np.exp(-C *
-                                            (stimLevel - theta0[0]) + d))**2
+                                            (stimLevel - theta0[0]) + d)) ** 2
     elif sigName in ['gumbel', 'neg_gumbel']:
         C = np.log(-np.log(alpha)) - np.log(-np.log(1 - alpha))
         stimLevel = C / theta0[1] * (stimLevel -
@@ -584,13 +582,13 @@ def getSlope(result, stimLevel):
     elif sigName in ['Weibull', 'weibull', 'neg_Weibull', 'neg_weibull']:
         C = np.log(-np.log(alpha)) - np.log(-np.log(1 - alpha))
         stimLevelNormalized = C / theta0[1] * (
-            np.log(stimLevel) - theta0[0]) + np.log(-np.log(1 - PC))
+                np.log(stimLevel) - theta0[0]) + np.log(-np.log(1 - PC))
         slope = C / theta0[1] * np.exp(-np.exp(stimLevelNormalized)) * np.exp(
             stimLevelNormalized)
         slope = slope / stimLevel
     elif sigName in [
-            'tdist', 'student', 'heavytail', 'neg_tdist', 'neg_student',
-            'neg_heavytail'
+        'tdist', 'student', 'heavytail', 'neg_tdist', 'neg_student',
+        'neg_heavytail'
     ]:
         # student T distribution with 1 df --> heavy tail distribution
         C = (my_t1icdf(1 - alpha) - my_t1icdf(alpha))
@@ -637,8 +635,8 @@ def getSlopePC(result, pCorrect, unscaled=False):
         pCorrectUnscaled = pCorrect
     else:
         assert ((pCorrect > theta0[3]) & (pCorrect < (1 - theta0[2]))
-               ), 'pCorrect must lay btw {:.2f} and {:.2f}'.format(
-                   theta0[3], (1 - theta0[2]))
+                ), 'pCorrect must lay btw {:.2f} and {:.2f}'.format(
+            theta0[3], (1 - theta0[2]))
         pCorrectUnscaled = (pCorrect - theta0[3]) / (1 - theta0[2] - theta0[3])
     ''' find the (normalized) stimulus level, where the given percent correct is
     reached and evaluate slope there'''
@@ -661,7 +659,7 @@ def getSlopePC(result, pCorrect, unscaled=False):
         d = np.log(1 / PC - 1)
         slope = C * np.exp(-C * (stimLevel - theta0[0]) +
                            d) / (1 + np.exp(-C *
-                                            (stimLevel - theta0[0]) + d))**2
+                                            (stimLevel - theta0[0]) + d)) ** 2
     elif sigName in ['gumbel', 'neg_gumbel']:
         C = np.log(-np.log(alpha)) - np.log(-np.log(1 - alpha))
         stimLevel = np.log(-np.log(1 - pCorrectUnscaled))
@@ -688,8 +686,8 @@ def getSlopePC(result, pCorrect, unscaled=False):
             stimLevelNormalized)
         slope = slope / stimLevel
     elif sigName in [
-            'tdist', 'student', 'heavytail', 'neg_tdist', 'neg_student',
-            'neg_heavytail'
+        'tdist', 'student', 'heavytail', 'neg_tdist', 'neg_student',
+        'neg_heavytail'
     ]:
         # student T distribution with 1 df --> heavy tail distribution
         C = (t1icdf(1 - alpha) - t1icdf(alpha))
@@ -752,7 +750,7 @@ def getThreshold(result, pCorrect, unscaled=False):
 
     assert ((np.array(pCorrect) > theta0[3]) & (np.array(pCorrect) <
                                                 (1 - theta0[2]))
-           ), 'The threshold percent correct is not reached by the sigmoid!'
+            ), 'The threshold percent correct is not reached by the sigmoid!'
 
     pCorrectUnscaled = (pCorrect - theta0[3]) / (1 - theta0[2] - theta0[3])
     alpha = result['options']['widthalpha']
@@ -773,8 +771,8 @@ def getThreshold(result, pCorrect, unscaled=False):
                              theta0[1] / C)
     elif sigName in ['logistic', 'neg_logistic']:
         threshold = theta0[0] - theta0[1] * (
-            np.log(1 / pCorrectUnscaled - 1) -
-            np.log(1 / PC - 1)) / 2 / np.log(1 / alpha - 1)
+                np.log(1 / pCorrectUnscaled - 1) -
+                np.log(1 / PC - 1)) / 2 / np.log(1 / alpha - 1)
     elif sigName in ['gumbel', 'neg_gumbel']:
         C = np.log(-np.log(alpha)) - np.log(-np.log(1 - alpha))
         threshold = theta0[0] + (np.log(-np.log(1 - pCorrectUnscaled)) -
@@ -794,8 +792,8 @@ def getThreshold(result, pCorrect, unscaled=False):
             theta0[0] + theta0[1] / C *
             (np.log(-np.log(1 - pCorrectUnscaled)) - np.log(-np.log(1 - PC))))
     elif sigName in [
-            'tdist', 'student', 'heavytail', 'neg_tdist', 'neg_student',
-            'neg_heavytail'
+        'tdist', 'student', 'heavytail', 'neg_tdist', 'neg_student',
+        'neg_heavytail'
     ]:
         C = (t1icdf(1 - alpha) - t1icdf(alpha))
         threshold = (t1icdf(pCorrectUnscaled) -
@@ -853,24 +851,24 @@ def getThreshold(result, pCorrect, unscaled=False):
         if sigName in ['norm', 'gauss', 'neg_norm', 'neg_gauss']:
             CI[iConfP, 0] = norminvg(
                 pCorrMin, thetaMin[0] - norminvg(PC, 0, thetaMin[1] / C),
-                thetaMin[1] / C)
+                          thetaMin[1] / C)
             CI[iConfP, 1] = norminvg(
                 pCorrMax, thetaMax[0] - norminvg(PC, 0, thetaMax[1] / C),
-                thetaMax[1] / C)
+                          thetaMax[1] / C)
         elif sigName in ['logistic', 'neg_logistic']:
             CI[iConfP, 0] = thetaMin[0] - thetaMin[1] * (
-                np.log(1 / pCorrMin - 1) -
-                np.log(1 / PC - 1)) / 2 / np.log(1 / alpha - 1)
+                    np.log(1 / pCorrMin - 1) -
+                    np.log(1 / PC - 1)) / 2 / np.log(1 / alpha - 1)
             CI[iConfP, 1] = thetaMax[0] - thetaMax[1] * (
-                np.log(1 / pCorrMax - 1) -
-                np.log(1 / PC - 1)) / 2 / np.log(1 / alpha - 1)
+                    np.log(1 / pCorrMax - 1) -
+                    np.log(1 / PC - 1)) / 2 / np.log(1 / alpha - 1)
         elif sigName in ['gumbel', 'neg_gumbel']:
             CI[iConfP, 0] = thetaMin[0] + (
-                np.log(-np.log(1 - pCorrMin)) -
-                np.log(-np.log(1 - PC))) * thetaMin[1] / C
+                    np.log(-np.log(1 - pCorrMin)) -
+                    np.log(-np.log(1 - PC))) * thetaMin[1] / C
             CI[iConfP, 1] = thetaMax[0] + (
-                np.log(-np.log(1 - pCorrMax)) -
-                np.log(-np.log(1 - PC))) * thetaMax[1] / C
+                    np.log(-np.log(1 - pCorrMax)) -
+                    np.log(-np.log(1 - PC))) * thetaMax[1] / C
         elif sigName in ['rgumbel', 'neg_rgumbel']:
             CI[iConfP, 0] = thetaMin[0] + (np.log(-np.log(pCorrMin)) - np.log(
                 -np.log(PC))) * thetaMin[1] / C
@@ -893,8 +891,8 @@ def getThreshold(result, pCorrect, unscaled=False):
                 thetaMax[0] + thetaMax[1] / C *
                 (np.log(-np.log(1 - pCorrMax)) - np.log(-np.log(1 - PC))))
         elif sigName in [
-                'tdist', 'student', 'heavytail', 'neg_tdist', 'neg_student',
-                'neg_heavytail'
+            'tdist', 'student', 'heavytail', 'neg_tdist', 'neg_student',
+            'neg_heavytail'
         ]:
             CI[iConfP, 0] = (t1icdf(pCorrMin) -
                              t1icdf(PC)) * thetaMin[1] / C + thetaMin[0]
@@ -918,14 +916,14 @@ def biasAna(data1, data2, options=dict()):
     whether it can be explained with a "finger bias"-> a bias in guessing """
 
     options = _deepcopy(options)
-    options['borders'] = np.empty([5, 2])
-    options['borders'][:] = np.nan
-    options['expType'] = 'YesNo'
+    options['bounds'] = np.empty([5, 2])
+    options['bounds'][:] = np.nan
+    options.experiment_type = ExperimentType.YES_NO
 
     options['priors'] = [None] * 5
     options['priors'][3] = lambda x: scipy.stats.beta.pdf(x, 2, 2)
-    options['borders'][2, :] = np.array([0, .1])
-    options['borders'][3, :] = np.array([.11, .89])
+    options['bounds'][2, :] = np.array([0, .1])
+    options['bounds'][3, :] = np.array([.11, .89])
     options['fixedPars'] = np.ones([5, 1]) * np.nan
     options['fixedPars'][4] = 0
     options['stepN'] = np.array([40, 40, 40, 40, 1])
@@ -1018,14 +1016,14 @@ def getDeviance(result, Nsamples=None):
     pMeasured = data[:, 1] / data[:, 2]
     loglikelihoodPred = data[:, 1] * np.log(pPred) + (data[:, 2] -
                                                       data[:, 1]) * np.log(
-                                                          (1 - pPred))
+        (1 - pPred))
     loglikelihoodMeasured = data[:, 1] * np.log(pMeasured) + (
-        data[:, 2] - data[:, 1]) * np.log((1 - pMeasured))
+            data[:, 2] - data[:, 1]) * np.log((1 - pMeasured))
     loglikelihoodMeasured[pMeasured == 1] = 0
     loglikelihoodMeasured[pMeasured == 0] = 0
 
     devianceResiduals = -2 * np.sign(pMeasured - pPred) * (
-        loglikelihoodMeasured - loglikelihoodPred)
+            loglikelihoodMeasured - loglikelihoodPred)
     deviance = np.sum(np.abs(devianceResiduals))
 
     if Nsamples is None:
@@ -1037,9 +1035,9 @@ def getDeviance(result, Nsamples=None):
                                           Nsamples)
             pMeasured = samp_dat / data[iData, 2]
             loglikelihoodPred = samp_dat * np.log(pPred[iData]) + (
-                data[iData, 2] - samp_dat) * np.log(1 - pPred[iData])
+                    data[iData, 2] - samp_dat) * np.log(1 - pPred[iData])
             loglikelihoodMeasured = samp_dat * np.log(pMeasured) + (
-                data[iData, 2] - samp_dat) * np.log(1 - pMeasured)
+                    data[iData, 2] - samp_dat) * np.log(1 - pMeasured)
             loglikelihoodMeasured[pMeasured == 1] = 0
             loglikelihoodMeasured[pMeasured == 0] = 0
             samples_devianceResiduals[:, iData] = -2 * np.sign(

@@ -6,6 +6,7 @@ import numpy as np
 
 from . import sigmoids
 from .utils import PsignifitException
+from .typing import ExperimentType
 
 
 class Conf:
@@ -29,20 +30,21 @@ class Conf:
     # set of valid options for psignifit. Add new attributes to this tuple
     _valid_opts = (
         'beta_prior',
-        'borders',
+        'bounds',
         'CI_method',
         'confP',
         'dynamic_grid',
         'estimate_type',
         'experiment_type',
+        'experiment_choices',
         'fast_optim',
         'fixed_parameters',
         'grid_eval',
         'grid_set_type',
         'grid_steps',
         'instant_plot',
-        'max_border_value',
-        'move_borders',
+        'max_bound_value',
+        'move_bounds',
         'parameters',
         'pool_max_blocks',
         'pool_max_gap',
@@ -50,7 +52,7 @@ class Conf:
         'pool_xtol',
         'priors',
         'sigmoid',
-        'steps_moving_borders',
+        'steps_moving_bounds',
         'stimulus_range',
         'thresh_PC',
         'uniform_weight',
@@ -67,20 +69,21 @@ class Conf:
 
         # set public defaults
         self.beta_prior = 10
-        self.borders = None
+        self.bounds = None
         self.CI_method = 'percentiles'
         self.confP = (.95, .9, .68)
         self.dynamic_grid = False
         self.estimate_type = 'MAP'
-        self.experiment_type = 'yes/no'
+        self.experiment_type = ExperimentType.YES_NO
+        self.experiment_choices = None
         self.fast_optim = False
         self.fixed_parameters = None
         self.grid_eval = None
         self.grid_set_type = 'cumDist'
         self.grid_steps = None
         self.instant_plot = False
-        self.max_border_value = 1e-05
-        self.move_borders = True
+        self.max_bound_value = 1e-05
+        self.move_bounds = True
         self.pool_max_blocks = 25
         self.pool_max_gap = np.inf
         self.pool_max_length = np.inf
@@ -125,18 +128,18 @@ class Conf:
             _str.append(f'{name}: {value}')
         return '\n'.join(_str)
 
-    def check_borders(self, value):
+    def check_bounds(self, value):
         if value is not None:
-            # borders is a dict in the form {'parameter_name': (left, right)}
+            # bounds is a dict in the form {'parameter_name': (left, right)}
             if type(value) != dict:
                 raise PsignifitException(
-                    f'Option borders must be a dictionary ({type(value).__name__} given)!'
+                    f'Option bounds must be a dictionary ({type(value).__name__} given)!'
                 )
             # now check that the keys in the dictionary are valid
             vkeys = self._parameters
             if vkeys < set(value.keys()):
                 raise PsignifitException(
-                    f'Option borders keys must be in {vkeys}. Given {list(value.keys())}!'
+                    f'Option bounds keys must be in {vkeys}. Given {list(value.keys())}!'
                 )
             # now check that the values are sequences of length 2
             for v in value.values():
@@ -146,7 +149,7 @@ class Conf:
                     correct_length = False
                 if not correct_length:
                     raise PsignifitException(
-                        f'Borders must be a sequence of 2 items: {v} given!')
+                        f'Bounds must be a sequence of 2 items: {v} given!')
 
     def check_fixed_parameters(self, value):
         if value is not None:
@@ -163,37 +166,43 @@ class Conf:
                 )
 
     def check_experiment_type(self, value):
-        cond1 = value in ('yes/no', 'equal asymptote')
+        cond1 = value in (ExperimentType.YES_NO.value,
+                          ExperimentType.EQ_ASYMPTOTE.value)
         cond2 = re.match('[0-9]AFC', value)
         if not (cond1 or cond2):
             raise PsignifitException(
-                f'Invalid experiment type: "{value}"\nValid types: "yes/no",' +
-                ' "equal asymptote", "2AFC", "3AFC", etc...')
+                f'Invalid experiment type: "{value}"\nValid types: {ExperimentType.YES_NO.value},' +
+                ' {ExperimentType.EQ_ASYMPTOTE.value}, "2AFC", "3AFC", etc...')
+        if cond2:
+            self.experiment_choices = value[0]
+            value = ExperimentType.N_AFC
+        else:
+            value = ExperimentType(value)
 
         self.grid_steps = {param: None for param in self._parameters}
-        self.steps_moving_borders = {param: None for param in self._parameters}
-        if value == 'yes/no':
+        self.steps_moving_bounds = {param: None for param in self._parameters}
+        if value == ExperimentType.YES_NO.value:
             self.grid_steps['threshold'] = 40
             self.grid_steps['width'] = 40
             self.grid_steps['lambda'] = 20
             self.grid_steps['gamma'] = 20
             self.grid_steps['eta'] = 20
-            self.steps_moving_borders['threshold'] = 25
-            self.steps_moving_borders['width'] = 30
-            self.steps_moving_borders['lambda'] = 10
-            self.steps_moving_borders['gamma'] = 10
-            self.steps_moving_borders['eta'] = 15
+            self.steps_moving_bounds['threshold'] = 25
+            self.steps_moving_bounds['width'] = 30
+            self.steps_moving_bounds['lambda'] = 10
+            self.steps_moving_bounds['gamma'] = 10
+            self.steps_moving_bounds['eta'] = 15
         else:
             self.grid_steps['threshold'] = 40
             self.grid_steps['width'] = 40
             self.grid_steps['lambda'] = 20
             self.grid_steps['gamma'] = 1
             self.grid_steps['eta'] = 20
-            self.steps_moving_borders['threshold'] = 30
-            self.steps_moving_borders['width'] = 40
-            self.steps_moving_borders['lambda'] = 10
-            self.steps_moving_borders['gamma'] = 1
-            self.steps_moving_borders['eta'] = 20
+            self.steps_moving_bounds['threshold'] = 30
+            self.steps_moving_bounds['width'] = 40
+            self.steps_moving_bounds['lambda'] = 10
+            self.steps_moving_bounds['gamma'] = 1
+            self.steps_moving_bounds['eta'] = 20
 
     def check_sigmoid(self, value):
         cond1 = value in dir(sigmoids)

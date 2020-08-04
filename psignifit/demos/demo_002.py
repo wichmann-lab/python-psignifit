@@ -64,24 +64,24 @@ options['sigmoidName'] = 'tdist'
  vectorized or even a formula.
  However, this is usually obtained from options['sigmoidName']
  This is needed if you want to use your own sigmoid, which is not built in  '''
-""" options['expType']        = 'YesNo' """
+""" options.experiment_type        = ExperimentType.YES_NO """
 ''' This sets which parameters you want to be free and which you fix and to
  which values, for standard experiment types. '''
 
-# 'YesNo', default sets all parameters free, which is suitable for a standard
+# ExperimentType.YES_NO, default sets all parameters free, which is suitable for a standard
 # yes/no paradigm.
-options['expType'] = 'YesNo'
+options.experiment_type = ExperimentType.YES_NO
 
 # '2AFC', fixes the lower asymptote to .5 and fits the rest, for 2
 # alternative forced choice experiments.
-options['expType'] = '2AFC'
+options.experiment_type = '2AFC'
 
 # 'nAFC', fixes the lower asymptote to 1/n and fits the rest. For this type
-# of experiment you MUST also provide options['expN'] the number of
+# of experiment you MUST also provide options.experiment_choices the number of
 # alternatives.
 # As an example with 3 alternatives:
-options['expType'] = 'nAFC'
-options['expN'] = 3
+options.experiment_type = ExperimentType.N_AFC
+options.experiment_choices = 3
 """ options['estimateType']   = 'mean' """
 ''' How you want to estimate your fit from the posterior '''
 
@@ -95,7 +95,7 @@ options['estimateType'] = 'mean'
 """ options['stepN']   = [40,40,20,20,20] 
  options['mbStepN'] = [25,20,10,10,20]     """
 ''' This sets the number of grid points on each dimension in the final
- fitting (stepN) and in the moving of borders mbStepN
+ fitting (stepN) and in the moving of bounds mbStepN
  the order is 
  [threshold,width,upper asymptote,lower asymptote,variance scaling] 
 
@@ -136,7 +136,7 @@ options['threshPC'] = .9
 
  This will disregard intervals of low posterior probability and then move
  in from the sides to adjust the exact CI size.
- This can handle borders and asymmetric distributions slightly better, but
+ This can handle bounds and asymmetric distributions slightly better, but
  will introduce slight jumps of the confidence interval when confp is
  adjusted depending on when the gridpoints get too small posterior
  probability.
@@ -146,7 +146,7 @@ options['threshPC'] = .9
 
  cuts at the estimated percentiles-> always tries to place alpha/2
  posterior probability above and below the credible interval.
- This has no jumping but will exclude border values even when they have
+ This has no jumping but will exclude bound values even when they have
  the highest posterior. Additionally it will not choose the area of
  highest posterior density if the distribution is skewed.  '''
 """ options['priors']  = getStandardPriors() """
@@ -176,39 +176,39 @@ options['threshPC'] = .9
 ''' A boolean to control whether you immediately get 2 standard plots of your
  fit. Turn to 1 to see the effect.     '''
 options['instantPlot'] = 1
-""" options['borders'] """
+""" options['bounds'] """
 ''' In this field you may provide your own bounds for the parameters.
  This should be a 5x2 matrix of start and end of the range for the 5
  parameters. (threshold,width,upper asymptote,lower asymptote,variance
  scale)    '''
 
-# For example this would set the borders to
+# For example this would set the bounds to
 # threshold between 1 and 2
 # width between .1 and 5
 # a fixed lapse rate of .05
 # a fixed lower asymptote at .05
 # a maximum on the variance scale of .2
-options['borders'] = [1, 2, .1, 5, .05, .05, .5, .5, np.exp(-20), .2]
+options['bounds'] = [1, 2, .1, 5, .05, .05, .5, .5, np.exp(-20), .2]
 ''' NOTE: By this you artificially exclude all values out of this range. Only
  exclude parameter values, which are truely impossible!'''
-""" options['maxBorderValue'] = exp(-10)    """
+""" options['maxBoundValue'] = exp(-10)    """
 ''' Parts of the grid which produce marginal values below this are considered
- 0 and are excluded from the calculation in moveBorders.m 
+ 0 and are excluded from the calculation in moveBounds.m 
  it should be a very small value and at least smaller than 1/(max(stepN)) '''
 
 # This for example would exclude fewer values and more conservative
-# movement of the borders:
-options['maxBorderValue'] = np.exp(-20)
-""" options.moveBorders    = 1 """
-''' Toggles the movement of borders by moveBorders
+# movement of the bounds:
+options['maxBoundValue'] = np.exp(-20)
+""" options.moveBounds    = 1 """
+''' Toggles the movement of bounds by moveBounds
  Usually this is good to concentrate on the right area in the parameter
  space.    '''
-options['moveBorders'] = 1
+options['moveBounds'] = 1
 
 # If you set
-options['moveBorders'] = 0
-# your posterior will always use the initial setting for the borders.
-# This is usefull if you set the borders by hand and do not want
+options['moveBounds'] = 0
+# your posterior will always use the initial setting for the bounds.
+# This is usefull if you set the bounds by hand and do not want
 # psignifit to move them after this.
 """ options['dynamicGrid']    = 0 """
 ''' Toggles the useage of a dynamic/adaptive grid.
@@ -230,7 +230,7 @@ options['GridSetEval'] = 10000
  When you increase this value very much try to set options['dynamicGrid'] = 0
  which produces an equal stepsize grid right away. '''
 
-# As an example: Will produce a more focused grid which leaves the borders
+# As an example: Will produce a more focused grid which leaves the bounds
 # very weakly sampled.
 options['UniformWeight'] = 0.01000
 # Only used with dynamic grid,-> by default not at all
