@@ -6,6 +6,14 @@ from .utils import norminvg as _norminvg
 from .utils import t1cdf as _t1cdf
 from .utils import t1icdf as _t1icdf
 
+# sigmoid function = psi
+# X -> stimulus levels (float)
+# m -> threshold is the stimulus level at which the sigmoid has value PC (float)
+#      psi(m) = PC , typically PC=0.5
+# width -> the difference of stimulus levels where the sigmoid has value alpha and 1-alpha
+#      width = X_(1-alpha) - X_(alpha)
+#      psi(X_(1-alpha)) = 0.95 = 1-alpha
+#      psi(X_(alpha)) = 0.05 = alpha
 
 def gauss(X, m, width, PC=0.5, alpha=0.05):
     C = width / (_norminv(1 - alpha) - _norminv(alpha))
