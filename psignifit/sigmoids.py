@@ -1,4 +1,4 @@
-import numpy as np
+import numpy as _np
 
 from .utils import normcdf as _normcdf
 from .utils import norminv as _norminv
@@ -21,26 +21,26 @@ def gauss(X, m, width, PC=0.5, alpha=0.05):
 
 
 def logistic(X, m, width, PC=0.5, alpha=0.05):
-    return 1 / (1 + np.exp(-2 * np.log(1 / alpha - 1) / width *
-                           (X - m) + np.log(1 / PC - 1)))
+    return 1 / (1 + _np.exp(-2 * _np.log(1 / alpha - 1) / width *
+                           (X - m) + _np.log(1 / PC - 1)))
 
 
 def gumbel(X, m, width, PC=0.5, alpha=0.05):
-    C = np.log(-np.log(alpha)) - np.log(-np.log(1 - alpha))
-    return 1 - np.exp(-np.exp(C / width * (X - m) + np.log(-np.log(1 - PC))))
+    C = _np.log(-_np.log(alpha)) - _np.log(-_np.log(1 - alpha))
+    return 1 - _np.exp(-_np.exp(C / width * (X - m) + _np.log(-_np.log(1 - PC))))
 
 
 def rgumbel(X, m, width, PC=0.5, alpha=0.05):
-    C = np.log(-np.log(1 - alpha)) - np.log(-np.log(alpha))
-    return np.exp(-np.exp(C / width * (X - m) + np.log(-np.log(PC))))
+    C = _np.log(-_np.log(1 - alpha)) - _np.log(-_np.log(alpha))
+    return _np.exp(-_np.exp(C / width * (X - m) + _np.log(-_np.log(PC))))
 
 
 def logn(X, m, width, PC=0.5, alpha=0.05):
-    return gauss(np.log(X), m, width, PC, alpha)
+    return gauss(_np.log(X), m, width, PC, alpha)
 
 
 def weibull(X, m, width, PC=0.5, alpha=0.05):
-    return gumbel(np.log(X), m, width, PC, alpha)
+    return gumbel(_np.log(X), m, width, PC, alpha)
 
 
 def tdist(X, m, width, PC=0.5, alpha=0.05):
