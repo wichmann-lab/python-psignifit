@@ -168,18 +168,19 @@ class Conf:
         return value
 
     def check_experiment_type(self, value):
-        cond1 = value in (ExperimentType.YES_NO.value,
-                          ExperimentType.EQ_ASYMPTOTE.value)
-        cond2 = re.match('[0-9]AFC', value)
-        if not (cond1 or cond2):
-            raise PsignifitException(
-                f'Invalid experiment type: "{value}"\nValid types: {ExperimentType.YES_NO.value},' +
-                ' {ExperimentType.EQ_ASYMPTOTE.value}, "2AFC", "3AFC", etc...')
-        if cond2:
-            self.experiment_choices = value[0]
-            value = ExperimentType.N_AFC
-        else:
-            value = ExperimentType(value)
+        if not isinstance(value, ExperimentType):
+            cond1 = value in (ExperimentType.YES_NO.value,
+                              ExperimentType.EQ_ASYMPTOTE.value)
+            cond2 = re.match('[0-9]+AFC', value)
+            if not (cond1 or cond2):
+                raise PsignifitException(
+                    f'Invalid experiment type: "{value}"\nValid types: {ExperimentType.YES_NO.value},' +
+                    ' {ExperimentType.EQ_ASYMPTOTE.value}, "2AFC", "3AFC", etc...')
+            if cond2:
+                self.experiment_choices = int(value[:-3])
+                value = ExperimentType.N_AFC
+            else:
+                value = ExperimentType(value)
 
         self.grid_steps = {param: None for param in self._parameters}
         self.steps_moving_bounds = {param: None for param in self._parameters}
