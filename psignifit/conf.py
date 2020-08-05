@@ -109,7 +109,7 @@ class Conf:
             if hasattr(self, 'check_' + name):
                 # run the check
                 # the check method should raise if value is not valid
-                getattr(self, 'check_' + name)(value)
+                value = getattr(self, 'check_' + name)(value)
             super().__setattr__(name, value)
         else:
             raise PsignifitException(f'Invalid option "{name}"!')
@@ -150,6 +150,7 @@ class Conf:
                 if not correct_length:
                     raise PsignifitException(
                         f'Bounds must be a sequence of 2 items: {v} given!')
+            return value
 
     def check_fixed_parameters(self, value):
         if value is not None:
@@ -164,6 +165,7 @@ class Conf:
                 raise PsignifitException(
                     f'Option fixed_paramters keys must be in {vkeys}. Given {list(value.keys())}!'
                 )
+        return value
 
     def check_experiment_type(self, value):
         cond1 = value in (ExperimentType.YES_NO.value,
@@ -204,6 +206,8 @@ class Conf:
             self.steps_moving_bounds['gamma'] = 1
             self.steps_moving_bounds['eta'] = 20
 
+        return value
+
     def check_sigmoid(self, value):
         cond1 = value in dir(sigmoids)
         cond2 = value.startswith('_') or value.startswith('my_')
@@ -213,12 +217,16 @@ class Conf:
         if value in ('weibull', 'logn', 'neg_weibull', 'neg_logn'):
             self._logspace = True
 
+        return value
+
     def check_dynamic_grid(self, value):
         if value:
             if self.grid_eval is None:
                 self.grid_eval = 10000
             if self.uniform_weigth is None:
                 self.uniform_weigth = 1.
+
+        return value
 
     def check_stimulus_range(self, value):
         if value:
@@ -231,6 +239,8 @@ class Conf:
                 raise PsignifitException(
                     f"Option stimulus range must be a sequence of two items!")
 
+        return value
+
     def check_width_alpha(self, value):
         try:
             # check that it is a number:
@@ -242,9 +252,13 @@ class Conf:
             raise PsignifitException(
                 f"Option width_alpha must be between 0 and 1 ({value} given)!")
 
+        return value
+
     def check_width_min(self, value):
         if value:
             try:
                 _ = value + 1
             except Exception:
                 raise PsignifitException("Option width_min must be a number")
+
+        return value
