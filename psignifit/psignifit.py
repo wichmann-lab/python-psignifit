@@ -273,29 +273,12 @@ levels,which is frequently invalid for adaptive procedures!""")
 
     for fidx, fval in fixed:
         fit.insert(fidx, fval)
-    # bounds = [bounds[parm] for parm in parm_order]
-    # print(bounds)
-    # fit = spo.minimize(optm_likelihood, grid_max, method='SLSQP', bounds=bounds,
-    # options={'disp':True})
 
-    print('fit', list(fit))
+    fit_dict = {}
+    for idx, parm in enumerate(fit):
+        fit_dict[PARM_ORDER[idx]] = parm
 
-    # to verify that the differences here are not relevant,
-    # the thing to do is to calculare the confidence interval, and then
-    # verify that the difference is well within the confidence interval, let's
-    # say 1/3 of it
-    fit_heiko = [
-        0.0046448472488663396, 0.004683837353547434, 1.0676339572811912e-07,
-        0.5, 0.00011599137494786461
-    ]
-    diff_fits = [
-        (abs(n - o) / ((n + o) / 2)) * 100 for n, o in zip(fit, fit_heiko)
-    ]
-    print('rel diff (%)', diff_fits)
-    print('abs diff', [abs(n - o) for n, o in zip(fit, fit_heiko)])
-    fitted_parm = list(PARM_ORDER)
-    fitted_parm.remove('gamma')
-    print('fitted parms', fitted_parm)
+    results = {'sigmoid_parameters': fit_dict}
 
     # take care of confidence intervals/condifence region
 
@@ -337,7 +320,7 @@ levels,which is frequently invalid for adaptive procedures!""")
     # if options['instantPlot']:
     # plot.plotPsych(result)
 
-    # return results
+    return results
 
 
 def psignifitFast(data, options):
