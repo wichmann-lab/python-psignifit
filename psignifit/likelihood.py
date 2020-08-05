@@ -40,7 +40,7 @@ def log_likelihood(data, sigmoid=None, priors=None, grid=None):
     # fixing this would also fix the case with the curried likelihood
     # below, that currently does work for grid['eta'] -> None
     if grid['eta'] is None:
-        v = None
+        eta_prime = None
         thres, width, lambd, gamma = np.meshgrid(thres,
                                                  width,
                                                  lambd,
@@ -50,19 +50,19 @@ def log_likelihood(data, sigmoid=None, priors=None, grid=None):
                                                  indexing='ij')
     else:
         eta_std = grid['eta']
-        eta = eta_std**2  # use variance instead of standard deviation
-        v = 1 / eta[eta > 1e-09] - 1
+        eta = eta_std ** 2  # use variance instead of standard deviation
+        eta_prime = 1 / eta[eta > 1e-09] - 1
 
         # for smaller variance we use the binomial model
         vbinom = (eta <= 1e-09).sum()
-        thres, width, lambd, gamma, v = np.meshgrid(thres,
-                                                    width,
-                                                    lambd,
-                                                    gamma,
-                                                    v,
-                                                    copy=False,
-                                                    sparse=True,
-                                                    indexing='ij')
+        thres, width, lambd, gamma, eta_prime = np.meshgrid(thres,
+                                                            width,
+                                                            lambd,
+                                                            gamma,
+                                                            eta_prime,
+                                                            copy=False,
+                                                            sparse=True,
+                                                            indexing='ij')
 
     scale = 1 - gamma - lambd
     ###FIXME: handle the case with equal_asymptote
@@ -75,41 +75,29 @@ def log_likelihood(data, sigmoid=None, priors=None, grid=None):
     # performance by using an explicit, but no profiling has been done to prove
     # this.
     for level, trials, correct_trials in zip(levels, ntrials, ncorrect):
-        # Notation in paper: n=num_trials, k=num_correct, x=level
+        # Notation in paper: n=trials, k=correct_trials, x=level
         if trials == 0:
-            # no trials at this stimulus level!
             continue
+
         # average predicted probability of correct
         psi = sigmoid(level, thres, width) * scale + gamma
-        if correct_trials == 0:
-            # no correct
-            pbin += trials * np.log(1 - psi)
-            if v is not None:
-                b = (1 - psi) * v
-                p += (sp.gammaln(trials + b) - sp.gammaln(trials + v) - sp.gammaln(b) +
-                      sp.gammaln(v))
-        elif correct_trials == trials:
-            # all correct
-            pbin += correct_trials * np.log(psi)
-            if v is not None:
-                a = psi * v
-                p += (sp.gammaln(correct_trials + a) - sp.gammaln(trials + v) - sp.gammaln(a) +
-                      sp.gammaln(v))
-        elif correct_trials < trials:
-            # some correct
-            psi_r = 1 - psi
-            pbin += correct_trials * np.log(psi) + (trials - correct_trials) * np.log(psi_r)
-            if v is not None:
-                a = psi * v
-                b = (1 - psi) * v
-                p += (sp.gammaln(correct_trials + a) + sp.gammaln(trials - correct_trials + b) -
-                      sp.gammaln(trials + v) - sp.gammaln(a) - sp.gammaln(b) +
-                      sp.gammaln(v))
-        else:
-            # we should never land here: we can't more ncorrect than ntrials
-            raise PsignifitException('ncorrect %d > ntrials %d!' % (correct_trials, trials))
+        pbin += correct_trials * np.log(psi) + (trials - correct_trials) * np.log(1 - psi)
+        if eta_prime is not None:
+            a = psi * eta_prime
+            b = (1 - psi) * eta_prime
+            p += -sp.gammaln(trials + eta_prime) + sp.gammaln(eta_prime)
 
-    if v is None:
+            if correct_trials == 0:
+                p += (sp.gammaln(trials + b) - sp.gammaln(b))
+            elif correct_trials == trials:
+                p += (sp.gammaln(correct_trials + a) - sp.gammaln(a))
+            elif correct_trials < trials:
+                p += (sp.gammaln(correct_trials + a) + sp.gammaln(trials - correct_trials + b)
+                      - sp.gammaln(a) - sp.gammaln(b))
+            else: # we should never land here: we can't more ncorrect than ntrials
+                raise PsignifitException('ncorrect %d > ntrials %d!' % (correct_trials, trials))
+
+    if eta_prime is None:
         p = pbin
     else:
         pbin = np.broadcast_to(pbin, pbin.shape[:4] + (vbinom,))
@@ -122,7 +110,7 @@ def log_likelihood(data, sigmoid=None, priors=None, grid=None):
     p += np.log(priors['lambda'](lambd))
     ## FIXME equal asymptote case not contemplated here
     p += np.log(priors['gamma'](gamma))
-    if v is not None:
+    if eta_prime is not None:
         p += np.log(priors['eta'](eta_std))
     return p
 
