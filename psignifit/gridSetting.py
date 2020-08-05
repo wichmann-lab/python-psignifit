@@ -6,7 +6,7 @@ set for each dim the stepN Xvalues adaptively
 function gridSetting(data,options)
 This tries to get equal steps in cummulated likelihood in the slice
 thorugh the Seed
-it evaluates at GridSetEval points from Xborders(:,1) to Xborders(:,2)
+it evaluates at GridSetEval points from Xbounds(:,1) to Xbounds(:,2)
 
 @author: root
 """
@@ -20,19 +20,19 @@ from .likelihood import likelihood
 
 def gridSetting(data, options, Seed):
     # Initialisierung
-    d = np.size(options['borders'], 0)
+    d = np.size(options['bounds'], 0)
     X1D = []
     '''Equal steps in cumulative distribution'''
 
     if options['gridSetType'] == 'cumDist':
         Like1D = np.zeros([options['GridSetEval'], 1])
         for idx in range(d):
-            if options['borders'][idx, 0] < options['borders'][idx, 1]:
+            if options['bounds'][idx, 0] < options['bounds'][idx, 1]:
                 X1D.append(np.zeros([1, options['stepN'][idx]]))
                 local_N_eval = options['GridSetEval']
                 while any(np.diff(X1D[idx]) == 0):
-                    Xtest1D = np.linspace(options['borders'][idx, 0],
-                                          options['borders'][idx, 1],
+                    Xtest1D = np.linspace(options['bounds'][idx, 0],
+                                          options['bounds'][idx, 1],
                                           local_N_eval)
                     alpha = Seed[0]
                     beta = Seed[1]
@@ -65,19 +65,19 @@ def gridSetting(data, options, Seed):
 
                     local_N_eval = 10 * local_N_eval
             else:
-                X1D.append(copy.deepcopy(options['borders'][idx, 0]))
+                X1D.append(copy.deepcopy(options['bounds'][idx, 0]))
         ''' equal steps in cumulative  second derivative'''
     elif (options['gridSetType'] in ['2', '2ndDerivative']):
         Like1D = np.zeros([options['GridSetEval'], 1])
 
         for idx in range(d):
-            if options['borders'][idx, 0] < options['borders'][idx, 1]:
+            if options['bounds'][idx, 0] < options['bounds'][idx, 1]:
                 X1D.append(np.zeros([1, options['stepN'][idx]]))
                 local_N_eval = options['GridSetEval']
                 while any(np.diff(X1D[idx] == 0)):
 
-                    Xtest1D = np.linspace(options['borders'][idx, 0],
-                                          options['borders'][idx, 1],
+                    Xtest1D = np.linspace(options['bounds'][idx, 0],
+                                          options['bounds'][idx, 1],
                                           local_N_eval)
                     alpha = Seed[0]
                     beta = Seed[1]
@@ -118,36 +118,36 @@ def gridSetting(data, options, Seed):
                         X1D[idx] = np.unique(np.array(X1D))  # TODO check
                         break
             else:
-                X1D.append(options['borders'][idx, 0])
+                X1D.append(options['bounds'][idx, 0])
         ''' different choices for the varscale '''
         ''' We use STD now directly as parametrisation'''
     elif options['gridSetType'] in ['priorlike', 'STD', 'exp', '4power']:
         for i in range(4):
-            if options['borders'](i, 0) < options['borders'](i, 1):
+            if options['bounds'](i, 0) < options['bounds'](i, 1):
                 X1D.append(
-                    np.linspace(options['borders'][i, 0],
-                                options['borders'][i, 1], options['stepN'][i]))
+                    np.linspace(options['bounds'][i, 0],
+                                options['bounds'][i, 1], options['stepN'][i]))
             else:
-                X1D.append(copy.deepcopy(options['borders'][id, 0]))
+                X1D.append(copy.deepcopy(options['bounds'][id, 0]))
         if options['gridSetType'] == 'priorlike':
-            maximum = b.cdf(options['borders'][4, 1], 1, options['betaPrior'])
-            minimum = b.cdf(options['borders'][4, 0], 1, options['betaPrior'])
+            maximum = b.cdf(options['bounds'][4, 1], 1, options['betaPrior'])
+            minimum = b.cdf(options['bounds'][4, 0], 1, options['betaPrior'])
             X1D.append(
                 b.ppf(np.linspace(minimum, maximum, options['stepN'][4]), 1,
                       options['betaPrior']))
         elif options['gridSetType'] == 'STD':
-            maximum = np.sqrt(options['borders'][4, 1])
-            minimum = np.sqrt(options['borders'][4, 0])
+            maximum = np.sqrt(options['bounds'][4, 1])
+            minimum = np.sqrt(options['bounds'][4, 0])
             X1D.append((np.linspace(minimum, maximum, options['stepN'][4]))**2)
         elif options['gridSetType'] == 'exp':
             p = np.linspace(1, 1, options['stepN'][4])
             X1D.append(
                 np.log(p) / np.log(.1) *
-                (options['borders'][4, 1] - options['borders'][4, 0]) +
-                options['borders'][4, 0])
+                (options['bounds'][4, 1] - options['bounds'][4, 0]) +
+                options['bounds'][4, 0])
         elif options['gridSetType'] == '4power':
-            maximum = np.sqrt(options['borders'][4, 1])
-            minimum = np.sqrt(options['borders'][4, 0])
+            maximum = np.sqrt(options['bounds'][4, 1])
+            minimum = np.sqrt(options['bounds'][4, 0])
             X1D.append((np.linspace(minimum, maximum, options['stepN'][4]))**4)
 
     return X1D

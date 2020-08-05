@@ -22,7 +22,7 @@ def get_data():
 def get_std_options():
     options = dict()
     options['sigmoidName'] = 'norm'  # choose a cumulative Gauss as the sigmoid
-    options['expType'] = '2AFC'
+    options.experiment_type = '2AFC'
     options['fixedPars'] = np.nan * np.ones(5)
     options['fixedPars'][2] = 0.01
     options['fixedPars'][3] = 0.5
@@ -78,12 +78,12 @@ def test_fixedPars():
     data = get_data()
     options = get_std_options()
     res = psignifit(data, options)
-    # Check that fit and borders are actually set to the fixed parametervalues
+    # Check that fit and bounds are actually set to the fixed parametervalues
     assert np.all(res['Fit'][np.isfinite(options['fixedPars'])] ==
                   options['fixedPars'][np.isfinite(options['fixedPars'])])
     assert np.all(
-        res['options']['borders'][np.isfinite(options['fixedPars']), 0] ==
+        res['options']['bounds'][np.isfinite(options['fixedPars']), 0] ==
         options['fixedPars'][np.isfinite(options['fixedPars'])])
     assert np.all(
-        res['options']['borders'][np.isfinite(options['fixedPars']), 1] ==
+        res['options']['bounds'][np.isfinite(options['fixedPars']), 1] ==
         options['fixedPars'][np.isfinite(options['fixedPars'])])

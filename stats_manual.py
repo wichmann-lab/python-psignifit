@@ -17,7 +17,7 @@ data = np.array([[0.0010, 45.0000, 90.0000],
                  [0.0100, 90.0000, 90.0000]])
 options = dict()
 options['sigmoidName'] = 'norm'  # choose a cumulative Gauss as the sigmoid
-options['expType'] = '2AFC'
+options.experiment_type = '2AFC'
 # options['fixedPars']   = np.nan*np.ones(5)
 # options['fixedPars'][2] = 0.01
 # options['fixedPars'][3] = 0.5

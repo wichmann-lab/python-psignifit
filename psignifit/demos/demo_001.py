@@ -44,20 +44,20 @@ options = dict()  # initialize as an empty dict
 """
 
 options['sigmoidName'] = 'norm'  # choose a cumulative Gauss as the sigmoid
-options['expType'] = '2AFC'  # choose 2-AFC as the paradigm of the experiment
+options.experiment_type = '2AFC'  # choose 2-AFC as the paradigm of the experiment
 # this sets the guessing rate to .5 and
 # fits the rest of the parameters '''
 """
  There are 3 other types of experiments supported out of the box:
  
  n alternative forces choice: The guessing rate is known.
-       options.expType = "nAFC"
-       options.expN    = <number of alternatives>
+       options.experiment_type = ExperimentType.N_AFC
+       options.experiment_choices    = <number of alternatives>
  Yes/No experiments: A free guessing and lapse rate is estimated
-       options.expType = "YesNo"
+       options.experiment_type = ExperimentType.YES_NO
  equal asymptote: As Yes/No, but enforces that guessing and lapsing occure
  equally often
-       options.expType = "equalAsymptote"
+       options.experiment_type = ExperimentType.EQ_ASYMPTOTE
 
  Out of the box psignifit supports the following sigmoid functions,
  choosen by:

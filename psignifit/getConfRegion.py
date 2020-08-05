@@ -92,7 +92,7 @@ def getConfRegion(result):
                 confRegionM[order[MassSort > confP1]] = False
                 '''
                 Now we have the confidence regions
-                put the borders between the nearest contained and the first
+                put the bounds between the nearest contained and the first
                 not contained point
 
                 we move in from the outer points to collect the half of the

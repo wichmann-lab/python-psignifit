@@ -23,7 +23,7 @@ data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
 
 options = dict()
 options['sigmoidName'] = 'norm'
-options['expType'] = '2AFC'
+options.experiment_type = '2AFC'
 res = ps.psignifit(data, options)
 """  obtaining threshold values  """
 ''' 

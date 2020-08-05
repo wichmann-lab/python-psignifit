@@ -39,7 +39,7 @@ data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
                  [0.0100, 90.0000, 90.0000]])
 
 options = dict()
-options['expType'] = '2AFC'
+options.experiment_type = '2AFC'
 options['sigmoidName'] = 'norm'
 
 res = ps.psignifit(data, options)
@@ -86,7 +86,7 @@ data = np.array([[1.5000, 3.0000, 3.0000], [1.3500, 3.0000, 3.0000],
 
 # We fit this assuming the same lapse rate for yes and for no
 options = dict()
-options['expType'] = 'equalAsymptote'
+options.experiment_type = ExperimentType.EQ_ASYMPTOTE
 # by default this gives us a cumulative normal fit, which is fine for now.
 
 res = ps.psignifit(data, options)
@@ -120,7 +120,7 @@ ps.psigniplot.plotMarginal(res, 0)
  possible range is .5 to 1.5 
 '''
 options = dict()
-options['expType'] = 'equalAsymptote'
+options.experiment_type = ExperimentType.EQ_ASYMPTOTE
 
 options['stimulusRange'] = np.array([.5, 1.5])
 resRange = ps.psignifit(data, options)
@@ -173,7 +173,7 @@ data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
                  [0.0100, 90.0000, 90.0000]])
 
 options = dict()
-options['expType'] = '2AFC'
+options.experiment_type = '2AFC'
 options['sigmoidName'] = 'norm'
 
 res = ps.psignifit(data, options)
@@ -234,15 +234,15 @@ options['priors'] = copy.deepcopy(res['options']['priors'])
 
 options['priors'][2] = priorLambda
 ''' 
- Most of the times you then have to adjust the borders of integration as
+ Most of the times you then have to adjust the bounds of integration as
  well. This confines the region psignifit operates on. All values outside
- the borders implicitly have prior probability 0!!
- For our example we set all borders to NaN, which means they are set
- automatically and state only the borders for lambda, which is the third
+ the bounds implicitly have prior probability 0!!
+ For our example we set all bounds to NaN, which means they are set
+ automatically and state only the bounds for lambda, which is the third
  parameter. '''
 
-options['borders'] = np.nan * np.ones((5, 2))
-options['borders'][2, :] = np.array([0, .1])
+options['bounds'] = np.nan * np.ones((5, 2))
+options['bounds'][2, :] = np.array([0, .1])
 
 res = ps.psignifit(data, options)
 ''' 
