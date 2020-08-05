@@ -74,42 +74,40 @@ def log_likelihood(data, sigmoid=None, priors=None, grid=None):
     # as we don't expect huge number of levels, we should not lose too much
     # performance by using an explicit, but no profiling has been done to prove
     # this.
-    for i in range(len(levels)):
-        x = levels[i]
-        n = ntrials[i]
-        k = ncorrect[i]
-        if n == 0:
+    for level, trials, correct_trials in zip(levels, ntrials, ncorrect):
+        # Notation in paper: n=num_trials, k=num_correct, x=level
+        if trials == 0:
             # no trials at this stimulus level!
             continue
         # average predicted probability of correct
-        psi = sigmoid(x, thres, width) * scale + gamma
-        if k == 0:
+        psi = sigmoid(level, thres, width) * scale + gamma
+        if correct_trials == 0:
             # no correct
-            pbin += n * np.log(1 - psi)
+            pbin += trials * np.log(1 - psi)
             if v is not None:
                 b = (1 - psi) * v
-                p += (sp.gammaln(n + b) - sp.gammaln(n + v) - sp.gammaln(b) +
+                p += (sp.gammaln(trials + b) - sp.gammaln(trials + v) - sp.gammaln(b) +
                       sp.gammaln(v))
-        elif k == n:
+        elif correct_trials == trials:
             # all correct
-            pbin += k * np.log(psi)
+            pbin += correct_trials * np.log(psi)
             if v is not None:
                 a = psi * v
-                p += (sp.gammaln(k + a) - sp.gammaln(n + v) - sp.gammaln(a) +
+                p += (sp.gammaln(correct_trials + a) - sp.gammaln(trials + v) - sp.gammaln(a) +
                       sp.gammaln(v))
-        elif k < n:
+        elif correct_trials < trials:
             # some correct
             psi_r = 1 - psi
-            pbin += k * np.log(psi) + (n - k) * np.log(psi_r)
+            pbin += correct_trials * np.log(psi) + (trials - correct_trials) * np.log(psi_r)
             if v is not None:
                 a = psi * v
                 b = (1 - psi) * v
-                p += (sp.gammaln(k + a) + sp.gammaln(n - k + b) -
-                      sp.gammaln(n + v) - sp.gammaln(a) - sp.gammaln(b) +
+                p += (sp.gammaln(correct_trials + a) + sp.gammaln(trials - correct_trials + b) -
+                      sp.gammaln(trials + v) - sp.gammaln(a) - sp.gammaln(b) +
                       sp.gammaln(v))
         else:
             # we should never land here: we can't more ncorrect than ntrials
-            raise PsignifitException('ncorrect %d > ntrials %d!' % (k, n))
+            raise PsignifitException('ncorrect %d > ntrials %d!' % (correct_trials, trials))
 
     if v is None:
         p = pbin
