@@ -4,12 +4,14 @@
 
 import ast
 import os
+
 from setuptools import setup, find_packages
 
 # this file is used to pick the relevant metadata for setup.py
 INITFILE = os.path.join('psignifit', '__init__.py')
 # the directory we are in
 CWD = os.path.abspath(os.path.dirname(__file__))
+
 
 def parse_keyword(key):
     """Get metadata from psignifit/__init__.py using an AST"""
@@ -25,9 +27,10 @@ def parse_keyword(key):
     # return "not available" if we didn't find the variable
     return 'N/A'
 
+
 # pick the relevant keywords from the __init__.py file
 metadata_vars = ('name', 'version', 'description', 'author', 'license', 'url')
-metadata = dict((var, parse_keyword('__%s__'%var)) for var in metadata_vars)
+metadata = dict((var, parse_keyword('__%s__' % var)) for var in metadata_vars)
 
 # Get the long description from the README file
 with open(os.path.join(CWD, 'README.md'), encoding='utf-8') as f:
@@ -45,14 +48,13 @@ setup(
     ],
     packages=find_packages(),
     install_requires=['scipy', 'matplotlib', 'pytest'],
-    #package_data={
+    # package_data={
     #    'sample': ['package_data.dat'],
-    #},
-    #entry_points={
+    # },
+    # entry_points={
     #    'console_scripts': [
     #        'sample=sample:main',
     #    ],
-    #},
+    # },
     **metadata
 )
-

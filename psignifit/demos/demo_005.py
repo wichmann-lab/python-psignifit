@@ -11,39 +11,27 @@ DEMO_005 PLOTTING FUNCTIONS
 
 """
 
+import matplotlib.pyplot as plt
 import numpy as np
 
-import matplotlib.pyplot as plt
 import psignifit as ps
 
-data = np.array([[0.0010,   45.0000,   90.0000],
-                 [0.0015,   50.0000,   90.0000],
-                 [0.0020,   44.0000,   90.0000],
-                 [0.0025,   44.0000,   90.0000],
-                 [0.0030,   52.0000,   90.0000],
-                 [0.0035,   53.0000,   90.0000],
-                 [0.0040,   62.0000,   90.0000],
-                 [0.0045,   64.0000,   90.0000],
-                 [0.0050,   76.0000,   90.0000],
-                 [0.0060,   79.0000,   90.0000],
-                 [0.0070,   88.0000,   90.0000],
-                 [0.0080,   90.0000,   90.0000],
-                 [0.0100,   90.0000,   90.0000]])
-                 
-
-
-
+data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
+                 [0.0020, 44.0000, 90.0000], [0.0025, 44.0000, 90.0000],
+                 [0.0030, 52.0000, 90.0000], [0.0035, 53.0000, 90.0000],
+                 [0.0040, 62.0000, 90.0000], [0.0045, 64.0000, 90.0000],
+                 [0.0050, 76.0000, 90.0000], [0.0060, 79.0000, 90.0000],
+                 [0.0070, 88.0000, 90.0000], [0.0080, 90.0000, 90.0000],
+                 [0.0100, 90.0000, 90.0000]])
 
 options = dict()
 options['expType'] = '2AFC'
 options['sigmoidName'] = 'norm'
 
 res = ps.psignifit(data, options)
-
 """ plotPsych """
 '''This funciton plots the fitted psychometric function with the measured data. 
  It takes the result dict you want to plot. You can also set plotting options.'''
- 
 '''
 'dataColor': np.array([0,round(105/255,3),round(170/255,3)]),
 'plotData':    True, 
@@ -61,8 +49,7 @@ res = ps.psignifit(data, options)
 'CIthresh': False 
 '''
 plt.figure()
-ps.psigniplot.plotPsych(res,lineWidth = 5)
-
+ps.psigniplot.plotPsych(res, lineWidth=5)
 """ plotMarginal """
 '''This function plots the marginal posterior density for a single parameter. 
 As input it requires a results dictionary, the parameter to plot and optionally 
@@ -71,11 +58,9 @@ plotting options and a handle to an axis to plot in.
 
 plt.figure()
 ps.psigniplot.plotMarginal(res)
-
 '''The gray shadow corresponds to the chosen confidence interval and the black 
 line shows the point estimate for the plotted parameter. 
 The prior is also included in the plot as a gray dashed line.'''
-
 '''You may set the following options again with their
  respective default values assigned to change the behaviour of the plot:
 'dim' = 0
@@ -90,7 +75,6 @@ The prior is also included in the plot as a gray dashed line.'''
 'CIpatch'        = True                # draw the patch for the confidence interval
 'plotPE'         = True                # plot the point estimate?
 '''
-
 """ plot2D """
 ''' This plots 2 dimensional posterior marginals. 
 As input this function expects the result dict, two numbers for the two parameters 
@@ -98,8 +82,7 @@ to plot against each other and optionally a handle h to the axis to plot in
 and plotting options. '''
 
 plt.figure()
-ps.psigniplot.plot2D(res,0,1)
-
+ps.psigniplot.plot2D(res, 0, 1)
 '''As options the following fields in plotOptions can be set:
 'axisHandle'  = plt.gca()    # axes handle to plot in
 'colorMap'  = getColorMap()         # A colormap for the posterior
@@ -108,16 +91,8 @@ ps.psigniplot.plot2D(res,0,1)
 'label1'    = '[parameter name]'   # label for the first parameter
 'label2'    = '[parameter name]'   # label for the second parameter
 '''
-
 """ plotPrior """
 '''As a tool this function plots the actually used priors of the provided 
 result dictionary. '''
 plt.figure()
 ps.psigniplot.plotPrior(res)
- 
- 
- 
- 
- 
-
-

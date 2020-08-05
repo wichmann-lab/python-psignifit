@@ -6,35 +6,25 @@
 """
 
 import numpy as np
+
 import psignifit as ps
-
-
 '''
  We will need some fitted function for illustration. Thus we first fit our
  standard data from DEMO_001 again:
 '''
 
-data = np.array([[0.0010,   45.0000,   90.0000],
-                 [0.0015,   50.0000,   90.0000],
-                 [0.0020,   44.0000,   90.0000],
-                 [0.0025,   44.0000,   90.0000],
-                 [0.0030,   52.0000,   90.0000],
-                 [0.0035,   53.0000,   90.0000],
-                 [0.0040,   62.0000,   90.0000],
-                 [0.0045,   64.0000,   90.0000],
-                 [0.0050,   76.0000,   90.0000],
-                 [0.0060,   79.0000,   90.0000],
-                 [0.0070,   88.0000,   90.0000],
-                 [0.0080,   90.0000,   90.0000],
-                 [0.0100,   90.0000,   90.0000]])
-                 
+data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
+                 [0.0020, 44.0000, 90.0000], [0.0025, 44.0000, 90.0000],
+                 [0.0030, 52.0000, 90.0000], [0.0035, 53.0000, 90.0000],
+                 [0.0040, 62.0000, 90.0000], [0.0045, 64.0000, 90.0000],
+                 [0.0050, 76.0000, 90.0000], [0.0060, 79.0000, 90.0000],
+                 [0.0070, 88.0000, 90.0000], [0.0080, 90.0000, 90.0000],
+                 [0.0100, 90.0000, 90.0000]])
 
-
-options                = dict()
+options = dict()
 options['sigmoidName'] = 'norm'
-options['expType']     = '2AFC'
-res = ps.psignifit(data,options)
-
+options['expType'] = '2AFC'
+res = ps.psignifit(data, options)
 """  obtaining threshold values  """
 ''' 
  For comparison to other estimation techniques we provide functions to
@@ -49,7 +39,7 @@ res = ps.psignifit(data,options)
  For example: This call will find the value at which our function reaches
  90% correct:
 '''
-ps.getThreshold(res,0.9)
+ps.getThreshold(res, 0.9)
 ''' 
  which should be 0.0058 
 
@@ -57,7 +47,7 @@ ps.getThreshold(res,0.9)
  middle of the psychometric function independent of the guessing and lapse
  rate:
 '''
-ps.getThreshold(res,0.5,1)
+ps.getThreshold(res, 0.5, 1)
 ''' 
  which should be 0.0046, which is exactly the definition of the threshold
  we use in the fitting.
@@ -65,7 +55,7 @@ ps.getThreshold(res,0.5,1)
  The function also computes worst case credible intervals for the
  threshold. 
 '''
-[threshold,CI] = ps.getThreshold(res,0.5,1)
+[threshold, CI] = ps.getThreshold(res, 0.5, 1)
 '''
  The credible intervals are for the confidence levels given for your
  function fit. 
@@ -74,7 +64,6 @@ ps.getThreshold(res,0.5,1)
  worst case for all other parameters instead of averaging over the values
  correctly.
 '''
-
 """  Obtaining slope values """
 ''' 
  We also provide two functions to calculate the slope of the psychometric
@@ -84,14 +73,14 @@ ps.getThreshold(res,0.5,1)
  getSlope(res,stimLevel), will calculate the slope at a given stimulus
  level. 
 '''
- #For example: 
-ps.getSlope(res,0.006)
+# For example:
+ps.getSlope(res, 0.006)
 '''
  getSlopePC(res,pCorrect,unscaled), will calculate the slope at a given 
  percent correct.
-''' 
-# For example: 
-ps.getSlopePC(res,0.6)
+'''
+# For example:
+ps.getSlopePC(res, 0.6)
 ''' 
  Will yield the slope at the value where the psychometric function reaches
  60% correct (at 0.0034). This slope is 89.0673.
@@ -101,8 +90,7 @@ ps.getSlopePC(res,0.6)
  For example we can calculate the slope at the midpoint of the
  psychometric function using:
 '''
-ps.getSlopePC(res,0.5,1)
-
+ps.getSlopePC(res, 0.5, 1)
 """ Bias Analysis """
 ''' 
  For 2AFC experiments it makes sense to check whether the observers are
@@ -125,97 +113,58 @@ ps.getSlopePC(res,0.5,1)
  and data31 and data32 are a pair each:
 '''
 
-data11 = np.array([[0.0010,   22.0000,   45.0000],
-    [0.0015,   27.0000,   45.0000],
-    [0.0020,   24.0000,   47.0000],
-    [0.0025,   20.0000,   44.0000],
-    [0.0030,   27.0000,   45.0000],
-    [0.0035,   27.0000,   44.0000],
-    [0.0040,   30.0000,   45.0000],
-    [0.0045,   30.0000,   44.0000],
-    [0.0050,   39.0000,   43.0000],
-    [0.0060,   40.0000,   46.0000],
-    [0.0070,   47.0000,   48.0000],
-    [0.0080,   47.0000,   47.0000],
-    [0.0100,   42.0000,   42.0000]])
+data11 = np.array([[0.0010, 22.0000, 45.0000], [0.0015, 27.0000, 45.0000],
+                   [0.0020, 24.0000, 47.0000], [0.0025, 20.0000, 44.0000],
+                   [0.0030, 27.0000, 45.0000], [0.0035, 27.0000, 44.0000],
+                   [0.0040, 30.0000, 45.0000], [0.0045, 30.0000, 44.0000],
+                   [0.0050, 39.0000, 43.0000], [0.0060, 40.0000, 46.0000],
+                   [0.0070, 47.0000, 48.0000], [0.0080, 47.0000, 47.0000],
+                   [0.0100, 42.0000, 42.0000]])
 
-data12 = np.array([[0.0010,   23.0000,   45.0000],
-    [0.0015,   23.0000,   45.0000],
-    [0.0020,   20.0000,   43.0000],
-    [0.0025,   24.0000,   46.0000],
-    [0.0030,   25.0000,   45.0000],
-    [0.0035,   26.0000,   46.0000],
-    [0.0040,   32.0000,   45.0000],
-    [0.0045,   34.0000,   46.0000],
-    [0.0050,   37.0000,   47.0000],
-    [0.0060,   38.0000,   44.0000],
-    [0.0070,   41.0000,   42.0000],
-    [0.0080,   43.0000,   43.0000],
-    [0.0100,   48.0000,   48.0000]])
+data12 = np.array([[0.0010, 23.0000, 45.0000], [0.0015, 23.0000, 45.0000],
+                   [0.0020, 20.0000, 43.0000], [0.0025, 24.0000, 46.0000],
+                   [0.0030, 25.0000, 45.0000], [0.0035, 26.0000, 46.0000],
+                   [0.0040, 32.0000, 45.0000], [0.0045, 34.0000, 46.0000],
+                   [0.0050, 37.0000, 47.0000], [0.0060, 38.0000, 44.0000],
+                   [0.0070, 41.0000, 42.0000], [0.0080, 43.0000, 43.0000],
+                   [0.0100, 48.0000, 48.0000]])
 
+data21 = np.array([[0.0010, 33.0000, 45.0000], [0.0015, 37.0000, 45.0000],
+                   [0.0020, 36.0000, 47.0000], [0.0025, 32.0000, 44.0000],
+                   [0.0030, 36.0000, 45.0000], [0.0035, 36.0000, 44.0000],
+                   [0.0040, 37.0000, 45.0000], [0.0045, 36.0000, 44.0000],
+                   [0.0050, 42.0000, 43.0000], [0.0060, 43.0000, 46.0000],
+                   [0.0070, 47.0000, 48.0000], [0.0080, 47.0000, 47.0000],
+                   [0.0100, 42.0000, 42.0000]])
 
-data21 = np.array([[ 0.0010,   33.0000,   45.0000],
-    [0.0015,   37.0000,   45.0000],
-    [0.0020,   36.0000,   47.0000],
-    [0.0025,   32.0000,   44.0000],
-    [0.0030,   36.0000,   45.0000],
-    [0.0035,   36.0000,   44.0000],
-    [0.0040,   37.0000,   45.0000],
-    [0.0045,   36.0000,   44.0000],
-    [0.0050,   42.0000,   43.0000],
-    [0.0060,   43.0000,   46.0000],
-    [0.0070,   47.0000,   48.0000],
-    [0.0080,   47.0000,   47.0000],
-    [0.0100,   42.0000,   42.0000]])
+data22 = np.array([[0.0010, 12.0000, 45.0000], [0.0015, 13.0000, 45.0000],
+                   [0.0020, 8.0000, 43.0000], [0.0025, 12.0000, 46.0000],
+                   [0.0030, 16.0000, 45.0000], [0.0035, 17.0000, 46.0000],
+                   [0.0040, 25.0000, 45.0000], [0.0045, 28.0000, 46.0000],
+                   [0.0050, 34.0000, 47.0000], [0.0060, 35.0000, 44.0000],
+                   [0.0070, 41.0000, 42.0000], [0.0080, 43.0000, 43.0000],
+                   [0.0100, 48.0000, 48.0000]])
 
-data22 = np.array([[ 0.0010,   12.0000,   45.0000],
-    [0.0015,   13.0000,   45.0000],
-    [0.0020,   8.0000,   43.0000],
-    [0.0025,   12.0000,   46.0000],
-    [0.0030,   16.0000,   45.0000],
-    [0.0035,   17.0000,   46.0000],
-    [0.0040,   25.0000,   45.0000],
-    [0.0045,   28.0000,   46.0000],
-    [0.0050,   34.0000,   47.0000],
-    [0.0060,   35.0000,   44.0000],
-    [0.0070,   41.0000,   42.0000],
-    [0.0080,   43.0000,   43.0000],
-    [0.0100,   48.0000,   48.0000]])
+data31 = np.array([[0.0010, 22.0000, 45.0000], [0.0015, 25.0000, 45.0000],
+                   [0.0020, 24.0000, 47.0000], [0.0025, 20.0000, 44.0000],
+                   [0.0030, 20.0000, 45.0000], [0.0035, 21.0000, 44.0000],
+                   [0.0040, 22.0000, 45.0000], [0.0045, 25.0000, 44.0000],
+                   [0.0050, 32.0000, 43.0000], [0.0060, 35.0000, 46.0000],
+                   [0.0070, 46.0000, 48.0000], [0.0080, 47.0000, 47.0000],
+                   [0.0100, 42.0000, 42.0000]])
 
-
-data31 = np.array([[0.0010,   22.0000,   45.0000],
-    [0.0015,   25.0000,   45.0000],
-    [0.0020,   24.0000,   47.0000],
-    [0.0025,   20.0000,   44.0000],
-    [0.0030,   20.0000,   45.0000],
-    [0.0035,   21.0000,   44.0000],
-    [0.0040,   22.0000,   45.0000],
-    [0.0045,   25.0000,   44.0000],
-    [0.0050,   32.0000,   43.0000],
-    [0.0060,   35.0000,   46.0000],
-    [0.0070,   46.0000,   48.0000],
-    [0.0080,   47.0000,   47.0000],
-    [0.0100,   42.0000,   42.0000]])
-
-data32 = np.array([[0.0010,   23.0000,   45.0000],
-    [0.0015,   25.0000,   45.0000],
-    [0.0020,   20.0000,   43.0000],
-    [0.0025,   24.0000,   46.0000],
-    [0.0030,   32.0000,   45.0000],
-    [0.0035,   32.0000,   46.0000],
-    [0.0040,   40.0000,   45.0000],
-    [0.0045,   39.0000,   46.0000],
-    [0.0050,   44.0000,   47.0000],
-    [0.0060,   43.0000,   44.0000],
-    [0.0070,   42.0000,   42.0000],
-    [0.0080,   43.0000,   43.0000],
-    [0.0100,   48.0000,   48.0000]])
-
+data32 = np.array([[0.0010, 23.0000, 45.0000], [0.0015, 25.0000, 45.0000],
+                   [0.0020, 20.0000, 43.0000], [0.0025, 24.0000, 46.0000],
+                   [0.0030, 32.0000, 45.0000], [0.0035, 32.0000, 46.0000],
+                   [0.0040, 40.0000, 45.0000], [0.0045, 39.0000, 46.0000],
+                   [0.0050, 44.0000, 47.0000], [0.0060, 43.0000, 44.0000],
+                   [0.0070, 42.0000, 42.0000], [0.0080, 43.0000, 43.0000],
+                   [0.0100, 48.0000, 48.0000]])
 '''
  now we can check whether our different pairs show biased behaviour:
 '''
 # We start with the first pair of data:
-ps.biasAna(data11,data12,options)
+ps.biasAna(data11, data12, options)
 '''
  This command will open a figure, which constains plots for the first
  dataset alone (red), for the second dataset alone (blue) and for the
@@ -235,8 +184,7 @@ ps.biasAna(data11,data12,options)
 '''
 
 # Next, we check our second split of data:
-ps.biasAna(data21,data22,options)
-
+ps.biasAna(data21, data22, options)
 '''
  In this case there seems to be very strong "finger bias", i.e. the
  observer is much better at guessing in one than in the other part of the
@@ -254,8 +202,7 @@ ps.biasAna(data21,data22,options)
 '''
 
 # Now we have a look at our third splitting:
-ps.biasAna(data31,data32,options)
-
+ps.biasAna(data31, data32, options)
 '''
  In this case the guessing rate does not seem to differ between intervals,
  but the psychometric functions are shifted, i.e. the task was easier in
@@ -283,7 +230,6 @@ ps.biasAna(data31,data32,options)
  the plots of the marginals should allow a separation of the different
  biases.
 '''
-
 """  plotsModelfit """
 '''
  We offer you a function which creates the plots psignifit 2 created for
@@ -292,7 +238,6 @@ ps.biasAna(data31,data32,options)
 '''
 
 ps.psigniplot.plotsModelfit(res)
-
 '''
  This method will show you three plots, based on the deviance residuals,
  which are the normalized deviations from the fitted psychometric function:
@@ -311,15 +256,13 @@ ps.psigniplot.plotsModelfit(res)
  you how the deviations from the psychometric function changed over time. 
  Again strong and/or systematic deviations from 0 are a cause for worry.
 '''
-
 """ Quick and dirty mode """
 '''
  To fit functions fast, for example during experiments or to have a fast
  early look at your data
 '''
 
-resFast = ps.psignifitFast(data,options);
-
+resFast = ps.psignifitFast(data, options)
 '''
  To reduce processing time this function changes three aspects:
  1) It uses only a binomial model instead of the full beta-binomial model 

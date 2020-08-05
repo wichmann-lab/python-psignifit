@@ -21,15 +21,18 @@ normcdf = scipy.stats.norm.cdf
 t1cdf = scipy.stats.t(1).cdf
 t1icdf = scipy.stats.t(1).ppf
 
+
 # our own Exception class
 class PsignifitException(Exception):
     pass
+
 
 # create a decorator from the numpy errstate contextmanager, used to handle
 # floating point errors. In our case divide-by-zero errors are usually harmless,
 # because we are working in log space and log(0)==-inf is a valid result
 class fp_error_handler(np.errstate):
     pass
+
 
 def get_grid(borders, steps):
     """Return uniformely spaced grid within given borders.
@@ -64,14 +67,18 @@ def normalize(func, interval, steps=10000):
     Intregration is done using the composite trapezoidal rule.
     """
     if interval[0] == interval[1]:
+
         def nfunc(y):
             return np.ones_like(y)
     else:
         x = np.linspace(interval[0], interval[1], steps)
         integral = np.trapz(func(x), x=x)
+
         def nfunc(y):
-            return func(y)/integral
+            return func(y) / integral
+
     return nfunc
+
 
 def nd_integrate(func, grid):
     """Calculate integral of multivariate function using composite trapezoidal rule
@@ -99,13 +106,13 @@ def nd_integrate(func, grid):
             delta = np.empty_like(steps)
             delta[1:] = np.diff(steps)
             # delta weight is half at the borders of the integration interval
-            delta[0] = delta[1]/2
-            delta[-1] = delta[-1]/2
+            delta[0] = delta[1] / 2
+            delta[-1] = delta[-1] / 2
             deltas.append(delta)
     # create a meshgrid for each dimension
     mesh_grids = np.meshgrid(*deltas, copy=False, sparse=True, indexing='ij')
     weights = np.prod(mesh_grids, axis=0)
-    return (func*weights).sum(), weights
+    return (func * weights).sum(), weights
 
 
 def pool_data(data, xtol=0, max_gap=np.inf, max_length=np.inf):
@@ -115,28 +122,29 @@ def pool_data(data, xtol=0, max_gap=np.inf, max_length=np.inf):
     at max pool_max_length trials appart in general.
     """
     ndata = data.shape[0]
-    seen = [False]*ndata
-    cum_ntrials = [0] + list(data[:,2].cumsum())
+    seen = [False] * ndata
+    cum_ntrials = [0] + list(data[:, 2].cumsum())
 
     pool = []
-    for  i in range(ndata):
+    for i in range(ndata):
         if not seen[i]:
-            current = data[i,0]
+            current = data[i, 0]
             block = []
             gap = 0
             for j in range(i, ndata):
-                if (cum_ntrials[j+1]-cum_ntrials[i])>max_length or gap>max_gap:
+                if (cum_ntrials[j + 1] -
+                        cum_ntrials[i]) > max_length or gap > max_gap:
                     break
-                level, ncorrect, ntrials = data[j,:]
+                level, ncorrect, ntrials = data[j, :]
                 if abs(level - current) <= xtol and not seen[j]:
                     seen[j] = True
                     gap = 0
-                    block.append((level*ntrials, ncorrect, ntrials))
+                    block.append((level * ntrials, ncorrect, ntrials))
                 else:
                     gap += ntrials
 
             level, ncorrect, ntrials = np.sum(block, axis=0)
-            pool.append((level/ntrials, ncorrect, ntrials))
+            pool.append((level / ntrials, ncorrect, ntrials))
 
     return np.array(pool)
 
@@ -146,11 +154,19 @@ def strToDim(string):
     Finds the number corresponding to a dim/parameter given as a string.
     """
     s = string.lower()
-    if s in ['threshold','thresh','m','t','alpha', '0']:    return 0,'Threshold'
-    elif s in  ['width','w','beta', '1']:                   return 1,'Width'
-    elif s in ['lapse','lambda','lapserate','lapse rate','lapse-rate',
-               'upper asymptote','l', '2']:                 return 2, r'$\lambda$'
-    elif s in ['gamma','guess','guessrate','guess rate',
-               'guess-rate','lower asymptote','g', '3']:    return 3, r'$\gamma$'
-    elif s in ['sigma','std','s','eta','e', '4']:           return 4, r'$\eta$'
-
+    if s in ['threshold', 'thresh', 'm', 't', 'alpha', '0']:
+        return 0, 'Threshold'
+    elif s in ['width', 'w', 'beta', '1']:
+        return 1, 'Width'
+    elif s in [
+            'lapse', 'lambda', 'lapserate', 'lapse rate', 'lapse-rate',
+            'upper asymptote', 'l', '2'
+    ]:
+        return 2, r'$\lambda$'
+    elif s in [
+            'gamma', 'guess', 'guessrate', 'guess rate', 'guess-rate',
+            'lower asymptote', 'g', '3'
+    ]:
+        return 3, r'$\gamma$'
+    elif s in ['sigma', 'std', 's', 'eta', 'e', '4']:
+        return 4, r'$\eta$'

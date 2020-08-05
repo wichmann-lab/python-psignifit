@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
-import numpy as np
 
-from .likelihood import likelihood
-from .marginalize import marginalize
 from .utils import norminv
 
 
-def set_borders(data, wmin=None, etype=None, srange=None,
-                      alpha=None):
+def set_borders(data, wmin=None, etype=None, srange=None, alpha=None):
     """
     Set borders of the grid for the parameter optimization
 
@@ -26,12 +22,13 @@ def set_borders(data, wmin=None, etype=None, srange=None,
 
     # Threshold is assumed to be within the data spread +/- 50%
     spread = srange[1] - srange[0]
-    threshold = (srange[0]-spread/2, srange[1]+spread/2)
+    threshold = (srange[0] - spread / 2, srange[1] + spread / 2)
 
     # The width is assumed to be between half the minimal distance of
     # two points and 3 times the range of data
-    spread /= (norminv(.95)-norminv(.05))/(norminv(1-alpha)-norminv(alpha))
-    width  = (wmin, 3*spread)
+    spread /= (norminv(.95) - norminv(.05)) / (norminv(1 - alpha) -
+                                               norminv(alpha))
+    width = (wmin, 3 * spread)
 
     # The lapse rate lambda
     lambda_ = (0., 0.5)
@@ -44,11 +41,15 @@ def set_borders(data, wmin=None, etype=None, srange=None,
     else:
         # this is a nAFC experiment
         n = int(etype[0])
-        gamma = (1./n, 1./n)
+        gamma = (1. / n, 1. / n)
 
     # The overdispersion parameter eta
-    eta = (0., 1-1e-10)
+    eta = (0., 1 - 1e-10)
 
-    return {'threshold': threshold, 'width': width, 'lambda': lambda_,
-            'gamma': gamma, 'eta' : eta}
-
+    return {
+        'threshold': threshold,
+        'width': width,
+        'lambda': lambda_,
+        'gamma': gamma,
+        'eta': eta
+    }
