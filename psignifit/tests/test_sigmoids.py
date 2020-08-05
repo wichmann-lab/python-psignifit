@@ -21,8 +21,16 @@ ALPHA = 0.05
 # list of all sigmoids (after having removed aliases)
 ALL_SIGS = { getattr(sg, name) for name in dir(sg) if not name.startswith('_') }
 
+LOG_SIGS = ('weibull', 'logn', 'neg_weibull', 'neg_logn')
+
 @pytest.mark.parametrize('sigmoid', ALL_SIGS)
 def test_sigmoid_sanity_check(sigmoid):
-    out = sigmoid(X, M, WIDTH, PC=PC, alpha=ALPHA)
-    print(sigmoid.__name__, out.min(), out.max())
+    #if sigmoid.__name__ in LOG_SIGS:
+    #    x = np.log(X)
+    #else:
+    #    x = X
+    x = X
+    out = sigmoid(x, M, WIDTH, PC=PC, alpha=ALPHA)
+    #print(sigmoid.__name__, out.min(), out.max())
+    assert np.isclose(sigmoid(M, M, WIDTH, PC=PC, alpha=ALPHA), PC)
 
