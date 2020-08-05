@@ -36,6 +36,7 @@ def test_check_option():
     def check_foobar(self, value):
         if value > 10:
             raise PsignifitException
+        return value
 
     B.check_foobar = check_foobar
     # instantiate the new conf
