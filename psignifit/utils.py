@@ -51,7 +51,7 @@ def get_grid(bounds, steps):
     grid = {}
     for param in bounds:
         if bounds[param] is None:
-            grid[param] == None
+            grid[param] = None
         else:
             grid[param] = np.linspace(*bounds[param], num=steps[param])
     return grid

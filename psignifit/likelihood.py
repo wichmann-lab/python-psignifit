@@ -47,6 +47,13 @@ def log_posterior(data: np.ndarray, sigmoid: Sigmoid, priors: Dict[str, Prior], 
     width = grid['width']
     lambd = grid['lambda']
     gamma = grid['gamma']
+    eta_std = grid['eta']
+    if eta_std is None:
+        eta_prime = None
+    else:
+        eta = eta_std ** 2  # use variance instead of standard deviation
+        eta_prime = 1 / eta[eta > 1e-09] - 1
+        eta_binom = (eta <= 1e-09).sum() # for small variance we use the binomial model
 
     levels = data[:, 0]
     ncorrect = data[:, 1]
@@ -59,24 +66,20 @@ def log_posterior(data: np.ndarray, sigmoid: Sigmoid, priors: Dict[str, Prior], 
     # concatenating?
     # fixing this would also fix the case with the curried likelihood
     # below, that currently does work for grid['eta'] -> None
-
-    # IN WHICH CASE IS ETA == NONE??? AT LEAST NEVER IN BOUNDS (constant)
-    if grid['eta'] is None:
-        eta_prime = None
-        thres, width, lambd, gamma = np.meshgrid(thres, width, lambd, gamma,
-                                                 copy=False, sparse=True, indexing='ij')
+    if gamma is None and eta_prime is None:
+        thres, width, lambd = np.meshgrid(thres, width, lambd, copy=False, sparse=True, indexing='ij')
+    elif gamma is None:
+        thres, width, lambd, eta_prime = np.meshgrid(thres, width, lambd, eta_prime,
+                                                     copy=False, sparse=True, indexing='ij')
+    elif eta_prime is None:
+        thres, width, lambd, gamma = np.meshgrid(thres, width, lambd, gamma, copy=False, sparse=True, indexing='ij')
     else:
-        eta_std = grid['eta']
-        eta = eta_std ** 2  # use variance instead of standard deviation
-        eta_prime = 1 / eta[eta > 1e-09] - 1
-
-        # for smaller variance we use the binomial model
-        vbinom = (eta <= 1e-09).sum()
         thres, width, lambd, gamma, eta_prime = np.meshgrid(thres, width, lambd, gamma, eta_prime,
                                                             copy=False, sparse=True, indexing='ij')
 
+    if gamma is None:
+        gamma = lambd
     scale = 1 - gamma - lambd
-    ###FIXME: handle the case with equal_asymptote
 
     pbin = 0
     p = 0
@@ -112,14 +115,14 @@ def log_posterior(data: np.ndarray, sigmoid: Sigmoid, priors: Dict[str, Prior], 
     if eta_prime is None:
         p = pbin
     else:
-        pbin = np.broadcast_to(pbin, pbin.shape[:4] + (vbinom,))
-        p = np.concatenate((pbin, p), axis=4)
+        print(pbin.shape, p.shape, pbin.shape[:-1] + (eta_binom,))
+        pbin = np.broadcast_to(pbin, pbin.shape[:-1] + (eta_binom,))
+        p = np.concatenate((pbin, p), axis=-1)
 
     # add priors on the corresponding axis
     p += np.log(priors['threshold'](thres))
     p += np.log(priors['width'](width))
     p += np.log(priors['lambda'](lambd))
-    ## FIXME equal asymptote case not contemplated here
     p += np.log(priors['gamma'](gamma))
     if eta_prime is not None:
         p += np.log(priors['eta'](eta_std))
