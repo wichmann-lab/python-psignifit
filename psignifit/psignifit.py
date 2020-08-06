@@ -137,23 +137,8 @@ def psignifit(data, conf=None, **kwargs):
     #            options['priors'][ipar] = priors[ipar]
     #
     #    p.checkPriors(data, options)
-    width_alpha = conf.width_alpha
     if conf.priors is None:
-        priors = {
-            'threshold':
-                partial(_priors.pthreshold, st_range=stimulus_range),
-            'width':
-                partial(_priors.pwidth,
-                        wmin=width_min,
-                        wmax=stimulus_range[1] - stimulus_range[0],
-                        alpha=width_alpha),
-            'lambda':
-                _priors.plambda,
-            'gamma':
-                _priors.pgamma,
-            'eta':
-                partial(_priors.peta, k=conf.beta_prior),
-        }
+        priors = _priors.default_priors(stimulus_range, width_min, conf.width_alpha, conf.beta_prior)
     else:
         # will take care of user-specified priors later!
         # XXX TODO!
@@ -195,10 +180,8 @@ levels,which is frequently invalid for adaptive procedures!""")
                          max_gap=conf.pool_max_gap,
                          max_length=conf.pool_max_length)
 
-    # bounds of integration
-    exp_type = conf.experiment_type
-    bounds = parameter_bounds(wmin=width_min, etype=exp_type, srange=stimulus_range,
-                              alpha=width_alpha, echoices = conf.experiment_choices)
+    bounds = parameter_bounds(wmin=width_min, etype=conf.experiment_type, srange=stimulus_range,
+                              alpha=conf.width_alpha, echoices = conf.experiment_choices)
 
     # override at user request
     if conf.bounds is not None:

@@ -2,11 +2,14 @@
 """
 """
 import warnings
+from typing import Tuple, Dict
+from functools import partial
 
 import numpy as np
 import scipy.stats
 
 from .utils import norminv
+from .typing import Prior
 
 
 def pthreshold(x, st_range):
@@ -71,7 +74,20 @@ def peta(x, k):
     return scipy.stats.beta.pdf(x, 1, k)
 
 
-def checkPriors(data, options):
+def default_priors(stimulus_range: Tuple[float, float], width_min: float,
+                   width_alpha: float, beta: float) -> Dict[str, Prior]:
+    return {
+        'threshold': partial(pthreshold, st_range=stimulus_range),
+        'width': partial(pwidth, wmin=width_min,
+                         wmax=stimulus_range[1] - stimulus_range[0],
+                         alpha=width_alpha),
+        'lambda': plambda,
+        'gamma': pgamma,
+        'eta': partial(peta, k=beta),
+    }
+
+
+def check_priors(data, options):
     """
     this runs a short test whether the provided priors are functional
      function checkPriors(data,options)
