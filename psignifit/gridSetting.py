@@ -15,7 +15,7 @@ import copy
 import numpy as np
 from scipy.stats import beta as b
 
-from .likelihood import likelihood
+from .likelihood import posterior_grid
 
 
 def gridSetting(data, options, Seed):

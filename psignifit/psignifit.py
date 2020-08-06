@@ -255,7 +255,7 @@ levels,which is frequently invalid for adaptive procedures!""")
     # if they were using the default, this is a bug in the software or your data
     # are highly unusual, if they changed the defaults the error can be more verbose
     # "the choice of your prior or of your bounds has a significant influence on the
-    # confidence interval widths and or the max likelihood estimate"
+    # confidence interval widths and or the max posterior_grid estimate"
     #########
     # if result['marginals'][0][0] * result['marginalsW'][0][0] > .001:
     # warnings.warn('psignifit:boundWarning\n'\
@@ -357,10 +357,10 @@ def psignifitCore(data, options):
                 # if parameter was fixed
                 else:
                     result['X1D'].append(np.array([options['bounds'][idx, 0]]))
-    '''Evaluate likelihood and form it into a posterior'''
+    '''Evaluate posterior_grid and form it into a posterior_grid'''
 
     (result['Posterior'],
-     result['logPmax']) = _l.likelihood(data, options, result['X1D'])
+     result['logPmax']) = _l.posterior_grid(data, options, result['X1D'])
     result['weight'] = getWeights(result['X1D'])
     integral = np.sum(
         np.array(result['Posterior'][:]) * np.array(result['weight'][:]))

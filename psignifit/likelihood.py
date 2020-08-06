@@ -34,7 +34,12 @@ def posterior_grid(data, sigmoid: Sigmoid, priors: Dict[str, Prior],
     ind_max = np.unravel_index(p.argmax(), p.shape)
     p = np.exp(p - p[ind_max])
 
-    grid_max = {name: grid_values[index] for (index, (name, grid_values)) in zip(ind_max, sorted(grid.items()))}
+    grid_max = dict()
+    for index, (name, grid_values) in  zip(ind_max, sorted(grid.items())):
+        if grid_values is None:
+            grid_max[name] = None
+        else:
+            grid_max[name] = grid_values[index]
     return p, grid_max
 
 
@@ -65,7 +70,8 @@ def log_posterior(data: np.ndarray, sigmoid: Sigmoid, priors: Dict[str, Prior], 
     lambd = grid['lambda']
     gamma = grid['gamma']
     eta_std = grid['eta']
-    if eta_std is None:
+
+    if np.allclose(eta_std, [0]):
         eta_prime = None
     else:
         eta = eta_std ** 2  # use variance instead of standard deviation
@@ -76,13 +82,6 @@ def log_posterior(data: np.ndarray, sigmoid: Sigmoid, priors: Dict[str, Prior], 
     ncorrect = data[:, 1]
     ntrials = data[:, 2]
 
-    ###FIXME: fix treatment of no 'eta' configurations,
-    # best choice is probably having grid['eta'] = [0]
-    # then rewrite below so that we don't test for v -> None but for
-    # v -> [] instead, then rearrange the p, pbin broadcasting and
-    # concatenating?
-    # fixing this would also fix the case with the curried posterior_grid
-    # below, that currently does work for grid['eta'] -> None
     if gamma is None and eta_prime is None:
         lambd, thres, width = np.meshgrid(lambd, thres, width, copy=False, sparse=True, indexing='ij')
     elif gamma is None:
@@ -125,9 +124,8 @@ def log_posterior(data: np.ndarray, sigmoid: Sigmoid, priors: Dict[str, Prior], 
                 p += (sp.gammaln(correct_trials + a) + sp.gammaln(trials - correct_trials + b) -
                       sp.gammaln(trials + eta_prime) - sp.gammaln(a) - sp.gammaln(b) +
                       sp.gammaln(eta_prime))
-        else:
-            # we should never land here: we can't more ncorrect than ntrials
-            raise PsignifitException('ncorrect %d > ntrials %d!' % (correct_trials, trials))
+            else:  # we should never land here: we can't more ncorrect than ntrials
+                raise PsignifitException('ncorrect %d > ntrials %d!' % (correct_trials, trials))
 
     if eta_prime is None:
         p = pbin
@@ -141,8 +139,12 @@ def log_posterior(data: np.ndarray, sigmoid: Sigmoid, priors: Dict[str, Prior], 
     p += np.log(priors['width'](width))
     p += np.log(priors['lambda'](lambd))
     p += np.log(priors['gamma'](gamma))
-    if eta_prime is not None:
+    if eta_prime is None:
+        p = np.expand_dims(p, axis=0)
+    else:
         p += np.log(priors['eta'](eta_std.reshape(-1, *eta_prime.shape[1:])))
+    if grid['gamma'] is None:
+        p = np.expand_dims(p, axis=1)
     return p
 
 
@@ -169,6 +171,9 @@ def max_posterior(data, param_init: Dict[str, float], param_fixed: Dict[str, flo
         # do not optimize fixed parameter
         if name in param_init:
             param_init.pop(name)
+    for name, value in param_init.items():
+        if not np.isscalar(value):
+            raise PsignifitException(f'Expects scalar number as initialization of {name}, got {value}.')
 
     def objective(x):
         optimized_param = dict(zip(sorted(param_init.keys()), x))
@@ -178,4 +183,5 @@ def max_posterior(data, param_init: Dict[str, float], param_fixed: Dict[str, flo
     init_values = [value for name, value in sorted(param_init.items())]
     optimized_values = optimize.fmin(objective, init_values, disp=False)
     optimized_param = dict(zip(sorted(param_init.keys()), optimized_values))
+    print(param_init, optimized_param)
     return {**param_fixed, **optimized_param}
