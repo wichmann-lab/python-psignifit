@@ -34,13 +34,16 @@ def setup_experiment(**kwargs):
 @pytest.mark.parametrize(
    "experiment_type,result_shape,result_max",
     [
-       ("yes/no", (30, 40, 10, 1, 20), -560.8871),
-       ("3AFC", (30, 40, 10, 1, 20), -560.0022),
-       ("equal asymptote", (30, 40, 10, 20), -560.8881),  # gamma dimension is None
+       ("yes/no", (20, 1, 10, 30, 40), -560.8871),
+       ("3AFC", (20, 1, 10, 30, 40), -560.0022),
+       ("equal asymptote", (20, 10, 30, 40), -560.8881),  # gamma is none in grid
     ]
 )
 def test_log_posterior(experiment_type, result_shape, result_max):
     data, sigmoid, priors, grid = setup_experiment(experiment_type=experiment_type)
+    if experiment_type == "equal asymptote":
+        assert grid['gamma'] is None
+
     log_pp = likelihood.log_posterior(data, sigmoid, priors, grid)
 
     np.testing.assert_equal(log_pp.shape, result_shape)

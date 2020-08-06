@@ -6,7 +6,6 @@ from functools import partial
 
 import numpy as np
 import scipy
-import scipy.optimize as spo
 
 from . import priors as _priors
 from . import psigniplot as plot
@@ -17,7 +16,7 @@ from .getConfRegion import getConfRegion
 from .getSeed import getSeed
 from .getWeights import getWeights
 from .gridSetting import gridSetting
-from .likelihood import likelihood, PARM_ORDER, get_optm_llh
+from .likelihood import posterior_grid, max_posterior
 from .marginalize import marginalize
 from .typing import ExperimentType
 from .utils import (norminv, norminvg, t1icdf, pool_data, nd_integrate,
@@ -199,17 +198,11 @@ levels,which is frequently invalid for adaptive procedures!""")
     for parameter, prior in priors.items():
         priors[parameter] = normalize(prior, bounds[parameter])
 
-    # do first sparse grid likelihood evaluation
+    # do first sparse grid posterior_grid evaluation
     grid = get_grid(bounds, conf.steps_moving_bounds)
-    llh_sparse, llh_max, llh_max_idx, grid_max = likelihood(data,
-                                                            sigmoid=sigmoid,
-                                                            priors=priors,
-                                                            grid=grid)
-    print('\nsparsegrid logmax', llh_max)
-
-    # normalize the likelihood
-    integral, weights = nd_integrate(llh_sparse,
-                                     [grid[parm] for parm in PARM_ORDER])
+    llh_sparse, grid_max = posterior_grid(data, sigmoid=sigmoid, priors=priors, grid=grid)
+    # normalize the posterior_grid
+    integral, weights = nd_integrate(llh_sparse, [grid_value for parm, grid_value in sorted(grid.items())])
     llh_sparse /= integral
     # FIXME: maybe we don't need the nd_integrate function, because here we are
     # we are doing part of the same work again...
@@ -222,7 +215,7 @@ levels,which is frequently invalid for adaptive procedures!""")
     # indices on the grid of the volumes that contribute more than `tol` to the
     # overall integral
     mask = np.nonzero(volumes >= tol)
-    for idx, parm in enumerate(PARM_ORDER):
+    for idx, parm in enumerate(sorted(bounds.keys())):
         pgrid = grid[parm]
         # get the indeces for this parameter's axis and sort it
         axis = np.sort(mask[idx])
@@ -233,34 +226,20 @@ levels,which is frequently invalid for adaptive procedures!""")
         # update the bounds
         bounds[parm] = (pgrid[left], pgrid[right])
 
-    # do dense grid likelihood evaluation
+    # do dense grid posterior_grid evaluation
     grid = get_grid(bounds, conf.grid_steps)
 
-    llh, llh_max, llh_max_idx, grid_max = likelihood(data,
-                                                     sigmoid=sigmoid,
-                                                     priors=priors,
-                                                     grid=grid)
-
-    print('logmax', llh_max)
+    llh, grid_max = posterior_grid(data, sigmoid=sigmoid, priors=priors, grid=grid)
     print('fit0', grid_max)
-    optm_likelihood, fixed = get_optm_llh(data,
-                                          sigmoid=sigmoid,
-                                          priors=priors,
-                                          grid=grid)
-    # start optimization at the maximum of the llh on the grid -> grid_max
-    # remove fixed parameters, so that the optimization doesn't touch them
-    for fidx, fval in fixed:
-        grid_max.pop(fidx)
 
-    fit = list(spo.fmin(optm_likelihood, grid_max, disp=False))
+    fixed_param = {}
+    for parm_name, parm_values in grid.items():
+        if parm_values is None:
+            fixed_param[parm_name] = parm_values
+        elif len(parm_values) <= 1:
+            fixed_param[parm_name] = parm_values[0]
 
-    for fidx, fval in fixed:
-        fit.insert(fidx, fval)
-
-    fit_dict = {}
-    for idx, parm in enumerate(fit):
-        fit_dict[PARM_ORDER[idx]] = parm
-
+    fit_dict = max_posterior(data, param_init=grid_max, param_fixed=fixed_param, sigmoid=sigmoid, priors=priors)
     results = {'sigmoid_parameters': fit_dict}
 
     # take care of confidence intervals/condifence region

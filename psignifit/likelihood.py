@@ -1,35 +1,50 @@
 # -*- coding: utf-8 -*-
-from typing import Dict
+from typing import Dict, Tuple
 
 import numpy as np
 import scipy.special as sp
+from scipy import optimize
 
 from .utils import fp_error_handler, PsignifitException
 from .typing import Sigmoid, Prior, ParameterGrid
 
-# this is the order in which the parameters are stored in the big
-# likelihood 5 dimensional matrix
-PARM_ORDER = ('threshold', 'width', 'lambda', 'gamma', 'eta')
 
+def posterior_grid(data, sigmoid: Sigmoid, priors: Dict[str, Prior],
+                   grid: ParameterGrid) -> Tuple[np.ndarray, Dict[str, float]]:
+    """ Finds the parameters which maximize the log posterior_grid in grid of parameter values.
 
-def likelihood(data, sigmoid=None, priors=None, grid=None):
+    The objective is described in :func:`psignifit.likelihood.log_posterior:.
+
+    Args:
+        data: Numpy array with three columns for the stimulus levels, the correct trials, and the total trials.
+        param_init: Initial value per parameter to optimize.
+        param_fixed: Fixed value per parameter not to optimize.
+        sigmoid: Sigmoid function
+        priors: Prior function per parameter
+        Grid: Dictionary of parameter name and numpy array with possible parameter values.
+    Returns:
+        p: Numpy array with a posterior value for each entry in the grid.
+           The axis correspond to the the grid entries in alphabetic order.
+           If the grid entry is None there is no corresponding axis.
+        grid_max: Dictionary of parameter names with the parameter values,
+                  which maximize the posterior_grid.
+    """
     p = log_posterior(data, sigmoid=sigmoid, priors=priors, grid=grid)
-    # locate the maximum
+
     ind_max = np.unravel_index(p.argmax(), p.shape)
-    logmax = p[ind_max]
-    p -= logmax
-    p = np.exp(p)
-    # get the value of the parameters on the grid corresponding to the maximum
-    grid_max = [grid[parm][i] for (i, parm) in zip(ind_max, PARM_ORDER)]
-    return p, logmax, ind_max, grid_max
+    p = np.exp(p - p[ind_max])
+
+    grid_max = {name: grid_values[index] for (index, (name, grid_values)) in zip(ind_max, sorted(grid.items()))}
+    return p, grid_max
 
 
 @fp_error_handler(divide='ignore')
 def log_posterior(data: np.ndarray, sigmoid: Sigmoid, priors: Dict[str, Prior], grid: ParameterGrid) -> np.ndarray:
-    """ Estimate the logarithmic posterior probability of sigmoid parameters.
+    """ Estimate the logarithmic posterior_grid probability of sigmoid parameters.
 
-    The function estimates the log-likelihood for a grid of sigmoid parameters and adds the corresponding
+    The function estimates the log-posterior_grid for a grid of sigmoid parameters and adds the corresponding
     log-priors. This is described in formulas A.4 and A.5 of [Schuett2016]_.
+    The grid entry for gamma can be None to constraint lambda = gamma as in equal asymptote experiments.
 
     Args:
         data: numpy array with three columns for the stimulus levels, the correct trials, and the total trials.
@@ -37,7 +52,9 @@ def log_posterior(data: np.ndarray, sigmoid: Sigmoid, priors: Dict[str, Prior], 
         priors: dictionary of parameter names and corresponding prior function, see :module:`~psignifit.priors`.
         grid: dictionary of parameter name and numpy array with parameter values.
     Returns:
-        Numpy array with the log-posterior for each parameter combination in grid.
+        Numpy array with the log-posterior_grid for each parameter combination in grid.
+        The axis correspond to the the grid entries in alphabetic order.
+        If the grid entry is None there is no corresponding axis.
 
     .. [Schuett2016] Schütt, H. H., Harmeling, S., Macke, J. H. and Wichmann, F. A. (2016).
           Painfree and accurate Bayesian estimation of psychometric functions for (potentially) overdispersed data.
@@ -64,17 +81,17 @@ def log_posterior(data: np.ndarray, sigmoid: Sigmoid, priors: Dict[str, Prior], 
     # then rewrite below so that we don't test for v -> None but for
     # v -> [] instead, then rearrange the p, pbin broadcasting and
     # concatenating?
-    # fixing this would also fix the case with the curried likelihood
+    # fixing this would also fix the case with the curried posterior_grid
     # below, that currently does work for grid['eta'] -> None
     if gamma is None and eta_prime is None:
-        thres, width, lambd = np.meshgrid(thres, width, lambd, copy=False, sparse=True, indexing='ij')
+        lambd, thres, width = np.meshgrid(lambd, thres, width, copy=False, sparse=True, indexing='ij')
     elif gamma is None:
-        thres, width, lambd, eta_prime = np.meshgrid(thres, width, lambd, eta_prime,
+        eta_prime, lambd, thres, width = np.meshgrid(eta_prime, lambd, thres, width,
                                                      copy=False, sparse=True, indexing='ij')
     elif eta_prime is None:
-        thres, width, lambd, gamma = np.meshgrid(thres, width, lambd, gamma, copy=False, sparse=True, indexing='ij')
+        gamma, lambd, thres, width = np.meshgrid(gamma, lambd, thres, width, copy=False, sparse=True, indexing='ij')
     else:
-        thres, width, lambd, gamma, eta_prime = np.meshgrid(thres, width, lambd, gamma, eta_prime,
+        eta_prime, gamma, lambd, thres, width = np.meshgrid(eta_prime, gamma, lambd, thres, width,
                                                             copy=False, sparse=True, indexing='ij')
 
     if gamma is None:
@@ -115,9 +132,9 @@ def log_posterior(data: np.ndarray, sigmoid: Sigmoid, priors: Dict[str, Prior], 
     if eta_prime is None:
         p = pbin
     else:
-        print(pbin.shape, p.shape, pbin.shape[:-1] + (eta_binom,))
-        pbin = np.broadcast_to(pbin, pbin.shape[:-1] + (eta_binom,))
-        p = np.concatenate((pbin, p), axis=-1)
+        # eta_prime is on axis=0
+        pbin = np.broadcast_to(pbin, (eta_binom,) + pbin.shape[1:])
+        p = np.concatenate((pbin, p), axis=0)
 
     # add priors on the corresponding axis
     p += np.log(priors['threshold'](thres))
@@ -125,28 +142,40 @@ def log_posterior(data: np.ndarray, sigmoid: Sigmoid, priors: Dict[str, Prior], 
     p += np.log(priors['lambda'](lambd))
     p += np.log(priors['gamma'](gamma))
     if eta_prime is not None:
-        p += np.log(priors['eta'](eta_std))
+        p += np.log(priors['eta'](eta_std.reshape(-1, *eta_prime.shape[1:])))
     return p
 
 
-def get_optm_llh(data, sigmoid=None, priors=None, grid=None):
-    ###FIXME### does not work when grid[parm] = None!!!
-    # return a curried version of log_posterior to be used in the
-    # optimization routine
-    # - go through the grid and detect "fixed" parameters that we shouldn't
-    #   try to optimize
-    fixed_parms = [parm for parm, steps in grid.items() if len(steps) == 1]
-    # create a list of (fixed_parm_index, fixed_parm_value) tuples
-    fixed = [(PARM_ORDER.index(parm), grid[parm][0]) for parm in fixed_parms]
+def max_posterior(data, param_init: Dict[str, float], param_fixed: Dict[str, float],
+                  sigmoid: Sigmoid, priors: Dict[str, Prior]) -> Dict[str, float]:
+    """ Finds the parameters which maximize the log posterior_grid using hill climbing.
 
-    def cllh(x):
-        # convert to list for efficient insertion
-        y = list(x)
-        for fidx, fval in fixed:
-            # insert value of fixed parameter at the right position
-            y.insert(fidx, fval)
-        # create a temporary grid with only one step (all params are fixed)
-        lgrid = {parm: y[idx] for idx, parm in enumerate(PARM_ORDER)}
-        return -log_posterior(data, sigmoid=sigmoid, priors=priors, grid=lgrid)
+     Parameters with None or a single entry in `grid` are treated as fixed.
+     The objective is described in :func:`psignifit.likelihood.log_posterior:.
+     It is optimized by :func:`scipy.optimize.fmin` with default settings,
+     using the downhill simplex algorithm.
 
-    return cllh, fixed
+     Args:
+         data: numpy array with three columns for the stimulus levels, the correct trials, and the total trials.
+         param_init: Initial value per parameter to optimize.
+         param_fixed: Fixed value per parameter not to optimize.
+         sigmoid: Sigmoid function
+         priors: Prior function per parameter
+    Returns:
+        Dictionary of parameter names with the parameter values,
+        which maximize the posterior_grid.
+    """
+    for name in param_fixed.keys():
+        # do not optimize fixed parameter
+        if name in param_init:
+            param_init.pop(name)
+
+    def objective(x):
+        optimized_param = dict(zip(sorted(param_init.keys()), x))
+        _grid = {**param_fixed, **optimized_param}
+        return -log_posterior(data, sigmoid=sigmoid, priors=priors, grid=_grid)
+
+    init_values = [value for name, value in sorted(param_init.items())]
+    optimized_values = optimize.fmin(objective, init_values, disp=False)
+    optimized_param = dict(zip(sorted(param_init.keys()), optimized_values))
+    return {**param_fixed, **optimized_param}
