@@ -2,8 +2,12 @@
 """
 Utils class capsulating all custom made probabilistic functions
 """
+from typing import Dict, Optional
+
 import numpy as np
 import scipy.stats
+
+from .typing import ParameterBounds
 
 # Alias common statistical distribution to be reused all over the place.
 
@@ -34,26 +38,28 @@ class fp_error_handler(np.errstate):
     pass
 
 
-def get_grid(bounds, steps):
+def get_grid(bounds: ParameterBounds, steps: Dict[str, int]) -> Dict[str, Optional[np.ndarray]]:
     """Return uniformely spaced grid within given bounds.
 
-    Input Parameters:
+    If the bound start and end values are close, a fixed value is assumed and the grid entry contains
+    only the start.
+    If the bound is None, the grid entry will be None.
 
-       bounds  - a dictionary {parameter : (min_val, max_val)}
-       steps    - a dictionary {parameter : nsteps}
-
-    where `nsteps` is the number of steps in the grid.
+    Args:
+       bounds: a dictionary {parameter : (min_val, max_val)}
+       steps: a dictionary {parameter : nsteps} where `nsteps` is the number of steps in the grid.
 
     Returns:
-
-        grid    - a dictionary {parameter: (min_val, val1, val2, ..., max_val)}
+        grid:  a dictionary {parameter: (min_val, val1, val2, ..., max_val)}
     """
     grid = {}
-    for param in bounds:
-        if bounds[param] is None:
+    for param, bound in bounds.items():
+        if bound is None:
             grid[param] = None
+        elif np.isclose(bound[0], bound[1]):
+            grid[param] = np.array([bound[0]])
         else:
-            grid[param] = np.linspace(*bounds[param], num=steps[param])
+            grid[param] = np.linspace(*bound, num=steps[param])
     return grid
 
 
