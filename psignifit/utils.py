@@ -88,7 +88,7 @@ def normalize(func: Prior, interval: Tuple[float, float], steps: int = 10000) ->
     return nfunc
 
 
-def nd_integrate(func, grid):
+def integral_weights(grid):
     """Calculate integral of multivariate function using composite trapezoidal rule
 
     Input parameters:
@@ -103,12 +103,10 @@ def nd_integrate(func, grid):
          (x1-x0)/2, x1-x0, x2-x1, ..., x(m-1)-x(m-2), (xm-x(m-1))/2
          `weights` has the same shape as `func`
     """
-    M = len(grid)
     deltas = []
-    # loop over all dimensions and gather the deltas (dx_1, dx_2, ..., dx_m)
     for steps in grid:
         # handle singleton dimensions
-        if len(steps) == 1:
+        if steps is None or len(steps) <= 1:
             deltas.append(1)
         else:
             delta = np.empty_like(steps, dtype=float)
@@ -117,10 +115,10 @@ def nd_integrate(func, grid):
             delta[0] = delta[1] / 2
             delta[-1] = delta[-1] / 2
             deltas.append(delta)
+
     # create a meshgrid for each dimension
     mesh_grids = np.meshgrid(*deltas, copy=False, sparse=True, indexing='ij')
-    weights = np.prod(mesh_grids, axis=0)
-    return (func * weights).sum(), weights
+    return np.prod(mesh_grids, axis=0)
 
 
 def pool_data(data, xtol=0, max_gap=np.inf, max_length=np.inf):

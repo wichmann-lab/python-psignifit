@@ -19,7 +19,7 @@ from .gridSetting import gridSetting
 from .likelihood import posterior_grid, max_posterior
 from .marginalize import marginalize
 from .typing import ExperimentType
-from .utils import (norminv, norminvg, t1icdf, pool_data, nd_integrate,
+from .utils import (norminv, norminvg, t1icdf, pool_data, integral_weights,
                     PsignifitException, normalize, get_grid)
 
 
@@ -186,13 +186,9 @@ levels,which is frequently invalid for adaptive procedures!""")
     if conf.bounds is not None:
         bounds.update(conf.bounds)
 
-    # XXX FIXME: take care of fixed parameters later!
-    ##### plan would be to just define left_bound=right_bound
-    # bound_idx = np.where(np.isnan(options['fixedPars']) == False);
-    # print(bound_idx)
-    # if (bound_idx[0].size > 0):
-    # options['bounds'][bound_idx[0],0] = options['fixedPars'][bound_idx[0]]
-    # options['bounds'][bound_idx[0],1] = options['fixedPars'][bound_idx[0]]
+    if conf.fixed_parameters is not None:
+        for param, value in conf.fixed_parameters.items():
+            bounds[param] = (value, value)
 
     # normalize priors to first choice of bounds
     for parameter, prior in priors.items():
@@ -200,21 +196,13 @@ levels,which is frequently invalid for adaptive procedures!""")
 
     # do first sparse grid posterior_grid evaluation
     grid = get_grid(bounds, conf.steps_moving_bounds)
-    llh_sparse, grid_max = posterior_grid(data, sigmoid=sigmoid, priors=priors, grid=grid)
+    posteriors_sparse, grid_max = posterior_grid(data, sigmoid=sigmoid, priors=priors, grid=grid)
     # normalize the posterior_grid
-    integral, weights = nd_integrate(llh_sparse, [grid_value for parm, grid_value in sorted(grid.items())])
-    llh_sparse /= integral
-    # FIXME: maybe we don't need the nd_integrate function, because here we are
-    # we are doing part of the same work again...
-    # - integral under each grid point
-    #     ###TODO!!!###
-    #     new_tol = (old_told*grid_1*grid_2*grid_3)/(grid_1*grid_2*grid_3)
-    #     set a minimum though, should never be less than 1e-05
-    tol = conf.max_bound_value
-    volumes = llh_sparse * weights
-    # indices on the grid of the volumes that contribute more than `tol` to the
-    # overall integral
-    mask = np.nonzero(volumes >= tol)
+    posterior_volumes = posteriors_sparse * integral_weights([grid_value for _, grid_value in sorted(grid.items())])
+    posterior_integral = posterior_volumes.sum()
+
+    # indices on the grid of the volumes that contribute more than `tol` to the overall integral
+    mask = np.nonzero(posterior_volumes / posterior_integral >= conf.max_bound_value)
     for idx, parm in enumerate(sorted(bounds.keys())):
         pgrid = grid[parm]
         # get the indeces for this parameter's axis and sort it
@@ -229,7 +217,7 @@ levels,which is frequently invalid for adaptive procedures!""")
     # do dense grid posterior_grid evaluation
     grid = get_grid(bounds, conf.grid_steps)
 
-    llh, grid_max = posterior_grid(data, sigmoid=sigmoid, priors=priors, grid=grid)
+    posteriors, grid_max = posterior_grid(data, sigmoid=sigmoid, priors=priors, grid=grid)
     print('fit0', grid_max)
 
     fixed_param = {}
