@@ -11,12 +11,20 @@ def test_normalize():
     norm = utils.normalize(func, (0, 10))
     assert np.allclose(1. / 10, norm(x))
 
+    # For a fixed value, the integral should be one
+    norm = utils.normalize(func, (1, 1))
+    assert np.allclose([1], norm(1))
+
 
 def test_normalize_sin():
     # for sin the integral in (0, pi/2) is 1, so the norm(sin) == sin
     x = np.linspace(0, np.pi / 2, 100)
     norm = utils.normalize(np.sin, (0, np.pi / 2))
     assert np.allclose(np.sin(x), norm(x))
+
+    # For a fixed value, the integral should be one
+    norm = utils.normalize(np.sin, (1, 1))
+    assert np.allclose([1], norm(1))
 
 
 def test_get_grid():

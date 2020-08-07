@@ -2,12 +2,12 @@
 """
 Utils class capsulating all custom made probabilistic functions
 """
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 
 import numpy as np
 import scipy.stats
 
-from .typing import ParameterBounds
+from .typing import ParameterBounds, Prior
 
 # Alias common statistical distribution to be reused all over the place.
 
@@ -63,17 +63,19 @@ def get_grid(bounds: ParameterBounds, steps: Dict[str, int]) -> Dict[str, Option
     return grid
 
 
-def normalize(func, interval, steps=10000):
+def normalize(func: Prior, interval: Tuple[float, float], steps: int = 10000) -> Prior:
+    """ Normalize the prior function to have integral 1 within the interval.
+
+    Integration is done using the composite trapezoidal rule.
+
+    Args:
+        func: is a vectorized function that takes one single argument
+        interval: is a tuple (lo, hi)
+
+    Returns:
+        The normalized prior function.
     """
-    Return a normalized function, which has integral 1 within the interval.
-
-    - `func` is a vectorized function that takes one single argument
-    - `interval` is a tuple (lo, hi)
-
-    Intregration is done using the composite trapezoidal rule.
-    """
-    if interval[0] == interval[1]:
-
+    if np.isclose(interval[0], interval[1]):
         def nfunc(y):
             return np.ones_like(y)
     else:
