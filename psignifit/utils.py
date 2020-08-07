@@ -111,7 +111,7 @@ def nd_integrate(func, grid):
         if len(steps) == 1:
             deltas.append(1)
         else:
-            delta = np.empty_like(steps)
+            delta = np.empty_like(steps, dtype=float)
             delta[1:] = np.diff(steps)
             # delta weight is half at the bounds of the integration interval
             delta[0] = delta[1] / 2
