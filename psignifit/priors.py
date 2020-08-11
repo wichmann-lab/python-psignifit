@@ -8,7 +8,7 @@ from functools import partial
 import numpy as np
 import scipy.stats
 
-from .utils import norminv
+from .utils import norminv, PsignifitException
 from .typing import Prior
 
 
@@ -75,7 +75,10 @@ def peta(x, k):
 
 
 def default_priors(stimulus_range: Tuple[float, float], width_min: float,
-                   width_alpha: float, beta: float) -> Dict[str, Prior]:
+                   width_alpha: float, beta: float, thresh_PC: float = 0.5) -> Dict[str, Prior]:
+    if not np.isclose(thresh_PC, 0.5):
+        raise ValueError("Default prior 'threshold' expects thresh_PC=0.5, got {thresh_PC = }")
+
     return {
         'threshold': partial(pthreshold, st_range=stimulus_range),
         'width': partial(pwidth, wmin=width_min,
@@ -87,69 +90,38 @@ def default_priors(stimulus_range: Tuple[float, float], width_min: float,
     }
 
 
-def check_priors(data, options):
-    """
-    this runs a short test whether the provided priors are functional
-     function checkPriors(data,options)
-     concretely the priors are evaluated for a 25 values on each dimension and
-     a warning is issued for zeros and a error for nan and infs and negative
-     values
+def check_priors(priors: Dict[str, Prior], stimulus_range: Tuple[float, float],
+                 width_min: float, n_test_values: int = 25):
+    """ Checks basic properties of the prior results.
 
-    """
+    Each prior function is evaluated on a small number of
+    artificial data points, created using stimulus_range and width_min.
 
-    if options['logspace']:
-        data[:, 0] = np.log(data[:, 0])
-    """ on threshold
-    values chosen according to standard boarders
-    at the bounds it may be 0 -> a little inwards """
-    data_min = np.min(data[:, 0])
-    data_max = np.max(data[:, 0])
+    Args:
+        priors: Dictionary of prior functions.
+        stimulus_range: Minimum and maximum stimulus values.
+        width_min: Parameter adjusting the lower bound of the width prior
+        n_test_values: Number of data points used to test the priors.
+    Raises:
+        AssertionError if prior returns non-finite or non-positive values.
+    """
+    data_min, data_max = stimulus_range
     dataspread = data_max - data_min
-    testValues = np.linspace(data_min - .4 * dataspread,
-                             data_max + .4 * dataspread, 25)
 
-    testResult = options['priors'][0](testValues)
+    test_values = np.linspace(data_min - .4 * dataspread, data_max + .4 * dataspread, n_test_values)
+    _check_prior(priors, "threshold", test_values)
 
-    testForWarnings(testResult, "the threshold")
-    """ on width
-    values according to standard priors
-    """
-    testValues = np.linspace(
-        1.1 * np.min(np.diff(np.sort(np.unique(data[:, 0])))), 2.9 * dataspread,
-        25)
-    testResult = options['priors'][1](testValues)
+    test_values = np.linspace( 1.1 * width_min, 2.9 * dataspread, n_test_values)
+    _check_prior(priors, "width", test_values)
 
-    testForWarnings(testResult, "the width")
-    """ on lambda
-    values 0 to .9
-    """
-    testValues = np.linspace(0.0001, .9, 25)
-    testResult = options['priors'][2](testValues)
-
-    testForWarnings(testResult, "lambda")
-    """ on gamma
-    values 0 to .9
-    """
-    testValues = np.linspace(0.0001, .9, 25)
-    testResult = options['priors'][3](testValues)
-
-    testForWarnings(testResult, "gamma")
-    """ on eta
-    values 0 to .9
-    """
-    testValues = np.linspace(0, .9, 25)
-    testResult = options['priors'][4](testValues)
-
-    testForWarnings(testResult, "eta")
+    test_values = np.linspace(0.0001, .9, n_test_values)
+    _check_prior(priors, "lambda", test_values)
+    _check_prior(priors, "gamma", test_values)
+    _check_prior(priors, "eta", test_values)
 
 
-def testForWarnings(testResult, parameter):
-    assert all(
-        np.isfinite(testResult)
-    ), "the prior you provided for %s returns non-finite values" % parameter
-    assert all(
-        testResult >= 0
-    ), "the prior you provided for %s returns negative values" % parameter
-
-    if any(testResult == 0):
-        warnings.warn("the prior you provided for %s returns zeros" % parameter)
+def _check_prior(priors, name, values):
+    result = priors[name](values)
+    assert np.all(np.isfinite(result)), f"Prior '{name}' returns non-finite values."
+    assert np.all(result >= 0), f"Prior '{name}' returns negative values."
+    assert np.all(result != 0), f"Prior '{name}' returns zeros."

@@ -120,28 +120,11 @@ def psignifit(data, conf=None, **kwargs):
             # for ULP, see https://en.wikipedia.org/wiki/Unit_in_the_last_place
             width_min = 100 * np.spacing(stimulus_range[1])
 
-    # get priors
-    # if options['threshPC'] != .5 and not(hasattr(options, 'priors')):
-    #    warnings.warn('psignifit:TresholdPCchanged\n'\
-    #        'You changed the percent correct corresponding to the threshold\n')
-
-    # if not('priors' in options.keys()):
-    #    options['priors'] = _p.getStandardPriors(data, options)
-    # else:
-    #
-    #    priors = _p.getStandardPriors(data, options)
-    #
-    #    for ipar in range(5):
-    #        if not(hasattr(options['priors'][ipar], '__call__')):
-    #            options['priors'][ipar] = priors[ipar]
-    #
-    #    p.checkPriors(data, options)
-    if conf.priors is None:
-        priors = _priors.default_priors(stimulus_range, width_min, conf.width_alpha, conf.beta_prior)
-    else:
-        # will take care of user-specified priors later!
-        # XXX TODO!
-        raise NotImplementedError
+    priors = _priors.default_priors(stimulus_range, width_min, conf.width_alpha,
+                                    conf.beta_prior, thresh_PC=conf.thresh_PC)
+    if conf.priors is not None:
+        priors.update(conf.priors)
+    _priors.check_priors(priors, stimulus_range, width_min)
 
     # sigmoid
     sigmoid = getattr(sigmoids, conf.sigmoid)
