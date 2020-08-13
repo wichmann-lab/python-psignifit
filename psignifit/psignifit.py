@@ -3,6 +3,7 @@
 import warnings
 from copy import deepcopy as _deepcopy
 from functools import partial
+from typing import Dict, Tuple
 
 import numpy as np
 import scipy
@@ -18,7 +19,7 @@ from .getWeights import getWeights
 from .gridSetting import gridSetting
 from .likelihood import posterior_grid, max_posterior
 from .marginalize import marginalize
-from .typing import ExperimentType
+from .typing import ExperimentType, ParameterBounds, Prior, Sigmoid
 from .utils import (norminv, norminvg, t1icdf, pool_data, integral_weights,
                     PsignifitException, normalize, get_grid)
 
