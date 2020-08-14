@@ -1,10 +1,11 @@
 import numpy as np
+from typing import Optional
 
-from .utils import normcdf as _normcdf
-from .utils import norminv as _norminv
-from .utils import norminvg as _norminvg
-from .utils import t1cdf as _t1cdf
-from .utils import t1icdf as _t1icdf
+from .utils import normcdf as normcdf
+from .utils import norminv as norminv
+from .utils import norminvg as norminvg
+from .utils import t1cdf as t1cdf
+from .utils import t1icdf as t1icdf
 
 
 class Sigmoid:
@@ -36,6 +37,7 @@ class Sigmoid:
         self.logspace = logspace
 
     def __call__(self, stimulus_level, threshold, width):
+        """ Calculate the sigmoid value at specified stimulus levels. """
         if self.logspace:
             stimulus_level = np.log(stimulus_level)
         value = self._value(stimulus_level, threshold, width)
@@ -45,14 +47,52 @@ class Sigmoid:
         else:
             return value
 
-    def _value(self, stimulus_level: np.ndarray, threshold: np.ndarray, width: np.ndarray):
-        """ Calculate the sigmoid value at specified stimulus levels. """
+    def threshold(self, perc_correct: np.ndarray, threshold: float, width: float,
+                  gamma: Optional[float] = None, lambd: Optional[float] = None) -> np.ndarray:
+        """ Finds a threshold value for given parameters at different percent correct cutoffs.
+
+        See Sigmoid class description for a discussion of the parameters.
+
+        Args:
+            perc_correct: Percentage correct at the threshold to calculate.
+            threshold: Parameter value for threshold at PC
+            width: Parameter value for width of the sigmoid
+            gamma: Parameter value for the lower offset of the sigmoid
+            lambd: Parameter value for the upper offset of the sigmoid
+        Returns:
+            Threshold at the percentage correct values.
+        """
+        perc_correct = np.asarray(perc_correct)
+        if lambd is not None and gamma is not None:
+            if (perc_correct < gamma).any() or (perc_correct > (1 - lambd)).any():
+                raise ValueError(f'perc_correct={perc_correct} has to be between {gamma} and {1 - lambd}.')
+            perc_correct = (perc_correct - gamma) / (1 - lambd - gamma)
+        PC = self.PC
+        if self.negative:
+            PC = 1 - PC
+            perc_correct = 1 - perc_correct
+
+        result = self._threshold(perc_correct, threshold, width, PC)
+        if self.logspace:
+            return np.exp(result)
+        else:
+            return result
+
+    def _value(self, stimulus_level: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
         raise NotImplementedError("This should be overwritten by an implementation.")
+
+    def _threshold(self, perc_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray, PC: float) -> np.ndarray:
+        raise NotImplementedError("This should be overwritten by an implementation.")
+
 
 class Gaussian(Sigmoid):
     def _value(self, stimulus_level, threshold, width):
-        C = width / (_norminv(1 - self.alpha) - _norminv(self.alpha))
-        return _normcdf(stimulus_level, (threshold - _norminvg(self.PC, 0, C)), C)
+        C = width / (norminv(1 - self.alpha) - norminv(self.alpha))
+        return normcdf(stimulus_level, (threshold - norminvg(self.PC, 0, C)), C)
+
+    def _threshold(self, perc_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray, PC: float) -> np.ndarray:
+        C = norminv(1 - self.alpha) - norminv(self.alpha)
+        return norminvg(perc_correct, threshold - norminvg(PC, 0, width / C), width / C)
 
 
 class Logistic(Sigmoid):
@@ -60,23 +100,35 @@ class Logistic(Sigmoid):
         return 1 / (1 + np.exp(-2 * np.log(1 / self.alpha - 1) / width * (stimulus_level - threshold)
                                + np.log(1 / self.PC - 1)))
 
+    def _threshold(self, perc_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray, PC: float) -> np.ndarray:
+        return threshold - width * ( np.log(1 / perc_correct - 1) - np.log(1 / PC - 1)) / 2 / np.log(1 / self.alpha - 1)
+
 class Gumbel(Sigmoid):
     def _value(self, stimulus_level, threshold, width):
         C = np.log(-np.log(self.alpha)) - np.log(-np.log(1 - self.alpha))
         return 1 - np.exp(-np.exp(C / width * (stimulus_level - threshold) + np.log(-np.log(1 - self.PC))))
 
+    def _threshold(self, perc_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray, PC: float) -> np.ndarray:
+        C = np.log(-np.log(self.alpha)) - np.log(-np.log(1 - self.alpha))
+        return threshold + (np.log(-np.log(1 - perc_correct)) - np.log(-np.log(1 - PC))) * width / C
 
 class ReverseGumbel(Sigmoid):
     def _value(self, stimulus_level, threshold, width):
         C = np.log(-np.log(1 - self.alpha)) - np.log(-np.log(self.alpha))
         return np.exp(-np.exp(C / width * (stimulus_level - threshold) + np.log(-np.log(self.PC))))
 
+    def _threshold(self, perc_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray, PC: float) -> np.ndarray:
+        C = np.log(-np.log(1 - self.alpha)) - np.log(-np.log(self.alpha))
+        return threshold + (np.log(-np.log(perc_correct)) - np.log(-np.log(PC))) * width / C
 
 class Student(Sigmoid):
     def _value(self, stimulus_level, threshold, width):
-        C = (_t1icdf(1 - self.alpha) - _t1icdf(self.alpha))
-        return _t1cdf(C * (stimulus_level - threshold) / width + _t1icdf(self.PC))
+        C = (t1icdf(1 - self.alpha) - t1icdf(self.alpha))
+        return t1cdf(C * (stimulus_level - threshold) / width + t1icdf(self.PC))
 
+    def _threshold(self, perc_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray, PC: float) -> np.ndarray:
+        C = (t1icdf(1 - self.alpha) - t1icdf(self.alpha))
+        return (t1icdf(perc_correct) - t1icdf(PC)) * width / C + threshold
 
 _CLASS_BY_NAME = {
     'norm': Gaussian,

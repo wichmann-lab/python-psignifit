@@ -6,10 +6,11 @@ from psignifit import sigmoids
 
 # fixed parameters for simple sigmoid sanity checks
 X = np.linspace(1e-12, 1-1e-12, num=10000)
-M = 0.5
-WIDTH = 0.9
+THRESHOLD_PARAM = 0.5
+WIDTH_PARAM = 0.9
 PC = 0.5
 ALPHA = 0.05
+
 
 # list of all sigmoids (after having removed aliases)
 LOG_SIGS = ('weibull', 'logn', 'neg_weibull', 'neg_logn')
@@ -42,20 +43,25 @@ def test_sigmoid_by_name(sigmoid_name):
 @pytest.mark.parametrize('sigmoid_name', sigmoids.ALL_SIGMOID_NAMES)
 def test_sigmoid_sanity_check(sigmoid_name):
     sigmoid = sigmoids.sigmoid_by_name(sigmoid_name, PC=PC, alpha=ALPHA)
-    x_M = M
+    x_threshold = THRESHOLD_PARAM
     x = np.linspace(1e-8, 1, 100)
     if sigmoid.negative:
         x = 1 - x
     if sigmoid.logspace:
-        x_M = np.exp(x_M)
+        x_threshold = np.exp(x_threshold)
         x = np.exp(x)
 
     # sigmoid(M) == PC
-    np.testing.assert_allclose(sigmoid(x_M, M, WIDTH), PC)
+    np.testing.assert_allclose(sigmoid(x_threshold, THRESHOLD_PARAM, WIDTH_PARAM), PC)
 
     # |X_L - X_R| == WIDTH, with
     # with sigmoid(X_L) == ALPHA
     # and  sigmoid(X_R) == 1 - ALPHA
-    s = sigmoid(x, M, WIDTH)
+    s = sigmoid(x, THRESHOLD_PARAM, WIDTH_PARAM)
     idx_alpha, idx_nalpha =  np.abs(s - ALPHA).argmin(), np.abs(s - (1 - ALPHA)).argmin()
-    np.testing.assert_allclose(s[idx_nalpha] - s[idx_alpha], WIDTH, atol=0.02)
+    np.testing.assert_allclose(s[idx_nalpha] - s[idx_alpha], WIDTH_PARAM, atol=0.02)
+
+    t = sigmoid.threshold(PC, threshold=THRESHOLD_PARAM, width=WIDTH_PARAM)
+    np.testing.assert_allclose(t, x_threshold)
+    t = sigmoid.threshold(PC, threshold=THRESHOLD_PARAM, width=WIDTH_PARAM, gamma=0, lambd=0)
+    np.testing.assert_allclose(t, x_threshold)
