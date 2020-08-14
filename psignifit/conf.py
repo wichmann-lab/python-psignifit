@@ -64,7 +64,6 @@ class Conf:
     def __init__(self, **kwargs):
         # we only allow keyword arguments
         # set private attributes defaults
-        self._logspace = False
         self._parameters = {'threshold', 'width', 'lambda', 'gamma', 'eta'}
 
         # set public defaults
@@ -213,14 +212,10 @@ class Conf:
         return value
 
     def check_sigmoid(self, value):
-        cond1 = value in dir(sigmoids)
-        cond2 = value.startswith('_') or value.startswith('my_')
-        if (not cond1) or (cond2):
-            raise PsignifitException(f'Invalid sigmoid: "{value}"!')
-        # set logspace when appropriate
-        if value in ('weibull', 'logn', 'neg_weibull', 'neg_logn'):
-            self._logspace = True
-
+        try:
+            sigmoid = sigmoids.sigmoid_by_name(value)
+        except:
+            raise PsignifitException('Invalid sigmoid name "{value}", use one of {sigmoids.ALL_SIGMOID_NAMES}')
         return value
 
     def check_dynamic_grid(self, value):

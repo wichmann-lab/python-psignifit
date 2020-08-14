@@ -6,7 +6,8 @@ import scipy.special as sp
 from scipy import optimize
 
 from .utils import fp_error_handler, PsignifitException
-from .typing import Sigmoid, Prior, ParameterGrid
+from .typing import Prior, ParameterGrid
+from .sigmoids import Sigmoid
 
 
 def posterior_grid(data, sigmoid: Sigmoid, priors: Dict[str, Prior],

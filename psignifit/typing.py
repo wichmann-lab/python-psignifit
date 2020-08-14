@@ -35,6 +35,5 @@ except ImportError:
 
 
 Prior = Callable[[np.ndarray], np.ndarray]
-Sigmoid = Callable[[float, float, float], float]
 
 

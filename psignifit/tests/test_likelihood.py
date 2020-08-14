@@ -21,8 +21,7 @@ def setup_experiment(**kwargs):
     bounds = parameter_bounds(wmin=width_min, etype=conf.experiment_type, srange=stimulus_range,
                               alpha=conf.width_alpha, echoices=conf.experiment_choices)
 
-    sigmoid = getattr(sigmoids, conf.sigmoid)
-    sigmoid = partial(sigmoid, PC=conf.thresh_PC, alpha=conf.width_alpha)
+    sigmoid = sigmoids.sigmoid_by_name(conf.sigmoid, PC=conf.thresh_PC, alpha=conf.width_alpha)
 
     priors = default_priors(stimulus_range, width_min, conf.width_alpha, conf.beta_prior)
     for parameter, prior in priors.items():

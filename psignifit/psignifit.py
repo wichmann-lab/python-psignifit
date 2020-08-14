@@ -19,7 +19,7 @@ from .getWeights import getWeights
 from .gridSetting import gridSetting
 from .likelihood import posterior_grid, max_posterior
 from .marginalize import marginalize
-from .typing import ExperimentType, ParameterBounds, Prior, Sigmoid
+from .typing import ExperimentType, ParameterBounds, Prior
 from .utils import (norminv, norminvg, t1icdf, pool_data, integral_weights,
                     PsignifitException, normalize, get_grid)
 
@@ -50,14 +50,15 @@ def psignifit(data, conf=None, **kwargs):
         raise PsignifitException(
             "Can't handle conf together with other keyword arguments!")
 
-    data = _check_data(data, verbose=conf.verbose, logspace=conf._logspace,
+    sigmoid = sigmoids.sigmoid_by_name(conf.sigmoid, PC=conf.thresh_PC, alpha=conf.width_alpha)
+    data = _check_data(data, verbose=conf.verbose, logspace=sigmoid.logspace,
                        has_user_stimulus_range=conf.stimulus_range is not None)
     levels, ncorrect, ntrials = data[:, 0], data[:, 1], data[:, 2]
 
     stimulus_range = conf.stimulus_range
     if stimulus_range is None:
         stimulus_range = (levels.min(), levels.max())
-    if conf._logspace:
+    if sigmoid.logspace:
         stimulus_range = (np.log(stimulus_range[0]), np.log(stimulus_range[1]))
         levels = np.log(levels)
 
@@ -90,8 +91,6 @@ def psignifit(data, conf=None, **kwargs):
         for param, value in conf.fixed_parameters.items():
             bounds[param] = (value, value)
 
-    sigmoid = getattr(sigmoids, conf.sigmoid)
-    sigmoid = partial(sigmoid, PC=conf.thresh_PC, alpha=conf.width_alpha)
 
     # normalize priors to first choice of bounds
     for parameter, prior in priors.items():
@@ -144,7 +143,7 @@ def psignifit(data, conf=None, **kwargs):
 
 
 def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
-                    priors: Dict[str, Prior], sigmoid: Sigmoid,
+                    priors: Dict[str, Prior], sigmoid: sigmoids.Sigmoid,
                     steps_moving_bounds: Dict[str, int], max_bound_value: float,
                     grid_steps: Dict[str, int]) -> Dict[str, float]:
     """ Fit sigmoid parameters in a three step procedure. """
