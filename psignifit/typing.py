@@ -22,7 +22,7 @@ try:
         gamma: Optional[Tuple[float, float]]
         eta: Tuple[float, float]
 
-    class ParameterBounds(TypedDict):
+    class ParameterGrid(TypedDict):
         threshold: np.ndarray
         width: np.ndarray
         lambda: np.ndarray
