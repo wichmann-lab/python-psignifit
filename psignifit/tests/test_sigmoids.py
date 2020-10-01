@@ -61,7 +61,7 @@ def test_sigmoid_sanity_check(sigmoid_name):
     idx_alpha, idx_nalpha =  np.abs(s - ALPHA).argmin(), np.abs(s - (1 - ALPHA)).argmin()
     np.testing.assert_allclose(s[idx_nalpha] - s[idx_alpha], WIDTH_PARAM, atol=0.02)
 
-    t = sigmoid.threshold(PC, threshold=THRESHOLD_PARAM, width=WIDTH_PARAM)
+    t = sigmoid.inverse(PC, threshold=THRESHOLD_PARAM, width=WIDTH_PARAM)
     np.testing.assert_allclose(t, x_threshold)
-    t = sigmoid.threshold(PC, threshold=THRESHOLD_PARAM, width=WIDTH_PARAM, gamma=0, lambd=0)
+    t = sigmoid.inverse(PC, threshold=THRESHOLD_PARAM, width=WIDTH_PARAM, gamma=0, lambd=0)
     np.testing.assert_allclose(t, x_threshold)
