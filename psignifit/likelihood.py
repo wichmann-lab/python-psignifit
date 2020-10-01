@@ -110,7 +110,18 @@ def log_posterior(data: np.ndarray, sigmoid: Sigmoid, priors: Dict[str, Prior], 
             continue
 
         psi = sigmoid(level, thres, width) * scale + gamma
-        pbin += correct_trials * np.nan_to_num(np.log(psi)) + (trials - correct_trials) * np.nan_to_num(np.log(1 - psi))
+
+        # Separate cases to avoid warnings problems with np.log(...)
+        # for correct_trials == 0 or (trials - correct_trials) == 0
+        if correct_trials == 0:
+            pbin += (trials - correct_trials) * np.log(1 - psi)
+        elif correct_trials == trials:
+            pbin += correct_trials * np.log(psi)
+        elif correct_trials < trials:
+            pbin += correct_trials * np.log(psi) + (trials - correct_trials) * np.log(1 - psi)
+        else:  # we should never land here: we can't more ncorrect than ntrials
+            raise PsignifitException('ncorrect %d > ntrials %d!' % (correct_trials, trials))
+
         if eta_prime is not None:
             a = psi * eta_prime
             b = (1 - psi) * eta_prime
