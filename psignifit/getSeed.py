@@ -13,6 +13,8 @@ where psi^(-1) is the inverse of the sigmoid function.
 
 @author: root
 """
+# THIS FILE IS LEGACY AND WILL BE REMOVED. NO STYLE CHECKING HERE
+# flake8: noqa
 import numpy as np
 
 

@@ -4,6 +4,9 @@ Created on Sun Jan 31 21:33:31 2016
 
 @author: root
 """
+# THIS FILE IS LEGACY AND WILL BE REMOVED. NO STYLE CHECKING HERE
+# flake8: noqa
+
 from numpy import log, exp
 
 
