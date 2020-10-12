@@ -47,7 +47,10 @@ setup(
         'Programming Language :: Python :: 3',
     ],
     packages=find_packages(),
-    install_requires=['scipy', 'matplotlib', 'pytest'],
+    install_requires=['scipy', 'matplotlib'],
+    extras_require = {
+        'tests': ["pytest", "pytest-cov", "flake8"],
+    },
     # package_data={
     #    'sample': ['package_data.dat'],
     # },
