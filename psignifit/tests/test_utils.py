@@ -5,7 +5,10 @@ from psignifit import utils
 
 def test_normalize():
     # a constant function
-    func = lambda x: np.ones_like(x)
+
+    def func(x):
+        return np.ones_like(x)
+
     # the integral is length of x, so the normalized function should return 1/len(x)
     x = np.arange(11)
     norm = utils.normalize(func, (0, 10))

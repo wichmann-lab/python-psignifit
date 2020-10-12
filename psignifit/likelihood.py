@@ -36,7 +36,7 @@ def posterior_grid(data, sigmoid: Sigmoid, priors: Dict[str, Prior],
     p = np.exp(p - p[ind_max])
 
     grid_max = dict()
-    for index, (name, grid_values) in  zip(ind_max, sorted(grid.items())):
+    for index, (name, grid_values) in zip(ind_max, sorted(grid.items())):
         if grid_values is None:
             grid_max[name] = None
         else:
@@ -44,7 +44,7 @@ def posterior_grid(data, sigmoid: Sigmoid, priors: Dict[str, Prior],
     return p, grid_max
 
 
-@fp_error_handler(divide='ignore')
+@fp_error_handler(divide='ignore')  # noqa: C901, function is too complex
 def log_posterior(data: np.ndarray, sigmoid: Sigmoid, priors: Dict[str, Prior], grid: ParameterGrid) -> np.ndarray:
     """ Estimate the logarithmic posterior_grid probability of sigmoid parameters.
 
@@ -77,7 +77,7 @@ def log_posterior(data: np.ndarray, sigmoid: Sigmoid, priors: Dict[str, Prior], 
     else:
         eta = eta_std ** 2  # use variance instead of standard deviation
         eta_prime = 1 / eta[eta > 1e-09] - 1
-        eta_binom = (eta <= 1e-09).sum() # for small variance we use the binomial model
+        eta_binom = (eta <= 1e-09).sum()  # for small variance we use the binomial model
 
     levels = data[:, 0]
     ncorrect = data[:, 1]

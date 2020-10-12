@@ -144,7 +144,7 @@ class Conf:
             for v in value.values():
                 try:
                     correct_length = (len(v) == 2)
-                except Exception:
+                except TypeError:
                     correct_length = False
                 if not correct_length:
                     raise PsignifitException(
@@ -213,8 +213,8 @@ class Conf:
 
     def check_sigmoid(self, value):
         try:
-            sigmoid = sigmoids.sigmoid_by_name(value)
-        except:
+            sigmoids.sigmoid_by_name(value)
+        except KeyError:
             raise PsignifitException('Invalid sigmoid name "{value}", use one of {sigmoids.ALL_SIGMOID_NAMES}')
         return value
 
@@ -245,7 +245,7 @@ class Conf:
             # check that it is a number:
             diff = 1 - value
             wrong_type = False
-        except Exception:
+        except TypeError:
             wrong_type = True
         if wrong_type or not (0 < diff < 1):
             raise PsignifitException(
@@ -257,7 +257,7 @@ class Conf:
         if value:
             try:
                 _ = value + 1
-            except Exception:
+            except TypeError:
                 raise PsignifitException("Option width_min must be a number")
 
         return value

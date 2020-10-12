@@ -1,6 +1,5 @@
 import enum
-from typing import Callable, Dict
-from typing import Dict, Tuple, Optional
+from typing import Callable, Dict, Tuple, Optional
 
 import numpy as np
 
@@ -13,7 +12,6 @@ class ExperimentType(enum.Enum):
 
 try:
     from typing import TypedDict
-
 
     class ParameterBounds(TypedDict):
         threshold: Tuple[float, float]
@@ -35,5 +33,3 @@ except ImportError:
 
 
 Prior = Callable[[np.ndarray], np.ndarray]
-
-

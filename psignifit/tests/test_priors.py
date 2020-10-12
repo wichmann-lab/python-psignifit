@@ -27,4 +27,3 @@ def test_check_priors():
 
         del prior_dict['threshold']
         priors.check_priors(prior_dict, stimulus_range, width_min)
-

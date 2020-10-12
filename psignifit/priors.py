@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 """
 """
-import warnings
 from typing import Tuple, Dict
 from functools import partial
 
 import numpy as np
 import scipy.stats
 
-from .utils import norminv, PsignifitException
+from .utils import norminv
 from .typing import Prior
 
 
@@ -111,7 +110,7 @@ def check_priors(priors: Dict[str, Prior], stimulus_range: Tuple[float, float],
     test_values = np.linspace(data_min - .4 * dataspread, data_max + .4 * dataspread, n_test_values)
     _check_prior(priors, "threshold", test_values)
 
-    test_values = np.linspace( 1.1 * width_min, 2.9 * dataspread, n_test_values)
+    test_values = np.linspace(1.1 * width_min, 2.9 * dataspread, n_test_values)
     _check_prior(priors, "width", test_values)
 
     test_values = np.linspace(0.0001, .9, n_test_values)

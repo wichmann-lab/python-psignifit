@@ -5,7 +5,7 @@ from psignifit import sigmoids
 
 
 # fixed parameters for simple sigmoid sanity checks
-X = np.linspace(1e-12, 1-1e-12, num=10000)
+X = np.linspace(1e-12, 1 - 1e-12, num=10000)
 THRESHOLD_PARAM = 0.5
 WIDTH_PARAM = 0.9
 PC = 0.5
@@ -24,6 +24,7 @@ def test_ALL_SIGMOID_NAMES():
         'tdist', 'student', 'heavytail', 'neg_tdist', 'neg_student', 'neg_heavytail')
     for name in TEST_SIGS:
         assert name in sigmoids.ALL_SIGMOID_NAMES
+
 
 @pytest.mark.parametrize('sigmoid_name', sigmoids.ALL_SIGMOID_NAMES)
 def test_sigmoid_by_name(sigmoid_name):
@@ -58,7 +59,7 @@ def test_sigmoid_sanity_check(sigmoid_name):
     # with sigmoid(X_L) == ALPHA
     # and  sigmoid(X_R) == 1 - ALPHA
     s = sigmoid(x, THRESHOLD_PARAM, WIDTH_PARAM)
-    idx_alpha, idx_nalpha =  np.abs(s - ALPHA).argmin(), np.abs(s - (1 - ALPHA)).argmin()
+    idx_alpha, idx_nalpha = np.abs(s - ALPHA).argmin(), np.abs(s - (1 - ALPHA)).argmin()
     np.testing.assert_allclose(s[idx_nalpha] - s[idx_alpha], WIDTH_PARAM, atol=0.02)
 
     t = sigmoid.inverse(PC, threshold=THRESHOLD_PARAM, width=WIDTH_PARAM)

@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-from functools import partial
 
 from psignifit import likelihood
 from psignifit import sigmoids
