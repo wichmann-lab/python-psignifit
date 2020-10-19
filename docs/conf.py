@@ -20,7 +20,7 @@ import sys
 # -- Project information -----------------------------------------------------
 
 project = 'psignifit'
-author = 'Heiko Schütt, Felix Wichmann; David-Elias Künstle, Tiziano Zito'
+author = 'Original: Heiko Schütt, Stefan Harmeling, Jakob Macke, and Felix Wichmann; Python implementation: David-Elias Künstle, Tiziano Zito'
 copyright = '2020, ' + author
 
 
