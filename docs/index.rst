@@ -75,6 +75,7 @@ Contents
    how_to/index.rst
    generated_examples/index.rst
    test_MATLAB_version.rst
+   references/index.rst
 
 
 * :ref:`genindex`

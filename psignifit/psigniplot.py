@@ -37,9 +37,7 @@ def plotPsych(result,
               dataSize=0,
               axisHandle=None,
               showImediate=True):
-    """
-    This function produces a plot of the fitted psychometric function with 
-    the data.
+    """ Plot of the fitted psychometric function with the data.
     """
 
     fit = result['Fit']
@@ -163,7 +161,8 @@ def plotPsych(result,
 
 
 def plotsModelfit(result, showImediate=True):
-    """
+    """ Plot utilities to judge model fit.
+
     Plots some standard plots, meant to help you judge whether there are
     systematic deviations from the model. We dropped the statistical tests
     here though.
@@ -278,11 +277,11 @@ def plotMarginal(result,
                  plotPE=True,
                  axisHandle=None,
                  showImediate=True):
-    """
-    Plots the marginal for a single dimension.
-    result       should be a result struct from the main psignifit routine
-    dim          is the parameter to plot:
-                   1=threshold, 2=width, 3=lambda, 4=gamma, 5=sigma
+    """ Plots the marginal for a single dimension.
+
+    Args:
+        result: should be a result struct from the main psignifit routine
+        dim: The parameter to plot. 1=threshold, 2=width, 3=lambda, 4=gamma, 5=sigma
     """
     if isinstance(dim, str): dim = _utils.strToDim(dim)
 
@@ -369,8 +368,7 @@ def plotMarginal(result,
 
 
 def getColorMap():
-    """
-       This function returns the standard University of Tuebingen Colormap. 
+    """ Returns the standard University of Tuebingen Colormap.
     """
     midBlue = np.array([165, 30, 55]) / 255
     lightBlue = np.array([210, 150, 0]) / 255
@@ -388,8 +386,7 @@ def plotPrior(result,
               markerSize=30,
               showImediate=True):
     """
-    This function creates the plot illustrating the priors on the different 
-    parameters
+    Plot the priors on the different parameters
     """
 
     data = result['data']
@@ -601,13 +598,13 @@ def plot2D(result,
            fontSize=10,
            axisHandle=None,
            showImediate=True):
-    """ 
-    This function constructs a 2 dimensional marginal plot of the posterior
-    density. This is the same plot as it is displayed in plotBayes in an
-    unmodifyable way.
+    """ Construct a 2 dimensional marginal plot of the posterior density.
+
+    This is the same plot as it is displayed in plotBayes in an unmodifyable way.
 
     The result struct is passed as result.
     par1 and par2 should code the two parameters to plot:
+
         0 = threshold
         1 = width
         2 = lambda
