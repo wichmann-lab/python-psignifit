@@ -48,6 +48,14 @@ setup(
     ],
     packages=find_packages(),
     install_requires=['scipy', 'matplotlib', 'pytest'],
+    extras_requires={
+        'docs': [
+            'sphinx',
+            'sphinx-gallery',
+            'sphinx_rtd_theme',
+            'matplotlib',
+        ],
+    },
     # package_data={
     #    'sample': ['package_data.dat'],
     # },
