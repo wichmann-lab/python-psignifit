@@ -2,6 +2,8 @@
 
 Python toolbox for Bayesian psychometric function estimation.
 
+[![Documentation](https://readthedocs.org/projects/psignifit/badge/?version=latest)](https://ordcomp.readthedocs.io/en/latest/?badge=latest)
+
 ## Installation
 For users
 
