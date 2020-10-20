@@ -1,14 +1,20 @@
 """This module defines the basic configuration object for psignifit.
 """
 import re
+import dataclasses
+from typing import Dict, Tuple, Optional
 
 import numpy as np
 
 from . import sigmoids
 from .utils import PsignifitException
-from .typing import ExperimentType
+from .typing import ExperimentType, Prior
 
 
+_PARAMETERS = {'threshold', 'width', 'lambda', 'gamma', 'eta'}
+
+
+@dataclasses.dataclass(frozen=True)
 class Conf:
     """The basic configuration object for psignifit.
 
@@ -28,105 +34,56 @@ class Conf:
     for `foobar`.
     """
     # set of valid options for psignifit. Add new attributes to this tuple
-    _valid_opts = (
-        'beta_prior',
-        'bounds',
-        'CI_method',
-        'confP',
-        'dynamic_grid',
-        'estimate_type',
-        'experiment_type',
-        'experiment_choices',
-        'fast_optim',
-        'fixed_parameters',
-        'grid_eval',
-        'grid_set_type',
-        'grid_steps',
-        'instant_plot',
-        'max_bound_value',
-        'move_bounds',
-        'parameters',
-        'pool_max_blocks',
-        'pool_max_gap',
-        'pool_max_length',
-        'pool_xtol',
-        'priors',
-        'sigmoid',
-        'steps_moving_bounds',
-        'stimulus_range',
-        'thresh_PC',
-        'uniform_weight',
-        'verbose',
-        'width_alpha',
-        'width_min',
-    )
 
-    def __init__(self, **kwargs):
-        # we only allow keyword arguments
-        # set private attributes defaults
-        self._parameters = {'threshold', 'width', 'lambda', 'gamma', 'eta'}
+    beta_prior: int = 10
+    CI_method: str = 'percentiles'
+    confP: Tuple[float, float, float] = (.95, .9, .68)
+    dynamic_grid: bool = False
+    estimate_type: str = 'MAP'
+    experiment_type: ExperimentType = ExperimentType.YES_NO
+    experiment_choices: Optional[int] = None
+    fast_optim: bool = False
+    fixed_parameters: Optional[Dict[str, float]] = None
+    grid_set_type: str = 'cumDist'
+    instant_plot: bool = False
+    max_bound_value: float = 1e-05
+    move_bounds: bool = True
+    pool_max_blocks: int  = 25
+    pool_max_gap: float = np.inf
+    pool_max_length: float = np.inf
+    pool_xtol: float = 0
+    priors: Optional[Dict[str, Prior]] = dataclasses.field(default=None, hash=False)
+    sigmoid: str = 'norm'
+    stimulus_range: Optional[Tuple[float, float]] = None
+    thresh_PC: float = 0.5
+    verbose: bool = True
+    width_alpha: float = 0.05
+    width_min: Optional[float] = None
 
-        # set public defaults
-        self.beta_prior = 10
-        self.bounds = None
-        self.CI_method = 'percentiles'
-        self.confP = (.95, .9, .68)
-        self.dynamic_grid = False
-        self.estimate_type = 'MAP'
-        self.experiment_type = ExperimentType.YES_NO
-        self.experiment_choices = None
-        self.fast_optim = False
-        self.fixed_parameters = None
-        self.grid_eval = None
-        self.grid_set_type = 'cumDist'
-        self.grid_steps = None
-        self.instant_plot = False
-        self.max_bound_value = 1e-05
-        self.move_bounds = True
-        self.pool_max_blocks = 25
-        self.pool_max_gap = np.inf
-        self.pool_max_length = np.inf
-        self.pool_xtol = 0
-        self.priors = None
-        self.sigmoid = 'norm'
-        self.stimulus_range = None
-        self.thresh_PC = 0.5
-        self.uniform_weight = None
-        self.verbose = True
-        self.width_alpha = 0.05
-        self.width_min = None
+    # parameters, if not specified, will be initialize based on others
+    bounds: Optional[Dict[str, Tuple[float, float]]] = None
+    grid_eval: Optional[int] = None
+    uniform_weight: Optional[float] = None
 
-        # overwrite defaults with user preferences
-        for arg in kwargs:
-            setattr(self, arg, kwargs[arg])
+    # parameters which are always initialized based on other parameters
+    grid_steps: Dict[str, int] = dataclasses.field(init=False)
+    steps_moving_bounds: Dict[str, int] = dataclasses.field(init=False)
 
-    def __setattr__(self, name, value):
-        if name.startswith('_'):
-            super().__setattr__(name, value)
-        elif name in self._valid_opts:
-            # first run checks for the supplied option, if any are available
-            if hasattr(self, 'check_' + name):
-                # run the check
-                # the check method should raise if value is not valid
-                value = getattr(self, 'check_' + name)(value)
-            super().__setattr__(name, value)
-        else:
-            raise PsignifitException(f'Invalid option "{name}"!')
+    def __post_init__(self):
+        self.check_parameters()
+
+    def check_parameters(self):
+        for field in dataclasses.fields(self):
+            checker_name = 'check_' + field.name
+            if hasattr(self, checker_name):
+                checker = getattr(self, checker_name)
+                old_value = getattr(self, field.name)
+                object.__setattr__(self, field.name, checker(old_value))
 
     # template for an option checking method
     # def check_foobar(self, value):
     #    if value > 10:
     #       raise PsignifitException(f'Foobar must be < 10: {value} given!')
-
-    def __repr__(self):
-        # give an nice string representation of ourselves
-        _str = []
-        for name in sorted(self._valid_opts):
-            # if name is not defined, returns None
-            value = getattr(self, name, None)
-            _str.append(f'{name}: {value}')
-        return '\n'.join(_str)
-
     def check_bounds(self, value):
         if value is not None:
             # bounds is a dict in the form {'parameter_name': (left, right)}
@@ -135,7 +92,7 @@ class Conf:
                     f'Option bounds must be a dictionary ({type(value).__name__} given)!'
                 )
             # now check that the keys in the dictionary are valid
-            vkeys = self._parameters
+            vkeys = _PARAMETERS
             if vkeys < set(value.keys()):
                 raise PsignifitException(
                     f'Option bounds keys must be in {vkeys}. Given {list(value.keys())}!'
@@ -159,7 +116,7 @@ class Conf:
                     f'Option fixed_parameters must be a dictionary ({type(value).__name__} given)!'
                 )
             # now check that the keys in the dictionary are valid
-            vkeys = self._parameters
+            vkeys = _PARAMETERS
             if vkeys < set(value.keys()):
                 raise PsignifitException(
                     f'Option fixed_paramters keys must be in {vkeys}. Given {list(value.keys())}!'
@@ -176,7 +133,7 @@ class Conf:
                     f'Invalid experiment type: "{value}"\nValid types: {valid_values},' +
                     ', or "2AFC", "3AFC", etc...')
             if cond2:
-                self.experiment_choices = int(value[:-3])
+                object.__setattr__(self, 'experiment_choices', int(value[:-3]))
                 value = ExperimentType.N_AFC
             else:
                 value = ExperimentType(value)
@@ -184,30 +141,33 @@ class Conf:
             raise PsignifitException("For nAFC experiments, expects 'experiment_choices' to be a number, got None.\n"
                                      "Can be specified in the experiment type, e.g. 2AFC, 3AFC, … .")
 
-        self.grid_steps = {param: None for param in self._parameters}
-        self.steps_moving_bounds = {param: None for param in self._parameters}
+        # because the attributes are immutable (frozen)
+        # we have to set them with this special syntax
+        object.__setattr__(self, 'grid_steps', {
+            'threshold': 40,
+            'width': 40,
+            'lambda': 20,
+            # 'gamma' will be set below
+            'eta': 20,
+        })
         if value == ExperimentType.YES_NO.value:
-            self.grid_steps['threshold'] = 40
-            self.grid_steps['width'] = 40
-            self.grid_steps['lambda'] = 20
             self.grid_steps['gamma'] = 20
-            self.grid_steps['eta'] = 20
-            self.steps_moving_bounds['threshold'] = 25
-            self.steps_moving_bounds['width'] = 30
-            self.steps_moving_bounds['lambda'] = 10
-            self.steps_moving_bounds['gamma'] = 10
-            self.steps_moving_bounds['eta'] = 15
+            object.__setattr__(self, 'steps_moving_bounds', {
+                'threshold': 25,
+                'width': 30,
+                'lambda': 10,
+                'gamma': 10,
+                'eta': 15,
+            })
         else:
-            self.grid_steps['threshold'] = 40
-            self.grid_steps['width'] = 40
-            self.grid_steps['lambda'] = 20
             self.grid_steps['gamma'] = 1
-            self.grid_steps['eta'] = 20
-            self.steps_moving_bounds['threshold'] = 30
-            self.steps_moving_bounds['width'] = 40
-            self.steps_moving_bounds['lambda'] = 10
-            self.steps_moving_bounds['gamma'] = 1
-            self.steps_moving_bounds['eta'] = 20
+            object.__setattr__(self, 'steps_moving_bounds', {
+                'threshold': 30,
+                'width': 40,
+                'lambda': 10,
+                'gamma': 1,
+                'eta': 20,
+            })
 
         return value
 
@@ -221,9 +181,9 @@ class Conf:
     def check_dynamic_grid(self, value):
         if value:
             if self.grid_eval is None:
-                self.grid_eval = 10000
+                object.__setattr__(self, 'grid_eval', 10000)
             if self.uniform_weigth is None:
-                self.uniform_weigth = 1.
+                object.__setattr__(self, 'uniform_weight', 1.)
 
         return value
 
