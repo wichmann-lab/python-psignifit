@@ -34,7 +34,7 @@ def setup_experiment(**kwargs):
 @pytest.mark.parametrize(
     "experiment_type,result_shape,result_max",
     [
-        ("yes/no", (20, 1, 10, 30, 40), -560.8871),
+        ("yes/no", (15, 10, 10, 25, 30), -557.5108),
         ("3AFC", (20, 1, 10, 30, 40), -560.0022),
         ("equal asymptote", (20, 1, 10, 30, 40), -560.8881),  # gamma is none in grid
     ]
@@ -56,14 +56,14 @@ def test_log_posterior_zero_eta():
 
     log_pp = likelihood.log_posterior(data, sigmoid, priors, grid)
 
-    np.testing.assert_equal(log_pp.shape, (1, 1, 10, 30, 40))
-    np.testing.assert_allclose(log_pp.max(), -565.3310)
+    np.testing.assert_equal(log_pp.shape, (1, 10, 10, 25, 30))
+    np.testing.assert_allclose(log_pp.max(), -559.8134)
 
 
 @pytest.mark.parametrize(
     "experiment_type,result_shape,result_max",
     [
-        ("yes/no", (20, 1, 10, 30, 40), 1.),
+        ("yes/no", (15, 10, 10, 25, 30), 1.),
         ("3AFC", (20, 1, 10, 30, 40), 1.),
         ("equal asymptote", (20, 1, 10, 30, 40), 1.),  # gamma is none in grid
     ]
@@ -83,7 +83,7 @@ def test_posterior_grid(experiment_type, result_shape, result_max):
 @pytest.mark.parametrize(
     "experiment_type,result_shape,result_max",
     [
-        ("yes/no", (20, 1, 10, 30, 40), 1.),
+        ("yes/no", (15, 10, 10, 25, 30), 1.),
         ("3AFC", (20, 1, 10, 30, 40), 1.),
         ("equal asymptote", (20, 1, 10, 30, 40), 1.),  # gamma is none in grid
     ]

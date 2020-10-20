@@ -27,9 +27,19 @@ def test_check_option(mocked_check):
     mocked_check.assert_called_with((10, 100))
 
 
-def test_set_wrong_experiment_type():
+def test_check_experiment_type():
     with pytest.raises(PsignifitException):
         Configuration(experiment_type='foobar')
+
+    with pytest.raises(PsignifitException):
+        Configuration(experiment_type='nAFC')
+    assert Configuration(experiment_type='nAFC', experiment_choices=12) == Configuration(experiment_type='12AFC')
+
+    steps_nafc = Configuration(experiment_type='2AFC').steps_moving_bounds
+    steps_eqasymp = Configuration(experiment_type='equal asymptote').steps_moving_bounds
+    steps_yesno = Configuration(experiment_type='yes/no').steps_moving_bounds
+    assert steps_eqasymp == steps_nafc
+    assert steps_nafc != steps_yesno
 
 
 def test_set_bounds_with_nondict():

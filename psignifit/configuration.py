@@ -40,7 +40,7 @@ class Configuration:
     confP: Tuple[float, float, float] = (.95, .9, .68)
     dynamic_grid: bool = False
     estimate_type: str = 'MAP'
-    experiment_type: ExperimentType = ExperimentType.YES_NO
+    experiment_type: str = ExperimentType.YES_NO.value
     experiment_choices: Optional[int] = None
     fast_optim: bool = False
     fixed_parameters: Optional[Dict[str, float]] = None
@@ -128,19 +128,17 @@ class Configuration:
 
     def check_experiment_type(self, value):
         valid_values = [type.value for type in ExperimentType]
-        if not isinstance(value, ExperimentType):
-            cond1 = value in valid_values
-            cond2 = re.match('[0-9]+AFC', value)
-            if not (cond1 or cond2):
-                raise PsignifitException(
-                    f'Invalid experiment type: "{value}"\nValid types: {valid_values},' +
-                    ', or "2AFC", "3AFC", etc...')
-            if cond2:
-                object.__setattr__(self, 'experiment_choices', int(value[:-3]))
-                value = ExperimentType.N_AFC
-            else:
-                value = ExperimentType(value)
-        if value is ExperimentType.N_AFC and self.experiment_choices is None:
+        is_valid = value in valid_values
+        is_nafc = re.match('[0-9]+AFC', value)
+        if not (is_valid or is_nafc):
+            raise PsignifitException(
+                f'Invalid experiment type: "{value}"\nValid types: {valid_values},' +
+                ', or "2AFC", "3AFC", etc...')
+        if is_nafc:
+            object.__setattr__(self, 'experiment_choices', int(value[:-3]))
+            object.__setattr__(self, 'experiment_type', ExperimentType.N_AFC.value)
+            value = ExperimentType.N_AFC.value
+        if value == ExperimentType.N_AFC.value and self.experiment_choices is None:
             raise PsignifitException("For nAFC experiments, expects 'experiment_choices' to be a number, got None.\n"
                                      "Can be specified in the experiment type, e.g. 2AFC, 3AFC, … .")
 
