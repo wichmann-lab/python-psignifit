@@ -72,6 +72,9 @@ class Conf:
     def __post_init__(self):
         self.check_parameters()
 
+    def asdict(self) -> Dict:
+        return dataclasses.asdict(self)
+
     def check_parameters(self):
         for field in dataclasses.fields(self):
             checker_name = 'check_' + field.name
