@@ -20,6 +20,16 @@ def test_setting_invalid_option():
     with pytest.raises(TypeError):
         c = Configuration(foobar=10)
 
+def test_dict_conversion():
+    config = Configuration()
+    config_dict = config.as_dict()
+
+    assert isinstance(config_dict, dict)
+    for field in dataclasses.fields(Configuration):
+        assert field.name in config_dict
+
+    assert config == Configuration.from_dict(config_dict)
+
 
 @patch.object(Configuration, 'check_bounds')
 def test_check_option(mocked_check):

@@ -2,7 +2,7 @@
 """
 import re
 import dataclasses
-from typing import Dict, Tuple, Optional
+from typing import Any, Dict, Tuple, Optional
 
 import numpy as np
 
@@ -66,13 +66,19 @@ class Configuration:
     uniform_weight: Optional[float] = None
 
     # parameters which are always initialized based on other parameters
-    grid_steps: Dict[str, int] = dataclasses.field(init=False)
-    steps_moving_bounds: Dict[str, int] = dataclasses.field(init=False)
+    grid_steps: Dict[str, int] = None
+    steps_moving_bounds: Dict[str, int] = None
 
     def __post_init__(self):
         self.check_parameters()
 
-    def asdict(self) -> Dict:
+    @classmethod
+    def from_dict(cls, config_dict: Dict[str, Any]):
+        config_dict = config_dict.copy()
+        return cls(confP=tuple(config_dict.pop('confP')),
+                   **config_dict)
+
+    def as_dict(self) -> Dict[str, Any]:
         return dataclasses.asdict(self)
 
     def check_parameters(self):
