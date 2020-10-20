@@ -80,8 +80,7 @@ class Configuration:
             checker_name = 'check_' + field.name
             if hasattr(self, checker_name):
                 checker = getattr(self, checker_name)
-                old_value = getattr(self, field.name)
-                object.__setattr__(self, field.name, checker(old_value))
+                checker(getattr(self, field.name))
 
     # template for an option checking method
     # def check_foobar(self, value):
@@ -109,7 +108,6 @@ class Configuration:
                 if not correct_length:
                     raise PsignifitException(
                         f'Bounds must be a sequence of 2 items: {v} given!')
-            return value
 
     def check_fixed_parameters(self, value):
         if value is not None:
@@ -124,7 +122,6 @@ class Configuration:
                 raise PsignifitException(
                     f'Option fixed_paramters keys must be in {vkeys}. Given {list(value.keys())}!'
                 )
-        return value
 
     def check_experiment_type(self, value):
         valid_values = [type.value for type in ExperimentType]
@@ -170,14 +167,11 @@ class Configuration:
                 'eta': 20,
             })
 
-        return value
-
     def check_sigmoid(self, value):
         try:
             sigmoid = sigmoids.sigmoid_by_name(value)
         except:
             raise PsignifitException('Invalid sigmoid name "{value}", use one of {sigmoids.ALL_SIGMOID_NAMES}')
-        return value
 
     def check_dynamic_grid(self, value):
         if value:
@@ -185,8 +179,6 @@ class Configuration:
                 object.__setattr__(self, 'grid_eval', 10000)
             if self.uniform_weigth is None:
                 object.__setattr__(self, 'uniform_weight', 1.)
-
-        return value
 
     def check_stimulus_range(self, value):
         if value:
@@ -199,8 +191,6 @@ class Configuration:
                 raise PsignifitException(
                     f"Option stimulus range must be a sequence of two items!")
 
-        return value
-
     def check_width_alpha(self, value):
         try:
             # check that it is a number:
@@ -212,13 +202,9 @@ class Configuration:
             raise PsignifitException(
                 f"Option width_alpha must be between 0 and 1 ({value} given)!")
 
-        return value
-
     def check_width_min(self, value):
         if value:
             try:
                 _ = value + 1
             except Exception:
                 raise PsignifitException("Option width_min must be a number")
-
-        return value
