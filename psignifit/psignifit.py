@@ -12,7 +12,7 @@ from . import priors as _priors
 from . import psigniplot as plot
 from . import sigmoids
 from .bounds import parameter_bounds
-from .conf import Conf
+from .configuration import Configuration
 from .getConfRegion import getConfRegion
 from .getSeed import getSeed
 from .getWeights import getWeights
@@ -44,7 +44,7 @@ def psignifit(data, conf=None, **kwargs):
     To get an introduction to basic usage start with demo001
     """
     if conf is None:
-        conf = Conf(**kwargs)
+        conf = Configuration(**kwargs)
     elif len(kwargs) > 0:
         # user shouldn't specify a conf object *and* kwargs simultaneously
         raise PsignifitException(

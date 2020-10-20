@@ -15,7 +15,7 @@ _PARAMETERS = {'threshold', 'width', 'lambda', 'gamma', 'eta'}
 
 
 @dataclasses.dataclass(frozen=True)
-class Conf:
+class Configuration:
     """The basic configuration object for psignifit.
 
     This class contains a set of valid options and the corresponding sanity

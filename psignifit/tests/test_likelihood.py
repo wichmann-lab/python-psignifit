@@ -6,14 +6,14 @@ from psignifit import likelihood
 from psignifit import sigmoids
 from psignifit.priors import default_priors
 from psignifit.bounds import parameter_bounds
-from psignifit.conf import Conf
+from psignifit.configuration import Configuration
 from psignifit import utils
 
 from .data import DATA
 
 
 def setup_experiment(**kwargs):
-    conf = Conf(**kwargs)
+    conf = Configuration(**kwargs)
 
     stimulus_levels = DATA[:, 0]
     stimulus_range = (stimulus_levels.min(), stimulus_levels.max())
