@@ -236,7 +236,7 @@ class Conf:
                 wrong_type = True
             if wrong_type or len_ != 2:
                 raise PsignifitException(
-                    f"Option stimulus range must be a sequence of two items!")
+                    "Option stimulus range must be a sequence of two items!")
 
         return value
 
