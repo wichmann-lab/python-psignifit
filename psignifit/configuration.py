@@ -20,9 +20,12 @@ class Configuration:
 
     This class contains a set of valid options and the corresponding sanity
     checks.
-
-    It raises `PsignifitException` if an invalid option is specified or
+    These checks raise `PsignifitException` if an invalid option is specified or
     if a valid option is specified with a value outside of the allowed range.
+
+    The sanity checks are only run during initialization.
+    Changing attributes is highly discouraged and should be followed
+    by rerunning sanity checks with `config.check_attributes()`.
 
     Note: attributes and methods starting with `_` are considered private and
     used internally. Do not change them unlsess you know what you are doing
@@ -33,8 +36,6 @@ class Configuration:
     raises `PsignifitException` if `value` is outside of the accepted range
     for `foobar`.
     """
-    # set of valid options for psignifit. Add new attributes to this tuple
-
     beta_prior: int = 10
     CI_method: str = 'percentiles'
     confP: Tuple[float, float, float] = (.95, .9, .68)
@@ -60,17 +61,17 @@ class Configuration:
     width_alpha: float = 0.05
     width_min: Optional[float] = None
 
-    # parameters, if not specified, will be initialize based on others
+    # attributes, if not specified, will be initialize based on others
     bounds: Optional[Dict[str, Tuple[float, float]]] = None
     grid_eval: Optional[int] = None
     uniform_weight: Optional[float] = None
 
-    # parameters which are always initialized based on other parameters
+    # attributes which are always initialized based on other parameters
     grid_steps: Dict[str, int] = None
     steps_moving_bounds: Dict[str, int] = None
 
     def __post_init__(self):
-        self.check_parameters()
+        self.check_attributes()
 
     @classmethod
     def from_dict(cls, config_dict: Dict[str, Any]):
@@ -81,17 +82,27 @@ class Configuration:
     def as_dict(self) -> Dict[str, Any]:
         return dataclasses.asdict(self)
 
-    def check_parameters(self):
-        for field in dataclasses.fields(self):
-            checker_name = 'check_' + field.name
-            if hasattr(self, checker_name):
-                checker = getattr(self, checker_name)
-                checker(getattr(self, field.name))
+    def check_attributes(self):
+        """ Run sanity checks.
 
-    # template for an option checking method
-    # def check_foobar(self, value):
-    #    if value > 10:
-    #       raise PsignifitException(f'Foobar must be < 10: {value} given!')
+        For each attribute named NAME, this function
+        searches for a method check_NAME and executes
+        it if found.
+
+        Example for a sanity check of a `foobar` attribute:
+        .. code-block:: python
+
+            def check_foobar(self, value):
+                if value > 10:
+                    raise PsignifitException(f'Foobar must be < 10: {value} given!')
+         """
+        for attribute in dataclasses.fields(self):
+            sanity_check_name = 'check_' + attribute.name
+            if hasattr(self, sanity_check_name):
+                sanity_check_method = getattr(self, sanity_check_name)
+                attribute_value = getattr(self, attribute.name)
+                sanity_check_method(attribute_value)
+
     def check_bounds(self, value):
         if value is not None:
             # bounds is a dict in the form {'parameter_name': (left, right)}
