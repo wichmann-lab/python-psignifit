@@ -33,7 +33,16 @@ jobs:
 #        pip install -e .[tests,docs]
     - name: Lint with flake8
       run: |
-        # exit-zero treats all errors as warnings.
+        # stop the build if there are Python syntax errors or undefined names
+        #    E9: Runtime errors (syntax, indentation, io)
+        #    F63: Wrong use of operators and always-true assertion tests
+        #    F7: Wrong position of statements (break, continue, return, ...)
+        #    F82: Undefined (variable) name
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        #
+        # print warnings if other style errors are found.
+        #    see .flake8 config file for selected/ignored rules.
+        #    warnings can be found in the action logs https://github.com/wichmann-lab/python-psignifit/actions
         flake8 . --count --exit-zero --statistics --show-source
     - name: Test with pytest and measure coverage
       run: |
