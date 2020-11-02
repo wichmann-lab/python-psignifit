@@ -48,7 +48,7 @@ setup(
     ],
     packages=find_packages(),
     install_requires=['scipy', 'matplotlib', 'pytest'],
-    extras_requires={
+    extras_require={
         'docs': [
             'sphinx',
             'sphinx-gallery',
