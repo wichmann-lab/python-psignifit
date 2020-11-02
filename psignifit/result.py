@@ -15,7 +15,7 @@ class NumpyEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass
 class Result:
     sigmoid_parameters: Dict[str, float]
     configuration: Configuration

@@ -13,10 +13,6 @@ def test_setting_valid_option():
 
 
 def test_setting_invalid_option():
-    with pytest.raises(dataclasses.FrozenInstanceError):
-        c = Configuration()
-        c.verbose = 10
-    # assignment shortcut
     with pytest.raises(TypeError):
         c = Configuration(foobar=10)
 

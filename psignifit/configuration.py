@@ -14,7 +14,7 @@ from .typing import ExperimentType, Prior
 _PARAMETERS = {'threshold', 'width', 'lambda', 'gamma', 'eta'}
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass
 class Configuration:
     """The basic configuration object for psignifit.
 
@@ -138,8 +138,8 @@ class Configuration:
                 f'Invalid experiment type: "{value}"\nValid types: {valid_values},' +
                 ', or "2AFC", "3AFC", etc...')
         if is_nafc:
-            object.__setattr__(self, 'experiment_choices', int(value[:-3]))
-            object.__setattr__(self, 'experiment_type', ExperimentType.N_AFC.value)
+            self.experiment_choices = int(value[:-3])
+            self.experiment_type = ExperimentType.N_AFC.value
             value = ExperimentType.N_AFC.value
         if value == ExperimentType.N_AFC.value and self.experiment_choices is None:
             raise PsignifitException("For nAFC experiments, expects 'experiment_choices' to be a number, got None.\n"
@@ -147,31 +147,31 @@ class Configuration:
 
         # because the attributes are immutable (frozen)
         # we have to set them with this special syntax
-        object.__setattr__(self, 'grid_steps', {
+        self.grid_steps = {
             'threshold': 40,
             'width': 40,
             'lambda': 20,
             # 'gamma' will be set below
             'eta': 20,
-        })
+        }
         if value == ExperimentType.YES_NO.value:
             self.grid_steps['gamma'] = 20
-            object.__setattr__(self, 'steps_moving_bounds', {
+            self.steps_moving_bounds = {
                 'threshold': 25,
                 'width': 30,
                 'lambda': 10,
                 'gamma': 10,
                 'eta': 15,
-            })
+            }
         else:
             self.grid_steps['gamma'] = 1
-            object.__setattr__(self, 'steps_moving_bounds', {
+            self.steps_moving_bounds = {
                 'threshold': 30,
                 'width': 40,
                 'lambda': 10,
                 'gamma': 1,
                 'eta': 20,
-            })
+            }
 
     def check_sigmoid(self, value):
         try:
@@ -182,9 +182,9 @@ class Configuration:
     def check_dynamic_grid(self, value):
         if value:
             if self.grid_eval is None:
-                object.__setattr__(self, 'grid_eval', 10000)
+                self.grid_eval = 10000
             if self.uniform_weigth is None:
-                object.__setattr__(self, 'uniform_weight', 1.)
+                self.uniform_weight = 1.
 
     def check_stimulus_range(self, value):
         if value:
