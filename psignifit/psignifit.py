@@ -8,8 +8,9 @@ import numpy as np
 from . import priors as _priors
 from . import sigmoids
 from .bounds import parameter_bounds
-from .conf import Conf
+from .configuration import Configuration
 from .likelihood import posterior_grid, max_posterior
+from .result import Result
 from .typing import ParameterBounds, Prior
 from .utils import (pool_data, integral_weights, PsignifitException, normalize, get_grid)
 
@@ -34,7 +35,7 @@ def psignifit(data, conf=None, **kwargs):
     To get an introduction to basic usage start with demo001
     """
     if conf is None:
-        conf = Conf(**kwargs)
+        conf = Configuration(**kwargs)
     elif len(kwargs) > 0:
         # user shouldn't specify a conf object *and* kwargs simultaneously
         raise PsignifitException(
@@ -86,7 +87,6 @@ def psignifit(data, conf=None, **kwargs):
         priors[parameter] = normalize(prior, bounds[parameter])
 
     fit_dict = _fit_parameters(data, bounds, priors, sigmoid, conf.steps_moving_bounds, conf.max_bound_value, conf.grid_steps)
-    results = {'sigmoid_parameters': fit_dict}
 
     # take care of confidence intervals/condifence region
 
@@ -128,7 +128,8 @@ def psignifit(data, conf=None, **kwargs):
     # if options['instantPlot']:
     # plot.plotPsych(result)
 
-    return results
+    return Result(sigmoid_parameters=fit_dict,
+                  configuration=conf)
 
 
 def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,

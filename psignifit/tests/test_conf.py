@@ -1,126 +1,100 @@
+import dataclasses
+from unittest.mock import patch
+
 import pytest
 
-from psignifit.conf import Conf
+from psignifit.configuration import Configuration
 from psignifit.utils import PsignifitException
 
 
 def test_setting_valid_option():
-    c = Conf()
-    c.verbose = 10
-    assert c.verbose == 10
-    # assignment shortcut
-    c = Conf(verbose=20)
+    c = Configuration(verbose=20)
     assert c.verbose == 20
 
 
 def test_setting_invalid_option():
-    with pytest.raises(PsignifitException):
-        c = Conf()
-        c.foobar = 10
-    # assignment shortcut
-    with pytest.raises(PsignifitException):
-        c = Conf(foobar=10)
-
-
-def test_setting_nonkw_argument():
     with pytest.raises(TypeError):
-        Conf(10)
+        c = Configuration(foobar=10)
+
+def test_dict_conversion():
+    config = Configuration()
+    config_dict = config.as_dict()
+
+    assert isinstance(config_dict, dict)
+    for field in dataclasses.fields(Configuration):
+        assert field.name in config_dict
+
+    assert config == Configuration.from_dict(config_dict)
 
 
-def test_check_option():
-    # create a Conf with a single valid option
-    class B(Conf):
-        _valid_opts = Conf._valid_opts + ('foobar',)
+@patch.object(Configuration, 'check_bounds')
+def test_check_option(mocked_check):
+    __ = Configuration(bounds=(10, 100))
+    mocked_check.assert_called_with((10, 100))
 
-    # add a check for the fake option
-    def check_foobar(self, value):
-        if value > 10:
-            raise PsignifitException
-        return value
 
-    B.check_foobar = check_foobar
-    # instantiate the new conf
-    c = B()
-    # try set the value in the valid range
-    c.foobar = 10
-    assert c.foobar == 10
-    # try going out of range and catch the resulting exception
+def test_check_experiment_type():
     with pytest.raises(PsignifitException):
-        c.foobar = 11
+        Configuration(experiment_type='foobar')
 
-
-def test_repr():
-    # create a Conf with two additional valid options
-    class B(Conf):
-        _valid_opts = Conf._valid_opts + ('foobar', 'fiibur')
-
-    # set only one option, so we can test the None case too
-    c = B(foobar=10)
-    # manually restrict the list of valid options
-    c._valid_opts = ('foobar', 'fiibur')
-    assert str(c) == 'fiibur: None\nfoobar: 10'
-
-
-def test_private_attr():
-    c = Conf()
-    c._foobar = 10
-    assert c._foobar == 10
-    # it shouldn't appear in the str representation
-    assert str(c).find('_foobar: 10') == -1
-
-
-def test_set_wrong_experiment_type():
     with pytest.raises(PsignifitException):
-        Conf(experiment_type='foobar')
+        Configuration(experiment_type='nAFC')
+    assert Configuration(experiment_type='nAFC', experiment_choices=12) == Configuration(experiment_type='12AFC')
+
+    steps_nafc = Configuration(experiment_type='2AFC').steps_moving_bounds
+    steps_eqasymp = Configuration(experiment_type='equal asymptote').steps_moving_bounds
+    steps_yesno = Configuration(experiment_type='yes/no').steps_moving_bounds
+    assert steps_eqasymp == steps_nafc
+    assert steps_nafc != steps_yesno
 
 
 def test_set_bounds_with_nondict():
     with pytest.raises(PsignifitException):
-        Conf(bounds=(1, 2, 3))
+        Configuration(bounds=(1, 2, 3))
 
 
 def test_set_bounds_with_wrong_key():
     with pytest.raises(PsignifitException):
-        Conf(bounds={'foo': 'bar'})
+        Configuration(bounds={'foo': 'bar'})
 
 
 def test_set_bounds_with_wrong_value1():
     with pytest.raises(PsignifitException):
-        Conf(bounds={'threshold': 10})
+        Configuration(bounds={'threshold': 10})
 
 
 def test_set_bounds_with_wrong_value2():
     with pytest.raises(PsignifitException):
-        Conf(bounds={'threshold': (1, 2, 3)})
+        Configuration(bounds={'threshold': (1, 2, 3)})
 
 
 def test_set_wrong_sigmoid():
     with pytest.raises(PsignifitException):
-        Conf(sigmoid='foobaro')
+        Configuration(sigmoid='foobaro')
 
 
 def test_set_stimulus_range_wrong_type():
     with pytest.raises(PsignifitException):
-        Conf(stimulus_range=10)
+        Configuration(stimulus_range=10)
 
 
 def test_set_stimulus_range_wrong_length():
     with pytest.raises(PsignifitException):
-        Conf(stimulus_range=(1, 2, 3))
+        Configuration(stimulus_range=(1, 2, 3))
 
 
 def test_set_width_alpha_wrong_type():
     with pytest.raises(PsignifitException):
-        Conf(width_alpha=(1, 2, 3))
+        Configuration(width_alpha=(1, 2, 3))
 
 
 def test_set_width_alpha_wrong_range():
     with pytest.raises(PsignifitException):
-        Conf(width_alpha=1.2)
+        Configuration(width_alpha=1.2)
     with pytest.raises(PsignifitException):
-        Conf(width_alpha=-1)
+        Configuration(width_alpha=-1)
 
 
 def test_set_width_min_wrong_type():
     with pytest.raises(PsignifitException):
-        Conf(width_min=(1, 2, 3))
+        Configuration(width_min=(1, 2, 3))
