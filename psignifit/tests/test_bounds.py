@@ -6,7 +6,7 @@ from psignifit.typing import ExperimentType
 
 
 def test_parameter_bounds():
-    bounds = parameter_bounds(wmin=0.1, etype=ExperimentType.EQ_ASYMPTOTE, srange=(0, 1), alpha=0.01)
+    bounds = parameter_bounds(wmin=0.1, etype=ExperimentType.EQ_ASYMPTOTE.value, srange=(0, 1), alpha=0.01)
     true_bounds = {'threshold': (-0.5, 1.5),
                    'width': (0.1, 4.242957250279646),
                    'lambda': (0.0, 0.5),
@@ -20,7 +20,7 @@ def test_parameter_bounds():
         else:
             assert_almost_equal(actual_value, true_value)
 
-    parameter_bounds(wmin=0.1, etype=ExperimentType.YES_NO, srange=(0, 1), alpha=0.01)
-    parameter_bounds(wmin=0.1, etype=ExperimentType.N_AFC, srange=(0, 1), alpha=0.01, echoices=2)
+    parameter_bounds(wmin=0.1, etype=ExperimentType.YES_NO.value, srange=(0, 1), alpha=0.01)
+    parameter_bounds(wmin=0.1, etype=ExperimentType.N_AFC.value, srange=(0, 1), alpha=0.01, echoices=2)
     with pytest.raises(ValueError):
         parameter_bounds(wmin=0.1, etype='unknown experiment', srange=(0, 1), alpha=0.01)
