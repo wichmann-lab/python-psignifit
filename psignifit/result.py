@@ -19,12 +19,14 @@ class NumpyEncoder(json.JSONEncoder):
 class Result:
     sigmoid_parameters: Dict[str, float]
     configuration: Configuration
+    # If future attributes should contain numpy arrays,
+    # run np.asarray in __post_init__.
+    # Otherwise, load_json may result in nested lists instead.
 
     @classmethod
     def from_dict(cls, result_dict: Dict[str, Any]):
         result_dict = result_dict.copy()
         config_dict = result_dict.pop('configuration')
-        # Numpy arrays should be initialized from lists here.
         return cls(configuration=Configuration.from_dict(config_dict),
                    **result_dict)
 
