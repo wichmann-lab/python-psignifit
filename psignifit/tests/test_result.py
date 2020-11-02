@@ -17,6 +17,7 @@ def result():
                       'eta': 0.0001
                   })
 
+
 def test_from_to_result_dict(result):
     result_dict = result.as_dict()
 
@@ -37,4 +38,3 @@ def test_save_load_result_json(result, tmp_path):
     assert result_file.exists()
 
     assert result == Result.load_json(result_file)
-

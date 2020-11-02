@@ -49,7 +49,7 @@ class Configuration:
     instant_plot: bool = False
     max_bound_value: float = 1e-05
     move_bounds: bool = True
-    pool_max_blocks: int  = 25
+    pool_max_blocks: int = 25
     pool_max_gap: float = np.inf
     pool_max_length: float = np.inf
     pool_xtol: float = 0
@@ -186,8 +186,8 @@ class Configuration:
 
     def check_sigmoid(self, value):
         try:
-            sigmoid = sigmoids.sigmoid_by_name(value)
-        except:
+            sigmoids.sigmoid_by_name(value)
+        except KeyError:
             raise PsignifitException('Invalid sigmoid name "{value}", use one of {sigmoids.ALL_SIGMOID_NAMES}')
 
     def check_dynamic_grid(self, value):
@@ -206,7 +206,7 @@ class Configuration:
                 wrong_type = True
             if wrong_type or len_ != 2:
                 raise PsignifitException(
-                    f"Option stimulus range must be a sequence of two items!")
+                    "Option stimulus range must be a sequence of two items!")
 
     def check_width_alpha(self, value):
         try:
