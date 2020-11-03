@@ -2,7 +2,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
-import psignifit.sigmoids as sg
+from psignifit import sigmoids
 
 COLS=4
 
@@ -12,29 +12,38 @@ WIDTH = 0.9
 PC = 0.5
 ALPHA = 0.05
 
-# list of all sigmoids (after having removed aliases)
-ALL_SIGS = { getattr(sg, name) for name in dir(sg) if not name.startswith('_') }
 
-def plot_sigmoid(sigmoid, x, threshold=M, width=WIDTH, PC=PC, alpha=ALPHA, axes=None):
-    y = sigmoid(x, threshold, width, PC=PC, alpha=alpha)
-
+def plot_sigmoid(sigmoid_name, x, threshold=M, width=WIDTH, axes=None):
     if axes is None:
-        fig, axes = plt.subplots()
-    axes.plot(x, y)
-    #axes.set(xlabel='stimulus level', ylabel='percent correct', title=sigmoid.__name__)
-    axes.set(title=sigmoid.__name__)
+        axes = plt.gca()
+
+    sigmoid = sigmoids.sigmoid_by_name(sigmoid_name, PC=PC, alpha=ALPHA)
+    if sigmoid.logspace:
+        x = np.exp(x)
+    y = sigmoid(x, threshold, width)
+    slope = sigmoid.slope(x, threshold, width)
+
+    axes.plot(x, y, color='C0')
+    axes.set_ylabel('value', color='C0')
+    axes.tick_params(axis='y', labelcolor='C0')
+
+    axes2 = axes.twinx()
+    axes2.plot(x, slope, color='C1')
+    axes2.set_ylabel('slope', color='C1')
+    axes2.tick_params(axis='y', labelcolor='C1')
+
+    axes.set(title=sigmoid_name)
     axes.grid()
 
+
 if __name__ == '__main__':
-    fig = plt.figure()
     # total number of plots
-    tot_plots = len(ALL_SIGS)
+    tot_plots = len(sigmoids.ALL_SIGMOID_NAMES)
     # we want 4 columns
     cols = 4
     rows = tot_plots // cols + tot_plots % cols
 
-    for position, s in enumerate(ALL_SIGS):
-        axes = fig.add_subplot(rows, cols, position+1)
-        plot_sigmoid(s, X, axes=axes)
-    fig.tight_layout()
+    fig, axes = plt.subplots(rows, cols, constrained_layout=True)
+    for sigmoid, ax in zip(sigmoids.ALL_SIGMOID_NAMES, axes.ravel()):
+        plot_sigmoid(sigmoid, X, axes=ax)
     plt.show()
