@@ -3,16 +3,20 @@
 If you add a new sigmoid type, add it to the CLASS_BY_NAME constant
 and to the _LOGSPACE_NAMES, if it expects stimulus on an exponential scale.
 """
+from typing import Optional, TypeVar
+
 import numpy as np
-from typing import Optional
+import scipy
 
-from .utils import normcdf as normcdf
-from .utils import norminv as norminv
-from .utils import norminvg as norminvg
-from .utils import t1cdf as t1cdf
-from .utils import t1icdf as t1icdf
+from .utils import normcdf
+from .utils import norminv
+from .utils import norminvg
+from .utils import t1cdf
+from .utils import t1icdf
 
 
+# sigmoid can be calculated on single floats, or on numpy arrays of floats
+N = TypeVar('N', float, np.ndarray)
 class Sigmoid:
     """ Base class for sigmoid implementation.
 
@@ -32,17 +36,36 @@ class Sigmoid:
          psi(X_(1-alpha)) = 0.95 = 1-alpha
          psi(X_(alpha)) = 0.05 = alpha
     """
-    logspace = False
-    negate = False
 
     def __init__(self, PC=0.5, alpha=0.05, negative=False, logspace=False):
         self.PC = PC
         self.alpha = alpha
         self.negative = negative
         self.logspace = logspace
+        if negative:
+            self.PC = 1 - PC
+        else:
+            self.PC = PC
 
-    def __call__(self, stimulus_level, threshold, width):
-        """ Calculate the sigmoid value at specified stimulus levels. """
+    def __eq__(self, o: object) -> bool:
+        return (isinstance(o, self.__class__)
+                and o.PC == self.PC
+                and o.alpha == self.alpha
+                and o.negative == self.negative
+                and o.logspace == self.logspace)
+
+    def __call__(self, stimulus_level: N, threshold: N, width: N) -> N:
+        """ Calculate the sigmoid value at specified stimulus levels.
+
+        Args:
+            perc_correct: Percentage correct at the threshold to calculate.
+            threshold: Parameter value for threshold at PC
+            width: Parameter value for width of the sigmoid
+            gamma: Parameter value for the lower offset of the sigmoid
+            lambd: Parameter value for the upper offset of the sigmoid
+        Returns:
+            Percentage correct at the stimulus values.
+        """
         if self.logspace:
             stimulus_level = np.log(stimulus_level)
         value = self._value(stimulus_level, threshold, width)
@@ -52,11 +75,33 @@ class Sigmoid:
         else:
             return value
 
-    def inverse(self, perc_correct: np.ndarray, threshold: float, width: float,
-                gamma: Optional[float] = None, lambd: Optional[float] = None) -> np.ndarray:
+    def slope(self, stimulus_level: N, threshold: N, width: N, gamma: N = 0, lambd: N = 0) -> N:
+        """ Calculate the slope at specified stimulus levels.
+
+        Args:
+            perc_correct: Percentage correct at the threshold to calculate.
+            threshold: Parameter value for threshold at PC
+            width: Parameter value for width of the sigmoid
+            gamma: Parameter value for the lower offset of the sigmoid
+            lambd: Parameter value for the upper offset of the sigmoid
+        Returns:
+            Slope at the stimulus values.
+        """
+        if self.logspace:
+            stimulus_level = np.log(stimulus_level)
+
+        slope = (1 - gamma - lambd) * self._slope(stimulus_level, threshold, width)
+
+        if self.negative:
+            return -slope
+        else:
+            return slope
+
+    def inverse(self, perc_correct: N, threshold: N, width: N,
+                gamma: Optional[N] = None, lambd: Optional[N] = None) -> np.ndarray:
         """ Finds the stimulus value for given parameters at different percent correct.
 
-        See Sigmoid class description for a discussion of the parameters.
+        See :class:psignifit.sigmoids.Sigmoid for a discussion of the parameters.
 
         Args:
             perc_correct: Percentage correct at the threshold to calculate.
@@ -89,8 +134,12 @@ class Sigmoid:
     def _inverse(self, perc_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray, PC: float) -> np.ndarray:
         raise NotImplementedError("This should be overwritten by an implementation.")
 
+    def _inverse(self, perc_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
+        raise NotImplementedError("This should be overwritten by an implementation.")
+
 
 class Gaussian(Sigmoid):
+    """ Sigmoid based on the Gaussian distribution's CDF. """
     def _value(self, stimulus_level, threshold, width):
         C = width / (norminv(1 - self.alpha) - norminv(self.alpha))
         return normcdf(stimulus_level, (threshold - norminvg(self.PC, 0, C)), C)
