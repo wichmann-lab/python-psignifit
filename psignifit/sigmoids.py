@@ -38,7 +38,13 @@ class Sigmoid:
     """
 
     def __init__(self, PC=0.5, alpha=0.05, negative=False, logspace=False):
-        self.PC = PC
+        """
+        Args:
+             PC: Percentage correct (sigmoid function value) at threshold
+             alpha: Scaling parameter
+             negative: Flip sigmoid such percentage correct is decreasing.
+             logspace: Expect log-scaled stimulus correct
+        """
         self.alpha = alpha
         self.negative = negative
         self.logspace = logspace
@@ -154,6 +160,7 @@ class Gaussian(Sigmoid):
 
 
 class Logistic(Sigmoid):
+    """ Sigmoid based on the Logistic distribution's CDF. """
     def _value(self, stimulus_level, threshold, width):
         return 1 / (1 + np.exp(-2 * np.log(1 / self.alpha - 1) / width * (stimulus_level - threshold)
                                + np.log(1 / self.PC - 1)))
@@ -168,6 +175,7 @@ class Logistic(Sigmoid):
 
 
 class Gumbel(Sigmoid):
+    """ Sigmoid based on the Gumbel distribution's CDF. """
     def _value(self, stimulus_level, threshold, width):
         C = np.log(-np.log(self.alpha)) - np.log(-np.log(1 - self.alpha))
         return 1 - np.exp(-np.exp(C / width * (stimulus_level - threshold) + np.log(-np.log(1 - self.PC))))
@@ -183,6 +191,7 @@ class Gumbel(Sigmoid):
 
 
 class ReverseGumbel(Sigmoid):
+    """ Sigmoid based on the reversed Gumbel distribution's CDF. """
     def _value(self, stimulus_level, threshold, width):
         C = np.log(-np.log(1 - self.alpha)) - np.log(-np.log(self.alpha))
         return np.exp(-np.exp(C / width * (stimulus_level - threshold) + np.log(-np.log(self.PC))))
@@ -198,6 +207,7 @@ class ReverseGumbel(Sigmoid):
 
 
 class Student(Sigmoid):
+    """ Sigmoid based on the Student-t distribution's CDF. """
     def _value(self, stimulus_level, threshold, width):
         C = (t1icdf(1 - self.alpha) - t1icdf(self.alpha))
         return t1cdf(C * (stimulus_level - threshold) / width + t1icdf(self.PC))
@@ -225,6 +235,7 @@ _CLASS_BY_NAME = {
     'logn': Gaussian,
 }
 
+
 _LOGSPACE_NAMES = [
     'weibull',
     'logn'
@@ -234,6 +245,20 @@ ALL_SIGMOID_NAMES = set(_CLASS_BY_NAME.keys())
 ALL_SIGMOID_NAMES |= { 'neg_' + name for name in ALL_SIGMOID_NAMES }
 
 def sigmoid_by_name(name, PC=None, alpha=None):
+    """ Find and initialize a sigmoid from the name.
+
+    The list of supported name can be found in the global
+    variable :const:`psignifit.sigmoids.ALL_SIGMOID_NAMES`.
+
+    Note, that some supported names are synonymes, such
+    equal sigmoids might be returned for different names.
+
+    Names starting with `neg_` indicate, that the
+    sigmoid is decreasing instead of increasing.
+
+    See :meth:`psignifit.sigmoids.Sigmoid.__init__` for
+     a description of the arguments.
+    """
     kwargs = dict()
     name = name.lower().strip()
     if PC is not None:
