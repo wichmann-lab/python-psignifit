@@ -48,10 +48,67 @@ confidence levels. (any shape of confP will be interpreted as a vector)
 # return( list( indices = which( probMassVec >= HDIheight ) ,
 # mass = HDImass , height = HDIheight ) )
 # }
+from typing import Sequence
 
 import numpy as np
 
 from .marginalize import marginalize
+
+
+def confidence(probabilities: np.ndarray, p_values: Sequence[float], mode: str):
+    CI_METHODS = { 'project': grid_hdi, 'percentiles': confidence_percentiles }
+    if mode in CI_METHODS:
+        calc_ci = CI_METHODS[mode]
+    elif mode == 'stripes':
+        raise ValueError('Confidence mode "stripes" is not supported anymore. "' 
+                         f'"Use one of {list(CI_METHODS.keys())}.')
+    else:
+        raise ValueError(f'Expects mode as one of {list(CI_METHODS.keys())}, got {mode}')
+
+    assert np.isclose(probabilities.sum(), 1)
+    intervals = np.empty((probabilities.ndim, 2, len(p_values)))
+    for p_ix, p_value in enumerate(p_values):
+        intervals[:, :, p_ix] = calc_ci(probabilities, p_value)
+    # TODO intervals are indices -> to parameter values
+    return intervals
+
+
+def grid_hdi(probability_mass: np.ndarray, credible_mass: float) -> np.ndarray:
+    """ Highest density intervals (hdi) on a grid.
+
+    Calculates the grid region, in which the probability mass
+    is at least the credible mass (highest density region, hdr).
+    This region is projected to the individual dimensions.
+    The intervals range from the first to the last grid entry
+    in the projected hdr.
+
+    See `stats.stackexchange` for an explanation of the method.
+
+    Args:
+        probability_mass: Probability mass at each grid point
+        credible_mass: Minimal mass in highest density region
+    Returns:
+        Highest density interval per dimension, shape (n_dims, 2)
+
+    .. _stats.stackexchange: https://stats.stackexchange.com/questions/148439/what-is-a-highest-density-region-hdr
+    """
+    decreasing_mass = np.sort(np.ravel(probability_mass))[::-1]
+    atleast_height_ix = np.argwhere(np.cumsum(decreasing_mass) >= credible_mass)
+    if len(atleast_height_ix) == 0:
+        raise ValueError(f"Expects credible mass <= sum(mass), got {credible_mass} > {np.sum(probability_mass)}")
+    hd_height_ix = np.min(atleast_height_ix)
+    hd_region = probability_mass >= decreasing_mass[hd_height_ix]
+
+    dims = np.arange(hd_region.ndim)
+    confidence_interval = np.empty((hd_region.ndim, 2))
+    for d in dims:
+        projected_region = hd_region.any(axis=tuple(dims[dims != d]))
+        confidence_interval[d, :] = np.flatnonzero(projected_region)[[0, -1]]
+    return confidence_interval
+
+
+def confidence_percentiles():
+    pass
 
 
 def getConfRegion(result):
