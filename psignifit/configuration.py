@@ -37,7 +37,7 @@ class Configuration:
     for `foobar`.
     """
     beta_prior: int = 10
-    CI_method: str = 'percentiles'
+    CI_method: str = 'project'
     confP: Tuple[float, float, float] = (.95, .9, .68)
     dynamic_grid: bool = False
     estimate_type: str = 'MAP'
