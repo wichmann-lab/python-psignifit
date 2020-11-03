@@ -51,12 +51,13 @@ confidence levels. (any shape of confP will be interpreted as a vector)
 from typing import Sequence
 
 import numpy as np
+from scipy import stats
 
 from .marginalize import marginalize
 
 
 def confidence(probabilities: np.ndarray, p_values: Sequence[float], mode: str):
-    CI_METHODS = { 'project': grid_hdi, 'percentiles': confidence_percentiles }
+    CI_METHODS = { 'project': grid_hdi, 'percentiles': percentile_intervals }
     if mode in CI_METHODS:
         calc_ci = CI_METHODS[mode]
     elif mode == 'stripes':
@@ -73,7 +74,7 @@ def confidence(probabilities: np.ndarray, p_values: Sequence[float], mode: str):
     return intervals
 
 
-def grid_hdi(probability_mass: np.ndarray, credible_mass: float) -> np.ndarray:
+def grid_hdi(probability_mass: np.ndarray, grid_values: np.ndarray, credible_mass: float) -> np.ndarray:
     """ Highest density intervals (hdi) on a grid.
 
     Calculates the grid region, in which the probability mass
@@ -85,10 +86,11 @@ def grid_hdi(probability_mass: np.ndarray, credible_mass: float) -> np.ndarray:
     See `stats.stackexchange` for an explanation of the method.
 
     Args:
-        probability_mass: Probability mass at each grid point
+        probability_mass: Probability mass at each grid point, shape (n_points, n_points, ...)
+        grid_values: Parameter values along grid axis, shape (n_dims, n_points)
         credible_mass: Minimal mass in highest density region
     Returns:
-        Highest density interval per dimension, shape (n_dims, 2)
+        Grid value at interval per dimension, shape (n_dims, 2)
 
     .. _stats.stackexchange: https://stats.stackexchange.com/questions/148439/what-is-a-highest-density-region-hdr
     """
@@ -100,15 +102,35 @@ def grid_hdi(probability_mass: np.ndarray, credible_mass: float) -> np.ndarray:
     hd_region = probability_mass >= decreasing_mass[hd_height_ix]
 
     dims = np.arange(hd_region.ndim)
-    confidence_interval = np.empty((hd_region.ndim, 2))
+    intervals = np.empty((hd_region.ndim, 2))
     for d in dims:
         projected_region = hd_region.any(axis=tuple(dims[dims != d]))
-        confidence_interval[d, :] = np.flatnonzero(projected_region)[[0, -1]]
-    return confidence_interval
+        interval_ix = np.flatnonzero(projected_region)[[0, -1]]
+        intervals[d, :] = grid_values[d, interval_ix]
+    return intervals
 
 
-def confidence_percentiles():
-    pass
+def percentile_intervals(probability_mass: np.ndarray, grid_values: np.ndarray, p_value: float):
+    """ Percentile intervals on a grid.
+
+    Find alpha/2 and 1-alpha/2 percentiles on marginal probability mass (alpha = 1 - p_value).
+    
+    Args:
+        probability_mass: Probability mass at each grid point, shape (n_points, n_points, ...)
+        grid_values: Parameter values along grid axis, shape (n_dims, n_points)
+        credible_mass: Minimal mass in highest density region
+    Returns:
+        Grid value at interval per dimension, shape (n_dims, 2)
+    """
+
+    mass_margins = stats.contingency.margins(probability_mass)
+    intervals = np.empty((len(mass_margins), 2))
+    for d, mass in enumerate(mass_margins):
+        alpha = 1 - p_value
+        cum_mass = np.cumsum(mass)
+        intervals[d, 0] = np.interp(alpha / 2, cum_mass, grid_values[d])
+        intervals[d, 1] = np.interp(1 - alpha / 2, cum_mass, grid_values[d])
+    return intervals
 
 
 def getConfRegion(result):
