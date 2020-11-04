@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Any, Dict, TextIO, Union
+from typing import Any, Dict, Tuple, List, TextIO, Union
 import json
 from pathlib import Path
 
@@ -19,6 +19,7 @@ class NumpyEncoder(json.JSONEncoder):
 class Result:
     sigmoid_parameters: Dict[str, float]
     configuration: Configuration
+    confidence_intervals: Dict[str, List[Tuple[float, float]]]
     # If future attributes should contain numpy arrays,
     # run np.asarray in __post_init__.
     # Otherwise, load_json may result in nested lists instead.

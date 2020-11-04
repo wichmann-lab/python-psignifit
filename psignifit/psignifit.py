@@ -86,10 +86,14 @@ def psignifit(data, conf=None, **kwargs):
     for parameter, prior in priors.items():
         priors[parameter] = normalize(prior, bounds[parameter])
 
-    fit_dict = _fit_parameters(data, bounds, priors, sigmoid, conf.steps_moving_bounds, conf.max_bound_value, conf.grid_steps)
+    fit_dict, posteriors, grid = _fit_parameters(data, bounds, priors, sigmoid, conf.steps_moving_bounds,
+                                                 conf.max_bound_value, conf.grid_steps)
 
+    grid_values = [grid_value for _, grid_value in sorted(grid.items())]
+    intervals = confidence_intervals(posteriors, grid_values, conf.confP, conf.CI_method)
+    intervals_dict = {param: interval_per_p.tolist()
+                      for param, interval_per_p in zip(sorted(grid.keys()), intervals)}
     # take care of confidence intervals/condifence region
-
     # XXX FIXME: take care of post-ptocessing later
     # ''' after processing '''
     # # check that the marginals go to nearly 0 at the bounds of the grid
@@ -129,7 +133,8 @@ def psignifit(data, conf=None, **kwargs):
     # plot.plotPsych(result)
 
     return Result(sigmoid_parameters=fit_dict,
-                  configuration=conf)
+                  configuration=conf,
+                  confidence_intervals=intervals_dict)
 
 
 def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
@@ -163,7 +168,9 @@ def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
         elif len(parm_values) <= 1:
             fixed_param[parm_name] = parm_values[0]
     fit_dict = max_posterior(data, param_init=grid_max, param_fixed=fixed_param, sigmoid=sigmoid, priors=priors)
-    return fit_dict
+
+
+    return fit_dict, posteriors, grid
 
 
 def _check_data(data: np.ndarray, verbose: bool, logspace: bool, has_user_stimulus_range: bool) -> np.ndarray:
