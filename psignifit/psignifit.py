@@ -140,11 +140,8 @@ def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
     # do first sparse grid posterior_grid evaluation
     grid = get_grid(bounds, steps_moving_bounds)
     posteriors_sparse, grid_max = posterior_grid(data, sigmoid=sigmoid, priors=priors, grid=grid)
-    # normalize the posterior_grid
-    posterior_volumes = posteriors_sparse * integral_weights([grid_value for _, grid_value in sorted(grid.items())])
-    posterior_integral = posterior_volumes.sum()
     # indices on the grid of the volumes that contribute more than `tol` to the overall integral
-    mask = np.nonzero(posterior_volumes / posterior_integral >= max_bound_value)
+    mask = np.nonzero(posteriors_sparse >= max_bound_value)
     for idx, parm in enumerate(sorted(bounds.keys())):
         pgrid = grid[parm]
         # get the indeces for this parameter's axis and sort it
