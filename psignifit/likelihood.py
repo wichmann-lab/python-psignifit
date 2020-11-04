@@ -5,7 +5,7 @@ import numpy as np
 import scipy.special as sp
 from scipy import optimize
 
-from .utils import fp_error_handler, PsignifitException
+from .utils import fp_error_handler, PsignifitException, integral_weights
 from .typing import Prior, ParameterGrid
 from .sigmoids import Sigmoid
 
@@ -41,7 +41,12 @@ def posterior_grid(data, sigmoid: Sigmoid, priors: Dict[str, Prior],
             grid_max[name] = None
         else:
             grid_max[name] = grid_values[index]
-    return p, grid_max
+
+    # normalize the posterior_grid
+    posterior_volumes = p * integral_weights([grid_value for _, grid_value in sorted(grid.items())])
+    posterior_integral = posterior_volumes.sum()
+    posterior_mass = posterior_volumes / posterior_integral
+    return posterior_mass, grid_max
 
 
 @fp_error_handler(divide='ignore')
