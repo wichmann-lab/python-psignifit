@@ -56,7 +56,29 @@ from scipy import stats
 from .marginalize import marginalize
 
 
-def confidence(probabilities: np.ndarray, p_values: Sequence[float], mode: str):
+def confidence_intervals(probability_mass: np.ndarray, grid_values: np.ndarray,
+                         p_values: Sequence[float], mode: str) -> np.ndarray:
+    """ Confidence intervals on probability grid.
+
+    Supports two methods:
+
+        - 'project', projects the confidence region down each axis.
+          Implemented using :func:`grid_hdi`.
+        - 'percentiles', finds alpha/2 and 1-alpha/2 percentiles (alpha = 1-p_value).
+          Implemented using :func:`percentile_intervals`.
+
+    Args:
+        probability_mass: Probability mass at each grid point, shape (n_points, n_points, ...)
+        grid_values: Parameter values along grid axis in the same order as probability_mass dimensions,
+                     shape (n_dims, n_points)
+        p_values: Probabilities of confidence in the intervals.
+        mode: Either 'project' or 'percentiles'.
+    Returns:
+        Start and end grid-values for the confidence interval
+        per dimension and p_value, shape (n_dims, n_p_values, 2)
+    Raises:
+        ValueError for unsupported mode or sum(probability_mass) != 1.
+     """
     CI_METHODS = { 'project': grid_hdi, 'percentiles': percentile_intervals }
     if mode in CI_METHODS:
         calc_ci = CI_METHODS[mode]
@@ -66,11 +88,12 @@ def confidence(probabilities: np.ndarray, p_values: Sequence[float], mode: str):
     else:
         raise ValueError(f'Expects mode as one of {list(CI_METHODS.keys())}, got {mode}')
 
-    assert np.isclose(probabilities.sum(), 1)
-    intervals = np.empty((probabilities.ndim, 2, len(p_values)))
+    if not np.isclose(probability_mass.sum(), 1):
+        raise ValueError(f'Expects sum(probability_mass) to be 1., got {probability_mass.sum():.4f}')
+    intervals = np.empty((probability_mass.ndim, len(p_values), 2))
     for p_ix, p_value in enumerate(p_values):
-        intervals[:, :, p_ix] = calc_ci(probabilities, p_value)
-    # TODO intervals are indices -> to parameter values
+        intervals[:, p_ix, :] = calc_ci(probability_mass, grid_values, p_value)
+
     return intervals
 
 
@@ -106,7 +129,7 @@ def grid_hdi(probability_mass: np.ndarray, grid_values: np.ndarray, credible_mas
     for d in dims:
         projected_region = hd_region.any(axis=tuple(dims[dims != d]))
         interval_ix = np.flatnonzero(projected_region)[[0, -1]]
-        intervals[d, :] = grid_values[d, interval_ix]
+        intervals[d, :] = grid_values[d][interval_ix]
     return intervals
 
 
@@ -122,14 +145,11 @@ def percentile_intervals(probability_mass: np.ndarray, grid_values: np.ndarray, 
     Returns:
         Grid value at interval per dimension, shape (n_dims, 2)
     """
-
     mass_margins = stats.contingency.margins(probability_mass)
     intervals = np.empty((len(mass_margins), 2))
+    alpha = 1 - p_value
     for d, mass in enumerate(mass_margins):
-        alpha = 1 - p_value
-        cum_mass = np.cumsum(mass)
-        intervals[d, 0] = np.interp(alpha / 2, cum_mass, grid_values[d])
-        intervals[d, 1] = np.interp(1 - alpha / 2, cum_mass, grid_values[d])
+        intervals[d, :] = np.interp([alpha / 2, 1 - alpha / 2], np.cumsum(mass), grid_values[d])
     return intervals
 
 
