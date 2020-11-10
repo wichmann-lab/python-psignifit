@@ -106,7 +106,8 @@ class Logistic(Sigmoid):
                                + np.log(1 / self.PC - 1)))
 
     def _inverse(self, perc_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray, PC: float) -> np.ndarray:
-        return threshold - width * ( np.log(1 / perc_correct - 1) - np.log(1 / PC - 1)) / 2 / np.log(1 / self.alpha - 1)
+        return threshold - width * (np.log(1 / perc_correct - 1) - np.log(1 / PC - 1)) / 2 / np.log(1 / self.alpha - 1)
+
 
 class Gumbel(Sigmoid):
     def _value(self, stimulus_level, threshold, width):
@@ -117,6 +118,7 @@ class Gumbel(Sigmoid):
         C = np.log(-np.log(self.alpha)) - np.log(-np.log(1 - self.alpha))
         return threshold + (np.log(-np.log(1 - perc_correct)) - np.log(-np.log(1 - PC))) * width / C
 
+
 class ReverseGumbel(Sigmoid):
     def _value(self, stimulus_level, threshold, width):
         C = np.log(-np.log(1 - self.alpha)) - np.log(-np.log(self.alpha))
@@ -126,6 +128,7 @@ class ReverseGumbel(Sigmoid):
         C = np.log(-np.log(1 - self.alpha)) - np.log(-np.log(self.alpha))
         return threshold + (np.log(-np.log(perc_correct)) - np.log(-np.log(PC))) * width / C
 
+
 class Student(Sigmoid):
     def _value(self, stimulus_level, threshold, width):
         C = (t1icdf(1 - self.alpha) - t1icdf(self.alpha))
@@ -134,6 +137,7 @@ class Student(Sigmoid):
     def _inverse(self, perc_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray, PC: float) -> np.ndarray:
         C = (t1icdf(1 - self.alpha) - t1icdf(self.alpha))
         return (t1icdf(perc_correct) - t1icdf(PC)) * width / C + threshold
+
 
 _CLASS_BY_NAME = {
     'norm': Gaussian,
@@ -154,7 +158,8 @@ _LOGSPACE_NAMES = [
 ]
 
 ALL_SIGMOID_NAMES = set(_CLASS_BY_NAME.keys())
-ALL_SIGMOID_NAMES |= { 'neg_' + name for name in ALL_SIGMOID_NAMES }
+ALL_SIGMOID_NAMES |= {'neg_' + name for name in ALL_SIGMOID_NAMES}
+
 
 def sigmoid_by_name(name, PC=None, alpha=None):
     kwargs = dict()
@@ -170,4 +175,3 @@ def sigmoid_by_name(name, PC=None, alpha=None):
         kwargs['logspace'] = True
 
     return _CLASS_BY_NAME[name](**kwargs)
-

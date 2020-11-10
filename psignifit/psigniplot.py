@@ -3,7 +3,6 @@
 Created on Mon Mar 14 17:34:08 2016
 
 
-
 @author: Ole
 """
 
@@ -16,9 +15,10 @@ from scipy.signal import convolve as _convn
 
 from . import utils as _utils
 from .marginalize import marginalize
+from .typing import ExperimentType
 
 
-def plotPsych(result,
+def plotPsych(result,  # noqa: C901, this function is too complex
               dataColor=[0, 105. / 255, 170. / 255],
               plotData=True,
               lineColor=[0, 0, 0],
@@ -37,24 +37,24 @@ def plotPsych(result,
               dataSize=0,
               axisHandle=None,
               showImediate=True):
-    """
-    This function produces a plot of the fitted psychometric function with 
-    the data.
+    """ Plot of the fitted psychometric function with the data.
     """
 
     fit = result['Fit']
     data = result['data']
     options = result['options']
 
-    if axisHandle == None: axisHandle = plt.gca()
-    try:
-        plt.sca(axisHandle)
-    except TypeError:
-        raise ValueError('Invalid axes handle provided to plot in.')
+    if axisHandle is None:
+        axisHandle = plt.gca()
 
-    if np.isnan(fit[3]): fit[3] = fit[2]
-    if data.size == 0: return
-    if dataSize == 0: dataSize = 10000. / np.sum(data[:, 2])
+    plt.sca(axisHandle)
+
+    if np.isnan(fit[3]):
+        fit[3] = fit[2]
+    if data.size == 0:
+        return
+    if dataSize == 0:
+        dataSize = 10000. / np.sum(data[:, 2])
 
     if ExperimentType.N_AFC == options.experiment_type:
         ymin = 1. / options.experiment_choices
@@ -146,7 +146,8 @@ def plotPsych(result,
     plt.tick_params(labelsize=fontSize)
     plt.xlabel(xLabel, fontname=fontName, fontsize=labelSize)
     plt.ylabel(yLabel, fontname=fontName, fontsize=labelSize)
-    if aspectRatio: axisHandle.set_aspect(2 / (1 + np.sqrt(5)))
+    if aspectRatio:
+        axisHandle.set_aspect(2 / (1 + np.sqrt(5)))
 
     plt.ylim([ymin, 1])
     # tried to mimic box('off') in matlab, as box('off') in python works differently
@@ -167,17 +168,17 @@ def plotsModelfit(result, showImediate=True):
     Plots some standard plots, meant to help you judge whether there are
     systematic deviations from the model. We dropped the statistical tests
     here though.
-    
-    The left plot shows the psychometric function with the data. 
-    
-    The central plot shows the Deviance residuals against the stimulus level. 
+
+    The left plot shows the psychometric function with the data.
+
+    The central plot shows the Deviance residuals against the stimulus level.
     Systematic deviations from 0 here would indicate that the measured data
     shows a different shape than the fitted one.
-    
+
     The right plot shows the Deviance residuals against "time", e.g. against
     the order of the passed blocks. A trend in this plot would indicate
-    learning/ changes in performance over time. 
-    
+    learning/ changes in performance over time.
+
     These are the same plots as presented in psignifit 2 for this purpose.
     """
 
@@ -284,30 +285,25 @@ def plotMarginal(result,
     dim          is the parameter to plot:
                    1=threshold, 2=width, 3=lambda, 4=gamma, 5=sigma
     """
-    if isinstance(dim, str): dim = _utils.strToDim(dim)
+    if isinstance(dim, str):
+        dim = _utils.strToDim(dim)
 
     if len(result['marginals'][dim]) <= 1:
         print(
             'Error: The parameter you wanted to plot was fixed in the analysis!'
         )
-        # return
-    if axisHandle == None: axisHandle = plt.gca()
+        return
+    if axisHandle is None:
+        axisHandle = plt.gca()
     try:
         plt.sca(axisHandle)
         plt.rc('text', usetex=True)
     except TypeError:
         raise ValueError('Invalid axes handle provided to plot in.')
+
+    label_defaults = ('Threshold', 'Width', r'$\lambda$', r'$\gamma$', r'$\eta$')
     if not xLabel:
-        if dim == 0:
-            xLabel = 'Threshold'
-        elif dim == 1:
-            xLabel = 'Width'
-        elif dim == 2:
-            xLabel = r'$\lambda$'
-        elif dim == 3:
-            xLabel = r'$\gamma$'
-        elif dim == 4:
-            xLabel = r'$\eta$'
+        xLabel = label_defaults[dim]
 
     x = result['marginalsX'][dim]
     marginal = result['marginals'][dim]
@@ -368,16 +364,15 @@ def plotMarginal(result,
     return axisHandle
 
 
-def getColorMap():
+def uni_tuebingen_cm():
     """
-       This function returns the standard University of Tuebingen Colormap. 
+       Colormap using the color scheme of the University of Tuebingen.
     """
     midBlue = np.array([165, 30, 55]) / 255
     lightBlue = np.array([210, 150, 0]) / 255
     steps = 200
 
-    MAP = _mcolors.LinearSegmentedColormap.from_list('Tuebingen', \
-                                                     [midBlue, lightBlue, [1, 1, 1]], N=steps, gamma=1.0)
+    MAP = _mcolors.LinearSegmentedColormap.from_list('Tuebingen', [midBlue, lightBlue, [1, 1, 1]], N=steps, gamma=1.0)
     _cm.register_cmap(name='Tuebingen', cmap=MAP)
     return MAP
 
@@ -387,9 +382,7 @@ def plotPrior(result,
               lineColor=np.array([0, 105, 170]) / 255,
               markerSize=30,
               showImediate=True):
-    """
-    This function creates the plot illustrating the priors on the different 
-    parameters
+    """ Plot the priors on the different parameters
     """
 
     data = result['data']
@@ -415,26 +408,21 @@ def plotPrior(result,
 
     # We use the same prior as we previously used... e.g. we use the factor by
     # which they differ for the cumulative normal function
-    Cfactor = (_utils.norminv(.95) - _utils.norminv(.05)) / \
-              (_utils.norminv(1 - result['options']['widthalpha']) - \
-               _utils.norminv(result['options']['widthalpha']))
+    Cfactor = ((_utils.norminv(.95) - _utils.norminv(.05)) /
+               (_utils.norminv(1 - result['options']['widthalpha']) - _utils.norminv(result['options']['widthalpha'])))
     widthmax = r
 
     steps = 10000
     theta = np.empty(5)
+    ranges = [
+        (stimRange[0] - .5 * r, stimRange[1] + .5 * r),
+        (min(result['X1D'][1]), max(result['X1D'][1], )),
+        (0, .5),
+        (0, .5),
+        (0, 1),
+    ]
     for itheta in range(0, 5):
-        if itheta == 0:
-            x = np.linspace(stimRange[0] - .5 * r, stimRange[1] + .5 * r, steps)
-        elif itheta == 1:
-            x = np.linspace(min(result['X1D'][itheta]), max(result['X1D'][1],),
-                            steps)
-        elif itheta == 2:
-            x = np.linspace(0, .5, steps)
-        elif itheta == 3:
-            x = np.linspace(0, .5, steps)
-        elif itheta == 4:
-            x = np.linspace(0, 1, steps)
-
+        x = np.linspace(ranges[itheta][0], ranges[itheta][1], steps)
         y = result['options']['priors'][itheta](x)
         theta[itheta] = np.sum(x * y) / np.sum(y)
 
@@ -466,24 +454,15 @@ def plotPrior(result,
     plt.xlim(xLimit)
 
     x = np.linspace(xLimit[0], xLimit[1], steps)
-    for idot in range(0, 5):
-        if idot == 0:
-            xcurrent = theta[0]
-            color = 'k'
-        elif idot == 1:
-            xcurrent = min(xthresh)
-            color = [1, 200 / 255, 0]
-        elif idot == 2:
-            tix = cthresh[cthresh >= .25].size
-            xcurrent = xthresh[-tix]
-            color = 'r'
-        elif idot == 3:
-            tix = cthresh[cthresh >= .75].size
-            xcurrent = xthresh[-tix]
-            color = 'b'
-        elif idot == 4:
-            xcurrent = max(xthresh)
-            color = 'g'
+    thetas = [theta[0],
+              min(xthresh),
+              xthresh[-cthresh[cthresh >= .25].size],
+              xthresh[-cthresh[cthresh >= .75].size],
+              max(xthresh)]
+    colors = [
+       'k', [1, 200 / 255, 0], 'r', 'b', 'g',
+    ]
+    for xcurrent, color in zip(thetas, colors):
         y = 100 * (theta[3] + ((1 - theta[2]) - theta[3]) *
                    result['options']['sigmoidHandle'](x, xcurrent, theta[1]))
 
@@ -514,25 +493,12 @@ def plotPrior(result,
     plt.xlabel('Stimulus Level', fontsize=18)
 
     x = np.linspace(xLimit[0], xLimit[1], steps)
-    for idot in range(0, 5):
-        if idot == 0:
-            xcurrent = theta[1]
-            color = 'k'
-        elif idot == 1:
-            xcurrent = min(xwidth)
-            color = [1, 200 / 255, 0]
-        elif idot == 2:
-            wix = cwidth[cwidth >= .25].size
-            xcurrent = xwidth[-wix]
-            color = 'r'
-        elif idot == 3:
-            wix = cwidth[cwidth >= .75].size
-            xcurrent = xwidth[-wix]
-            color = 'b'
-        elif idot == 4:
-            xcurrent = max(xwidth)
-            color = 'g'
-
+    widths = [theta[1],
+              min(xwidth),
+              xwidth[-cwidth[cwidth >= .25].size],
+              xwidth[-cwidth[cwidth >= .75].size],
+              max(xwidth)]
+    for xcurrent, color in zip(widths, colors):
         y = 100 * (theta[3] + (1 - theta[2] - theta[3]) *
                    result['options']['sigmoidHandle'](x, theta[0], xcurrent))
         plt.subplot(2, 3, 5)
@@ -553,7 +519,7 @@ def plotPrior(result,
     plt.plot(xlapse, ylapse, lw=lineWidth, c=lineColor)
     # plt.hold(True)
     plt.xlim([0, .5])
-    plt.title('\lambda', fontsize=18)
+    plt.title('\\lambda', fontsize=18)
 
     plt.subplot(2, 3, 6)
     plt.plot(data[:, 0], np.zeros(data[:, 0].size), 'k.', ms=markerSize * .75)
@@ -561,24 +527,12 @@ def plotPrior(result,
     plt.xlim(xLimit)
 
     x = np.linspace(xLimit[0], xLimit[1], steps)
-    for idot in range(0, 5):
-        if idot == 0:
-            xcurrent = theta[2]
-            color = 'k'
-        elif idot == 1:
-            xcurrent = 0
-            color = [1, 200 / 255, 0]
-        elif idot == 2:
-            lix = clapse[clapse >= .25].size
-            xcurrent = xlapse[-lix]
-            color = 'r'
-        elif idot == 3:
-            lix = clapse[clapse >= .75].size
-            xcurrent = xlapse[-lix]
-            color = 'b'
-        elif idot == 4:
-            xcurrent = .5
-            color = 'g'
+    lapses = [theta[2],
+              0,
+              xlapse[-clapse[clapse >= .25].size],
+              xlapse[-clapse[clapse >= .75].size],
+              0.5]
+    for xcurrent, color in zip(lapses, colors):
         y = 100 * (theta[3] + (1 - xcurrent - theta[3]) *
                    result['options']['sigmoidHandle'](x, theta[0], theta[1]))
         plt.subplot(2, 3, 6)
@@ -596,14 +550,13 @@ def plotPrior(result,
 def plot2D(result,
            par1,
            par2,
-           colorMap=getColorMap(),
+           colorMap=uni_tuebingen_cm(),
            labelSize=15,
-           fontSize=10,
            axisHandle=None,
            showImediate=True):
-    """ 
-    This function constructs a 2 dimensional marginal plot of the posterior
-    density. This is the same plot as it is displayed in plotBayes in an
+    """ Constructs a 2 dimensional marginal plot of the posterior density.
+
+    This is the same plot as it is displayed in plotBayes in an
     unmodifyable way.
 
     The result struct is passed as result.
@@ -613,7 +566,7 @@ def plot2D(result,
         2 = lambda
         3 = gamma
         4 = eta
-        
+
     Further plotting options may be passed.
     """
     # convert strings to dimension number
@@ -621,10 +574,10 @@ def plot2D(result,
     par2, label2 = _utils.strToDim(str(par2))
 
     assert (
-        par1 != par2
+            par1 != par2
     ), 'par1 and par2 must be different numbers to code for the parameters to plot'
 
-    if axisHandle == None:
+    if axisHandle is None:
         axisHandle = plt.gca()
 
     try:
@@ -645,7 +598,7 @@ def plot2D(result,
         else:
             plotMarginal(result, par2)
     else:
-        e = [result['X1D'][par2][0], result['X1D'][par2][-1], \
+        e = [result['X1D'][par2][0], result['X1D'][par2][-1],
              result['X1D'][par1][0], result['X1D'][par1][-1]]
         plt.imshow(marg, extent=e)
         plt.ylabel(label1, fontsize=labelSize)

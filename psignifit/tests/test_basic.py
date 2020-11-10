@@ -4,9 +4,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 
-pytestmark = pytest.mark.skip("Skip basic tests until refactoring is complete")
-
 from psignifit import psignifit, psigniplot
+
+
+pytestmark = pytest.mark.skip("Skip basic tests until refactoring is complete")
 
 
 def get_data():
@@ -84,6 +85,5 @@ def test_fixedPars():
     assert np.all(
         res['options']['bounds'][np.isfinite(options['fixedPars']), 0] ==
         options['fixedPars'][np.isfinite(options['fixedPars'])])
-    assert np.all(
-        res['options']['bounds'][np.isfinite(options['fixedPars']), 1] ==
-        options['fixedPars'][np.isfinite(options['fixedPars'])])
+    assert np.all(res['options']['bounds'][np.isfinite(options['fixedPars']), 1] ==
+                  options['fixedPars'][np.isfinite(options['fixedPars'])])

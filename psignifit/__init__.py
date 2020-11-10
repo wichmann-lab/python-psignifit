@@ -7,7 +7,7 @@ import os
 import subprocess
 
 # import here the main function
-from .psignifit import psignifit, getThreshold, getSlope, getSlopePC, biasAna, psignifitFast
+from .psignifit import psignifit
 
 __name__ = 'psignifit'
 __description__ = 'toolbox for Bayesian psychometric function estimation'

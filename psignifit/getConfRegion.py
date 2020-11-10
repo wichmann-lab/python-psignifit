@@ -19,6 +19,8 @@ are a 5x2xN array then containting the confidence intervals at the different
 confidence levels. (any shape of confP will be interpreted as a vector)
 
 """
+# THIS FILE IS LEGACY AND WILL BE REMOVED. NO STYLE CHECKING HERE
+# flake8: noqa
 
 ####TODO: 'project' should be default, is a HDI (highest density interval) method
 ####      'percentiles' should be an option

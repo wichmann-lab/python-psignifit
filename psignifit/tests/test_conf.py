@@ -14,7 +14,8 @@ def test_setting_valid_option():
 
 def test_setting_invalid_option():
     with pytest.raises(TypeError):
-        c = Configuration(foobar=10)
+        Configuration(foobar=10)
+
 
 def test_dict_conversion():
     config = Configuration()
@@ -29,7 +30,7 @@ def test_dict_conversion():
 
 @patch.object(Configuration, 'check_bounds')
 def test_check_option(mocked_check):
-    __ = Configuration(bounds=(10, 100))
+    Configuration(bounds=(10, 100))
     mocked_check.assert_called_with((10, 100))
 
 

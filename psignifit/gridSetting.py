@@ -10,6 +10,8 @@ it evaluates at GridSetEval points from Xbounds(:,1) to Xbounds(:,2)
 
 @author: root
 """
+# THIS FILE IS LEGACY AND WILL BE REMOVED. NO STYLE CHECKING HERE
+# flake8: noqa
 import copy
 
 import numpy as np

@@ -12,8 +12,10 @@ It returns 3 variables:
 This also works for more than one dimension in dimension to obtain
 multidimensional marginals, x then becomes a cell array of the 1D ticks
 of the grid.
-
 """
+# THIS FILE IS LEGACY AND WILL BE REMOVED. NO STYLE CHECKING HERE
+# flake8: noqa
+
 import numpy as np
 
 

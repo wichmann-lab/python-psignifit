@@ -1,0 +1,17 @@
+[flake8]
+max-line-length = 127
+max-complexity = 13
+exclude = .git,__pycache__,doc/,docs/,build/,dist/,archive/,setup.py
+# Ignore some indentation, whitespace, and line break rules:
+#    Continuation line under-indented for hanging indent (E121)
+#    Closing bracket does not match indentation of opening bracket's line (E123)
+#    Continuation line over-indented for hanging indent (E126)
+#    Multiple spaces or tab after comma (E24=E241+E242)
+#    Missing whitespace around arithmetic operator (E226)
+#    Multiple statements on one line (def) (E704)
+#    Line break occurred before a binary operator (W503)
+#    Line break occurred after a binary operator (W504)
+ignore = E121,E123,E126,E226,E24,E704,W503,W504
+per-file-ignores =
+  # Module imported but unused (F401)
+  __init__.py:F401

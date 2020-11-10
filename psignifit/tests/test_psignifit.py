@@ -6,7 +6,8 @@ from .data import DATA
 
 def test_psignifit_runs():
     # this should not error
-    results = psignifit(DATA, sigmoid='norm', experiment_type='2AFC')
+    psignifit(DATA, sigmoid='norm', experiment_type='2AFC')
+
 
 def test_psignifit_fixed_fit():
     parm_heiko = {'threshold': 0.0046448472488663396,
@@ -20,4 +21,3 @@ def test_psignifit_fixed_fit():
 
     for p in parm:
         np.testing.assert_allclose(parm[p], parm_heiko[p], rtol=1e-4, atol=1e-4)
-
