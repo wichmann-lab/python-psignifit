@@ -6,7 +6,8 @@ and to the _LOGSPACE_NAMES, if it expects stimulus on an exponential scale.
 from typing import Optional, TypeVar
 
 import numpy as np
-import scipy
+import scipy as sp
+import scipy.stats
 
 from .utils import normcdf
 from .utils import norminv
@@ -151,7 +152,7 @@ class Gaussian(Sigmoid):
     def _slope(self, stimulus_level: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
         C = norminv(1 - self.alpha) - norminv(self.alpha)
         normalized_stimulus_level = (stimulus_level - threshold) / threshold * C
-        normalized_slope = scipy.stats.norm.pdf(normalized_stimulus_level)
+        normalized_slope = sp.stats.norm.pdf(normalized_stimulus_level)
         return normalized_slope * C / width
 
     def _inverse(self, perc_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
@@ -215,7 +216,7 @@ class Student(Sigmoid):
     def _slope(self, stimulus_level: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
         C = (t1icdf(1 - self.alpha) - t1icdf(self.alpha))
         stimLevel = (stimulus_level - threshold) * C / width + t1icdf(self.PC)
-        return C / width * scipy.stats.t.pdf(stimLevel, df=1)
+        return C / width * sp.stats.t.pdf(stimLevel, df=1)
 
     def _inverse(self, perc_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
         C = (t1icdf(1 - self.alpha) - t1icdf(self.alpha))
