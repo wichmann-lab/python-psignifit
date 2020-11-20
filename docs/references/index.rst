@@ -23,7 +23,6 @@ This is the class and function reference of psignifit.
 .. autosummary::
     :toctree: generated/
 
-    psigniplot.getColorMap
     psigniplot.plot2D
     psigniplot.plotMarginal
     psigniplot.plotPrior
