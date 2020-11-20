@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# THIS FILE IS LEGACY AND WILL BE REMOVED. NO STYLE CHECKING HERE
+# flake8: noqa
 
 import datetime as _dt
 import warnings

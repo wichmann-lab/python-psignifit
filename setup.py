@@ -47,8 +47,9 @@ setup(
         'Programming Language :: Python :: 3',
     ],
     packages=find_packages(),
-    install_requires=['scipy', 'matplotlib', 'pytest'],
-    extras_require={
+    install_requires=['scipy', 'matplotlib'],
+    extras_require = {
+        'tests': ["pytest", "pytest-cov", "flake8"],
         'docs': [
             'sphinx',
             'sphinx-gallery',
