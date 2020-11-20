@@ -122,40 +122,6 @@ def integral_weights(grid):
     return np.prod(mesh_grids, axis=0)
 
 
-def pool_data(data, xtol=0, max_gap=np.inf, max_length=np.inf):
-    """
-    Pool trials together which differ at maximum pool_xtol from the first one
-    it finds, are separated by maximally pool_max_gap trials of other levels and
-    at max pool_max_length trials appart in general.
-    """
-    ndata = data.shape[0]
-    seen = [False] * ndata
-    cum_ntrials = [0] + list(data[:, 2].cumsum())
-
-    pool = []
-    for i in range(ndata):
-        if not seen[i]:
-            current = data[i, 0]
-            block = []
-            gap = 0
-            for j in range(i, ndata):
-                if (cum_ntrials[j + 1] -
-                        cum_ntrials[i]) > max_length or gap > max_gap:
-                    break
-                level, ncorrect, ntrials = data[j, :]
-                if abs(level - current) <= xtol and not seen[j]:
-                    seen[j] = True
-                    gap = 0
-                    block.append((level * ntrials, ncorrect, ntrials))
-                else:
-                    gap += ntrials
-
-            level, ncorrect, ntrials = np.sum(block, axis=0)
-            pool.append((level / ntrials, ncorrect, ntrials))
-
-    return np.array(pool)
-
-
 def strToDim(string):
     """
     Finds the number corresponding to a dim/parameter given as a string.

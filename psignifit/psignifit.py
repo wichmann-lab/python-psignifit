@@ -145,11 +145,11 @@ def _warn_common_data_mistakes(levels, ntrials, has_user_stimulus_range, pool_ma
     if ntrials.max() == 1:
         warnings.warn("All blocks in data have only 1 trial.\n"
                       "To avoid problems during fitting, consider aggregating blocks of same stimulus level using "
-                      "psignifit.pool_trials(data).")
+                      "psignifit.pool_blocks(data).")
     if len(levels) > pool_max_blocks:
         warnings.warn(f"Expects at most {pool_max_blocks} blocks in data, got {len(levels)}.\n"
                       "To save fitting time, consider aggregating blocks of same stimulus level "
-                      "psignifit.pool_trials(data).\n"
+                      "psignifit.pool_blocks(data).\n"
                       "Hide this warning by increasing conf.pool_max_blocks.")
     # warning if many blocks were measured
     if len(levels) >= 25 and not has_user_stimulus_range:
