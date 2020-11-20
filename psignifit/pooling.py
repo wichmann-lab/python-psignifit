@@ -1,5 +1,7 @@
 import numpy as np
 
+from psignifit.utils import check_data
+
 
 def pool_blocks(data: np.ndarray, max_tol=0, max_gap=np.inf, max_length=np.inf):
     """ Pool trials
@@ -18,6 +20,8 @@ def pool_blocks(data: np.ndarray, max_tol=0, max_gap=np.inf, max_length=np.inf):
                      where stimulus level is averaged and correct/trial numbers are summed over
                      the pooled data rows.
     """
+    data = check_data(data)
+
     ndata = data.shape[0]
     seen = [False] * ndata
     cum_ntrials = [0] + list(data[:, 2].cumsum())
