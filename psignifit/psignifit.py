@@ -12,7 +12,7 @@ from .configuration import Configuration
 from .likelihood import posterior_grid, max_posterior
 from .result import Result
 from .typing import ParameterBounds, Prior
-from .utils import (pool_data, integral_weights, PsignifitException, normalize, get_grid)
+from .utils import (pool_data, integral_weights, PsignifitException, normalize, get_grid, check_data)
 
 
 def psignifit(data, conf=None, **kwargs):
@@ -42,8 +42,8 @@ def psignifit(data, conf=None, **kwargs):
             "Can't handle conf together with other keyword arguments!")
 
     sigmoid = sigmoids.sigmoid_by_name(conf.sigmoid, PC=conf.thresh_PC, alpha=conf.width_alpha)
-    data = _check_data(data, verbose=conf.verbose, logspace=sigmoid.logspace,
-                       has_user_stimulus_range=conf.stimulus_range is not None)
+    data = check_data(data, verbose=conf.verbose, logspace=sigmoid.logspace,
+                      has_user_stimulus_range=conf.stimulus_range is not None)
     levels, ntrials = data[:, 0], data[:, 2]
 
     stimulus_range = conf.stimulus_range
@@ -167,55 +167,3 @@ def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
             fixed_param[parm_name] = parm_values[0]
     fit_dict = max_posterior(data, param_init=grid_max, param_fixed=fixed_param, sigmoid=sigmoid, priors=priors)
     return fit_dict
-
-
-def _check_data(data: np.ndarray, verbose: bool, logspace: bool, has_user_stimulus_range: bool) -> np.ndarray:
-    """ Check data format, type and range.
-
-    Args:
-        data: The data matrix with columns levels, number of correct and number of trials
-        verbose: Print warnings
-        logspace: Data should be used logarithmically
-        is_user_stimulus_range: User configured the stimulus range
-    Returns:
-        data as float numpy array
-    """
-    data = np.asarray(data, dtype=float)
-    if len(data.shape) != 2 and data.shape[1] != 3:
-        raise PsignifitException("Expects data to be two dimensional with three columns, got {data.shape = }")
-    levels, ncorrect, ntrials = data[:, 0], data[:, 1], data[:, 2]
-
-    # levels should show some variance
-    if levels.max() == levels.min():
-        raise PsignifitException('Your stimulus levels are all identical.'
-                                 ' They can not be fitted by a sigmoid!')
-    # ncorrect and ntrials should be integers
-    if not np.allclose(ncorrect, ncorrect.astype(int)):
-        raise PsignifitException(
-            'The number correct column contains non integer'
-            ' numbers!')
-    if not np.allclose(ntrials, ntrials.astype(int)):
-        raise PsignifitException('The number of trials column contains non'
-                                 ' integer numbers!')
-    if logspace and levels.min() <= 0:
-        raise PsignifitException(f'Sigmoid {data.sigmoid} expects positive stimulus level data.')
-
-    # warning if many blocks were measured
-    if verbose and len(levels) >= 25 and not has_user_stimulus_range:
-        warnings.warn(f"""The data you supplied contained {len(levels)}>= 25 stimulus levels.
-            Did you sample adaptively?
-            If so please specify a range which contains the whole psychometric function in
-            conf.stimulus_range.
-            An appropriate prior prior will be then chosen. For now we use the standard
-            heuristic, assuming that the psychometric function is covered by the stimulus
-            levels,which is frequently invalid for adaptive procedures!""")
-
-    if verbose and ntrials.max() <= 5 and not has_user_stimulus_range:
-        warnings.warn("""All provided data blocks contain <= 5 trials.
-            Did you sample adaptively?
-            If so please specify a range which contains the whole psychometric function in
-            conf.stimulus_range.
-            An appropriate prior prior will be then chosen. For now we use the standard
-            heuristic, assuming that the psychometric function is covered by the stimulus
-            levels, which is frequently invalid for adaptive procedures!""")
-    return data

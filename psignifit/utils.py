@@ -2,6 +2,7 @@
 """
 Utils class capsulating all custom made probabilistic functions
 """
+import warnings
 from typing import Dict, Optional, Tuple
 
 import numpy as np
@@ -176,3 +177,55 @@ def strToDim(string):
         return 3, r'$\gamma$'
     elif s in ['sigma', 'std', 's', 'eta', 'e', '4']:
         return 4, r'$\eta$'
+
+
+def check_data(data: np.ndarray, verbose: bool, logspace: bool, has_user_stimulus_range: bool) -> np.ndarray:
+    """ Check data format, type and range.
+
+    Args:
+        data: The data matrix with columns levels, number of correct and number of trials
+        verbose: Print warnings
+        logspace: Data should be used logarithmically
+        has_user_stimulus_range: User configured the stimulus range
+    Returns:
+        data as float numpy array
+    """
+    data = np.asarray(data, dtype=float)
+    if len(data.shape) != 2 and data.shape[1] != 3:
+        raise PsignifitException("Expects data to be two dimensional with three columns, got {data.shape = }")
+    levels, ncorrect, ntrials = data[:, 0], data[:, 1], data[:, 2]
+
+    # levels should show some variance
+    if levels.max() == levels.min():
+        raise PsignifitException('Your stimulus levels are all identical.'
+                                 ' They can not be fitted by a sigmoid!')
+    # ncorrect and ntrials should be integers
+    if not np.allclose(ncorrect, ncorrect.astype(int)):
+        raise PsignifitException(
+            'The number correct column contains non integer'
+            ' numbers!')
+    if not np.allclose(ntrials, ntrials.astype(int)):
+        raise PsignifitException('The number of trials column contains non'
+                                 ' integer numbers!')
+    if logspace and levels.min() <= 0:
+        raise PsignifitException(f'Sigmoid {data.sigmoid} expects positive stimulus level data.')
+
+    # warning if many blocks were measured
+    if verbose and len(levels) >= 25 and not has_user_stimulus_range:
+        warnings.warn(f"""The data you supplied contained {len(levels)}>= 25 stimulus levels.
+            Did you sample adaptively?
+            If so please specify a range which contains the whole psychometric function in
+            conf.stimulus_range.
+            An appropriate prior prior will be then chosen. For now we use the standard
+            heuristic, assuming that the psychometric function is covered by the stimulus
+            levels,which is frequently invalid for adaptive procedures!""")
+
+    if verbose and ntrials.max() <= 5 and not has_user_stimulus_range:
+        warnings.warn("""All provided data blocks contain <= 5 trials.
+            Did you sample adaptively?
+            If so please specify a range which contains the whole psychometric function in
+            conf.stimulus_range.
+            An appropriate prior prior will be then chosen. For now we use the standard
+            heuristic, assuming that the psychometric function is covered by the stimulus
+            levels, which is frequently invalid for adaptive procedures!""")
+    return data
