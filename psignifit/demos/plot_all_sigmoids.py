@@ -1,3 +1,10 @@
+"""
+Plot Sigmoids
+=============
+
+In this example, we access all sigmoids that come with psignifit
+and visualize their function values and slopes.
+"""
 import matplotlib.pyplot as plt
 import numpy as np
 
