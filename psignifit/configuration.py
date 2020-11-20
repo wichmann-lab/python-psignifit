@@ -4,8 +4,6 @@ import re
 import dataclasses
 from typing import Any, Dict, Tuple, Optional
 
-import numpy as np
-
 from . import sigmoids
 from .utils import PsignifitException
 from .typing import ExperimentType, Prior
@@ -69,7 +67,6 @@ class Configuration:
 
     def __post_init__(self):
         self.check_attributes()
-
 
     @classmethod
     def from_dict(cls, config_dict: Dict[str, Any]):
