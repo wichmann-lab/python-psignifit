@@ -8,6 +8,7 @@ import subprocess
 
 # import here the main function
 from .psignifit import psignifit
+from . import sigmoids
 
 __name__ = 'psignifit'
 __description__ = 'toolbox for Bayesian psychometric function estimation'
