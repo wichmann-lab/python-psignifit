@@ -1,4 +1,5 @@
 import sys
+from sphinx_gallery.sorting import ExampleTitleSortKey
 
 # Configuration file for the Sphinx documentation builder.
 #
@@ -64,6 +65,7 @@ autodoc_typehints = 'description'
 sphinx_gallery_conf = {
      'examples_dirs': '../psignifit/demos',   # path to your example scripts
      'gallery_dirs': 'generated_examples',  # path to where to save gallery generated output
+     'within_subsection_order': ExampleTitleSortKey
 }
 
 
