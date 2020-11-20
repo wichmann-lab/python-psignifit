@@ -64,7 +64,6 @@ provided feedback: Nicole Eichert, Frank Jäkel, David Janssen, Britta
 Lewke, Lars Rothkegel, Joshua Solomon, Tom Wallis, Uli Wannek, Christian
 Wolf and Bei Xiao
 
-
 Contents
 ~~~~~~~~
 .. toctree::
