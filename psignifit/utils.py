@@ -179,16 +179,16 @@ def strToDim(string):
         return 4, r'$\eta$'
 
 
-def check_data(data: np.ndarray, verbose: bool, logspace: bool, has_user_stimulus_range: bool) -> np.ndarray:
+def check_data(data: np.ndarray, logspace: bool) -> np.ndarray:
     """ Check data format, type and range.
 
     Args:
         data: The data matrix with columns levels, number of correct and number of trials
-        verbose: Print warnings
         logspace: Data should be used logarithmically
-        has_user_stimulus_range: User configured the stimulus range
     Returns:
         data as float numpy array
+    Raises:
+        PsignifitException: if checks fail.
     """
     data = np.asarray(data, dtype=float)
     if len(data.shape) != 2 and data.shape[1] != 3:
@@ -210,22 +210,4 @@ def check_data(data: np.ndarray, verbose: bool, logspace: bool, has_user_stimulu
     if logspace and levels.min() <= 0:
         raise PsignifitException(f'Sigmoid {data.sigmoid} expects positive stimulus level data.')
 
-    # warning if many blocks were measured
-    if verbose and len(levels) >= 25 and not has_user_stimulus_range:
-        warnings.warn(f"""The data you supplied contained {len(levels)}>= 25 stimulus levels.
-            Did you sample adaptively?
-            If so please specify a range which contains the whole psychometric function in
-            conf.stimulus_range.
-            An appropriate prior prior will be then chosen. For now we use the standard
-            heuristic, assuming that the psychometric function is covered by the stimulus
-            levels,which is frequently invalid for adaptive procedures!""")
-
-    if verbose and ntrials.max() <= 5 and not has_user_stimulus_range:
-        warnings.warn("""All provided data blocks contain <= 5 trials.
-            Did you sample adaptively?
-            If so please specify a range which contains the whole psychometric function in
-            conf.stimulus_range.
-            An appropriate prior prior will be then chosen. For now we use the standard
-            heuristic, assuming that the psychometric function is covered by the stimulus
-            levels, which is frequently invalid for adaptive procedures!""")
     return data

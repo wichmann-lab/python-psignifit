@@ -12,7 +12,7 @@ from .configuration import Configuration
 from .likelihood import posterior_grid, max_posterior
 from .result import Result
 from .typing import ParameterBounds, Prior
-from .utils import (pool_data, integral_weights, PsignifitException, normalize, get_grid, check_data)
+from .utils import (integral_weights, PsignifitException, normalize, get_grid, check_data)
 
 
 def psignifit(data, conf=None, **kwargs):
@@ -42,9 +42,11 @@ def psignifit(data, conf=None, **kwargs):
             "Can't handle conf together with other keyword arguments!")
 
     sigmoid = sigmoids.sigmoid_by_name(conf.sigmoid, PC=conf.thresh_PC, alpha=conf.width_alpha)
-    data = check_data(data, verbose=conf.verbose, logspace=sigmoid.logspace,
-                      has_user_stimulus_range=conf.stimulus_range is not None)
+    data = check_data(data, logspace=sigmoid.logspace)
     levels, ntrials = data[:, 0], data[:, 2]
+    if conf.verbose:
+        _warn_common_data_mistakes(levels, ntrials, has_user_stimulus_range=conf.stimulus_range is not None,
+                                   pool_max_blocks=conf.pool_max_blocks)
 
     stimulus_range = conf.stimulus_range
     if stimulus_range is None:
@@ -61,12 +63,6 @@ def psignifit(data, conf=None, **kwargs):
             # For user specified stimulus range, use very conservative estimate of width_min.
             # https: // en.wikipedia.org / wiki / Unit_in_the_last_place
             width_min = 100 * np.spacing(stimulus_range[1])
-
-    if ntrials.max() == 1 or len(levels) > conf.pool_max_blocks:
-        warnings.warn("""Pooling data, to avoid problems with n=1 blocks or to save time fitting
-            because you have more than 25 blocks.
-            You can force acceptance of your blocks by increasing conf.pool_max_blocks""")
-        return pool_data(data, xtol=conf.pool_xtol, max_gap=conf.pool_max_gap, max_length=conf.pool_max_length)
 
     priors = _priors.default_priors(stimulus_range, width_min, conf.width_alpha,
                                     conf.beta_prior, thresh_PC=conf.thresh_PC)
@@ -130,6 +126,48 @@ def psignifit(data, conf=None, **kwargs):
 
     return Result(sigmoid_parameters=fit_dict,
                   configuration=conf)
+
+
+def _warn_common_data_mistakes(levels, ntrials, has_user_stimulus_range, pool_max_blocks) -> None:
+    """ Show warnings for common mistakes.
+
+    Checks for too many blocks and too few trials.
+    The warnings recommend to use pooling or to manually specify stimulus ranges.
+
+    Args:
+        level: Array of stimulus level per block
+        ntrial: Array of trial numbers per block
+        has_user_stimulus_range: User configured the stimulus range
+        pool_max_blocks: Maximum number of blocks until print of pool warning.
+    Returns:
+        None
+    """
+    if ntrials.max() == 1:
+        warnings.warn("All blocks in data have only 1 trial.\n"
+                      "To avoid problems during fitting, consider aggregating blocks of same stimulus level using "
+                      "psignifit.pool_trials(data).")
+    if len(levels) > pool_max_blocks:
+        warnings.warn(f"Expects at most {pool_max_blocks} blocks in data, got {len(levels)}.\n"
+                      "To save fitting time, consider aggregating blocks of same stimulus level "
+                      "psignifit.pool_trials(data).\n"
+                      "Hide this warning by increasing conf.pool_max_blocks.")
+    # warning if many blocks were measured
+    if len(levels) >= 25 and not has_user_stimulus_range:
+        warnings.warn(f"""The data you supplied contained {len(levels)}>= 25 stimulus levels.
+            Did you sample adaptively?
+            If so please specify a range which contains the whole psychometric function in
+            conf.stimulus_range.
+            An appropriate prior prior will be then chosen. For now we use the standard
+            heuristic, assuming that the psychometric function is covered by the stimulus
+            levels,which is frequently invalid for adaptive procedures!""")
+    if ntrials.max() <= 5 and not has_user_stimulus_range:
+        warnings.warn("""All provided data blocks contain <= 5 trials.
+            Did you sample adaptively?
+            If so please specify a range which contains the whole psychometric function in
+            conf.stimulus_range.
+            An appropriate prior prior will be then chosen. For now we use the standard
+            heuristic, assuming that the psychometric function is covered by the stimulus
+            levels, which is frequently invalid for adaptive procedures!""")
 
 
 def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
