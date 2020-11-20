@@ -1,4 +1,4 @@
-.. _options_dictionary:
+.. _options-dictionary:
 
 Options Dictionary
 ==================

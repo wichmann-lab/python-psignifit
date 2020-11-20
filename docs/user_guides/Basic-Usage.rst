@@ -66,7 +66,7 @@ function:
 
    result = ps.psignifit(data,options);
 
-You can find a complete list of the possible options :ref:`here <the-options-struct>`.
+You can find a complete list of the possible options :ref:`here <options-dictionary>`.
 
 *result* is a dictionary which contains all information obtained from
 fitting your data. Perhaps of primary interest are the fit and the
