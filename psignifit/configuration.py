@@ -50,9 +50,6 @@ class Configuration:
     max_bound_value: float = 1e-05
     move_bounds: bool = True
     pool_max_blocks: int = 25
-    pool_max_gap: float = np.inf
-    pool_max_length: float = np.inf
-    pool_xtol: float = 0
     priors: Optional[Dict[str, Prior]] = dataclasses.field(default=None, hash=False)
     sigmoid: str = 'norm'
     stimulus_range: Optional[Tuple[float, float]] = None
@@ -72,6 +69,7 @@ class Configuration:
 
     def __post_init__(self):
         self.check_attributes()
+
 
     @classmethod
     def from_dict(cls, config_dict: Dict[str, Any]):
