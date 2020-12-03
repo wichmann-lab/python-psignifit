@@ -63,8 +63,7 @@ options.experiment_type = '2AFC'  # choose 2-AFC as the paradigm of the experime
 #        options.experiment_choices    = <number of alternatives>
 #  Yes/No experiments: A free guessing and lapse rate is estimated
 #        options.experiment_type = ExperimentType.YES_NO
-#  equal asymptote: As Yes/No, but enforces that guessing and lapsing occure
-#  equally often
+#  equal asymptote: As Yes/No, but enforces that guessing and lapsing occure equally often
 #        options.experiment_type = ExperimentType.EQ_ASYMPTOTE
 #
 #  Out of the box psignifit supports the following sigmoid functions,
@@ -78,6 +77,7 @@ options.experiment_type = '2AFC'  # choose 2-AFC as the paradigm of the experime
 #  'tdist'       a t-distribution with df=1 as a heavytail distribution
 #
 #  for positive stimulus levels which make sence on a log-scale:
+#
 #  'logn'        a cumulative lognormal distribution
 #  'Weibull'     a Weibull function
 #

@@ -50,6 +50,12 @@ setup(
     install_requires=['scipy', 'matplotlib'],
     extras_require = {
         'tests': ["pytest", "pytest-cov", "flake8"],
+        'docs': [
+            'sphinx',
+            'sphinx-gallery',
+            'sphinx_rtd_theme',
+            'matplotlib',
+        ],
     },
     # package_data={
     #    'sample': ['package_data.dat'],

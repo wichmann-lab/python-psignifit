@@ -3,6 +3,7 @@
 Created on Mon Mar 14 17:34:08 2016
 
 
+
 @author: Ole
 """
 
@@ -164,7 +165,8 @@ def plotPsych(result,  # noqa: C901, this function is too complex
 
 
 def plotsModelfit(result, showImediate=True):
-    """
+    """ Plot utilities to judge model fit.
+
     Plots some standard plots, meant to help you judge whether there are
     systematic deviations from the model. We dropped the statistical tests
     here though.
@@ -279,11 +281,11 @@ def plotMarginal(result,
                  plotPE=True,
                  axisHandle=None,
                  showImediate=True):
-    """
-    Plots the marginal for a single dimension.
-    result       should be a result struct from the main psignifit routine
-    dim          is the parameter to plot:
-                   1=threshold, 2=width, 3=lambda, 4=gamma, 5=sigma
+    """ Plots the marginal for a single dimension.
+
+    Args:
+        result: should be a result struct from the main psignifit routine
+        dim: The parameter to plot. 1=threshold, 2=width, 3=lambda, 4=gamma, 5=sigma
     """
     if isinstance(dim, str):
         dim = _utils.strToDim(dim)
@@ -552,6 +554,7 @@ def plot2D(result,
            par2,
            colorMap=uni_tuebingen_cm(),
            labelSize=15,
+           fontSize=10,
            axisHandle=None,
            showImediate=True):
     """ Constructs a 2 dimensional marginal plot of the posterior density.
@@ -561,6 +564,7 @@ def plot2D(result,
 
     The result struct is passed as result.
     par1 and par2 should code the two parameters to plot:
+
         0 = threshold
         1 = width
         2 = lambda
@@ -573,9 +577,7 @@ def plot2D(result,
     par1, label1 = _utils.strToDim(str(par1))
     par2, label2 = _utils.strToDim(str(par2))
 
-    assert (
-            par1 != par2
-    ), 'par1 and par2 must be different numbers to code for the parameters to plot'
+    assert (par1 != par2), 'par1 and par2 must be different numbers to code for the parameters to plot'
 
     if axisHandle is None:
         axisHandle = plt.gca()

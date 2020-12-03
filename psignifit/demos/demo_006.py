@@ -281,10 +281,11 @@ resFast = ps.psignifitFast(data, options)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # To reduce processing time this function changes three aspects:
-# 1) It uses only a binomial model instead of the full beta-binomial model
+#
+#   1) It uses only a binomial model instead of the full beta-binomial model
 #      sacrificing robustness against overdispersion
-# 2) It reduces the number of gridpoints to evaluate the posterior
-# 3) It limits the number of function evaluations for the final optimization
+#   2) It reduces the number of gridpoints to evaluate the posterior
+#   3) It limits the number of function evaluations for the final optimization
 #      to find the MAP.
 #
 # Using this function will issue warnings and will not provide you with

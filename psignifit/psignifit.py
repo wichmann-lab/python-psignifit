@@ -17,8 +17,8 @@ from .utils import (pool_data, integral_weights, PsignifitException, normalize, 
 
 def psignifit(data, conf=None, **kwargs):
     """
-    main function for fitting psychometric functions
-    function result=psignifit(data,options)
+    Main function for fitting psychometric functions function
+
     This function is the user interface for fitting psychometric functions to data.
 
     pass your data in the n x 3 matrix of the form:

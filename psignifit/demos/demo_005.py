@@ -75,17 +75,19 @@ ps.psigniplot.plotMarginal(res)
 #
 # You may set the following options again with their
 #  respective default values assigned to change the behaviour of the plot:
-# 'dim' = 0
-# 'lineColor' = [0,round(105/255,3),round(170/255,3)]      # color of the density
-# 'lineWidth'      = 2                   # width of the plotline
-# 'xLabel'         = '[parameter name] '   # X-Axis label
-# 'yLabel'         = 'Marginal Density'  # Y-Axis label
-# 'labelSize'      = 15                  # Font size for the label
-# 'tufteAxis'      = False               # custom axis drawing enabled
-# 'prior'          = True;               # include the prior as a dashed weak line
-# 'priorColor'     = [.7,.7,.7]          # color of the prior distibution
-# 'CIpatch'        = True                # draw the patch for the confidence interval
-# 'plotPE'         = True                # plot the point estimate?
+#
+# ::
+#     'dim' = 0
+#     'lineColor' = [0,round(105/255,3),round(170/255,3)]      # color of the density
+#     'lineWidth'      = 2                   # width of the plotline
+#     'xLabel'         = '[parameter name] '   # X-Axis label
+#     'yLabel'         = 'Marginal Density'  # Y-Axis label
+#     'labelSize'      = 15                  # Font size for the label
+#     'tufteAxis'      = False               # custom axis drawing enabled
+#     'prior'          = True;               # include the prior as a dashed weak line
+#     'priorColor'     = [.7,.7,.7]          # color of the prior distibution
+#     'CIpatch'        = True                # draw the patch for the confidence interval
+#     'plotPE'         = True                # plot the point estimate?
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # plot2D
