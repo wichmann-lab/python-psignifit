@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
- DEMO_006 ADDITIONAL FUNCTIONALITY
- =================================
+ 6. Additional Functionality
+ ===========================
 
  This demo shows some convenience functions we added, which are not
  directly used for the final fitting of psychometric functions.
@@ -23,20 +23,16 @@ data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
                  [0.0070, 88.0000, 90.0000], [0.0080, 90.0000, 90.0000],
                  [0.0100, 90.0000, 90.0000]])
 
-options = dict()
-options['sigmoidName'] = 'norm'
-options.experiment_type = '2AFC'
-res = ps.psignifit(data, options)
+res = ps.psignifit(data, sigmoid_name='norm', experiment_type='2AFC')
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# obtaining threshold values
+# Obtaining Threshold Values
 # --------------------------
 #
 # For comparison to other estimation techniques we provide functions to
 # calculate thresholds at any given percent correct.
 #
-# The first function is getThreshold(result, pCorrect, unscaled). It
-# calculates the threshold of the function fit in result with pCorrect
+# Calculating the threshold of the function fit in result with pCorrect
 # proportion correct. Unscaled toggles, whether you refer to the pCorrect
 # obtained in the experiment (default), or to the percent correct on the
 # original function unscaled by guessing and lapse rate.
@@ -71,7 +67,7 @@ ps.getThreshold(res, 0.5, 1)
 # worst case for all other parameters instead of averaging over the values
 # correctly.
 #
-# Obtaining slope values
+# Obtaining Slope Values
 # ----------------------
 #
 #  We also provide two functions to calculate the slope of the psychometric

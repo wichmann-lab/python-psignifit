@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-DEMO_005 PLOTTING FUNCTIONS
-===========================
+5. Plotting
+===========
 
  Here the basic plot functions which come with the toolbox are explained.
  Most of the functions return the handle of the axis they plotted in
  to enable you to plot further details and change axis properties after the plot.
 
- To have something to plot we use the example data as provided in demo_001
+ To have something to plot we use the example data as provided in
+ :ref:`Demo 1 <sphx_glr_generated_examples_demo_001.py>`.
 """
 
 
@@ -24,15 +25,11 @@ data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
                  [0.0070, 88.0000, 90.0000], [0.0080, 90.0000, 90.0000],
                  [0.0100, 90.0000, 90.0000]])
 
-options = dict()
-options.experiment_type = '2AFC'
-options['sigmoidName'] = 'norm'
-
-res = ps.psignifit(data, options)
+res = ps.psignifit(data, sigmoid_name='norm', experiment_type='2AFC')
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# plotPsych
-# ---------
+# Plot Psychometric Function
+# --------------------------
 #
 # This funciton plots the fitted psychometric function with the measured data.
 #  It takes the result dict you want to plot. You can also set plotting options.
@@ -53,12 +50,12 @@ res = ps.psignifit(data, options)
 # 'CIthresh': False
 
 plt.figure()
-ps.psigniplot.plotPsych(res, lineWidth=5)
+ps.psigniplot.plot_psych(res, lineWidth=5)
 
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# plotMarginal
-# ------------
+# Plot Marginal Posterior
+# -----------------------
 #
 # This function plots the marginal posterior density for a single parameter.
 # As input it requires a results dictionary, the parameter to plot and optionally
@@ -66,7 +63,7 @@ ps.psigniplot.plotPsych(res, lineWidth=5)
 # (As usual 1 = threshold, 2 = width, 3 = lambda, 4 = gamma, 5 = eta)
 
 plt.figure()
-ps.psigniplot.plotMarginal(res)
+ps.psigniplot.plot_marginal(res)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # The gray shadow corresponds to the chosen confidence interval and the black
@@ -90,8 +87,8 @@ ps.psigniplot.plotMarginal(res)
 #     'plotPE'         = True                # plot the point estimate?
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# plot2D
-# ------
+# Plot Posterior in 2-D
+# ---------------------
 #
 # This plots 2 dimensional posterior marginals.
 # As input this function expects the result dict, two numbers for the two parameters
@@ -111,10 +108,10 @@ ps.psigniplot.plot2D(res, 0, 1)
 # 'label2'    = '[parameter name]'   # label for the second parameter
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# plotPrior
-# ---------
+# Plot Priors
+# -----------
 # As a tool this function plots the actually used priors of the provided
 # result dictionary.
 
 plt.figure()
-ps.psigniplot.plotPrior(res)
+ps.psigniplot.plot_prior(res)

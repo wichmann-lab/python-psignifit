@@ -1,20 +1,19 @@
 # -*- coding: utf-8 -*-
 """
- DEMO_002 OPTION DICTIONARY
- ==========================
+ 2. More Options
+ ===============
 
  Which options can one set?
 
-This demo explains all fields of the options dictionary, e.g. which options
-you can set for the fitting process as a user.
+ This demo explains all fields of the options dictionary, e.g. which options
+ you can set for the fitting process as a user.
 """
 
 import numpy as np
 
 import psignifit as ps
 
-# to have some data we use the data from demo_001
-
+# to have some data we use the data from the first demo.
 data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
                  [0.0020, 44.0000, 90.0000], [0.0025, 44.0000, 90.0000],
                  [0.0030, 52.0000, 90.0000], [0.0035, 53.0000, 90.0000],
@@ -24,294 +23,202 @@ data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
                  [0.0100, 90.0000, 90.0000]])
 
 # initializing options dictionary
-options = dict()
+config = {
+    'sigmoid_name': 'norm',
+    'experiment_type': '2AFC'
+}
 
 # now or at any later time you can run a fit with this command.
-
-res = ps.psignifit(data, options)
-
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# list of options fields
-# ----------------------
-# Here we list all fields of the option dictionary which can be accessed by
-#
-#   options['fieldname']        = default Value
-#
-# afterwards follows some explanation and allowed values
-#
-#   options['sigmoidName']    = 'norm' """
-#
-# This sets the type of sigmoid you fit to your data.
-
-# The dafault value 'norm' fits a cumulative gaussian to your data.
-options['sigmoidName'] = 'norm'
-
-# another standard alternative is the logistic function
-options['sigmoidName'] = 'logistic'
-
-# For data on a logscale you may want to fit a log-normal distribution or a
-# Weibull which you invoce with:
-options['sigmoidName'] = 'logn'
-#       or
-options['sigmoidName'] = 'weibull'
-
-# We also included the gumbel and reversed gumbel functions for asymmetric
-# psychometric functions. The gumbel has a longer lower tail the reversed
-# gumbel a longer upper tail.
-
-options['sigmoidName'] = 'gumbel'
-#       or
-options['sigmoidName'] = 'rgumbel'
-
-# for a heavy tailed distribution use
-options['sigmoidName'] = 'tdist'
+res = ps.psignifit(data, **config)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Sigmoid
+# --------
+# The standard options of `sigmoid_name` and `experiment_type` are described in
+# :ref:`Demo 1 <sphx_glr_generated_examples_demo_001.py>`.
 #
-#     options['sigmoidName'] = 'tdist'
-#
-# Here you may provide a handle to your own sigmoid which takes two
-# parameters as input and hands back a function value. This should be
-# vectorized or even a formula.
-# However, this is usually obtained from options['sigmoidName']
-# This is needed if you want to use your own sigmoid, which is not built in.
-#
-#     options.experiment_type        = ExperimentType.YES_NO """
-#
-# This sets which parameters you want to be free and which you fix and to
-# which values, for standard experiment types. '''
+# If the standard sigmoids do not match your requirements, you
+# may provide a reference to your own sigmoid, which has to be
+# a subclass of :class:`psignifit.sigmoids.Sigmoid`.
 
-# 'yes/no', default sets all parameters free, which is suitable for a standard
-# yes/no paradigm.
-options.experiment_type = "yes/no"
-
-# '2AFC', fixes the lower asymptote to .5 and fits the rest, for 2
-# alternative forced choice experiments.
-options.experiment_type = '2AFC'
-
-# 'nAFC', fixes the lower asymptote to 1/n and fits the rest. For this type
-# of experiment you MUST also provide options.experiment_choices the number of
-# alternatives.
-# As an example with 3 alternatives:
-options.experiment_type = "nAFC"
-options.experiment_choices = 3
-""" options['estimateType']   = 'mean' """
-''' How you want to estimate your fit from the posterior '''
-
-# 'MAP' The MAP estimator is the maximum a posteriori computed from
-# the posterior.
-options['estimateType'] = 'MAP'
-
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Estimation Type
+# ---------------
+# How you want to estimate your fit from the posterior
 # 'mean' The posterior mean. In a Bayesian sence a more suitable estimate.
 # the expected value of the Posterior.
-options['estimateType'] = 'mean'
+# 'MAP' The MAP estimator is the maximum a posteriori computed from
+# the posterior.
+
+config['estimate_type'] = 'MAP'
+config['estimate_type'] = 'mean'
 
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#
-#     options['stepN']   = [40,40,20,20,20]
-#     options['mbStepN'] = [25,20,10,10,20]
-#
+# Optimization Steps
+# ------------------
 # This sets the number of grid points on each dimension in the final
-#  fitting (stepN) and in the moving of bounds mbStepN
-#  the order is
-#  [threshold,width,upper asymptote,lower asymptote,variance scaling]
+# fitting (grid_steps) and in the moving of bounds (steps_moving_bounds)
+# as a dictionary with keys threshold, width, lambda (upper asymptote),
+# gamma (lower asymptote), and eta (variance scaling).
 #
-#  You may change this if you need more accurate estimates on the sparsely
-#  sampled parameters or if you want to play with them to save time.
+# You may change this if you need more accurate estimates on the sparsely
+# sampled parameters or if you want to play with them to save time.
 #
 # For example to get an even more exact estimate on the
-# lapse rate/upper asymptote plug in
-#
-#    options['stepN'] = [40, 40, 50, 20, 20]
-#
-# now the lapse rate is sampled at 50 places giving you a much more exact
+# lapse rate/upper asymptote, set lambda to 50.
+# Such, the lapse rate is sampled at 50 places giving you a much more exact
 # and smooth curve for comparisons.
 #
-#    options['confP']          = .95
-#
+config['grid_steps'] = {'lambda': 50}
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Confidence intervals
+# --------------------
 # The confidence level for the computed confidence intervals.
 # This may be set to any number between 0 and 1 excluding.
 
 # for example to get 99% confidence intervals try
-options['confP'] = .99
+config['confP'] = .99
 
-# You may specify a vector as well. If you do the conf_intervals in the
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# You may specify a vector with N elements as well.
+# If you do the conf_intervals in the
 # result will be a 5x2xN array containing the values for the different
 # confidence levels in the 3rd dimension.
 
-options['confP'] = [.95, .9, .68, .5]
 # will return 4 confidence intervals for each parameter for example.
+config['confP'] = [.95, .9, .68, .5]
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #
-#     options['threshPC']       = .5
-#
-# Which percent correct correspond to the threshold?
-# Given in Percent correct on the unscaled sigmoid (reaching from 0 to 1).
-
-# For example to define the threshold as 90% correct try:
-
-options['threshPC'] = .9
-
-
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#
-#    options['CImethod']      ='stripes'
-#
-# This sets how the confidence intervals are computed in getConfRegion
+# `CI_method` sets how the confidence intervals are computed in getConfRegion
 # possible variants are:
 #
-#       'project' -> project the confidence region on each axis
+# 'stripes': Find a threshold with (1-alpha) above it
+#      This will disregard intervals of low posterior probability and then move
+#      in from the sides to adjust the exact CI size.
+#      This can handle bounds and asymmetric distributions slightly better, but
+#      will introduce slight jumps of the confidence interval when confp is
+#      adjusted depending on when the gridpoints get too small posterior
+#      probability.
+# 'project':
+#      Project the confidence region on each axis
+# 'percentiles': find alpha/2 and 1-alpha/2 percentiles (alpha = 1-confP)
+#      This cuts at the estimated percentiles-> always tries to place alpha/2
+#      posterior probability above and below the credible interval.
+#      This has no jumping but will exclude bound values even when they have
+#      the highest posterior. Additionally it will not choose the area of
+#      highest posterior density if the distribution is skewed.
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Parameters
+# ----------
+# Which percent correct correspond to the threshold?
+# Given in Percent correct on the unscaled sigmoid (reaching from 0 to 1).
+# For example to define the threshold as 90% correct try:
+
+config['thresh_PC'] = .9
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# How the width of a psychometric function is defined can be changed by `width_alpha`:
+#   `width= psi^(-1)(1-alpha) - psi^(-1)(alpha)`
+#   where `psi^(-1)` is the inverse of the sigmoid function.
 #
-#       'stripes' -> find a threshold with (1-alpha) above it
+# `width_alpha` must be between 0 and .5 excluding.
 #
-# This will disregard intervals of low posterior probability and then move
-# in from the sides to adjust the exact CI size.
-# This can handle bounds and asymmetric distributions slightly better, but
-# will introduce slight jumps of the confidence interval when confp is
-# adjusted depending on when the gridpoints get too small posterior
-# probability.
+# Thus this would enable the useage of the interval from .1 to .9 as the
+# width for example:
+
+config['width_alpha'] = .1
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Priors
+# ------
 #
-#    'percentiles' -> find alpha/2 and 1-alpha/2 percentiles
-#                     (alpha = 1-confP)
-#
-# cuts at the estimated percentiles-> always tries to place alpha/2
-# posterior probability above and below the credible interval.
-# This has no jumping but will exclude bound values even when they have
-# the highest posterior. Additionally it will not choose the area of
-# highest posterior density if the distribution is skewed.
-#
-#     options['priors']  = getStandardPriors()
-#
-# This field contains a cell array of function handles, which define the
-# priors for each parameter.
-# If you want to set your priors manually, here is the place for it.
+# If you want to set your priors manually, you can set `priors`
+# as a dict with the parameter name as key and the custom prior function
+# as the value.
 #
 # For details on how do change these refer to
-# https://github.com/wichmann-lab/psignifit/wiki/Priors and demo_004
+# https://github.com/wichmann-lab/psignifit/wiki/Priors and
+# :ref:`Demo 4 <sphx_glr_generated_examples_demo_004.py>`
 #
-#      options['betaPrior']      = 20
-#
-# this sets the strength of the Prior in favor of a binomial observer.
+# The strength of the prior in favor of a binomial observer ca be set with
+# the `beta_prior` option.
 # Larger values correspond to a stronger prior. We choose this value after
 # a rather large number of simulations. Refer to the paper to learn more
-# about this
-#
-#    options['nblocks']        = inf
-#    options['poolMaxGap']     = inf
-#    options['poolMaxLength']  = 50
-#    options['poolxTol']       = 0
-#
-# these options set how your data is pooled into blocks. Your data is only
-# pooled if your data Matrix has more than nblocks lines. Then we pool
-# together a maximum of poolMaxLength trials, which are separated by a
-# maximum of poolMaxGap trials of other stimulus levels. If you want you may
-# specify a tolerance in stimulus level to pool trials, but by default we
-# only pool trials with exactly the same stimulus level. '''
-#
-#     options['instantPlot']    = 0
-#
-# A boolean to control whether you immediately get 2 standard plots of your
-# fit. Turn to 1 to see the effect.
-#
-#     options['instantPlot'] = 1
-#     options['bounds']
-#
-# In this field you may provide your own bounds for the parameters.
-#  This should be a 5x2 matrix of start and end of the range for the 5
-#  parameters. (threshold,width,upper asymptote,lower asymptote,variance
-#  scale)
-#
-# # For example this would set the bounds to
-# threshold between 1 and 2
-# width between .1 and 5
-# a fixed lapse rate of .05
-# a fixed lower asymptote at .05
-# a maximum on the variance scale of .2
+# about this.
 
-options['bounds'] = [1, 2, .1, 5, .05, .05, .5, .5, np.exp(-20), .2]
+config['beta_prior'] = 15
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# NOTE: By this you artificially exclude all values out of this range. Only
-# exclude parameter values, which are truely impossible!'''
+# Bounds
+# ------
+# You may provide your own bounds for the parameters.
+# This should be a dict of the parameter name and tuples of
+# start and end of the range.
 #
-#    options['maxBoundValue'] = exp(-10)
+# For example this would set the bounds to threshold between 1 and 2,
+# width between .1 and 5, a fixed lapse rate of .05,
+# a fixed lower asymptote at .05, and a maximum on the variance scale of .2
 #
-# Parts of the grid which produce marginal values below this are considered
-# 0 and are excluded from the calculation in moveBounds.m
-# it should be a very small value and at least smaller than 1/(max(stepN))
+# .. note::
+#     By this you artificially exclude all values out of this range. Only
+#     exclude parameter values, which are truely impossible!'''
+
+config['bounds'] = {
+    'threshold': (1, 2),
+    'width': (.1, 5),
+    'lambda': (.05, .05),
+    'gamma': (.5, .5),
+    'eta': (np.exp(-20), .2)
+}
 
 
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Parts of the grid which produce marginal values below `max_bound_values`
+# are considered 0 and are excluded calculations.
+# It should be a very small value and at least smaller than `1/(max(grid_steps))`.
+#
 # This for example would exclude fewer values and more conservative
 # movement of the bounds:
-options['maxBoundValue'] = np.exp(-20)
+
+config['max_bound_values'] = np.exp(-20)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# By default, the bounds are moved together during optimization.
+# Usually this is good to concentrate on the right area
+# in the parameter space.
 #
-#    options.moveBounds    = 1
-#
-# Toggles the movement of bounds by moveBounds
-# Usually this is good to concentrate on the right area in the parameter
-# space.
-
-options['moveBounds'] = 1
-
-# If you set
-options['moveBounds'] = 0
-# your posterior will always use the initial setting for the bounds.
+# This can be turned off.
+# Your posterior will always use the initial setting for the bounds.
 # This is usefull if you set the bounds by hand and do not want
 # psignifit to move them after this.
 
+config['move_bounds'] = False
+
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Pooling
+# -------
 #
-#    options['dynamicGrid']    = 0
+# These options set how your data is pooled into blocks.
+# Then we pool together a maximum of poolMaxLength trials,
+# which are separated by a maximum of poolMaxGap trials of other stimulus levels.
+# If you want you may specify a tolerance in stimulus level to pool trials,
+# but by default we only pool trials with exactly the same stimulus level.
 #
+# .. note::
+#     In contrast to the matlab implementation, python-psignifit does not
+#     pool implicitly. Instead a warning is printed, if pooling might be useful.
+#     Then pooling can be run as the separate function.
+#
+# Dynamic Grid
+# ------------
 # Toggles the useage of a dynamic/adaptive grid.
-# there was hope for a more exact estimate by this, but although the curves
-# look smoother the confidence intervals were not more exact. Thus this is
-# deactivated by default.
-
-options['dynamicGrid'] = 1
-options['dynamicGrid'] = 0
-
-# How many Likelihood evaluations are done per dimension to set the
-# adaptive grid. Should be a relatively large number.
-options['GridSetEval'] = 10000
-# Only used with dynamic grid,--> by default not at all
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #
-#   options['UniformWeight']  = 0.5000
-#
-# How many times the average is added to each position while setting the
-# adaptive grid. You may increase this number to get a more equally sampled
-# grid or decrease it to get an even stronger focus of the sampling on the
-# peak.
-# When you increase this value very much try to set options['dynamicGrid'] = 0
-# which produces an equal stepsize grid right away.
+# .. note::
+#   There was hope for a more exact estimate by this, but although the curves
+#   look smoother the confidence intervals were not more exact.
+#   This is why this was not ported to python-psignifit.
 
-# As an example: Will produce a more focused grid which leaves the bounds
-# very weakly sampled.
-options['UniformWeight'] = 0.01000
-# Only used with dynamic grid,-> by default not at all
-
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#
-#    options['widthalpha']     = .05
-#
-# This changes how the width of a psychometric function is defined
-# width= psi^(-1)(1-alpha) - psi^(-1)(alpha)
-# where psi^(-1) is the inverse of the sigmoid function.
-# widthalpha must be between 0 and .5 excluding '''
-
-# Thus this would enable the useage of the interval from .1 to .9 as the
-# width for example:
-options['widthalpha'] = .1
-
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#
-#    options.logspace:      = 0
-#
-# this is triggered when you fit lognormal or Weibull functions, which are
-# fitted in logspace. This is an internal variable which is used to pass
-# this to all functions. It is of no interest for a user.
