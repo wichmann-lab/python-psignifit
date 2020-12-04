@@ -39,7 +39,6 @@ class Configuration:
     beta_prior: int = 10
     CI_method: str = 'percentiles'
     confP: Tuple[float, float, float] = (.95, .9, .68)
-    dynamic_grid: bool = False
     estimate_type: str = 'MAP'
     experiment_type: str = ExperimentType.YES_NO.value
     experiment_choices: Optional[int] = None
@@ -63,12 +62,9 @@ class Configuration:
 
     # attributes, if not specified, will be initialize based on others
     bounds: Optional[Dict[str, Tuple[float, float]]] = None
-    grid_eval: Optional[int] = None
-    uniform_weight: Optional[float] = None
+    grid_steps: Dict[str, int] = dataclasses.field(default_factory=dict)
+    steps_moving_bounds: Dict[str, int] = dataclasses.field(default_factory=dict)
 
-    # attributes which are always initialized based on other parameters
-    grid_steps: Dict[str, int] = None
-    steps_moving_bounds: Dict[str, int] = None
 
     def __post_init__(self):
         self.check_attributes()
@@ -156,9 +152,7 @@ class Configuration:
             raise PsignifitException("For nAFC experiments, expects 'experiment_choices' to be a number, got None.\n"
                                      "Can be specified in the experiment type, e.g. 2AFC, 3AFC, … .")
 
-        # because the attributes are immutable (frozen)
-        # we have to set them with this special syntax
-        self.grid_steps = {
+        default_grid_steps = {
             'threshold': 40,
             'width': 40,
             'lambda': 20,
@@ -166,36 +160,33 @@ class Configuration:
             'eta': 20,
         }
         if value == ExperimentType.YES_NO.value:
-            self.grid_steps['gamma'] = 20
+            default_grid_steps['gamma'] = 20
             self.steps_moving_bounds = {
                 'threshold': 25,
                 'width': 30,
                 'lambda': 10,
                 'gamma': 10,
                 'eta': 15,
+                **self.steps_moving_bounds
             }
         else:
-            self.grid_steps['gamma'] = 1
+            default_grid_steps['gamma'] = 1
             self.steps_moving_bounds = {
                 'threshold': 30,
                 'width': 40,
                 'lambda': 10,
                 'gamma': 1,
                 'eta': 20,
+                **self.steps_moving_bounds
             }
+        self.grid_steps = {**default_grid_steps,
+                           **self.grid_steps}
 
     def check_sigmoid(self, value):
         try:
             sigmoids.sigmoid_by_name(value)
         except KeyError:
             raise PsignifitException('Invalid sigmoid name "{value}", use one of {sigmoids.ALL_SIGMOID_NAMES}')
-
-    def check_dynamic_grid(self, value):
-        if value:
-            if self.grid_eval is None:
-                self.grid_eval = 10000
-            if self.uniform_weigth is None:
-                self.uniform_weight = 1.
 
     def check_stimulus_range(self, value):
         if value:
