@@ -14,6 +14,16 @@ This is the class and function reference of psignifit.
 
     psignifit.psignifit
 
+:mod:`psignifit` Configration and Result
+========================================
+
+.. currentmodule:: psignifit
+
+.. autosummary::
+    :toctree: generated/
+
+    psignifit.configuration.Configuration
+    psignifit.result.Result
 
 :mod:`psignifit.psigniplot` Plotting
 ====================================
@@ -28,3 +38,15 @@ This is the class and function reference of psignifit.
     psigniplot.plotPrior
     psigniplot.plotPsych
     psigniplot.plotsModelfit
+
+:mod:`psignifit.sigmoids` Sigmoids
+==================================
+
+.. currentmodule:: psignifit.sigmoids
+
+.. autosummary::
+    :toctree: generated/
+
+    psignifit.sigmoids.Sigmoid
+    psignifit.sigmoids.sigmoid_by_name
+    psignifit.sigmoids.ALL_SIGMOID_NAMES
