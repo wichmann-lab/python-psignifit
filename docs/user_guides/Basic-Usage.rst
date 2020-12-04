@@ -3,9 +3,11 @@
 Basic Usage
 ===========
 
-First :ref:`install <install_guide>` the toolbox. 
-After successful installation of psignifit 4 you can fit
-psychometric functions as follows:
+First :ref:`install <install_guide>` the toolbox.
+After successful installation of psignifit you can fit
+psychometric functions as described in this guide.
+For a more interactive way to get started, look at
+:ref:`Demo 1 <sphx_glr_generated_examples_demo_001.py>`.
 
 As usually in python you first need to import the necessary packages.
 Here we import numpy for array handling and psignifit.
@@ -35,36 +37,20 @@ like this example dataset:
                 [0.0080,   90.0000,   90.0000],
                 [0.0100,   90.0000,   90.0000]]);
 
-Second, you need a dictionary which allows you to change options for the
-fitting process. (The name of the dictionary does not matter; you may
-name it however you like.)
 
-::
-
-   options             = dict();   # initialize as an empty dictionary
-
-You can set the different options with lines of the form
-options[‘field’]:
-
-::
-
-   options['sigmoidName'] = 'norm';   # choose a cumulative Gauss as the sigmoid  
-   options['expType']     = '2AFC';   # choose 2-AFC as the experiment type  
-                                      # this sets the guessing rate to .5 (fixed) and  
-                                      # fits the rest of the parameters  
-
-BTW: Apart from the *nAFC* (2AFC, 3AFC, … ) we provide two other options
-for *expType*: First *‘YesNo’* which enables a free upper and lower
-Asymptote and, second, *‘equalAsymptote’*, which assumes that the upper
-and the lower asymptote are equal. You find a more detailed description
-of the types :ref:`here <experiment-types>`.
 
 With those ingredients a simple call to psignifit will fit your
 function:
 
 ::
 
-   result = ps.psignifit(data,options);
+   result = ps.psignifit(data, experiment_type='2AFC);
+
+Apart from the *nAFC* (2AFC, 3AFC, … ) we provide two other options
+for *expType*: First *‘YesNo’* which enables a free upper and lower
+Asymptote and, second, *‘equalAsymptote’*, which assumes that the upper
+and the lower asymptote are equal. You find a more detailed description
+of the types :ref:`here <experiment-types>`.
 
 You can find a complete list of the possible options :ref:`here <options-dictionary>`.
 
@@ -74,8 +60,8 @@ confidence intervals:
 
 ::
 
-   result['Fit']
-   result['conf_Intervals']
+   result.sigmoid_parameters
+   result.confidence_intervals
 
 This gives you the basic result of your fit. The five values reported
 are:

@@ -1,4 +1,5 @@
 .. _priors:
+
 Priors
 ======
 
@@ -10,9 +11,10 @@ The relevant fields of the options dictionary are:
 
 ::
 
-   options['stimulusRange'] = np.array([a,b])  # set the range used for setting the prior to [a,b]
-   options['betaPrior'] = k                    # set the strength of the prior on the beta-binomial to k
-   options['borders'] = np.nan((5,2))          # setting fixed borders for parameters
+   options['stimulus_range'] = np.array([a,b])  # set the range used for setting the prior to [a,b]
+   options['beta_prior'] = k                    # set the strength of the prior on the beta-binomial to k
+   options['borders'] = {'threshold': (np.nan, np.nan)}  # setting fixed borders for threshold parameter
+
 
 Also the python version has the plotPrior function to show the used
 prior on at least the first 3 parameters. It is available using the
