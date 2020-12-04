@@ -220,23 +220,16 @@ print('Fit with beta prior = 200: ', res200.sigmoid_parameters)
 def prior_lambda(x):
     return ((x >= 0) * (x <= .1)).astype('float')
 
+custom_priors = {'lambda': prior_lambda}
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Note that we did not normalize this prior. This is internally done by
 # psignifit.
+#
 # If you are not familiar with function handles and anonymous functions
 # in Python3 you can find an introduction to them here:
 # http://www.programiz.com/python-programming/anonymous-function
-
-# To use this prior you need to add it to the options dict into the priors array
-import copy  # noqa: E402
-
-# To fill the priors field we take the priors from our last fit:
-options['priors'] = copy.deepcopy(res['options']['priors'])
-
-options['priors'][2] = priorLambda
-
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#
 # Most of the times you then have to adjust the bounds of integration as
 # well. This confines the region psignifit operates on. All values outside
 # the bounds implicitly have prior probability 0!
@@ -251,7 +244,7 @@ zero_bounds = {
     'eta' (np.nan, np.nan),
 }
 
-res = ps.psignifit(data, priors={'lambda': prior_lambda}, bounds=zero_bounds, experiment_type='2AFC')
+res = ps.psignifit(data, priors=custom_priors, bounds=zero_bounds, experiment_type='2AFC')
 
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
