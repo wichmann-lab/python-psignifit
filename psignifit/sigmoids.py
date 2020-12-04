@@ -159,18 +159,18 @@ class Sigmoid:
         and the provided sigmoid parameters.
 
         Two checks for relations between parameters:
-          - sigmoid(threshold_stimulus_level) == threshold_percent_correct
-          - |X_L - X_R| == width
-            with sigmoid(X_L) == alpha
-            and  sigmoid(X_R) == 1 - alpha
+          - `sigmoid(threshold_stimulus_level) == threshold_percent_correct`
+          - `|X_L - X_R| == width`
+            with `sigmoid(X_L) == alpha`
+            and  `sigmoid(X_R) == 1 - alpha`
 
         Two checks for the inverse:
-          - inverse(PC) == threshold_stimulus_level
-          - inverse(inverse(stimulus_levels) == stimulus_levels
+          - `inverse(PC) == threshold_stimulus_level`
+          - `inverse(inverse(stimulus_levels) == stimulus_levels`
 
         Two checks for the slope:
-          - maximum(|slope(stimulus_levels)|) close to |slope(0.5)|
-          - slope(stimulus_levels) > 0  (or < 0 for negative sigmoid)
+          - `maximum(|slope(stimulus_levels)|)` close to `|slope(0.5)|`
+          - `slope(stimulus_levels) > 0`  (or < 0 for negative sigmoid)
 
         Args:
              n_samples: Number of stimulus levels between 0 (exclusive) and 1 for tests
