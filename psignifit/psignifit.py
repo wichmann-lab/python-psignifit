@@ -9,6 +9,7 @@ from . import priors as _priors
 from . import sigmoids
 from .bounds import parameter_bounds
 from .configuration import Configuration
+from .getConfRegion import confidence_intervals
 from .likelihood import posterior_grid, max_posterior
 from .result import Result
 from .typing import ParameterBounds, Prior
