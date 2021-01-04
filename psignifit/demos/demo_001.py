@@ -114,7 +114,8 @@ plt.show()
 #   Without these fields you will not be able to use the 2D Bayesian plots
 #   anymore. Also, testing results for equality will fail.
 #   All other functions work without them.
-import gc
+import gc  # noqa: E402
+
 
 res.posterior = None
 res.weights = None

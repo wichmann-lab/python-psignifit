@@ -220,6 +220,7 @@ print('Fit with beta prior = 200: ', res200.sigmoid_parameters)
 def prior_lambda(x):
     return ((x >= 0) * (x <= .1)).astype('float')
 
+
 custom_priors = {'lambda': prior_lambda}
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

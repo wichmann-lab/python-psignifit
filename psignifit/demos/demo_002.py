@@ -221,4 +221,3 @@ config['move_bounds'] = False
 #   There was hope for a more exact estimate by this, but although the curves
 #   look smoother the confidence intervals were not more exact.
 #   This is why this was not ported to python-psignifit.
-
