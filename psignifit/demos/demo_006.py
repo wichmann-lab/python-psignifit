@@ -23,7 +23,8 @@ data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
                  [0.0070, 88.0000, 90.0000], [0.0080, 90.0000, 90.0000],
                  [0.0100, 90.0000, 90.0000]])
 
-res = ps.psignifit(data, sigmoid_name='norm', experiment_type='2AFC')
+config = dict(sigmoid_name='norm', experiment_type='2AFC')
+res = ps.psignifit(data, **config)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Obtaining Threshold Values
@@ -173,7 +174,7 @@ data32 = np.array([[0.0010, 23.0000, 45.0000], [0.0015, 25.0000, 45.0000],
 # now we can check whether our different pairs show biased behaviour:
 
 # We start with the first pair of data:
-ps.biasAna(data11, data12, options)
+ps.plot_bias_analysis(data11, data12, **config)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # This command will open a figure, which constains plots for the first
@@ -193,7 +194,7 @@ ps.biasAna(data11, data12, options)
 # changed much.
 
 # Next, we check our second split of data:
-ps.biasAna(data21, data22, options)
+ps.plot_bias_analysis(data21, data22, **config)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # In this case there seems to be very strong "finger bias", i.e. the
@@ -211,7 +212,7 @@ ps.biasAna(data21, data22, options)
 # be usable.
 
 # Now we have a look at our third splitting:
-ps.biasAna(data31, data32, options)
+ps.plot_bias_analysis(data31, data32, **config)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # In this case the guessing rate does not seem to differ between intervals,
@@ -273,7 +274,7 @@ ps.psigniplot.plotsModelfit(res)
 # To fit functions fast, for example during experiments or to have a fast
 # early look at your data
 
-resFast = ps.psignifitFast(data, options)
+resFast = ps.psignifitFast(data, **config)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # To reduce processing time this function changes three aspects:
