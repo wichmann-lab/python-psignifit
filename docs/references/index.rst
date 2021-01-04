@@ -13,6 +13,7 @@ This is the class and function reference of psignifit.
     :toctree: generated/
 
     psignifit.psignifit
+    psignifit.plot_bias_analysis
 
 
 :mod:`psignifit.psigniplot` Plotting
