@@ -9,6 +9,8 @@ import subprocess
 # import here the main function
 from .psignifit import psignifit
 from . import sigmoids
+from .bias import plot_bias_analysis
+
 
 __name__ = 'psignifit'
 __description__ = 'toolbox for Bayesian psychometric function estimation'
