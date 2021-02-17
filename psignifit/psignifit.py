@@ -42,7 +42,7 @@ def psignifit(data, conf=None, **kwargs):
         raise PsignifitException(
             "Can't handle conf together with other keyword arguments!")
 
-    sigmoid = sigmoids.sigmoid_by_name(conf.sigmoid, PC=conf.thresh_PC, alpha=conf.width_alpha)
+    sigmoid = conf.make_sigmoid()
     data = _check_data(data, verbose=conf.verbose, logspace=sigmoid.logspace,
                        has_user_stimulus_range=conf.stimulus_range is not None)
     levels, ntrials = data[:, 0], data[:, 2]
@@ -135,7 +135,8 @@ def psignifit(data, conf=None, **kwargs):
 
     return Result(sigmoid_parameters=fit_dict,
                   configuration=conf,
-                  confidence_intervals=intervals_dict)
+                  confidence_intervals=intervals_dict,
+                  posterior=posteriors)
 
 
 def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,

@@ -2,7 +2,7 @@
 """
 import re
 import dataclasses
-from typing import Any, Dict, Tuple, Optional
+from typing import Any, Dict, Tuple, Optional, Union
 
 import numpy as np
 
@@ -54,7 +54,7 @@ class Configuration:
     pool_max_length: float = np.inf
     pool_xtol: float = 0
     priors: Optional[Dict[str, Prior]] = dataclasses.field(default=None, hash=False)
-    sigmoid: str = 'norm'
+    sigmoid: Union[str, sigmoids.Sigmoid] = 'norm'
     stimulus_range: Optional[Tuple[float, float]] = None
     thresh_PC: float = 0.5
     verbose: bool = True
@@ -186,7 +186,7 @@ class Configuration:
 
     def check_sigmoid(self, value):
         try:
-            sigmoids.sigmoid_by_name(value)
+            self.make_sigmoid()
         except KeyError:
             raise PsignifitException('Invalid sigmoid name "{value}", use one of {sigmoids.ALL_SIGMOID_NAMES}')
 
@@ -225,3 +225,16 @@ class Configuration:
                 _ = value + 1
             except Exception:
                 raise PsignifitException("Option width_min must be a number")
+
+    def make_sigmoid(self) -> sigmoids.Sigmoid:
+        """ Construct sigmoid according to this configuration.
+
+        Returns:
+             Sigmoid object with percentage correct and alpha according to config.
+        """
+        if isinstance(self.sigmoid, sigmoids.Sigmoid):
+            self.sigmoid.PC = self.thresh_PC
+            self.sigmoid.alpha = self.width_alpha
+            return self.sigmoid
+        else:
+            return sigmoids.sigmoid_by_name(self.sigmoid, PC=self.thresh_PC, alpha=self.width_alpha)
