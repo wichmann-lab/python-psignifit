@@ -8,6 +8,7 @@ import subprocess
 
 # import here the main function
 from .psignifit import psignifit
+from .pooling import pool_blocks
 from . import sigmoids
 from .bias import plot_bias_analysis
 

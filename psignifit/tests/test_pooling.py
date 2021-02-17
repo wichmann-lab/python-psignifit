@@ -1,6 +1,6 @@
 import numpy as np
 
-from psignifit.utils import pool_data
+from psignifit.pooling import pool_blocks
 
 
 def test_pooling_minimal_default():
@@ -10,19 +10,19 @@ def test_pooling_minimal_default():
         [3., 0., 1.],
     ])
     # this should not be pooled at all
-    act = pool_data(inp, xtol=0, max_gap=10, max_length=10)
+    act = pool_blocks(inp, max_tol=0, max_gap=10, max_length=10)
     exp = inp
     assert np.all(exp == act)
 
 
-def test_pooling_minimal_xtol():
+def test_pooling_minimal_max_tol():
     inp = np.array([
         [1., 0., 1.],
         [1.4, 0., 1.],
         [2., 0., 1.],
         [3., 0., 1.],
     ])
-    act = pool_data(inp, xtol=0.4, max_gap=10, max_length=10)
+    act = pool_blocks(inp, max_tol=0.4, max_gap=10, max_length=10)
     exp = np.array([
         [1.2, 0., 2.],
         [2., 0., 1.],
@@ -43,7 +43,7 @@ def test_pooling_minimal_gap():
         [6., 0., 1.],
         [1., 0., 1.],
     ])
-    act = pool_data(inp, xtol=0.4, max_gap=2, max_length=10)
+    act = pool_blocks(inp, max_tol=0.4, max_gap=2, max_length=10)
     exp = np.array([
         [1.2, 0., 3.],
         [2., 0., 1.],
@@ -68,7 +68,7 @@ def test_pooling_minimal_length():
         [6., 0., 1.],
         [1., 0., 1.],
     ])
-    act = pool_data(inp, xtol=0.4, max_gap=2, max_length=2)
+    act = pool_blocks(inp, max_tol=0.4, max_gap=2, max_length=2)
     exp = np.array([
         [1.2, 0., 2.],
         [2., 0., 1.],
@@ -90,25 +90,25 @@ def test_pooling_minimal_length():
 
 def test_pooling_big_default():
     exp = parms_default.pop('out')
-    act = pool_data(data, **parms_default)
+    act = pool_blocks(data, **parms_default)
     assert np.allclose(exp, act, rtol=0, atol=1e-04)
 
 
-def test_pooling_big_xtol():
-    exp = parms_xtol.pop('out')
-    act = pool_data(data, **parms_xtol)
+def test_pooling_big_max_tol():
+    exp = parms_max_tol.pop('out')
+    act = pool_blocks(data, **parms_max_tol)
     assert np.allclose(exp, act, rtol=0, atol=1e-04)
 
 
 def test_pooling_big_max_length():
     exp = parms_max_length.pop('out')
-    act = pool_data(data, **parms_max_length)
+    act = pool_blocks(data, **parms_max_length)
     assert np.allclose(exp, act, rtol=0, atol=1e-04)
 
 
 def test_pooling_big_max_gap():
     exp = parms_max_gap.pop('out')
-    act = pool_data(data, **parms_max_gap)
+    act = pool_blocks(data, **parms_max_gap)
     assert np.allclose(exp, act, rtol=0, atol=1e-04)
 
 
@@ -516,7 +516,7 @@ data = np.array([
 ])
 
 parms_default = {
-    'xtol':
+    'max_tol':
         0,
     'max_gap':
         np.inf,
@@ -847,8 +847,8 @@ parms_default = {
         ]),
 }
 
-parms_xtol = {
-    'xtol':
+parms_max_tol = {
+    'max_tol':
         0.01,
     'max_gap':
         np.inf,
@@ -880,7 +880,7 @@ parms_xtol = {
 }
 
 parms_max_length = {
-    'xtol':
+    'max_tol':
         0.01,
     'max_gap':
         np.inf,
@@ -931,7 +931,7 @@ parms_max_length = {
 }
 
 parms_max_gap = {
-    'xtol':
+    'max_tol':
         0.01,
     'max_gap':
         0,
