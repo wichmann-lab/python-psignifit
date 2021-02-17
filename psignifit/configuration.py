@@ -4,8 +4,6 @@ import re
 import dataclasses
 from typing import Any, Dict, Tuple, Optional, Union
 
-import numpy as np
-
 from . import sigmoids
 from .utils import PsignifitException
 from .typing import ExperimentType, Prior
@@ -50,9 +48,6 @@ class Configuration:
     max_bound_value: float = 1e-05
     move_bounds: bool = True
     pool_max_blocks: int = 25
-    pool_max_gap: float = np.inf
-    pool_max_length: float = np.inf
-    pool_xtol: float = 0
     priors: Optional[Dict[str, Prior]] = dataclasses.field(default=None, hash=False)
     sigmoid: Union[str, sigmoids.Sigmoid] = 'norm'
     stimulus_range: Optional[Tuple[float, float]] = None

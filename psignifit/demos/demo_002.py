@@ -196,20 +196,20 @@ options['threshPC'] = .9
 # this sets the strength of the Prior in favor of a binomial observer.
 # Larger values correspond to a stronger prior. We choose this value after
 # a rather large number of simulations. Refer to the paper to learn more
-# about this
+# about this.
 #
-#    options['nblocks']        = inf
-#    options['poolMaxGap']     = inf
-#    options['poolMaxLength']  = 50
-#    options['poolxTol']       = 0
-#
-# these options set how your data is pooled into blocks. Your data is only
-# pooled if your data Matrix has more than nblocks lines. Then we pool
-# together a maximum of poolMaxLength trials, which are separated by a
-# maximum of poolMaxGap trials of other stimulus levels. If you want you may
+# Pooling
+# -------
+# Data can be pooled into blocks. We pool
+# together a maximum of `max_length` trials, which are separated by a
+# maximum of `max_gap` trials of other stimulus levels. If you want you may
 # specify a tolerance in stimulus level to pool trials, but by default we
-# only pool trials with exactly the same stimulus level. '''
-#
+# only pool trials with exactly the same stimulus level.
+pooled_data = ps.pool_blocks(data, max_tol=0, max_gap=np.inf, max_length=50)
+print(f"Data has {len(data)} blocks, maximum number of trials in a block: {data[:, 2].max()}")
+print(f"Pooled data has {len(pooled_data)} blocks, maximum number of trials in a block: {pooled_data[:, 2].max()}")
+
+# %%
 #     options['instantPlot']    = 0
 #
 # A boolean to control whether you immediately get 2 standard plots of your
