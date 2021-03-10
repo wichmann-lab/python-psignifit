@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 
+import psignifit.likelihood
 from psignifit import likelihood
 from psignifit import sigmoids
 from psignifit.priors import default_priors
@@ -60,6 +61,8 @@ def test_log_posterior_zero_eta():
 
 
 MAX = .097163
+
+
 @pytest.mark.parametrize(
     "experiment_type,result_shape,result_max",
     [
@@ -107,3 +110,22 @@ def test_max_posterior(experiment_type, result_shape, result_max):
 
     if experiment_type == "equal asymptote":
         assert max_param['gamma'] is None
+
+
+def test_integral_weights():
+    # Simple case
+    weights = psignifit.likelihood.integral_weights([[0, 1], [0, 1], [0, 1]])
+    assert weights.sum() == 1.
+    assert weights.shape == (2, 2, 2)
+    np.testing.assert_equal(weights, np.full((2, 2, 2), 1 / 8))
+
+    # Various differences
+    weights = psignifit.likelihood.integral_weights([[0, 1], [0, 2], [2, 6]])
+    assert weights.sum() == 8
+    assert weights.shape == (2, 2, 2)
+    np.testing.assert_equal(weights, np.full((2, 2, 2), 1))
+
+    # Various number of steps and None entries
+    weights = psignifit.likelihood.integral_weights([[0, 1], [5, 6, 9], None, [5]])
+    assert weights.sum() == 3.
+    assert weights.shape == (2, 3, 1, 1)
