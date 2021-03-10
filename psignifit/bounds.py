@@ -74,7 +74,7 @@ def mask_bounds(grid: Dict[str, Optional[np.ndarray]], mesh_mask: np.ndarray) ->
         The new bounds per parameter as the first and last valid parameter value.
     """
     new_bounds = dict()
-    mask_indices = np.nonzero(mesh_mask)
+    mask_indices = mesh_mask.nonzero()
     for axis, (parameter_name, parameter_values) in enumerate(sorted(grid.items())):
         # get the first and last indices for this parameter's mask
         # and enlarged of one element in both directions

@@ -117,18 +117,18 @@ def grid_hdi(probability_mass: np.ndarray, grid_values: np.ndarray, credible_mas
 
     .. _stats.stackexchange: https://stats.stackexchange.com/questions/148439/what-is-a-highest-density-region-hdr
     """
-    decreasing_mass = np.sort(np.ravel(probability_mass))[::-1]
-    atleast_height_ix = np.argwhere(np.cumsum(decreasing_mass) >= credible_mass)
+    decreasing_mass = np.sort(probability_mass.reshape(-1))[::-1]
+    atleast_height_ix = np.argwhere(decreasing_mass.cumsum() >= credible_mass)
     if len(atleast_height_ix) == 0:
-        raise ValueError(f"Expects credible mass <= sum(mass), got {credible_mass} > {np.sum(probability_mass)}")
-    hd_height_ix = np.min(atleast_height_ix)
+        raise ValueError(f"Expects credible mass < sum(mass), got {credible_mass} > {np.sum(probability_mass)}")
+    hd_height_ix = atleast_height_ix.min()
     hd_region = probability_mass >= decreasing_mass[hd_height_ix]
 
     dims = np.arange(hd_region.ndim)
     intervals = np.empty((hd_region.ndim, 2))
     for d in dims:
         projected_region = hd_region.any(axis=tuple(dims[dims != d]))
-        interval_ix = np.flatnonzero(projected_region)[[0, -1]]
+        interval_ix = projected_region.reshape(-1).nonzero()[[0, -1]]
         intervals[d, :] = grid_values[d][interval_ix]
     return intervals
 
@@ -149,7 +149,7 @@ def percentile_intervals(probability_mass: np.ndarray, grid_values: np.ndarray, 
     intervals = np.empty((len(mass_margins), 2))
     alpha = 1 - p_value
     for d, mass in enumerate(mass_margins):
-        intervals[d, :] = np.interp([alpha / 2, 1 - alpha / 2], np.cumsum(mass), grid_values[d])
+        intervals[d, :] = np.interp([alpha / 2, 1 - alpha / 2], mass.cumsum(), grid_values[d])
     return intervals
 
 
