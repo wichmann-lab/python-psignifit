@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import warnings
-from typing import Dict
+from typing import Dict, Optional
 
 import numpy as np
 
@@ -16,7 +16,8 @@ from .typing import ParameterBounds, Prior
 from .utils import (PsignifitException, normalize, get_grid, check_data)
 
 
-def psignifit(data, conf=None, **kwargs):
+def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
+              return_posterior: bool = False, **kwargs) -> Result:
     """
     Main function for fitting psychometric functions function
 
@@ -34,6 +35,13 @@ def psignifit(data, conf=None, **kwargs):
     You can find an explanation for all fields of the result in demo006
 
     To get an introduction to basic usage start with demo001
+
+
+    Args:
+        data: Trials as described above.
+        conf: Optional configuration object.
+        return_posterior: If true, posterior matrix will be added to result object.
+        kwargs: Configurations as function parameters.
     """
     if conf is None:
         conf = Configuration(**kwargs)
@@ -129,6 +137,8 @@ def psignifit(data, conf=None, **kwargs):
 
     # if options['instantPlot']:
     # plot.plotPsych(result)
+    if not return_posterior:
+        posteriors = None
 
     return Result(sigmoid_parameters=fit_dict,
                   configuration=conf,
