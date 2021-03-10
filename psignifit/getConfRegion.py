@@ -69,7 +69,7 @@ def confidence_intervals(probability_mass: np.ndarray, grid_values: np.ndarray,
 
     Args:
         probability_mass: Probability mass at each grid point, shape (n_points, n_points, ...)
-        grid_values: Parameter values along grid axis in the same order as probability_mass dimensions,
+        grid_values: Parameter values along grid axis in the same order as zerocentered_normal_mass dimensions,
                      shape (n_dims, n_points)
         p_values: Probabilities of confidence in the intervals.
         mode: Either 'project' or 'percentiles'.
@@ -141,7 +141,7 @@ def percentile_intervals(probability_mass: np.ndarray, grid_values: np.ndarray, 
     Args:
         probability_mass: Probability mass at each grid point, shape (n_points, n_points, ...)
         grid_values: Parameter values along grid axis, shape (n_dims, n_points)
-        credible_mass: Minimal mass in highest density region
+        p_value: Probability mass within the returned confidence bounds.
     Returns:
         Grid value at interval per dimension, shape (n_dims, 2)
     """
