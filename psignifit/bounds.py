@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Dict
+
+import numpy as np
 
 from .utils import norminv
-from .typing import ExperimentType
+from .typing import ExperimentType, ParameterBounds
 from .typing import ParameterBounds
 
 
@@ -59,3 +61,25 @@ def parameter_bounds(wmin: float, etype: ExperimentType, srange: Tuple[float, fl
         'gamma': gamma,
         'eta': (0., 1 - 1e-10)
     }
+
+
+def mask_bounds(grid: Dict[str, Optional[np.ndarray]], mesh_mask: np.ndarray) -> ParameterBounds:
+    """ Calculate the bounds as the first and last parameter value under the mask.
+
+    Args:
+        grid: Dict with arrays of possible parameter values.
+        mesh_mask: Indicating the accepted(True) and ignored(False) parameter value combination.
+
+    Returns:
+        The new bounds per parameter as the first and last valid parameter value.
+    """
+    new_bounds = dict()
+    mask_indices = np.nonzero(mesh_mask)
+    for axis, (parameter_name, parameter_values) in enumerate(sorted(grid.items())):
+        # get the first and last indices for this parameter's mask
+        # and enlarged of one element in both directions
+        left = max(0, mask_indices[axis].min() - 1)
+        right = min(mask_indices[axis].max(), len(parameter_values) - 1)
+        # update the bounds
+        new_bounds[parameter_name] = (parameter_values[left], parameter_values[right])
+    return new_bounds

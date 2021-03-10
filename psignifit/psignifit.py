@@ -7,13 +7,13 @@ import numpy as np
 
 from . import priors as _priors
 from . import sigmoids
-from .bounds import parameter_bounds
+from .bounds import parameter_bounds, mask_bounds
 from .configuration import Configuration
 from .getConfRegion import confidence_intervals
 from .likelihood import posterior_grid, max_posterior
 from .result import Result
 from .typing import ParameterBounds, Prior
-from .utils import (integral_weights, PsignifitException, normalize, get_grid, check_data)
+from .utils import (PsignifitException, normalize, get_grid, check_data)
 
 
 def psignifit(data, conf=None, **kwargs):
@@ -187,19 +187,10 @@ def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
     grid = get_grid(bounds, steps_moving_bounds)
     posteriors_sparse, grid_max = posterior_grid(data, sigmoid=sigmoid, priors=priors, grid=grid)
     # indices on the grid of the volumes that contribute more than `tol` to the overall integral
-    mask = np.nonzero(posteriors_sparse >= max_bound_value)
-    for idx, parm in enumerate(sorted(bounds.keys())):
-        pgrid = grid[parm]
-        # get the indeces for this parameter's axis and sort it
-        axis = np.sort(mask[idx])
-        # new bounds are the extrema of this axis, but enlarged of one element
-        # in both directions
-        left = max(0, axis[0] - 1)
-        right = min(axis[-1] + 1, len(pgrid) - 1)
-        # update the bounds
-        bounds[parm] = (pgrid[left], pgrid[right])
+    mask = posteriors_sparse >= max_bound_value
+    tighter_bounds = mask_bounds(grid, mask)
     # do dense grid posterior_grid evaluation
-    grid = get_grid(bounds, grid_steps)
+    grid = get_grid(tighter_bounds, grid_steps)
     posteriors, grid_max = posterior_grid(data, sigmoid=sigmoid, priors=priors, grid=grid)
     print('fit0', grid_max)
     fixed_param = {}
@@ -211,4 +202,5 @@ def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
     fit_dict = max_posterior(data, param_init=grid_max, param_fixed=fixed_param, sigmoid=sigmoid, priors=priors)
 
     return fit_dict, posteriors, grid
+
 

@@ -1,7 +1,8 @@
 import pytest
+import numpy as np
 from numpy.testing import assert_almost_equal
 
-from psignifit.bounds import parameter_bounds
+from psignifit.bounds import parameter_bounds, mask_bounds
 from psignifit.typing import ExperimentType
 
 
@@ -24,3 +25,17 @@ def test_parameter_bounds():
     parameter_bounds(wmin=0.1, etype=ExperimentType.N_AFC.value, srange=(0, 1), alpha=0.01, echoices=2)
     with pytest.raises(ValueError):
         parameter_bounds(wmin=0.1, etype='unknown experiment', srange=(0, 1), alpha=0.01)
+
+
+def test_mask_bounds():
+    grid = {'A': np.array([0.0, 0.0, 0.1, 0.2, 0.2, 0.1, 0.1]),
+            'B': np.array([0.0, 0.05, 0.1, 0.2, 0.4, 0.4, 0.0])}
+    A, B = np.meshgrid(grid['A'], grid['B'], sparse=True)
+    mask = (A + B) / 2 > 0.2
+    # 1. (min, max) nonzero indices: [(4, 5), (2, 6)]
+    # 2. increase / decrease by 1 and clip at border: [(3, 6), (1, 6)]
+    # 3. return corresponding grid values:
+    assert {'A': (0.2, 0.1), 'B': (0.05, 0.0)} == mask_bounds(grid, mask)
+
+
+
