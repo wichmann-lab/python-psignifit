@@ -4,7 +4,7 @@ from typing import Tuple, Optional, Dict
 import numpy as np
 
 from .utils import norminv
-from .typing import ExperimentType, ParameterBounds
+from .typing import ExperimentType
 from .typing import ParameterBounds
 
 

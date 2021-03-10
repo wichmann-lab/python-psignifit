@@ -21,11 +21,12 @@ class Result:
     configuration: Configuration
     confidence_intervals: Dict[str, List[Tuple[float, float]]]
     posterior: np.ndarray = dataclasses.field(compare=False)
+
     # If future attributes should contain numpy arrays,
     # run np.asarray in __post_init__.
     # Otherwise, load_json may result in nested lists instead.
     def __post_init__(self):
-         self.posterior = np.asarray(self.posterior)
+        self.posterior = np.asarray(self.posterior)
 
     @classmethod
     def from_dict(cls, result_dict: Dict[str, Any]):

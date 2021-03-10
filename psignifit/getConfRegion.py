@@ -128,7 +128,7 @@ def grid_hdi(probability_mass: np.ndarray, grid_values: np.ndarray, credible_mas
     intervals = np.empty((hd_region.ndim, 2))
     for d in dims:
         projected_region = hd_region.any(axis=tuple(dims[dims != d]))
-        interval_ix = projected_region.reshape(-1).nonzero()[[0, -1]]
+        interval_ix = projected_region.reshape(-1).nonzero()[0][[0, -1]]
         intervals[d, :] = grid_values[d][interval_ix]
     return intervals
 

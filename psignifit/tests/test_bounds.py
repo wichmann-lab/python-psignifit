@@ -36,6 +36,3 @@ def test_mask_bounds():
     # 2. increase / decrease by 1 and clip at border: [(3, 6), (1, 6)]
     # 3. return corresponding grid values:
     assert {'A': (0.2, 0.1), 'B': (0.05, 0.0)} == mask_bounds(grid, mask)
-
-
-

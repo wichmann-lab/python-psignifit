@@ -93,4 +93,3 @@ def test_percentile_intervals(zerocentered_normal_mass, grid_values):
     assert_allclose(1 * STD_CI, percentile_intervals(zerocentered_normal_mass, grid_values, 0.6827), atol=2 * ATOL)
     assert_allclose(2 * STD_CI, percentile_intervals(zerocentered_normal_mass, grid_values, 0.9545), atol=4 * ATOL)
     assert_allclose(3 * STD_CI, percentile_intervals(zerocentered_normal_mass, grid_values, 0.9973), atol=4 * ATOL)
-

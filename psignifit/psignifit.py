@@ -231,5 +231,3 @@ def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
     fit_dict = max_posterior(data, param_init=grid_max, param_fixed=fixed_param, sigmoid=sigmoid, priors=priors)
 
     return fit_dict, posteriors, grid
-
-
