@@ -182,13 +182,32 @@ def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
                     priors: Dict[str, Prior], sigmoid: sigmoids.Sigmoid,
                     steps_moving_bounds: Dict[str, int], max_bound_value: float,
                     grid_steps: Dict[str, int]) -> Dict[str, float]:
-    """ Fit sigmoid parameters in a three step procedure. """
+    """ Fit sigmoid parameters in a three step procedure.
+
+    1. Estimate posterior on wide bounds with large steps in between.
+    2. Estimate tighter bounds of relevant probability mass (> max_bound_values)
+       and calculate posterior there using fine steps.
+    3. Fit the sigmoid parameters using the fine and tight posterior grid.
+
+    Args:
+         data: Training samples.
+         bounds: Dict of (min, max) parameter value.
+         priors: Dict of prior function per parameter.
+         sigmoid: Sigmoid function to fit.
+         steps_moving_bounds: Dict of number of possible parameter values for loose bounds.
+         max_bound_value: Threshold posterior on loose grid, used to tighten bounds.
+         grid_steps: Dict of number of possible parameter values for tight bounds.
+
+    Returns:
+        fit_dict: Dict of fitted parameter value.
+        posteriors: Probability per parameter combination.
+        grid: Dict of possible parameter values.
+    """
     # do first sparse grid posterior_grid evaluation
     grid = get_grid(bounds, steps_moving_bounds)
     posteriors_sparse, grid_max = posterior_grid(data, sigmoid=sigmoid, priors=priors, grid=grid)
     # indices on the grid of the volumes that contribute more than `tol` to the overall integral
-    mask = posteriors_sparse >= max_bound_value
-    tighter_bounds = mask_bounds(grid, mask)
+    tighter_bounds = mask_bounds(grid, posteriors_sparse >= max_bound_value)
     # do dense grid posterior_grid evaluation
     grid = get_grid(tighter_bounds, grid_steps)
     posteriors, grid_max = posterior_grid(data, sigmoid=sigmoid, priors=priors, grid=grid)
