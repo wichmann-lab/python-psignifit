@@ -136,7 +136,7 @@ def plotPsych(result,
     
     #plt.hold(holdState)
     if (showImediate):
-        plt.show(0)
+        plt.show(block=False)
     return axisHandle
 
 def plotsModelfit(result,
@@ -234,7 +234,7 @@ def plotsModelfit(result,
     
     plt.tight_layout()
     if (showImediate):
-        plt.show(0)
+        plt.show(block=False)
 
 
 def plotMarginal(result,                  
@@ -317,7 +317,7 @@ def plotMarginal(result,
     if (showImediate):
         plt.xlim([min(x), max(x)])
         plt.ylim([0, 1.1*max(marginal)])
-        plt.show(0)
+        plt.show(block=False)
     return axisHandle
     
 
@@ -532,7 +532,7 @@ def plotPrior(result,
         plt.subplot(2,3,3)
         plt.plot(np.array(xcurrent),result['options']['priors'][2](np.array(xcurrent)),'.',c=color,ms=markerSize)
     if (showImediate):
-        plt.show(0)
+        plt.show(block=False)
 
 
 def plot2D(result,par1,par2, 
@@ -594,4 +594,4 @@ def plot2D(result,par1,par2,
     for side in ['top','right']: axisHandle.spines[side].set_visible(False)
     plt.ticklabel_format(style='sci',scilimits=(-2,4))
     if (showImediate):
-        plt.show(0)
+        plt.show(block=False)
