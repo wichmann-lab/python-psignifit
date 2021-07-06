@@ -447,7 +447,7 @@ def psignifitCore(data, options):
     elif options['estimateType'] == 'mean':
         # get mean estimate
         Fit = np.zeros([d,1])
-        for idx in range[0:d]:
+        for idx in range(d):
             Fit[idx] = np.sum(result['marginals'][idx]*result['marginalsW'][idx]*result['marginalsX'][idx])
         
         result['Fit'] = _deepcopy(Fit)
