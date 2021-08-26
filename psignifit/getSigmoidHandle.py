@@ -25,7 +25,7 @@ def getSigmoidHandle(options):
     alpha = options['widthalpha']
     sigmoid = options['sigmoidName']
     PC = options['threshPC']
-    if sigmoid[0:2]=='neg':
+    if sigmoid[0:3]=='neg':
         PC = 1-PC;
     
     
