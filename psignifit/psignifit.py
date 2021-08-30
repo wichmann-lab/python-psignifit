@@ -591,7 +591,7 @@ def getSlopePC(result, pCorrect, unscaled = False):
         slopeNormalized = scipy.stats.norm.pdf(normalizedStimLevel)
         slope = slopeNormalized *C/theta0[1]
     elif sigName in ['logistic','neg_logistic']:
-        stimLevel = theta0[0] - theta0[1]*np.log((1/pCorrectUnscaled-1)-np.log(1/PC-1))/2/np.log(1/alpha-1)
+        stimLevel = theta0[0] - theta0[1]*(np.log(1/pCorrectUnscaled-1)-np.log(1/PC-1))/2/np.log(1/alpha-1)
         C = 2 * np.log(1/alpha - 1) / theta0[1]
         d = np.log(1/PC-1)
         slope = C*np.exp(-C*(stimLevel-theta0[0])+d)/(1+np.exp(-C*(stimLevel-theta0[0])+d))**2
