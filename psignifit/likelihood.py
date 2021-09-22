@@ -41,7 +41,12 @@ def posterior_grid(data, sigmoid: Sigmoid, priors: Dict[str, Prior],
             grid_max[name] = None
         else:
             grid_max[name] = grid_values[index]
-    return p, grid_max
+
+    # normalize the posterior_grid
+    posterior_volumes = p * integral_weights([grid_value for _, grid_value in sorted(grid.items())])
+    posterior_integral = posterior_volumes.sum()
+    posterior_mass = posterior_volumes / posterior_integral
+    return posterior_mass, grid_max
 
 
 @fp_error_handler(divide='ignore')  # noqa: C901, function is too complex
@@ -197,3 +202,36 @@ def max_posterior(data, param_init: Dict[str, float], param_fixed: Dict[str, flo
     optimized_param = dict(zip(sorted(param_init.keys()), optimized_values))
     print(param_init, optimized_param)
     return {**param_fixed, **optimized_param}
+
+
+def integral_weights(grid):
+    """Calculate integral of multivariate function using composite trapezoidal rule
+
+    Input parameters:
+       -  `func` is an array of dimensions n_1 x n_2 x ... x n_m
+       - `grid` is a tuple (s_1, s_2, ..., s_m), where `s_i` are the points
+          on dimension `i` along which `func` has been evaluated
+
+    Outputs;
+       - integral is a number
+       - `deltas` is the grid of deltas used for the integration, for each
+         dimension these are:
+         (x1-x0)/2, x1-x0, x2-x1, ..., x(m-1)-x(m-2), (xm-x(m-1))/2
+         `weights` has the same shape as `func`
+    """
+    deltas = []
+    for steps in grid:
+        # handle singleton dimensions
+        if steps is None or len(steps) <= 1:
+            deltas.append(1)
+        else:
+            delta = np.empty_like(steps, dtype=float)
+            delta[1:] = np.diff(steps)
+            # delta weight is half at the bounds of the integration interval
+            delta[0] = delta[1] / 2
+            delta[-1] = delta[-1] / 2
+            deltas.append(delta)
+
+    # create a meshgrid for each dimension
+    mesh_grids = np.meshgrid(*deltas, copy=False, sparse=True, indexing='ij')
+    return np.prod(mesh_grids, axis=0)

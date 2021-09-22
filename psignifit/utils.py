@@ -88,73 +88,6 @@ def normalize(func: Prior, interval: Tuple[float, float], steps: int = 10000) ->
     return nfunc
 
 
-def integral_weights(grid):
-    """Calculate integral of multivariate function using composite trapezoidal rule
-
-    Input parameters:
-       -  `func` is an array of dimensions n_1 x n_2 x ... x n_m
-       - `grid` is a tuple (s_1, s_2, ..., s_m), where `s_i` are the points
-          on dimension `i` along which `func` has been evaluated
-
-    Outputs;
-       - integral is a number
-       - `deltas` is the grid of deltas used for the integration, for each
-         dimension these are:
-         (x1-x0)/2, x1-x0, x2-x1, ..., x(m-1)-x(m-2), (xm-x(m-1))/2
-         `weights` has the same shape as `func`
-    """
-    deltas = []
-    for steps in grid:
-        # handle singleton dimensions
-        if steps is None or len(steps) <= 1:
-            deltas.append(1)
-        else:
-            delta = np.empty_like(steps, dtype=float)
-            delta[1:] = np.diff(steps)
-            # delta weight is half at the bounds of the integration interval
-            delta[0] = delta[1] / 2
-            delta[-1] = delta[-1] / 2
-            deltas.append(delta)
-
-    # create a meshgrid for each dimension
-    mesh_grids = np.meshgrid(*deltas, copy=False, sparse=True, indexing='ij')
-    return np.prod(mesh_grids, axis=0)
-
-
-def pool_data(data, xtol=0, max_gap=np.inf, max_length=np.inf):
-    """
-    Pool trials together which differ at maximum pool_xtol from the first one
-    it finds, are separated by maximally pool_max_gap trials of other levels and
-    at max pool_max_length trials appart in general.
-    """
-    ndata = data.shape[0]
-    seen = [False] * ndata
-    cum_ntrials = [0] + list(data[:, 2].cumsum())
-
-    pool = []
-    for i in range(ndata):
-        if not seen[i]:
-            current = data[i, 0]
-            block = []
-            gap = 0
-            for j in range(i, ndata):
-                if (cum_ntrials[j + 1] -
-                        cum_ntrials[i]) > max_length or gap > max_gap:
-                    break
-                level, ncorrect, ntrials = data[j, :]
-                if abs(level - current) <= xtol and not seen[j]:
-                    seen[j] = True
-                    gap = 0
-                    block.append((level * ntrials, ncorrect, ntrials))
-                else:
-                    gap += ntrials
-
-            level, ncorrect, ntrials = np.sum(block, axis=0)
-            pool.append((level / ntrials, ncorrect, ntrials))
-
-    return np.array(pool)
-
-
 def strToDim(string):
     """
     Finds the number corresponding to a dim/parameter given as a string.
@@ -176,3 +109,37 @@ def strToDim(string):
         return 3, r'$\gamma$'
     elif s in ['sigma', 'std', 's', 'eta', 'e', '4']:
         return 4, r'$\eta$'
+
+
+def check_data(data: np.ndarray, logspace: Optional[bool] = None) -> np.ndarray:
+    """ Check data format, type and range.
+
+    Args:
+        data: The data matrix with columns levels, number of correct and number of trials
+        logspace: Data should be used logarithmically. If None, no test on logspace is performed.
+    Returns:
+        data as float numpy array
+    Raises:
+        PsignifitException: if checks fail.
+    """
+    data = np.asarray(data, dtype=float)
+    if len(data.shape) != 2 and data.shape[1] != 3:
+        raise PsignifitException("Expects data to be two dimensional with three columns, got {data.shape = }")
+    levels, ncorrect, ntrials = data[:, 0], data[:, 1], data[:, 2]
+
+    # levels should show some variance
+    if levels.max() == levels.min():
+        raise PsignifitException('Your stimulus levels are all identical.'
+                                 ' They can not be fitted by a sigmoid!')
+    # ncorrect and ntrials should be integers
+    if not np.allclose(ncorrect, ncorrect.astype(int)):
+        raise PsignifitException(
+            'The number correct column contains non integer'
+            ' numbers!')
+    if not np.allclose(ntrials, ntrials.astype(int)):
+        raise PsignifitException('The number of trials column contains non'
+                                 ' integer numbers!')
+    if logspace is True and levels.min() <= 0:
+        raise PsignifitException(f'Sigmoid {data.sigmoid} expects positive stimulus level data.')
+
+    return data

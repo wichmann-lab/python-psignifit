@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 
+import psignifit.likelihood
 from psignifit import likelihood
 from psignifit import sigmoids
 from psignifit.priors import default_priors
@@ -59,12 +60,15 @@ def test_log_posterior_zero_eta():
     np.testing.assert_allclose(log_pp.max(), -559.8134)
 
 
+MAX = .097163
+
+
 @pytest.mark.parametrize(
     "experiment_type,result_shape,result_max",
     [
-        ("yes/no", (15, 10, 10, 25, 30), 1.),
-        ("3AFC", (20, 1, 10, 30, 40), 1.),
-        ("equal asymptote", (20, 1, 10, 30, 40), 1.),  # gamma is none in grid
+        ("yes/no", (15, 10, 10, 25, 30), .102878),
+        ("3AFC", (20, 1, 10, 30, 40), .080135),
+        ("equal asymptote", (20, 1, 10, 30, 40), MAX),  # gamma is none in grid
     ]
 )
 def test_posterior_grid(experiment_type, result_shape, result_max):
@@ -73,7 +77,7 @@ def test_posterior_grid(experiment_type, result_shape, result_max):
     posterior, max_grid = likelihood.posterior_grid(data, sigmoid, priors, grid)
 
     np.testing.assert_equal(posterior.shape, result_shape)
-    np.testing.assert_allclose(posterior.max(), result_max)
+    np.testing.assert_allclose(posterior.max(), result_max, atol=0.001)
     if experiment_type == "equal asymptote":
         assert grid['gamma'] is None
         assert max_grid['gamma'] is None
@@ -82,9 +86,9 @@ def test_posterior_grid(experiment_type, result_shape, result_max):
 @pytest.mark.parametrize(
     "experiment_type,result_shape,result_max",
     [
-        ("yes/no", (15, 10, 10, 25, 30), 1.),
-        ("3AFC", (20, 1, 10, 30, 40), 1.),
-        ("equal asymptote", (20, 1, 10, 30, 40), 1.),  # gamma is none in grid
+        ("yes/no", (15, 10, 10, 25, 30), MAX),
+        ("3AFC", (20, 1, 10, 30, 40), MAX),
+        ("equal asymptote", (20, 1, 10, 30, 40), MAX),  # gamma is none in grid
     ]
 )
 def test_max_posterior(experiment_type, result_shape, result_max):
@@ -106,3 +110,22 @@ def test_max_posterior(experiment_type, result_shape, result_max):
 
     if experiment_type == "equal asymptote":
         assert max_param['gamma'] is None
+
+
+def test_integral_weights():
+    # Simple case
+    weights = psignifit.likelihood.integral_weights([[0, 1], [0, 1], [0, 1]])
+    assert weights.sum() == 1.
+    assert weights.shape == (2, 2, 2)
+    np.testing.assert_equal(weights, np.full((2, 2, 2), 1 / 8))
+
+    # Various differences
+    weights = psignifit.likelihood.integral_weights([[0, 1], [0, 2], [2, 6]])
+    assert weights.sum() == 8
+    assert weights.shape == (2, 2, 2)
+    np.testing.assert_equal(weights, np.full((2, 2, 2), 1))
+
+    # Various number of steps and None entries
+    weights = psignifit.likelihood.integral_weights([[0, 1], [5, 6, 9], None, [5]])
+    assert weights.sum() == 3.
+    assert weights.shape == (2, 3, 1, 1)

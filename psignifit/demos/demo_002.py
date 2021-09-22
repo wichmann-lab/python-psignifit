@@ -150,6 +150,7 @@ config['width_alpha'] = .1
 # a rather large number of simulations. Refer to the paper to learn more
 # about this.
 
+
 config['beta_prior'] = 15
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
