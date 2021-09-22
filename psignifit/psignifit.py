@@ -1,21 +1,23 @@
 # -*- coding: utf-8 -*-
 
 import warnings
-from typing import Dict
+from typing import Dict, Optional
 
 import numpy as np
 
 from . import priors as _priors
 from . import sigmoids
-from .bounds import parameter_bounds
+from .bounds import parameter_bounds, mask_bounds
 from .configuration import Configuration
+from .getConfRegion import confidence_intervals
 from .likelihood import posterior_grid, max_posterior
 from .result import Result
 from .typing import ParameterBounds, Prior
-from .utils import (integral_weights, PsignifitException, normalize, get_grid, check_data)
+from .utils import (PsignifitException, normalize, get_grid, check_data)
 
 
-def psignifit(data, conf=None, **kwargs):
+def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
+              return_posterior: bool = False, **kwargs) -> Result:
     """
     Main function for fitting psychometric functions function
 
@@ -33,6 +35,13 @@ def psignifit(data, conf=None, **kwargs):
     You can find an explanation for all fields of the result in demo006
 
     To get an introduction to basic usage start with demo001
+
+
+    Args:
+        data: Trials as described above.
+        conf: Optional configuration object.
+        return_posterior: If true, posterior matrix will be added to result object.
+        kwargs: Configurations as function parameters.
     """
     if conf is None:
         conf = Configuration(**kwargs)
@@ -41,8 +50,9 @@ def psignifit(data, conf=None, **kwargs):
         raise PsignifitException(
             "Can't handle conf together with other keyword arguments!")
 
-    sigmoid = sigmoids.sigmoid_by_name(conf.sigmoid, PC=conf.thresh_PC, alpha=conf.width_alpha)
+    sigmoid = conf.make_sigmoid()
     data = check_data(data, logspace=sigmoid.logspace)
+
     levels, ntrials = data[:, 0], data[:, 2]
     if conf.verbose:
         _warn_common_data_mistakes(levels, ntrials, has_user_stimulus_range=conf.stimulus_range is not None,
@@ -82,10 +92,14 @@ def psignifit(data, conf=None, **kwargs):
     for parameter, prior in priors.items():
         priors[parameter] = normalize(prior, bounds[parameter])
 
-    fit_dict = _fit_parameters(data, bounds, priors, sigmoid, conf.steps_moving_bounds, conf.max_bound_value, conf.grid_steps)
+    fit_dict, posteriors, grid = _fit_parameters(data, bounds, priors, sigmoid, conf.steps_moving_bounds,
+                                                 conf.max_bound_value, conf.grid_steps)
 
+    grid_values = [grid_value for _, grid_value in sorted(grid.items())]
+    intervals = confidence_intervals(posteriors, grid_values, conf.confP, conf.CI_method)
+    intervals_dict = {param: interval_per_p.tolist()
+                      for param, interval_per_p in zip(sorted(grid.keys()), intervals)}
     # take care of confidence intervals/condifence region
-
     # XXX FIXME: take care of post-ptocessing later
     # ''' after processing '''
     # # check that the marginals go to nearly 0 at the bounds of the grid
@@ -123,9 +137,13 @@ def psignifit(data, conf=None, **kwargs):
 
     # if options['instantPlot']:
     # plot.plotPsych(result)
+    if not return_posterior:
+        posteriors = None
 
     return Result(sigmoid_parameters=fit_dict,
-                  configuration=conf)
+                  configuration=conf,
+                  confidence_intervals=intervals_dict,
+                  posterior=posteriors)
 
 
 def _warn_common_data_mistakes(levels, ntrials, has_user_stimulus_range, pool_max_blocks) -> None:
@@ -174,27 +192,34 @@ def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
                     priors: Dict[str, Prior], sigmoid: sigmoids.Sigmoid,
                     steps_moving_bounds: Dict[str, int], max_bound_value: float,
                     grid_steps: Dict[str, int]) -> Dict[str, float]:
-    """ Fit sigmoid parameters in a three step procedure. """
+    """ Fit sigmoid parameters in a three step procedure.
+
+    1. Estimate posterior on wide bounds with large steps in between.
+    2. Estimate tighter bounds of relevant probability mass (> max_bound_values)
+       and calculate posterior there using fine steps.
+    3. Fit the sigmoid parameters using the fine and tight posterior grid.
+
+    Args:
+         data: Training samples.
+         bounds: Dict of (min, max) parameter value.
+         priors: Dict of prior function per parameter.
+         sigmoid: Sigmoid function to fit.
+         steps_moving_bounds: Dict of number of possible parameter values for loose bounds.
+         max_bound_value: Threshold posterior on loose grid, used to tighten bounds.
+         grid_steps: Dict of number of possible parameter values for tight bounds.
+
+    Returns:
+        fit_dict: Dict of fitted parameter value.
+        posteriors: Probability per parameter combination.
+        grid: Dict of possible parameter values.
+    """
     # do first sparse grid posterior_grid evaluation
     grid = get_grid(bounds, steps_moving_bounds)
     posteriors_sparse, grid_max = posterior_grid(data, sigmoid=sigmoid, priors=priors, grid=grid)
-    # normalize the posterior_grid
-    posterior_volumes = posteriors_sparse * integral_weights([grid_value for _, grid_value in sorted(grid.items())])
-    posterior_integral = posterior_volumes.sum()
     # indices on the grid of the volumes that contribute more than `tol` to the overall integral
-    mask = np.nonzero(posterior_volumes / posterior_integral >= max_bound_value)
-    for idx, parm in enumerate(sorted(bounds.keys())):
-        pgrid = grid[parm]
-        # get the indeces for this parameter's axis and sort it
-        axis = np.sort(mask[idx])
-        # new bounds are the extrema of this axis, but enlarged of one element
-        # in both directions
-        left = max(0, axis[0] - 1)
-        right = min(axis[-1] + 1, len(pgrid) - 1)
-        # update the bounds
-        bounds[parm] = (pgrid[left], pgrid[right])
+    tighter_bounds = mask_bounds(grid, posteriors_sparse >= max_bound_value)
     # do dense grid posterior_grid evaluation
-    grid = get_grid(bounds, grid_steps)
+    grid = get_grid(tighter_bounds, grid_steps)
     posteriors, grid_max = posterior_grid(data, sigmoid=sigmoid, priors=priors, grid=grid)
     print('fit0', grid_max)
     fixed_param = {}
@@ -204,4 +229,5 @@ def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
         elif len(parm_values) <= 1:
             fixed_param[parm_name] = parm_values[0]
     fit_dict = max_posterior(data, param_init=grid_max, param_fixed=fixed_param, sigmoid=sigmoid, priors=priors)
-    return fit_dict
+
+    return fit_dict, posteriors, grid
