@@ -14,6 +14,7 @@ import psignifit as ps
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # We will need some fitted function for illustration. Thus we first fit our
 # standard data from DEMO_001 again:
+import psignifit.psigniplot
 
 data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
                  [0.0020, 44.0000, 90.0000], [0.0025, 44.0000, 90.0000],
@@ -174,7 +175,7 @@ data32 = np.array([[0.0010, 23.0000, 45.0000], [0.0015, 25.0000, 45.0000],
 # now we can check whether our different pairs show biased behaviour:
 
 # We start with the first pair of data:
-ps.plot_bias_analysis(data11, data12, **config)
+psignifit.psigniplot.plot_bias_analysis(data11, data12, **config)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # This command will open a figure, which constains plots for the first
@@ -194,7 +195,7 @@ ps.plot_bias_analysis(data11, data12, **config)
 # changed much.
 
 # Next, we check our second split of data:
-ps.plot_bias_analysis(data21, data22, **config)
+psignifit.psigniplot.plot_bias_analysis(data21, data22, **config)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # In this case there seems to be very strong "finger bias", i.e. the
@@ -212,7 +213,7 @@ ps.plot_bias_analysis(data21, data22, **config)
 # be usable.
 
 # Now we have a look at our third splitting:
-ps.plot_bias_analysis(data31, data32, **config)
+psignifit.psigniplot.plot_bias_analysis(data31, data32, **config)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # In this case the guessing rate does not seem to differ between intervals,
