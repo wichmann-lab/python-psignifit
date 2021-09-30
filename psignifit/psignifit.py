@@ -60,7 +60,10 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
 
     stimulus_range = conf.stimulus_range
     if stimulus_range is None:
-        stimulus_range = (levels.min(), levels.max())
+        if sigmoid.logspace:
+            stimulus_range = (levels[levels > 0].min(), levels.max())
+        else:
+            stimulus_range = (levels.min(), levels.max())
     if sigmoid.logspace:
         stimulus_range = (np.log(stimulus_range[0]), np.log(stimulus_range[1]))
         levels = np.log(levels)

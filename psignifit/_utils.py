@@ -47,7 +47,7 @@ def check_data(data: np.ndarray, logspace: Optional[bool] = None) -> np.ndarray:
     if not np.allclose(ntrials, ntrials.astype(int)):
         raise PsignifitException('The number of trials column contains non'
                                  ' integer numbers!')
-    if logspace is True and levels.min() <= 0:
-        raise PsignifitException(f'Sigmoid {data.sigmoid} expects positive stimulus level data.')
+    if logspace is True and levels.min() < 0:
+        raise PsignifitException(f'Sigmoid {data.sigmoid} expects non-negative stimulus level data.')
 
     return data
