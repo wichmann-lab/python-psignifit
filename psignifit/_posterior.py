@@ -236,38 +236,15 @@ def maximize_posterior(data, param_init: Dict[str, float], param_fixed: Dict[str
     init_values = [value for name, value in sorted(param_init.items())]
     optimized_values = optimize.fmin(objective, init_values, disp=False)
     optimized_param = dict(zip(sorted(param_init.keys()), optimized_values))
-    print(param_init, optimized_param)
     return {**param_fixed, **optimized_param}
 
 
-def integral_weights(grid):
-    """Calculate integral of multivariate function using composite trapezoidal rule
+def marginalize_posterior(parameter_grid: ParameterGrid, posterior_mass: np.ndarray) -> Dict[str, np.ndarray]:
+    marginals = dict()
+    for i, (param, grid) in enumerate(sorted(parameter_grid.items())):
+        if grid is None:
+            marginals[param] = None
+        axis = tuple(range(0, i)) + tuple(range(i + 1, len(parameter_grid)))
+        marginals[param] = np.squeeze(posterior_mass.sum(axis))
 
-    Input parameters:
-       -  `func` is an array of dimensions n_1 x n_2 x ... x n_m
-       - `grid` is a tuple (s_1, s_2, ..., s_m), where `s_i` are the points
-          on dimension `i` along which `func` has been evaluated
-
-    Outputs;
-       - integral is a number
-       - `deltas` is the grid of deltas used for the integration, for each
-         dimension these are:
-         (x1-x0)/2, x1-x0, x2-x1, ..., x(m-1)-x(m-2), (xm-x(m-1))/2
-         `weights` has the same shape as `func`
-    """
-    deltas = []
-    for steps in grid:
-        # handle singleton dimensions
-        if steps is None or len(steps) <= 1:
-            deltas.append(1)
-        else:
-            delta = np.empty_like(steps, dtype=float)
-            delta[1:] = np.diff(steps)
-            # delta weight is half at the bounds of the integration interval
-            delta[0] = delta[1] / 2
-            delta[-1] = delta[-1] / 2
-            deltas.append(delta)
-
-    # create a meshgrid for each dimension
-    mesh_grids = np.meshgrid(*deltas, copy=False, sparse=True, indexing='ij')
-    return np.prod(mesh_grids, axis=0)
+    return marginals

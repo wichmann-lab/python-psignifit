@@ -92,45 +92,11 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
     intervals = confidence_intervals(posteriors, grid_values, conf.confP, conf.CI_method)
     intervals_dict = {param: interval_per_p.tolist()
                       for param, interval_per_p in zip(sorted(grid.keys()), intervals)}
-    # take care of confidence intervals/condifence region
-    # XXX FIXME: take care of post-ptocessing later
-    # ''' after processing '''
-    # # check that the marginals go to nearly 0 at the bounds of the grid
-    # if options['verbose'] > -5:
-    # ## TODO ###
-    # when the marginal on the bounds not smaller than 1/1000 of the peak
-    # it means that the prior of the corresponding parameter has an influence of
-    # the result ( 1)prior may be too narrow, 2) you know what you are doing).
-    # if they were using the default, this is a bug in the software or your data
-    # are highly unusual, if they changed the defaults the error can be more verbose
-    # "the choice of your prior or of your bounds has a significant influence on the
-    # confidence interval widths and or the max posterior_grid estimate"
-    # ########
-    # if result['marginals'][0][0] * result['marginalsW'][0][0] > .001:
-    # warnings.warn('psignifit:boundWarning\n'\
-    # 'The marginal for the threshold is not near 0 at the lower bound.\n'\
-    # 'This indicates that smaller Thresholds would be possible.')
-    # if result['marginals'][0][-1] * result['marginalsW'][0][-1] > .001:
-    # warnings.warn('psignifit:boundWarning\n'\
-    # 'The marginal for the threshold is not near 0 at the upper bound.\n'\
-    # 'This indicates that your data is not sufficient to exclude much higher thresholds.\n'\
-    # 'Refer to the paper or the manual for more info on this topic.')
-    # if result['marginals'][1][0] * result['marginalsW'][1][0] > .001:
-    # warnings.warn('psignifit:boundWarning\n'\
-    # 'The marginal for the width is not near 0 at the lower bound.\n'\
-    # 'This indicates that your data is not sufficient to exclude much lower widths.\n'\
-    # 'Refer to the paper or the manual for more info on this topic.')
-    # if result['marginals'][1][-1] * result['marginalsW'][1][-1] > .001:
-    # warnings.warn('psignifit:boundWarning\n'\
-    # 'The marginal for the width is not near 0 at the lower bound.\n'\
-    # 'This indicates that your data is not sufficient to exclude much higher widths.\n'\
-    # 'Refer to the paper or the manual for more info on this topic.')
+    marginals = marginalize_posterior(grid, posteriors)
 
     if conf.verbose:
         _warn_marginal_sanity_checks(marginals)
 
-    # if options['instantPlot']:
-    # plot.plotPsych(result)
     if not return_posterior:
         posteriors = None
 
@@ -219,7 +185,7 @@ def _warn_marginal_sanity_checks(marginals):
 
 
 def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
-                    priors: Dict[str, Prior], sigmoid: sigmoids.Sigmoid,
+                    priors: Dict[str, Prior], sigmoid: _sigmoids.Sigmoid,
                     steps_moving_bounds: Dict[str, int], max_bound_value: float,
                     grid_steps: Dict[str, int]) -> Dict[str, float]:
     """ Fit sigmoid parameters in a three step procedure.
