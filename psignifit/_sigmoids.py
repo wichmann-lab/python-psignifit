@@ -9,12 +9,21 @@ import numpy as np
 import scipy as sp
 import scipy.stats
 
-from .utils import normcdf
-from .utils import norminv
-from .utils import norminvg
-from .utils import t1cdf
-from .utils import t1icdf
+# Alias common distribution to be reused all over the place.
 
+# - Normal distribution:
+#   - This one is useful when we want mean=0, std=1
+#     Percent point function -> inverse of cumulative normal distribution function
+#     returns percentiles
+norminv = scipy.stats.norm(loc=0, scale=1).ppf
+#   - also instantiate a generic version
+norminvg = scipy.stats.norm.ppf
+#   - Cumulative normal distribution function
+normcdf = scipy.stats.norm.cdf
+
+# T-Student with df=1
+t1cdf = scipy.stats.t(1).cdf
+t1icdf = scipy.stats.t(1).ppf
 
 # sigmoid can be calculated on single floats, or on numpy arrays of floats
 N = TypeVar('N', float, np.ndarray)
