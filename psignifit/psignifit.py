@@ -5,15 +5,15 @@ from typing import Dict, Optional
 
 import numpy as np
 
-from . import priors as _priors
-from . import sigmoids
-from .bounds import parameter_bounds, mask_bounds
-from .configuration import Configuration
-from .getConfRegion import confidence_intervals
-from .likelihood import posterior_grid, max_posterior
-from .result import Result
-from .typing import ParameterBounds, Prior
-from .utils import (PsignifitException, normalize, get_grid, check_data)
+from . import _sigmoids
+from ._parameter import parameter_bounds, masked_parameter_bounds, parameter_grid
+from ._configuration import Configuration
+from ._confidence import confidence_intervals
+from ._posterior import posterior_grid, maximize_posterior, marginalize_posterior
+from ._priors import setup_priors
+from ._result import Result
+from ._typing import ParameterBounds, Prior
+from ._utils import (PsignifitException, check_data)
 
 
 def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
@@ -74,14 +74,8 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
             # https: // en.wikipedia.org / wiki / Unit_in_the_last_place
             width_min = 100 * np.spacing(stimulus_range[1])
 
-    priors = _priors.default_priors(stimulus_range, width_min, conf.width_alpha,
-                                    conf.beta_prior, thresh_PC=conf.thresh_PC)
-    if conf.priors is not None:
-        priors.update(conf.priors)
-    _priors.check_priors(priors, stimulus_range, width_min)
-
-    bounds = parameter_bounds(wmin=width_min, etype=conf.experiment_type, srange=stimulus_range,
-                              alpha=conf.width_alpha, echoices=conf.experiment_choices)
+    bounds = parameter_bounds(min_width=width_min, experiment_type=conf.experiment_type, stimulus_range=stimulus_range,
+                              alpha=conf.width_alpha, nafc_choices=conf.experiment_choices)
     if conf.bounds is not None:
         bounds.update(conf.bounds)
     if conf.fixed_parameters is not None:
@@ -140,7 +134,7 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
     if not return_posterior:
         posteriors = None
 
-    return Result(sigmoid_parameters=fit_dict,
+    return Result(parameter_estimate=fit_dict,
                   configuration=conf,
                   confidence_intervals=intervals_dict,
                   posterior=posteriors)
@@ -214,20 +208,20 @@ def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
         grid: Dict of possible parameter values.
     """
     # do first sparse grid posterior_grid evaluation
-    grid = get_grid(bounds, steps_moving_bounds)
+    grid = parameter_grid(bounds, steps_moving_bounds)
     posteriors_sparse, grid_max = posterior_grid(data, sigmoid=sigmoid, priors=priors, grid=grid)
     # indices on the grid of the volumes that contribute more than `tol` to the overall integral
-    tighter_bounds = mask_bounds(grid, posteriors_sparse >= max_bound_value)
+    tighter_bounds = masked_parameter_bounds(grid, posteriors_sparse >= max_bound_value)
     # do dense grid posterior_grid evaluation
-    grid = get_grid(tighter_bounds, grid_steps)
+    grid = parameter_grid(tighter_bounds, grid_steps)
     posteriors, grid_max = posterior_grid(data, sigmoid=sigmoid, priors=priors, grid=grid)
-    print('fit0', grid_max)
+
     fixed_param = {}
     for parm_name, parm_values in grid.items():
         if parm_values is None:
             fixed_param[parm_name] = parm_values
         elif len(parm_values) <= 1:
             fixed_param[parm_name] = parm_values[0]
-    fit_dict = max_posterior(data, param_init=grid_max, param_fixed=fixed_param, sigmoid=sigmoid, priors=priors)
+    fit_dict = maximize_posterior(data, param_init=grid_max, param_fixed=fixed_param, sigmoid=sigmoid, priors=priors)
 
     return fit_dict, posteriors, grid

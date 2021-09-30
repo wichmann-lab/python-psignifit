@@ -184,8 +184,8 @@ res200 = ps.psignifit(data, beta_prior=200, experiment_type='2AFC')
 # First see that the only parameter whose fit changes by this is the
 # beta-variance parameter eta (the 5th)
 
-print('Fit with beta prior = 1: ', res1.sigmoid_parameters)
-print('Fit with beta prior = 200: ', res200.sigmoid_parameters)
+print('Fit with beta prior = 1: ', res1.parameter_estimate)
+print('Fit with beta prior = 200: ', res200.parameter_estimate)
 
 # Now we have a look at the confidence intervals
 # TODO: uncomment once confidence intervals are implemented

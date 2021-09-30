@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from psignifit.configuration import Configuration
+from psignifit._configuration import Configuration
 from psignifit.psignifit import psignifit, PsignifitException
 
 

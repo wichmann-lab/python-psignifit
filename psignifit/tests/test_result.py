@@ -3,14 +3,14 @@ import dataclasses
 import pytest
 import numpy as np
 
-from psignifit.result import Result
-from psignifit.configuration import Configuration
+from psignifit._result import Result
+from psignifit._configuration import Configuration
 
 
 @pytest.fixture
 def result():
     return Result(configuration=Configuration(),
-                  sigmoid_parameters={
+                  parameter_estimate={
                       'threshold': 0.005,
                       'width': 0.005,
                       'lambda': 1.-7,

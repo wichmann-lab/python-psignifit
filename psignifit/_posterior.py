@@ -5,9 +5,44 @@ import numpy as np
 import scipy.special as sp
 from scipy import optimize
 
-from .utils import fp_error_handler, PsignifitException
-from .typing import Prior, ParameterGrid
-from .sigmoids import Sigmoid
+from ._utils import fp_error_handler, PsignifitException
+from ._typing import Prior, ParameterGrid
+from ._sigmoids import Sigmoid
+
+
+def integral_weights(grid):
+    """Calculate integral of multivariate function using composite trapezoidal rule
+
+    Input parameters:
+       -  `func` is an array of dimensions n_1 x n_2 x ... x n_m
+       - `grid` is a tuple (s_1, s_2, ..., s_m), where `s_i` are the points
+          on dimension `i` along which `func` has been evaluated
+
+    Outputs;
+       - integral is a number
+       - `deltas` is the grid of deltas used for the integration, for each
+         dimension these are:
+         (x1-x0)/2, x1-x0, x2-x1, ..., x(m-1)-x(m-2), (xm-x(m-1))/2
+         `weights` has the same shape as `func`
+    """
+    deltas = []
+    for steps in grid:
+        # handle singleton dimensions
+        if steps is None or len(steps) <= 1:
+            deltas.append(1)
+        else:
+            delta = np.empty_like(steps, dtype=float)
+            delta[1:] = np.diff(steps)
+            # delta weight is half at the bounds of the integration interval
+            delta[0] = delta[1] / 2
+            delta[-1] = delta[-1] / 2
+            deltas.append(delta)
+
+    # create a meshgrid for each dimension
+    weights = 1
+    for param_weights in np.meshgrid(*deltas, copy=False, sparse=True, indexing='ij'):
+        weights = weights * param_weights
+    return weights
 
 
 def posterior_grid(data, sigmoid: Sigmoid, priors: Dict[str, Prior],
@@ -43,7 +78,8 @@ def posterior_grid(data, sigmoid: Sigmoid, priors: Dict[str, Prior],
             grid_max[name] = grid_values[index]
 
     # normalize the posterior_grid
-    posterior_volumes = p * integral_weights([grid_value for _, grid_value in sorted(grid.items())])
+    weights = integral_weights([grid_value for _, grid_value in sorted(grid.items())])
+    posterior_volumes = p * weights
     posterior_integral = posterior_volumes.sum()
     posterior_mass = posterior_volumes / posterior_integral
     return posterior_mass, grid_max
@@ -165,8 +201,8 @@ def log_posterior(data: np.ndarray, sigmoid: Sigmoid, priors: Dict[str, Prior], 
     return p
 
 
-def max_posterior(data, param_init: Dict[str, float], param_fixed: Dict[str, float],
-                  sigmoid: Sigmoid, priors: Dict[str, Prior]) -> Dict[str, float]:
+def maximize_posterior(data, param_init: Dict[str, float], param_fixed: Dict[str, float],
+                       sigmoid: Sigmoid, priors: Dict[str, Prior]) -> Dict[str, float]:
     """ Finds the parameters which maximize the log posterior_grid using hill climbing.
 
      Parameters with None or a single entry in `grid` are treated as fixed.

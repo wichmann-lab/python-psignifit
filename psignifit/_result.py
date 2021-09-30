@@ -1,11 +1,12 @@
 import dataclasses
-from typing import Any, Dict, Tuple, List, TextIO, Union
+from typing import Any, Dict, Tuple, List, TextIO, Union, Optional
 import json
 from pathlib import Path
 
 import numpy as np
 
-from .configuration import Configuration
+from ._configuration import Configuration
+from ._typing import ParameterGrid
 
 
 class NumpyEncoder(json.JSONEncoder):
@@ -17,7 +18,7 @@ class NumpyEncoder(json.JSONEncoder):
 
 @dataclasses.dataclass
 class Result:
-    sigmoid_parameters: Dict[str, float]
+    parameter_estimate: Dict[str, float]
     configuration: Configuration
     confidence_intervals: Dict[str, List[Tuple[float, float]]]
     posterior: np.ndarray = dataclasses.field(compare=False)
@@ -26,7 +27,14 @@ class Result:
     # run np.asarray in __post_init__.
     # Otherwise, load_json may result in nested lists instead.
     def __post_init__(self):
-        self.posterior = np.asarray(self.posterior)
+        if self.posterior_mass is not None:
+            self.posterior_mass = np.asarray(self.posterior_mass)
+
+    def _equal_numpy_dict(first, second):
+        """ Test if two dicts of numpy arrays are equal"""
+        if first.keys() != second.keys():
+            return False
+        return all(np.array_equal(first[key], second[key]) for key in first)
 
     @classmethod
     def from_dict(cls, result_dict: Dict[str, Any]):
@@ -88,9 +96,9 @@ class Result:
         if unscaled:  # set asymptotes to 0 for everything.
             lambd, gamma = 0, 0
         else:
-            lambd, gamma = self.sigmoid_parameters['lambda'], self.sigmoid_parameters['gamma']
-        new_threshold = sigmoid.inverse(percentage_correct, self.sigmoid_parameters['threshold'],
-                                        self.sigmoid_parameters['width'], lambd, gamma)
+            lambd, gamma = self.parameter_estimate['lambda'], self.parameter_estimate['gamma']
+        new_threshold = sigmoid.inverse(percentage_correct, self.parameter_estimate['threshold'],
+                                        self.parameter_estimate['width'], lambd, gamma)
         if not return_ci:
             return new_threshold
 
@@ -115,7 +123,7 @@ class Result:
         Returns:
             Slopes of the psychometric function at the stimulus levels.
         """
-        stimulus_level, param = np.asarray(stimulus_level), self.sigmoid_parameters
+        stimulus_level, param = np.asarray(stimulus_level), self.parameter_estimate
         sigmoid = self.configuration.make_sigmoid()
         return sigmoid.slope(stimulus_level, param['threshold'], param['width'], param['gamma'], param['lambda'])
 

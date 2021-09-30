@@ -1,6 +1,6 @@
 import numpy as np
 
-from psignifit.utils import check_data
+from psignifit._utils import check_data
 
 
 def pool_blocks(data: np.ndarray, max_tol=0, max_gap=np.inf, max_length=np.inf):

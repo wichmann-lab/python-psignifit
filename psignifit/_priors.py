@@ -1,17 +1,14 @@
 # -*- coding: utf-8 -*-
-"""
-"""
 from typing import Tuple, Dict
 from functools import partial
 
 import numpy as np
 import scipy.stats
 
-from .utils import norminv
-from .typing import Prior
+from ._typing import Prior
 
 
-def pthreshold(x, st_range):
+def threshold_prior(x, stimulus_range: Tuple[float, float]):
     """Default prior for the threshold parameter
 
     A uniform prior over the range `st_range` of the data with a cosine fall off
@@ -21,9 +18,9 @@ def pthreshold(x, st_range):
     of the tested stimulus levels with equal probability and may be up to 50% of
     the spread of the data outside the range with decreasing probability"""
     # spread
-    sp = st_range[1] - st_range[0]
-    s0 = st_range[0]
-    s1 = st_range[1]
+    sp = stimulus_range[1] - stimulus_range[0]
+    s0 = stimulus_range[0]
+    s1 = stimulus_range[1]
     p = np.zeros_like(x)
     p[(s0 < x) & (x < s1)] = 1.
     left = ((s0 - sp / 2) <= x) & (x <= s0)
@@ -33,7 +30,7 @@ def pthreshold(x, st_range):
     return p
 
 
-def pwidth(x, alpha, wmin, wmax):
+def width_prior(x, alpha: np.ndarray, wmin: np.ndarray, wmax: np.ndarray):
     """Default prior for the width parameter
 
     A uniform prior between two times the minimal distance of two tested stimulus
@@ -41,6 +38,7 @@ def pwidth(x, alpha, wmin, wmax):
     the minimal difference of two stimulus levels and at 3 times the range of the
     tested stimulus levels"""
     # rescaling for alpha
+    norminv = scipy.stats.norm(loc=0, scale=1).ppf
     y = x * (norminv(.95) - norminv(.05)) / (norminv(1 - alpha) -
                                              norminv(alpha))
     p = np.zeros_like(x)
@@ -52,21 +50,21 @@ def pwidth(x, alpha, wmin, wmax):
     return p
 
 
-def plambda(x):
+def lambda_prior(x):
     """Default prior for the lapse rate
 
-    A Beta distribution, wit parameters 1 and 10."""
+    A Beta distribution, with parameters 1 and 10."""
     return scipy.stats.beta.pdf(x, 1, 10)
 
 
-def pgamma(x):
+def gamma_prior(x):
     """Default prior for the guess rate
 
     A Beta distribution, wit parameters 1 and 10."""
     return scipy.stats.beta.pdf(x, 1, 10)
 
 
-def peta(x, k):
+def eta_prior(x, k):
     """Default prior for overdispersion
 
     A Beta distribution, wit parameters 1 and k."""
@@ -74,19 +72,26 @@ def peta(x, k):
 
 
 def default_priors(stimulus_range: Tuple[float, float], width_min: float,
-                   width_alpha: float, beta: float, thresh_PC: float = 0.5) -> Dict[str, Prior]:
-    if not np.isclose(thresh_PC, 0.5):
+                   width_alpha: float, beta: float, threshold_percent_correct: float = 0.5) -> Dict[str, Prior]:
+    if not np.isclose(threshold_percent_correct, 0.5):
         raise ValueError("Default prior 'threshold' expects thresh_PC=0.5, got {thresh_PC = }")
 
     return {
-        'threshold': partial(pthreshold, st_range=stimulus_range),
-        'width': partial(pwidth, wmin=width_min,
+        'threshold': partial(threshold_prior, stimulus_range=stimulus_range),
+        'width': partial(width_prior, wmin=width_min,
                          wmax=stimulus_range[1] - stimulus_range[0],
                          alpha=width_alpha),
-        'lambda': plambda,
-        'gamma': pgamma,
-        'eta': partial(peta, k=beta),
+        'lambda': lambda_prior,
+        'gamma': gamma_prior,
+        'eta': partial(eta_prior, k=beta),
     }
+
+
+def _check_prior(priors, name, values):
+    result = priors[name](values)
+    assert np.all(np.isfinite(result)), f"Prior '{name}' returns non-finite values."
+    assert np.all(result >= 0), f"Prior '{name}' returns negative values."
+    assert np.all(result != 0), f"Prior '{name}' returns zeros."
 
 
 def check_priors(priors: Dict[str, Prior], stimulus_range: Tuple[float, float],

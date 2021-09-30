@@ -117,7 +117,7 @@ plt.show()
 import gc  # noqa: E402
 
 
-res.posterior = None
+res.posterior_grid = None
 res.weights = None
 gc.collect()
 
