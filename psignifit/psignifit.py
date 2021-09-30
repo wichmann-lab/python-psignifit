@@ -82,10 +82,9 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
         for param, value in conf.fixed_parameters.items():
             bounds[param] = (value, value)
 
-    # normalize priors to first choice of bounds
-    for parameter, prior in priors.items():
-        priors[parameter] = normalize(prior, bounds[parameter])
-
+    priors = setup_priors(custom_priors=conf.priors, bounds=bounds,
+                          stimulus_range=stimulus_range, width_min=width_min, width_alpha=conf.width_alpha,
+                          beta_prior=conf.beta_prior, threshold_perc_correct=conf.thresh_PC)
     fit_dict, posteriors, grid = _fit_parameters(data, bounds, priors, sigmoid, conf.steps_moving_bounds,
                                                  conf.max_bound_value, conf.grid_steps)
 
@@ -127,7 +126,8 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
     # 'This indicates that your data is not sufficient to exclude much higher widths.\n'\
     # 'Refer to the paper or the manual for more info on this topic.')
 
-    # result['timestamp'] = _dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    if conf.verbose:
+        _warn_marginal_sanity_checks(marginals)
 
     # if options['instantPlot']:
     # plot.plotPsych(result)
@@ -180,6 +180,42 @@ def _warn_common_data_mistakes(levels, ntrials, has_user_stimulus_range, pool_ma
             An appropriate prior prior will be then chosen. For now we use the standard
             heuristic, assuming that the psychometric function is covered by the stimulus
             levels, which is frequently invalid for adaptive procedures!""")
+
+
+def _warn_marginal_sanity_checks(marginals):
+    if marginals['threshold'][0] > .001:
+        warnings.warn('psignifit:boundWarning\n'
+                      'The marginal for the threshold is not near 0 at the bound.\n'
+                      'This indicates that smaller Thresholds would be possible.')
+    if marginals['threshold'][-1] > .001:
+        warnings.warn('psignifit:boundWarning\n'
+                      'The marginal for the threshold is not near 0 at the upper bound.\n'
+                      'This indicates that your data is not sufficient to exclude much higher thresholds.\n'
+                      'Refer to the paper or the manual for more info on this topic.')
+    if marginals['width'][0] > .001:
+        warnings.warn('psignifit:boundWarning\n'
+                      'The marginal for the width is not near 0 at the lower bound.\n'
+                      'This indicates that your data is not sufficient to exclude much lower widths.\n'
+                      'Refer to the paper or the manual for more info on this topic.')
+    if marginals['width'][-1] > .001:
+        warnings.warn('psignifit:boundWarning\n'
+                      'The marginal for the width is not near 0 at the lower bound.\n'
+                      'This indicates that your data is not sufficient to exclude much higher widths.\n'
+                      'Refer to the paper or the manual for more info on this topic.')
+
+    for param, marginal in marginals.items():
+        if marginal.size < 3:
+            continue
+
+        peak = marginal.max() / 1000
+        if marginal[0] > peak or marginal[-1] > peak:
+            warnings.warn(f'''psignifit:boundWarning\n
+                             The marginal on the {param} bounds is not smaller than 1/1000 of the peak
+                             it means that the prior of the {param} parameter has an influence to the result.\n
+                             This means (1) the prior may be too narrow, or (2) you know what you are doing.\n
+                             If you were using the default settings, this is a bug in the software or your data
+                             are highly unusual,
+                             if you changed the defaults please check the priors and parameter bounds.''')
 
 
 def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,

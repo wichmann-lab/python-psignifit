@@ -124,8 +124,39 @@ def check_priors(priors: Dict[str, Prior], stimulus_range: Tuple[float, float],
     _check_prior(priors, "eta", test_values)
 
 
-def _check_prior(priors, name, values):
-    result = priors[name](values)
-    assert np.all(np.isfinite(result)), f"Prior '{name}' returns non-finite values."
-    assert np.all(result >= 0), f"Prior '{name}' returns negative values."
-    assert np.all(result != 0), f"Prior '{name}' returns zeros."
+def normalize_prior(func: Prior, interval: Tuple[float, float], steps: int = 10000) -> Prior:
+    """ Normalize the prior function to have integral 1 within the interval.
+
+    Integration is done using the composite trapezoidal rule.
+
+    Args:
+        func: is a vectorized function that takes one single argument
+        interval: is a tuple (lo, hi)
+
+    Returns:
+        The normalized prior function.
+    """
+    if np.isclose(interval[0], interval[1]):
+        def nfunc(y):
+            return np.ones_like(y)
+    else:
+        x = np.linspace(interval[0], interval[1], steps)
+        integral = np.trapz(func(x), x=x)
+
+        def nfunc(y):
+            return func(y) / integral
+
+    return nfunc
+
+
+def setup_priors(custom_priors, bounds, stimulus_range, width_min, width_alpha, beta_prior, threshold_perc_correct):
+    priors = default_priors(stimulus_range, width_min, width_alpha, beta_prior, threshold_perc_correct)
+    if custom_priors is not None:
+        priors.update(custom_priors)
+    check_priors(priors, stimulus_range, width_min)
+
+    for parameter, prior in priors.items():
+        priors[parameter] = normalize_prior(prior, bounds[parameter])
+    return priors
+
+
