@@ -103,7 +103,11 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
     return Result(parameter_estimate=fit_dict,
                   configuration=conf,
                   confidence_intervals=intervals_dict,
-                  posterior=posteriors)
+                  parameter_values={k: v.tolist() for k, v in grid.items()},
+                  prior_values={param: priors[param](values).tolist() for param, values in grid.items()},
+                  marginal_posterior_values={k: v.tolist() for k, v in marginals.items()},
+                  posterior_mass=posteriors,
+                  data=data.tolist())
 
 
 def _warn_common_data_mistakes(levels, ntrials, has_user_stimulus_range, pool_max_blocks) -> None:

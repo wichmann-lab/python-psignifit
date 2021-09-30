@@ -24,7 +24,29 @@ def result():
                       'gamma': [[0.001, 0.005], [0.005, 0.01], [0.1, 0.2]],
                       'eta': [[0.001, 0.005], [0.005, 0.01], [0.1, 0.2]]
                   },
-                  posterior=np.random.rand(5, ))
+                  data=np.random.rand(5, 3).tolist(),
+                  parameter_values={
+                      'threshold': np.random.rand(10,).tolist(),
+                      'width': np.random.rand(3,).tolist(),
+                      'lambda': np.random.rand(5,).tolist(),
+                      'gamma': np.random.rand(5,).tolist(),
+                      'eta': np.random.rand(16,).tolist()
+                  },
+                  prior_values={
+                      'threshold': np.random.rand(10,).tolist(),
+                      'width': np.random.rand(3,).tolist(),
+                      'lambda': np.random.rand(5,).tolist(),
+                      'gamma': np.random.rand(5,).tolist(),
+                      'eta': np.random.rand(16,).tolist()
+                  },
+                  marginal_posterior_values={
+                      'threshold': np.random.rand(10,).tolist(),
+                      'width': np.random.rand(3,).tolist(),
+                      'lambda': np.random.rand(5,).tolist(),
+                      'gamma': np.random.rand(5,).tolist(),
+                      'eta': np.random.rand(16,).tolist()
+                  },
+                  posterior_mass=np.random.rand(5, ))
 
 
 def test_from_to_result_dict(result):
@@ -56,5 +78,5 @@ def test_save_load_result_json(result, tmp_path):
     assert not result_file.exists()
     result.save_json(result_file)
     assert result_file.exists()
-
+    print(result)
     assert result == Result.load_json(result_file)
