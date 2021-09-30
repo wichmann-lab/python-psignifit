@@ -62,8 +62,8 @@ def plot_psychmetric_function(result: Result,  # noqa: C901, this function is to
         y = [ymin, params['gamma'] + (1 - params['lambda'] - params['gamma']) * config.thresh_PC]
         ax.plot(x, y, '-', c=line_color)
 
-        ax.axhline(y=1 - params['lambda'], linestyle=':', color='line_color')
-        ax.axhline(y=1 - params['gamma'], linestyle=':', color='line_color')
+        ax.axhline(y=1 - params['lambda'], linestyle=':', color=line_color)
+        ax.axhline(y=1 - params['gamma'], linestyle=':', color=line_color)
 
         CI = np.asarray(result.confidence_intervals['threshold'])
         y = np.array([params['gamma'] + .5 * (1 - params['lambda'] - params['gamma'])] * 2)
