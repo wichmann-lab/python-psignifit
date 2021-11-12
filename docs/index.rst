@@ -22,8 +22,8 @@ Where to start?
 
 First, :ref:`install_guide` the toolbox.
 
-Then, have a look at the :ref:`basic-usage`
-or at the :ref:`demo_index` file, which cover similar content.
+Then, check out the :ref:`getting_started`
+or the :ref:`demo_index` files.
 
 More information
 ~~~~~~~~~~~~~~~~
@@ -70,6 +70,7 @@ Contents
    :maxdepth: 2
 
    install_guide.rst
+   getting_started.rst
    user_guides/index.rst
    how_to/index.rst
    generated_examples/index.rst

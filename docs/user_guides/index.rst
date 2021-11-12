@@ -1,3 +1,5 @@
+.. _user-guides:
+
 User Guides
 ===========
 
@@ -5,7 +7,6 @@ User Guides
    :maxdepth: 2
    :caption: Contents:
 
-   Basic-Usage.rst
    Experiment-Types.rst
    Interval-Bias.rst
    Options-Dictionary.rst
