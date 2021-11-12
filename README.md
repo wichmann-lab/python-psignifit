@@ -1,10 +1,9 @@
 # psignifit
 
 Python toolbox for Bayesian psychometric function estimation.
-
-[![Unit tests](https://github.com/wichmann-lab/python-psignifit/workflows/ci-tests/badge.svg)](https://github.com/wichmann-lab/python-psignifit/actions)
+[![Tests](https://github.com/wichmann-lab/python-psignifit/actions/workflows/ci-tests.yml/badge.svg)](https://github.com/wichmann-lab/python-psignifit/actions/workflows/ci-tests.yml)
 [![Test Coverage](https://codecov.io/gh/wichmann-lab/python-psignifit/branch/master/graph/badge.svg)](https://codecov.io/gh/wichmann-lab/python-psignifit)
-[![Documentation](https://readthedocs.org/projects/psignifit/badge/?version=latest)](https://ordcomp.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/psignifit/badge/?version=latest)](https://psignifit.readthedocs.io/en/latest/?badge=latest)
 
 ## Installation
 For users
