@@ -2,6 +2,7 @@
 
 Plot Functions
 ==============
+TODO: Refactor plot documentation
 
 Here we explain the basic plot functions of python-psignifit 4. Most of
 the functions return the handle of the axis they plotted in to enable

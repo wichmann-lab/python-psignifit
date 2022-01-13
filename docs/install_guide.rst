@@ -1,19 +1,39 @@
 .. _install_guide:
 
-Install Guide
-=============
+Install
+=======
 
-We aimed to make this clone depend on as few as possible additional
-packages. The standard ones we could not avoid are: Numpy (>1.11.0),
-Scipy (>0.18.1), matplotlib (>2.0) for the plots and datetime, warnings
-and copy from the standard library. These packages are usually shipped
-with standard python distributions. All tests of the code were run in
-python 3.5/3.6/3.7. We do not support python 2.
+There are different ways to install python-psignifit:
 
-Once you have the required packages installed psignifit can be
-downloaded:
+- :ref:`Install the latest release <pip install>` from the python package index. This is the recommended approach for most users.
+- Download and install the source from the Github :ref:`website <zip install>` or :ref:`git repository <git install>`.
+  Use this approach to inspect and modify the source code or to use a psignifit version, that was not published in the package index.
 
-Downloading a ZIP File
+python-psignifit depends on few external python packages:
+- NumPy
+- SciPy
+- matplotlib
+
+These packages are often shipped with scientific python distributions or, if not already there,
+are installed automatically during the installation of python-psignifit.
+We `automatically check <https://github.com/wichmann-lab/python-psignifit/actions/workflows/ci-tests.yml>`
+compatibility with different python 3 versions on Ubuntu Linux and Windows. We do not support python 2.
+
+.. _pip install:
+
+Installing the latest release
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Install python-psignifit with all dependencies:
+
+::
+
+    pip install psignifit
+
+
+.. _zip install:
+
+Installing from source
 ~~~~~~~~~~~~~~~~~~~~~~
 
 To install psignifit go to
@@ -25,13 +45,18 @@ Then unpack the ZIP file and run the contained setup.py file:
 ::
 
    python setup.py install
+   # OR to make use of changes in the code:
+   python setup.py develop
 
 This should work on Linux, MAC and Windows equally well.
 
 If you “installed” this way and you want to update your psignifit,
 simply download again and replace the folder.
 
-Using Git to be Kept up to Date
+
+.. _git install:
+
+Using Git to be kept up to Date
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Instructions on how to install git can be found
@@ -54,3 +79,5 @@ To update your local copy you only need to change to the
 “python-psignifit” folder and type:
 
 ``git pull``
+
+Install as described in :ref:`zip install`.

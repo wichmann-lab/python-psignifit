@@ -5,15 +5,15 @@ from typing import Dict, Optional
 
 import numpy as np
 
-from . import priors as _priors
-from . import sigmoids
-from .bounds import parameter_bounds, mask_bounds
-from .configuration import Configuration
-from .getConfRegion import confidence_intervals
-from .likelihood import posterior_grid, max_posterior
-from .result import Result
-from .typing import ParameterBounds, Prior
-from .utils import (PsignifitException, normalize, get_grid, check_data)
+from . import _sigmoids
+from ._parameter import parameter_bounds, masked_parameter_bounds, parameter_grid
+from ._configuration import Configuration
+from ._confidence import confidence_intervals
+from ._posterior import posterior_grid, maximize_posterior, marginalize_posterior
+from ._priors import setup_priors
+from ._result import Result
+from ._typing import ParameterBounds, Prior
+from ._utils import (PsignifitException, check_data)
 
 
 def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
@@ -60,7 +60,10 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
 
     stimulus_range = conf.stimulus_range
     if stimulus_range is None:
-        stimulus_range = (levels.min(), levels.max())
+        if sigmoid.logspace:
+            stimulus_range = (levels[levels > 0].min(), levels.max())
+        else:
+            stimulus_range = (levels.min(), levels.max())
     if sigmoid.logspace:
         stimulus_range = (np.log(stimulus_range[0]), np.log(stimulus_range[1]))
         levels = np.log(levels)
@@ -74,24 +77,17 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
             # https: // en.wikipedia.org / wiki / Unit_in_the_last_place
             width_min = 100 * np.spacing(stimulus_range[1])
 
-    priors = _priors.default_priors(stimulus_range, width_min, conf.width_alpha,
-                                    conf.beta_prior, thresh_PC=conf.thresh_PC)
-    if conf.priors is not None:
-        priors.update(conf.priors)
-    _priors.check_priors(priors, stimulus_range, width_min)
-
-    bounds = parameter_bounds(wmin=width_min, etype=conf.experiment_type, srange=stimulus_range,
-                              alpha=conf.width_alpha, echoices=conf.experiment_choices)
+    bounds = parameter_bounds(min_width=width_min, experiment_type=conf.experiment_type, stimulus_range=stimulus_range,
+                              alpha=conf.width_alpha, nafc_choices=conf.experiment_choices)
     if conf.bounds is not None:
         bounds.update(conf.bounds)
     if conf.fixed_parameters is not None:
         for param, value in conf.fixed_parameters.items():
             bounds[param] = (value, value)
 
-    # normalize priors to first choice of bounds
-    for parameter, prior in priors.items():
-        priors[parameter] = normalize(prior, bounds[parameter])
-
+    priors = setup_priors(custom_priors=conf.priors, bounds=bounds,
+                          stimulus_range=stimulus_range, width_min=width_min, width_alpha=conf.width_alpha,
+                          beta_prior=conf.beta_prior, threshold_perc_correct=conf.thresh_PC)
     fit_dict, posteriors, grid = _fit_parameters(data, bounds, priors, sigmoid, conf.steps_moving_bounds,
                                                  conf.max_bound_value, conf.grid_steps)
 
@@ -99,51 +95,22 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
     intervals = confidence_intervals(posteriors, grid_values, conf.confP, conf.CI_method)
     intervals_dict = {param: interval_per_p.tolist()
                       for param, interval_per_p in zip(sorted(grid.keys()), intervals)}
-    # take care of confidence intervals/condifence region
-    # XXX FIXME: take care of post-ptocessing later
-    # ''' after processing '''
-    # # check that the marginals go to nearly 0 at the bounds of the grid
-    # if options['verbose'] > -5:
-    # ## TODO ###
-    # when the marginal on the bounds not smaller than 1/1000 of the peak
-    # it means that the prior of the corresponding parameter has an influence of
-    # the result ( 1)prior may be too narrow, 2) you know what you are doing).
-    # if they were using the default, this is a bug in the software or your data
-    # are highly unusual, if they changed the defaults the error can be more verbose
-    # "the choice of your prior or of your bounds has a significant influence on the
-    # confidence interval widths and or the max posterior_grid estimate"
-    # ########
-    # if result['marginals'][0][0] * result['marginalsW'][0][0] > .001:
-    # warnings.warn('psignifit:boundWarning\n'\
-    # 'The marginal for the threshold is not near 0 at the lower bound.\n'\
-    # 'This indicates that smaller Thresholds would be possible.')
-    # if result['marginals'][0][-1] * result['marginalsW'][0][-1] > .001:
-    # warnings.warn('psignifit:boundWarning\n'\
-    # 'The marginal for the threshold is not near 0 at the upper bound.\n'\
-    # 'This indicates that your data is not sufficient to exclude much higher thresholds.\n'\
-    # 'Refer to the paper or the manual for more info on this topic.')
-    # if result['marginals'][1][0] * result['marginalsW'][1][0] > .001:
-    # warnings.warn('psignifit:boundWarning\n'\
-    # 'The marginal for the width is not near 0 at the lower bound.\n'\
-    # 'This indicates that your data is not sufficient to exclude much lower widths.\n'\
-    # 'Refer to the paper or the manual for more info on this topic.')
-    # if result['marginals'][1][-1] * result['marginalsW'][1][-1] > .001:
-    # warnings.warn('psignifit:boundWarning\n'\
-    # 'The marginal for the width is not near 0 at the lower bound.\n'\
-    # 'This indicates that your data is not sufficient to exclude much higher widths.\n'\
-    # 'Refer to the paper or the manual for more info on this topic.')
+    marginals = marginalize_posterior(grid, posteriors)
 
-    # result['timestamp'] = _dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    if conf.verbose:
+        _warn_marginal_sanity_checks(marginals)
 
-    # if options['instantPlot']:
-    # plot.plotPsych(result)
     if not return_posterior:
         posteriors = None
 
-    return Result(sigmoid_parameters=fit_dict,
+    return Result(parameter_estimate=fit_dict,
                   configuration=conf,
                   confidence_intervals=intervals_dict,
-                  posterior=posteriors)
+                  parameter_values={k: v.tolist() for k, v in grid.items()},
+                  prior_values={param: priors[param](values).tolist() for param, values in grid.items()},
+                  marginal_posterior_values={k: v.tolist() for k, v in marginals.items()},
+                  posterior_mass=posteriors,
+                  data=data.tolist())
 
 
 def _warn_common_data_mistakes(levels, ntrials, has_user_stimulus_range, pool_max_blocks) -> None:
@@ -188,8 +155,44 @@ def _warn_common_data_mistakes(levels, ntrials, has_user_stimulus_range, pool_ma
             levels, which is frequently invalid for adaptive procedures!""")
 
 
+def _warn_marginal_sanity_checks(marginals):
+    if marginals['threshold'][0] > .001:
+        warnings.warn('psignifit:boundWarning\n'
+                      'The marginal for the threshold is not near 0 at the bound.\n'
+                      'This indicates that smaller Thresholds would be possible.')
+    if marginals['threshold'][-1] > .001:
+        warnings.warn('psignifit:boundWarning\n'
+                      'The marginal for the threshold is not near 0 at the upper bound.\n'
+                      'This indicates that your data is not sufficient to exclude much higher thresholds.\n'
+                      'Refer to the paper or the manual for more info on this topic.')
+    if marginals['width'][0] > .001:
+        warnings.warn('psignifit:boundWarning\n'
+                      'The marginal for the width is not near 0 at the lower bound.\n'
+                      'This indicates that your data is not sufficient to exclude much lower widths.\n'
+                      'Refer to the paper or the manual for more info on this topic.')
+    if marginals['width'][-1] > .001:
+        warnings.warn('psignifit:boundWarning\n'
+                      'The marginal for the width is not near 0 at the lower bound.\n'
+                      'This indicates that your data is not sufficient to exclude much higher widths.\n'
+                      'Refer to the paper or the manual for more info on this topic.')
+
+    for param, marginal in marginals.items():
+        if marginal.size < 3:
+            continue
+
+        peak = marginal.max() / 1000
+        if marginal[0] > peak or marginal[-1] > peak:
+            warnings.warn(f'''psignifit:boundWarning\n
+                             The marginal on the {param} bounds is not smaller than 1/1000 of the peak
+                             it means that the prior of the {param} parameter has an influence to the result.\n
+                             This means (1) the prior may be too narrow, or (2) you know what you are doing.\n
+                             If you were using the default settings, this is a bug in the software or your data
+                             are highly unusual,
+                             if you changed the defaults please check the priors and parameter bounds.''')
+
+
 def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
-                    priors: Dict[str, Prior], sigmoid: sigmoids.Sigmoid,
+                    priors: Dict[str, Prior], sigmoid: _sigmoids.Sigmoid,
                     steps_moving_bounds: Dict[str, int], max_bound_value: float,
                     grid_steps: Dict[str, int]) -> Dict[str, float]:
     """ Fit sigmoid parameters in a three step procedure.
@@ -214,20 +217,20 @@ def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
         grid: Dict of possible parameter values.
     """
     # do first sparse grid posterior_grid evaluation
-    grid = get_grid(bounds, steps_moving_bounds)
+    grid = parameter_grid(bounds, steps_moving_bounds)
     posteriors_sparse, grid_max = posterior_grid(data, sigmoid=sigmoid, priors=priors, grid=grid)
     # indices on the grid of the volumes that contribute more than `tol` to the overall integral
-    tighter_bounds = mask_bounds(grid, posteriors_sparse >= max_bound_value)
+    tighter_bounds = masked_parameter_bounds(grid, posteriors_sparse >= max_bound_value)
     # do dense grid posterior_grid evaluation
-    grid = get_grid(tighter_bounds, grid_steps)
+    grid = parameter_grid(tighter_bounds, grid_steps)
     posteriors, grid_max = posterior_grid(data, sigmoid=sigmoid, priors=priors, grid=grid)
-    print('fit0', grid_max)
+
     fixed_param = {}
     for parm_name, parm_values in grid.items():
         if parm_values is None:
             fixed_param[parm_name] = parm_values
         elif len(parm_values) <= 1:
             fixed_param[parm_name] = parm_values[0]
-    fit_dict = max_posterior(data, param_init=grid_max, param_fixed=fixed_param, sigmoid=sigmoid, priors=priors)
+    fit_dict = maximize_posterior(data, param_init=grid_max, param_fixed=fixed_param, sigmoid=sigmoid, priors=priors)
 
     return fit_dict, posteriors, grid

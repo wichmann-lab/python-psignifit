@@ -8,7 +8,7 @@ and visualize their function values and slopes.
 import matplotlib.pyplot as plt
 import numpy as np
 
-from psignifit import sigmoids
+from psignifit import _sigmoids
 
 
 STIMULUS_LEVELS = np.linspace(1e-12, 1-1e-12, num=10000)
@@ -51,8 +51,8 @@ def plot_sigmoids(sigmoids_with_name, x, cols):
 # Some of them are synonyms, so we aggregate all names.
 #
 unique_sigmoids, names = list(), list()
-for name in sigmoids.ALL_SIGMOID_NAMES:
-    sigmoid = sigmoids.sigmoid_by_name(name, PC=PC, alpha=ALPHA)
+for name in _sigmoids.ALL_SIGMOID_NAMES:
+    sigmoid = _sigmoids.sigmoid_by_name(name, PC=PC, alpha=ALPHA)
     if sigmoid in unique_sigmoids:
         # synonym found
         ix = unique_sigmoids.index(sigmoid)
@@ -63,7 +63,7 @@ for name in sigmoids.ALL_SIGMOID_NAMES:
         names.append(name)
 
 print(f"Found {len(unique_sigmoids)} sigmoids and "
-      f"{len(sigmoids.ALL_SIGMOID_NAMES) - len(unique_sigmoids)} synonym names.")
+      f"{len(_sigmoids.ALL_SIGMOID_NAMES) - len(unique_sigmoids)} synonym names.")
 
 
 # %%

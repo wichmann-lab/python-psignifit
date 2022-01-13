@@ -4,9 +4,9 @@ import re
 import dataclasses
 from typing import Any, Dict, Tuple, Optional, Union
 
-from . import sigmoids
-from .utils import PsignifitException
-from .typing import ExperimentType, Prior
+from . import _sigmoids
+from ._utils import PsignifitException
+from ._typing import ExperimentType, Prior
 
 
 _PARAMETERS = {'threshold', 'width', 'lambda', 'gamma', 'eta'}
@@ -37,7 +37,6 @@ class Configuration:
     beta_prior: int = 10
     CI_method: str = 'project'
     confP: Tuple[float, float, float] = (.95, .9, .68)
-    dynamic_grid: bool = False
     estimate_type: str = 'MAP'
     experiment_type: str = ExperimentType.YES_NO.value
     experiment_choices: Optional[int] = None
@@ -49,7 +48,7 @@ class Configuration:
     move_bounds: bool = True
     pool_max_blocks: int = 25
     priors: Optional[Dict[str, Prior]] = dataclasses.field(default=None, hash=False)
-    sigmoid: Union[str, sigmoids.Sigmoid] = 'norm'
+    sigmoid: Union[str, _sigmoids.Sigmoid] = 'norm'
     stimulus_range: Optional[Tuple[float, float]] = None
     thresh_PC: float = 0.5
     verbose: bool = True
@@ -58,12 +57,9 @@ class Configuration:
 
     # attributes, if not specified, will be initialize based on others
     bounds: Optional[Dict[str, Tuple[float, float]]] = None
-    grid_eval: Optional[int] = None
-    uniform_weight: Optional[float] = None
+    grid_steps: Dict[str, int] = dataclasses.field(default_factory=dict)
+    steps_moving_bounds: Dict[str, int] = dataclasses.field(default_factory=dict)
 
-    # attributes which are always initialized based on other parameters
-    grid_steps: Dict[str, int] = None
-    steps_moving_bounds: Dict[str, int] = None
 
     def __post_init__(self):
         self.check_attributes()
@@ -151,9 +147,7 @@ class Configuration:
             raise PsignifitException("For nAFC experiments, expects 'experiment_choices' to be a number, got None.\n"
                                      "Can be specified in the experiment type, e.g. 2AFC, 3AFC, … .")
 
-        # because the attributes are immutable (frozen)
-        # we have to set them with this special syntax
-        self.grid_steps = {
+        default_grid_steps = {
             'threshold': 40,
             'width': 40,
             'lambda': 20,
@@ -161,36 +155,33 @@ class Configuration:
             'eta': 20,
         }
         if value == ExperimentType.YES_NO.value:
-            self.grid_steps['gamma'] = 20
+            default_grid_steps['gamma'] = 20
             self.steps_moving_bounds = {
                 'threshold': 25,
                 'width': 30,
                 'lambda': 10,
                 'gamma': 10,
                 'eta': 15,
+                **self.steps_moving_bounds
             }
         else:
-            self.grid_steps['gamma'] = 1
+            default_grid_steps['gamma'] = 1
             self.steps_moving_bounds = {
                 'threshold': 30,
                 'width': 40,
                 'lambda': 10,
                 'gamma': 1,
                 'eta': 20,
+                **self.steps_moving_bounds
             }
+        self.grid_steps = {**default_grid_steps,
+                           **self.grid_steps}
 
     def check_sigmoid(self, value):
         try:
             self.make_sigmoid()
         except KeyError:
             raise PsignifitException('Invalid sigmoid name "{value}", use one of {sigmoids.ALL_SIGMOID_NAMES}')
-
-    def check_dynamic_grid(self, value):
-        if value:
-            if self.grid_eval is None:
-                self.grid_eval = 10000
-            if self.uniform_weigth is None:
-                self.uniform_weight = 1.
 
     def check_stimulus_range(self, value):
         if value:
@@ -221,15 +212,15 @@ class Configuration:
             except Exception:
                 raise PsignifitException("Option width_min must be a number")
 
-    def make_sigmoid(self) -> sigmoids.Sigmoid:
+    def make_sigmoid(self) -> _sigmoids.Sigmoid:
         """ Construct sigmoid according to this configuration.
 
         Returns:
              Sigmoid object with percentage correct and alpha according to config.
         """
-        if isinstance(self.sigmoid, sigmoids.Sigmoid):
+        if isinstance(self.sigmoid, _sigmoids.Sigmoid):
             self.sigmoid.PC = self.thresh_PC
             self.sigmoid.alpha = self.width_alpha
             return self.sigmoid
         else:
-            return sigmoids.sigmoid_by_name(self.sigmoid, PC=self.thresh_PC, alpha=self.width_alpha)
+            return _sigmoids.sigmoid_by_name(self.sigmoid, PC=self.thresh_PC, alpha=self.width_alpha)

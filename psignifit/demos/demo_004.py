@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-DEMO_004: PRIORS
-================
+4. Priors
+=========
 
 This demo covers how we set the priors for different situations.
 This gives you effective control over which parameters of the
@@ -31,7 +31,7 @@ import numpy as np
 import psignifit as ps
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# to illustrate this we plot the priors from our original example from
+# To illustrate this we plot the priors from our original example from
 # demo_001:
 
 data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
@@ -42,13 +42,10 @@ data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
                  [0.0070, 88.0000, 90.0000], [0.0080, 90.0000, 90.0000],
                  [0.0100, 90.0000, 90.0000]])
 
-options = dict()
-options.experiment_type = '2AFC'
-options['sigmoidName'] = 'norm'
 
-res = ps.psignifit(data, options)
+res = ps.psignifit(data, sigmoid_name='norm', experiment_type='2AFC')
 
-ps.psigniplot.plotPrior(res)
+ps.psigniplot.plot_prior(res)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # You should check that the assumptions we make for the heuristic to work
@@ -88,16 +85,13 @@ data = np.array([[1.5000, 3.0000, 3.0000], [1.3500, 3.0000, 3.0000],
                  [1.6917, 3.0000, 3.0000], [1.5225, 3.0000, 3.0000],
                  [1.3703, 2.0000, 3.0000]])
 
-# We fit this assuming the same lapse rate for yes and for no
-options = dict()
-options.experiment_type = "equal asymptote"
-# by default this gives us a cumulative normal fit, which is fine for now.
-
-res = ps.psignifit(data, options)
+# We fit this assuming the same lapse rate for yes and for no.
+# By default this uses a cumulative normal fit, which is fine for now.
+res = ps.psignifit(data, experiment_type='equal asymptote')
 
 # We first have a look at the fitted function
 plt.figure()
-ps.psigniplot.plotPsych(res)
+ps.psigniplot.plot_psych(res)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # You should notice that the percent correct is larger than 50 and we did
@@ -111,8 +105,7 @@ ps.psigniplot.plotPsych(res)
 # You can see how the prior influences the result by looking at the
 # marginal plot for the threshold as well:
 
-# plt.figure()
-ps.psigniplot.plotMarginal(res, 0)
+ps.psigniplot.plot_marginal(res, 0)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # note that the dashed grey line, which marks the prior goes down where
@@ -125,27 +118,23 @@ ps.psigniplot.plotMarginal(res, 0)
 # For our example dataset we might give a generous range and assume the
 # possible range is .5 to 1.5
 
-options = dict()
-options.experiment_type = 'equal asymptote'
-
-options['stimulusRange'] = np.array([.5, 1.5])
-resRange = ps.psignifit(data, options)
+res_range = ps.psignifit(data, stimulus_range=[.5, 1.5], experiment_type='equal asymptote')
 
 # We can now have a look how the prior changed:
-ps.psigniplot.plotPrior(resRange)
+ps.psigniplot.plotPrior(res_range)
 
 # By having a look at the marginal plot we can see that there is no area
 # where the prior dominates the posterior anymore. Thus our result for the
 # threshold is now dominated by the data everywhere.
 
 plt.figure()
-ps.psigniplot.plotMarginal(resRange, 0)
+ps.psigniplot.plotMarginal(res_range, 0)
 
 # Finally we can also compare our new fitted psychometric function,
 # to see that even the point estimate for the psychometric function was
 # influenced by the prior here:
 plt.figure()
-ps.psigniplot.plotPsych(resRange)
+ps.psigniplot.plotPsych(res_range)
 ps.psigniplot.plotPsych(res)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -179,34 +168,29 @@ data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
                  [0.0070, 88.0000, 90.0000], [0.0080, 90.0000, 90.0000],
                  [0.0100, 90.0000, 90.0000]])
 
-options = dict()
-options.experiment_type = '2AFC'
-options['sigmoidName'] = 'norm'
-
-res = ps.psignifit(data, options)
+res = ps.psignifit(data, experiment_type='2AFC')
 
 # first lets have a look at the results with the standard prior strength:
 print('Fit:', res['Fit'])
 print('confidence Intervals:', res['conf_Intervals'])
 
 # now we recalculate with the smallest most conservative prior:
-options['betaPrior'] = 1
-res1 = ps.psignifit(data, options)
+res1 = ps.psignifit(data, beta_prior=1, experiment_type='2AFC')
 
 # and with a very strong prior of 200
-options['betaPrior'] = 200
-res200 = ps.psignifit(data, options)
+res200 = ps.psignifit(data, beta_prior=200, experiment_type='2AFC')
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # First see that the only parameter whose fit changes by this is the
 # beta-variance parameter eta (the 5th)
 
-print('Fit with beta prior = 1: ', res1['Fit'])
-print('Fit with beta prior = 200: ', res200['Fit'])
+print('Fit with beta prior = 1: ', res1.parameter_estimate)
+print('Fit with beta prior = 200: ', res200.parameter_estimate)
 
 # Now we have a look at the confidence intervals
-print('confidence Intervals for beta prior = 1: ', res1['conf_Intervals'])
-print('confidence Intervals for beta prior = 200: ', res200['conf_Intervals'])
+# TODO: uncomment once confidence intervals are implemented
+# print('confidence Intervals for beta prior = 1: ', res1.confidence_intervals)
+# print('confidence Intervals for beta prior = 200: ', res200.confidence_intervals)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # They also do not change dramatically, but they are smaller for the 200
@@ -215,7 +199,7 @@ print('confidence Intervals for beta prior = 200: ', res200['conf_Intervals'])
 # Our recommendation based on the simulations is to keep the 10 prior. If
 # you have questions contact us.
 #
-# passing custom priors
+# Passing Custom Priors
 # ---------------------
 #
 # This part explains how to use custom priors, when you do not want to use
@@ -233,37 +217,36 @@ print('confidence Intervals for beta prior = 200: ', res200['conf_Intervals'])
 # For our example this works as follows:
 
 
-def priorLambda(x):
+def prior_lambda(x):
     return ((x >= 0) * (x <= .1)).astype('float')
 
+
+custom_priors = {'lambda': prior_lambda}
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Note that we did not normalize this prior. This is internally done by
 # psignifit.
+#
 # If you are not familiar with function handles and anonymous functions
 # in Python3 you can find an introduction to them here:
 # http://www.programiz.com/python-programming/anonymous-function
-
-# To use this prior you need to add it to the options dict into the priors array
-import copy  # noqa: E402
-
-# To fill the priors field we take the priors from our last fit:
-options['priors'] = copy.deepcopy(res['options']['priors'])
-
-options['priors'][2] = priorLambda
-
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#
 # Most of the times you then have to adjust the bounds of integration as
 # well. This confines the region psignifit operates on. All values outside
-# the bounds implicitly have prior probability 0!!
+# the bounds implicitly have prior probability 0!
 # For our example we set all bounds to NaN, which means they are set
-# automatically and state only the bounds for lambda, which is the third
-# parameter.
+# automatically and state only the bounds for lambda.
 
-options['bounds'] = np.nan * np.ones((5, 2))
-options['bounds'][2, :] = np.array([0, .1])
+zero_bounds = {
+    'threshold' (np.nan, np.nan),
+    'width' (np.nan, np.nan),
+    'lambda' (0, 1.),
+    'gamma' (np.nan, np.nan),
+    'eta' (np.nan, np.nan),
+}
 
-res = ps.psignifit(data, options)
+res = ps.psignifit(data, priors=custom_priors, bounds=zero_bounds, experiment_type='2AFC')
+
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # There will be a warning that the prior chosen here is zero at some
@@ -274,7 +257,7 @@ res = ps.psignifit(data, options)
 # them:
 
 plt.figure()
-ps.psigniplot.plotPrior(res)
+ps.psigniplot.plot_prior(res)
 
 plt.figure()
-ps.psigniplot.plotPsych(res)
+ps.psigniplot.plot_psych(res)

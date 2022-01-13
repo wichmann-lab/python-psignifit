@@ -1,170 +1,118 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Mar 14 17:34:08 2016
+from typing import Union, List
 
-
-
-@author: Ole
-"""
-
-import matplotlib.colors as _mcolors
 import matplotlib.pyplot as plt
+import matplotlib.axes
 import numpy as np
-from matplotlib import cm as _cm
-from matplotlib.ticker import ScalarFormatter
-from scipy.signal import convolve as _convn
+import scipy.stats
+from matplotlib import pyplot as plt
+from scipy.signal import convolve
 
-from . import utils as _utils
-from .marginalize import marginalize
-from .typing import ExperimentType
+from . import psignifit
+from ._typing import ExperimentType
+from ._result import Result
 
 
-def plotPsych(result,  # noqa: C901, this function is too complex
-              dataColor=[0, 105. / 255, 170. / 255],
-              plotData=True,
-              lineColor=[0, 0, 0],
-              lineWidth=2,
-              xLabel='Stimulus Level',
-              yLabel='Proportion Correct',
-              labelSize=15,
-              fontSize=10,
-              fontName='Helvetica',
-              tufteAxis=False,
-              plotAsymptote=True,
-              plotThresh=True,
-              aspectRatio=False,
-              extrapolLength=.2,
-              CIthresh=False,
-              dataSize=0,
-              axisHandle=None,
-              showImediate=True):
-    """ Plot of the fitted psychometric function with the data.
+def plot_psychmetric_function(result: Result,  # noqa: C901, this function is too complex
+                              ax: matplotlib.axes.Axes = plt.gca(),
+                              plot_data: bool = True,
+                              plot_parameter: bool = True,
+                              data_color: Union[str, List[float], np.ndarray] = '#0069AA',  # blue
+                              line_color: Union[str, List[float], np.ndarray] = '#000000',  # black
+                              line_width: float = 2,
+                              extrapolate_stimulus: float = 0.2,
+                              x_label='Stimulus Level',
+                              y_label='Proportion Correct'):
+    """ Plot oted psychometric function with the data.
     """
+    params = result.parameter_estimate
+    data = np.asarray(result.data)
+    config = result.configuration
 
-    fit = result['Fit']
-    data = result['data']
-    options = result['options']
-
-    if axisHandle is None:
-        axisHandle = plt.gca()
-
-    plt.sca(axisHandle)
-
-    if np.isnan(fit[3]):
-        fit[3] = fit[2]
-    if data.size == 0:
+    if params['gamma'] is None:
+        params['gamma'] = params['lambda']
+    if len(data) == 0:
         return
-    if dataSize == 0:
-        dataSize = 10000. / np.sum(data[:, 2])
+    data_size = 10000. / np.sum(data[:, 2])
 
-    if ExperimentType.N_AFC == options.experiment_type:
-        ymin = 1. / options.experiment_choices
+    if ExperimentType.N_AFC == ExperimentType(config.experiment_type):
+        ymin = 1. / config.experiment_choices
         ymin = min([ymin, min(data[:, 1] / data[:, 2])])
     else:
         ymin = 0
 
-    # PLOT DATA
-    # holdState = plt.ishold()
-    # if not holdState:
-    #    plt.cla()
-    #    plt.hold(True)
-    xData = data[:, 0]
-    if plotData:
-        yData = data[:, 1] / data[:, 2]
-        markerSize = np.sqrt(dataSize / 2 * data[:, 2])
-        for i in range(len(xData)):
-            plt.plot(xData[i],
-                     yData[i],
-                     '.',
-                     ms=markerSize[i],
-                     c=dataColor,
-                     clip_on=False)
+    x_data = data[:, 0]
+    if plot_data:
+        y_data = data[:, 1] / data[:, 2]
+        size = np.sqrt(data_size / 2 * data[:, 2])
+        ax.scatter(x_data, y_data, s=size, c=data_color, marker='.', clip_on=False)
 
-    # PLOT FITTED FUNCTION
-    if options['logspace']:
-        xMin = np.log(min(xData))
-        xMax = np.log(max(xData))
-        xLength = xMax - xMin
-        x = np.exp(np.linspace(xMin, xMax, num=1000))
-        xLow = np.exp(
-            np.linspace(xMin - extrapolLength * xLength, xMin, num=100))
-        xHigh = np.exp(
-            np.linspace(xMax, xMax + extrapolLength * xLength, num=100))
-        axisHandle.set_xscale('log')
-    else:
-        xMin = min(xData)
-        xMax = max(xData)
-        xLength = xMax - xMin
-        x = np.linspace(xMin, xMax, num=1000)
-        xLow = np.linspace(xMin - extrapolLength * xLength, xMin, num=100)
-        xHigh = np.linspace(xMax, xMax + extrapolLength * xLength, num=100)
+    sigmoid = config.make_sigmoid()
+    x = np.linspace(x_data.min(), x_data.max(), num=1000)
+    x_low = np.linspace(x[0] - extrapolate_stimulus * (x[-1] - x[0]), x[0], num=100)
+    x_high = np.linspace(x[-1], x[-1] + extrapolate_stimulus * (x[-1] - x[0]), num=100)
+    y = sigmoid(np.r_[x_low, x, x_high], params['threshold'], params['width'])
+    y = (1 - params['gamma'] - params['lambda']) * y + params['gamma']
+    ax.plot(x, y[len(x_low):-len(x_high)], c=line_color, lw=line_width, clip_on=False)
+    ax.plot(x_low, y[:len(x_low)], '--', c=line_color, lw=line_width, clip_on=False)
+    ax.plot(x_high, y[-len(x_high):], '--', c=line_color, lw=line_width, clip_on=False)
 
-    fitValuesLow = (1 - fit[2] - fit[3]) * options['sigmoidHandle'](
-        xLow, fit[0], fit[1]) + fit[3]
-    fitValuesHigh = (1 - fit[2] - fit[3]) * options['sigmoidHandle'](
-        xHigh, fit[0], fit[1]) + fit[3]
-    fitValues = (1 - fit[2] - fit[3]) * options['sigmoidHandle'](
-        x, fit[0], fit[1]) + fit[3]
+    if plot_parameter:
+        x = [params['threshold'], params['threshold']]
+        y = [ymin, params['gamma'] + (1 - params['lambda'] - params['gamma']) * config.thresh_PC]
+        ax.plot(x, y, '-', c=line_color)
 
-    plt.plot(x, fitValues, c=lineColor, lw=lineWidth, clip_on=False)
-    plt.plot(xLow, fitValuesLow, '--', c=lineColor, lw=lineWidth, clip_on=False)
-    plt.plot(xHigh,
-             fitValuesHigh,
-             '--',
-             c=lineColor,
-             lw=lineWidth,
-             clip_on=False)
+        ax.axhline(y=1 - params['lambda'], linestyle=':', color=line_color)
+        ax.axhline(y=1 - params['gamma'], linestyle=':', color=line_color)
 
-    # PLOT PARAMETER ILLUSTRATIONS
-    # THRESHOLD
-    if plotThresh:
-        if options['logspace']:
-            x = [np.exp(fit[0]), np.exp(fit[0])]
-        else:
-            x = [fit[0], fit[0]]
-        y = [ymin, fit[3] + (1 - fit[2] - fit[3]) * options['threshPC']]
-        plt.plot(x, y, '-', c=lineColor)
-    # ASYMPTOTES
-    if plotAsymptote:
-        plt.plot([min(xLow), max(xHigh)], [1 - fit[2], 1 - fit[2]],
-                 ':',
-                 c=lineColor,
-                 clip_on=False)
-        plt.plot([min(xLow), max(xHigh)], [fit[3], fit[3]],
-                 ':',
-                 c=lineColor,
-                 clip_on=False)
-    # CI-THRESHOLD
-    if CIthresh:
-        CIs = result['conf_Intervals']
-        y = np.array([fit[3] + .5 * (1 - fit[2] - fit[3]) for i in range(2)])
-        plt.plot(CIs[0, :, 0], y, c=lineColor)
-        plt.plot([CIs[0, 0, 0], CIs[0, 0, 0]], y + [-.01, .01], c=lineColor)
-        plt.plot([CIs[0, 1, 0], CIs[0, 1, 0]], y + [-.01, .01], c=lineColor)
+        CI = np.asarray(result.confidence_intervals['threshold'])
+        y = np.array([params['gamma'] + .5 * (1 - params['lambda'] - params['gamma'])] * 2)
+        ax.plot(CI[0, :], y, c=line_color)
+        ax.plot([CI[0, 0]] * 2, y + [-.01, .01], c=line_color)
+        ax.plot([CI[0, 1]] * 2, y + [-.01, .01], c=line_color)
 
     # AXIS SETTINGS
     plt.axis('tight')
-    plt.tick_params(labelsize=fontSize)
-    plt.xlabel(xLabel, fontname=fontName, fontsize=labelSize)
-    plt.ylabel(yLabel, fontname=fontName, fontsize=labelSize)
-    if aspectRatio:
-        axisHandle.set_aspect(2 / (1 + np.sqrt(5)))
-
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
     plt.ylim([ymin, 1])
-    # tried to mimic box('off') in matlab, as box('off') in python works differently
-    plt.tick_params(direction='out', right=False, top=False)
-    for side in ['top', 'right']:
-        axisHandle.spines[side].set_visible(False)
-    plt.gca().xaxis.set_major_formatter(ScalarFormatter())
-    plt.ticklabel_format(style='sci', scilimits=(-2, 4))
-
-    # plt.hold(holdState)
-    if (showImediate):
-        plt.show(0)
-    return axisHandle
+    return ax
 
 
-def plotsModelfit(result, showImediate=True):
+def plot_stimulus_residuals(result: Result, ax: matplotlib.axes.Axes = plt.gca()) -> matplotlib.axes.Axes:
+    return _plot_residuals(result.data[:, 0], 'Stimulus Level', result, ax)
+
+
+def plot_block_residuals(result: Result, ax: matplotlib.axes.Axes = plt.gca()) -> matplotlib.axes.Axes:
+    return _plot_residuals(range(result.data.shape[0]), 'Block Number', result, ax)
+
+
+def _plot_residuals(x_values: np.ndarray, x_label: str, result: Result, ax: matplotlib.axes.Axes = plt.gca()):
+    params = result.parameter_estimate
+    data = result.data
+    sigmoid = result.configuration.make_sigmoid()
+
+    std_model = params['gamma'] + (1 - params['lambda'] - params['gamma']) * sigmoid(
+        data[:, 0], params['threshold'], params['width'])
+    deviance = data[:, 1] / data[:, 2] - std_model
+    std_model = np.sqrt(std_model * (1 - std_model))
+    deviance = deviance / std_model
+    x = np.linspace(x_values.min(), x_values.max(), 1000)
+
+    ax.plot(x_values, deviance, 'k.', ms=10, clip_on=False)
+    linefit = np.polyfit(x_values, deviance, 1)
+    ax.plot(x, np.polyval(linefit, x), 'k-', clip_on=False)
+    linefit = np.polyfit(x_values, deviance, 2)
+    ax.plot(x, np.polyval(linefit, x), 'k--', clip_on=False)
+    linefit = np.polyfit(x_values, deviance, 3)
+    ax.plot(x, np.polyval(linefit, x), 'k:', clip_on=False)
+
+    ax.xlabel(x_label, fontsize=14)
+    ax.ylabel('Deviance', fontsize=14)
+    return ax
+
+
+def plot_modelfit(result: Result) -> matplotlib.figure.Figure:
     """ Plot utilities to judge model fit.
 
     Plots some standard plots, meant to help you judge whether there are
@@ -180,435 +128,203 @@ def plotsModelfit(result, showImediate=True):
     The right plot shows the Deviance residuals against "time", e.g. against
     the order of the passed blocks. A trend in this plot would indicate
     learning/ changes in performance over time.
-
-    These are the same plots as presented in psignifit 2 for this purpose.
     """
-
-    fit = result['Fit']
-    data = result['data']
-    options = result['options']
-
-    minStim = min(data[:, 0])
-    maxStim = max(data[:, 0])
-    stimRange = [1.1 * minStim - .1 * maxStim, 1.1 * maxStim - .1 * minStim]
-
-    plt.figure(figsize=(15, 5))
+    fig = plt.figure(figsize=(15, 5))
 
     ax = plt.subplot(1, 3, 1)
-    # the psychometric function
-    x = np.linspace(stimRange[0], stimRange[1], 1000)
-    y = fit[3] + (1 - fit[2] - fit[3]) * options['sigmoidHandle'](x, fit[0],
-                                                                  fit[1])
-
-    plt.plot(x, y, 'k', clip_on=False)
-    plt.plot(data[:, 0], data[:, 1] / data[:, 2], '.k', ms=10, clip_on=False)
-
-    plt.xlim(stimRange)
-    if options.experiment_type == ExperimentType.N_AFC:
-        plt.ylim([min(1. / options.experiment_choices, min(data[:, 1] / data[:, 2])), 1])
-    else:
-        plt.ylim([0, 1])
-    plt.xlabel('Stimulus Level', fontsize=14)
-    plt.ylabel('Percent Correct', fontsize=14)
-    plt.title('Psychometric Function', fontsize=20)
-    plt.tick_params(right=False, top=False)
-    for side in ['top', 'right']:
-        ax.spines[side].set_visible(False)
-    plt.ticklabel_format(style='sci', scilimits=(-2, 4))
+    plot_psychmetric_function(result, ax, plot_data=True, plot_parameter=False, extrapolate_stimulus=0)
+    ax.set_title('Psychometric Function')
 
     ax = plt.subplot(1, 3, 2)
-    # stimulus level vs deviance
-    stdModel = fit[3] + (1 - fit[2] - fit[3]) * options['sigmoidHandle'](
-        data[:, 0], fit[0], fit[1])
-    deviance = data[:, 1] / data[:, 2] - stdModel
-    stdModel = np.sqrt(stdModel * (1 - stdModel))
-    deviance = deviance / stdModel
-    xValues = np.linspace(minStim, maxStim, 1000)
-
-    plt.plot(data[:, 0], deviance, 'k.', ms=10, clip_on=False)
-    linefit = np.polyfit(data[:, 0], deviance, 1)
-    plt.plot(xValues, np.polyval(linefit, xValues), 'k-', clip_on=False)
-    linefit = np.polyfit(data[:, 0], deviance, 2)
-    plt.plot(xValues, np.polyval(linefit, xValues), 'k--', clip_on=False)
-    linefit = np.polyfit(data[:, 0], deviance, 3)
-    plt.plot(xValues, np.polyval(linefit, xValues), 'k:', clip_on=False)
-
-    plt.xlabel('Stimulus Level', fontsize=14)
-    plt.ylabel('Deviance', fontsize=14)
-    plt.title('Shape Check', fontsize=20)
-    plt.tick_params(right=False, top=False)
-    for side in ['top', 'right']:
-        ax.spines[side].set_visible(False)
-    plt.ticklabel_format(style='sci', scilimits=(-2, 4))
+    plot_stimulus_residuals(result, ax)
+    ax.set_title('Shape Check')
 
     ax = plt.subplot(1, 3, 3)
-    # block number vs deviance
-    blockN = range(len(deviance))
-    xValues = np.linspace(min(blockN), max(blockN), 1000)
-    plt.plot(blockN, deviance, 'k.', ms=10, clip_on=False)
-    linefit = np.polyfit(blockN, deviance, 1)
-    plt.plot(xValues, np.polyval(linefit, xValues), 'k-', clip_on=False)
-    linefit = np.polyfit(blockN, deviance, 2)
-    plt.plot(xValues, np.polyval(linefit, xValues), 'k--', clip_on=False)
-    linefit = np.polyfit(blockN, deviance, 3)
-    plt.plot(xValues, np.polyval(linefit, xValues), 'k:', clip_on=False)
+    plot_block_residuals(result, ax)
+    ax.set_title('Time Dependence?')
 
-    plt.xlabel('Block Number', fontsize=14)
-    plt.ylabel('Deviance', fontsize=14)
-    plt.title('Time Dependence?', fontsize=20)
-    plt.tick_params(right=False, top=False)
-    for side in ['top', 'right']:
-        ax.spines[side].set_visible(False)
-    plt.gca().xaxis.set_major_formatter(ScalarFormatter())
-    plt.ticklabel_format(style='sci', scilimits=(-2, 4))
-
-    plt.tight_layout()
-    if (showImediate):
-        plt.show(0)
+    fig.tight_layout()
+    return fig
 
 
-def plotMarginal(result,
-                 dim=0,
-                 lineColor=[0, 105 / 255, 170 / 255],
-                 lineWidth=2,
-                 xLabel='',
-                 yLabel='Marginal Density',
-                 labelSize=15,
-                 tufteAxis=False,
-                 prior=True,
-                 priorColor=[.7, .7, .7],
-                 CIpatch=True,
-                 plotPE=True,
-                 axisHandle=None,
-                 showImediate=True):
+def plot_marginal(result: Result,
+                  parameter: str,
+                  ax: matplotlib.axes.Axes = plt.gca(),
+                  line_color: Union[str, List[float], np.ndarray] = '#0069AA',  # blue
+                  line_width: float = 2,
+                  y_label: str ='Marginal Density',
+                  plot_prior: bool = True,
+                  prior_color: Union[str, List[float], np.ndarray] = '#B2B2B2',  # light gray
+                  plot_estimate: bool = True):
     """ Plots the marginal for a single dimension.
 
     Args:
         result: should be a result struct from the main psignifit routine
         dim: The parameter to plot. 1=threshold, 2=width, 3=lambda, 4=gamma, 5=sigma
     """
-    if isinstance(dim, str):
-        dim = _utils.strToDim(dim)
+    if parameter not in result.marginal_posterior_values:
+        raise ValueError(f'Expects parameter {parameter} in {{{result.marginal_posterior_values.keys()}}}')
 
-    if len(result['marginals'][dim]) <= 1:
-        print(
-            'Error: The parameter you wanted to plot was fixed in the analysis!'
-        )
-        return
-    if axisHandle is None:
-        axisHandle = plt.gca()
+    marginal = result.marginal_posterior_values[parameter]
+    if marginal is None:
+        raise ValueError(f'Parameter {parameter} was fixed during optimization. No marginal to plot.')
+
+    x_label = _parameter_label(parameter)
+
+    x = np.asarray(result.parameter_values[parameter])
+    if plot_estimate:
+        CIs = np.asarray(result.confidence_intervals[parameter])
+        for CI in CIs:
+            ci_x = np.r_[CI[0], x[(x >= CI[0]) & (x <= CI[1])], CI[1]]
+            ax.fill_between(ci_x, np.zeros_like(ci_x), np.interp(ci_x, x, marginal), color=line_color, alpha=0.5)
+
+        param_value = result.parameter_estimate[parameter]
+        ax.plot([param_value] * 2, [0, np.interp(param_value, x, marginal)], color=line_color)
+
+    if plot_prior:
+        ax.plot(x, result.prior_values[parameter], ls='--', color=prior_color, clip_on=False)
+
+    ax.plot(x, marginal, lw=line_width, c=line_color, clip_on=False)
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+
+    return ax
+
+
+def _parameter_label(parameter):
+    label_defaults = {'threshold': 'Threshold', 'width': 'Width',
+                      'lambda': r'$\lambda$', 'gamma': r'$\gamma$', 'eta': r'$\eta$'}
     try:
-        plt.sca(axisHandle)
-        plt.rc('text', usetex=True)
-    except TypeError:
-        raise ValueError('Invalid axes handle provided to plot in.')
-
-    label_defaults = ('Threshold', 'Width', r'$\lambda$', r'$\gamma$', r'$\eta$')
-    if not xLabel:
-        xLabel = label_defaults[dim]
-
-    x = result['marginalsX'][dim]
-    marginal = result['marginals'][dim]
-    CI = np.hstack(result['conf_Intervals'][dim].T)
-    Fit = result['Fit'][dim]
-
-    # holdState = plt.ishold()
-    # if not holdState: plt.cla()
-    # plt.hold(True)
-
-    # patch for confidence region
-    if CIpatch:
-        xCI = np.array([CI[0], CI[1], CI[1], CI[0]])
-        xCI = np.insert(xCI, 1, x[np.logical_and(x >= CI[0], x <= CI[1])])
-        yCI = np.array([
-            np.interp(CI[0], x, marginal),
-            np.interp(CI[1], x, marginal), 0, 0
-        ])
-        yCI = np.insert(yCI, 1, marginal[np.logical_and(x >= CI[0],
-                                                        x <= CI[1])])
-        color = .5 * np.array(lineColor) + .5 * np.array([1, 1, 1])
-        pat = plt.Polygon(np.array([xCI, yCI]).T,
-                          facecolor=color,
-                          edgecolor=color,
-                          alpha=1)
-        axisHandle.add_patch(pat)
-
-    # plot prior
-    if prior:
-        xprior = np.linspace(min(x), max(x), 1000)
-        plt.plot(xprior,
-                 result['options']['priors'][dim](xprior),
-                 '--',
-                 c=priorColor,
-                 clip_on=False)
-
-    # posterior
-    plt.plot(x, marginal, lw=lineWidth, c=np.array(lineColor), clip_on=False)
-    # point estimate
-    if plotPE:
-        plt.plot([Fit, Fit], [0, np.interp(Fit, x, marginal)],
-                 'k',
-                 clip_on=False)
-
-    plt.xlabel(xLabel, fontsize=labelSize, visible=True)
-    plt.ylabel(yLabel, fontsize=labelSize, visible=True)
-    plt.tick_params(direction='out', right=False, top=False)
-    for side in ['top', 'right']:
-        axisHandle.spines[side].set_visible(False)
-    plt.gca().xaxis.set_major_formatter(ScalarFormatter())
-    plt.ticklabel_format(style='sci', scilimits=(-2, 4))
-
-    # plt.hold(holdState)
-    if (showImediate):
-        plt.xlim([min(x), max(x)])
-        plt.ylim([0, 1.1 * max(marginal)])
-        plt.show(0)
-    return axisHandle
+        plt.rcParams.update({"text.usetex": True})
+        x_label = label_defaults[parameter]
+    except:
+        x_label = parameter.capitalize()
+    return x_label
 
 
-def uni_tuebingen_cm():
+def plot_prior(result: Result,
+               line_color: Union[str, List[float], np.ndarray] = '#0069AA',  # blue
+               line_width: float = 2,
+               marker_size: float = 30):
+    """ Plot the priors on the different parameters.
+
+    The coloured psychometric functions correspond to the 0%, 25%, 75% and 100%
+    quantiles of the prior.
     """
-       Colormap using the color scheme of the University of Tuebingen.
+    data = result.data
+    params = result.parameter_values
+    priors = result.prior_values
+    sigmoid = result.configuration.make_sigmoid()
+
+    colors = ['k', [1, 200 / 255, 0], 'r', 'b', 'g']
+    stimulus_range = result.configuration.stimulus_range
+    if stimulus_range is None:
+        stimulus_range = [data[:, 0].min(), data[:, 0].max()]
+    width = stimulus_range[1] - stimulus_range[0]
+    stimulus_range = [stimulus_range[0] - .5 * width , stimulus_range[1] + .5 * width]
+
+    titles = {'threshold': 'Threshold m',
+              'width': 'Width w',
+              'lambda': r'Lapse Rate $\lambda$'}
+
+    parameter_keys = ['threshold', 'width', 'lambda']
+    sigmoid_x = np.linspace(stimulus_range[0], stimulus_range[1], 10000)
+    sigmoid_params = {param: result.parameter_estimate[param] for param in parameter_keys}
+    for i, param in enumerate(parameter_keys):
+        prior_x = params[param]
+        weights = convolve(np.diff(prior_x), np.array([0.5, 0.5]))
+        cumprior = np.cumsum(priors[param] * weights)
+        x_percentiles = [result.parameter_estimate[param], min(prior_x), prior_x[-cumprior[cumprior >= .25].size],
+                         prior_x[-cumprior[cumprior >= .75].size], max(prior_x)]
+        plt.subplot(2, 3, i + 1)
+        plt.plot(params[param], priors[param], lw=line_width, c=line_color)
+        plt.scatter(x_percentiles, np.interp(x_percentiles, prior_x, priors[param]), ms=marker_size, c=colors)
+        plt.xlabel('Stimulus Level')
+        plt.ylabel('Density')
+        plt.title(titles[param])
+
+        plt.subplot(2, 3, i + 4)
+        for param_value, color in zip(x_percentiles, colors):
+            this_sigmoid_params = dict(sigmoid_params)
+            this_sigmoid_params[param] = param_value
+            plt.plot(sigmoid_x, sigmoid(sigmoid_x, **this_sigmoid_params), line_width=line_width, color=color)
+        plt.plot(data[:, 0], np.zeros(data[:, 0].shape), 'k.', ms=marker_size * .75)
+        plt.xlabel('Stimulus Level')
+        plt.ylabel('Percent Correct')
+
+
+def plot_2D_margin(result: Result,
+                   first_param: str,
+                   second_param: str,
+                   ax: matplotlib.axes.Axes = plt.gca()):
+    """ Constructs a 2 dimensional marginal plot of the posterior density. """
+    if result.posterior_mass is None:
+        ValueError("Expects posterior_mass in result, got None. You could try psignifit(return_posterior=True).")
+
+    parameter_indices = {param: i for i, param in enumerate(sorted(result.parameter_estimate.keys()))}
+    other_param_ix = tuple(i for param, i in parameter_indices.items()
+                           if param != first_param and param != second_param)
+    marginal_2d = np.sum(result.posterior_mass, axis=other_param_ix)
+    if len(marginal_2d.shape) != 2 or np.any(marginal_2d.shape == 1):
+        raise ValueError(f'The marginal is not two-dimensional. Were the parameters fixed during optimization?')
+
+    if parameter_indices[first_param] > parameter_indices[second_param]:
+        (second_param, first_param) = (first_param, second_param)
+    extent = [result.parameter_values[second_param][0], result.parameter_values[second_param][-1],
+              result.parameter_values[first_param][0], result.parameter_values[first_param][-1]]
+    ax.imshow(marginal_2d, extent=extent)
+    ax.set_xlabel(_parameter_label(second_param))
+    ax.set_ylabel(_parameter_label(first_param))
+
+
+def plot_bias_analysis(data: np.ndarray, compare_data: np.ndarray, **kwargs) -> None:
+    """ Analyse and plot 2-AFC dataset bias.
+
+    This short analysis is used to see whether two 2AFC datasets have a bias and
+    whether it can be explained with a "finger bias" (a bias in guessing).
+
+    It runs psignifit on the datasets `data`, `compare_data`, and
+    their combination. Then the corresponding psychometric functions and marginal
+    posterior distributions in 1, 2, and 3 dimensions are plotted.
+
+    Args:
+         data: First dataset as expected by :func:`psignifit.psignifit`.
+         compare_data: Second dataset for :func:`psignifit.psignifit`.
+         kwargs: Additional configuration arguments for :func:`psignifit.psignifit`.
     """
-    midBlue = np.array([165, 30, 55]) / 255
-    lightBlue = np.array([210, 150, 0]) / 255
-    steps = 200
+    config = dict(experiment_type=ExperimentType.YES_NO.value,
+                  bounds={'lambda': [0, .1],
+                          'gamma': [.11, .89]},
+                  fixed_parameters={'eta': 0},
+                  grid_steps={'threshold': 40,
+                              'width': 40,
+                              'lambda': 40,
+                              'gamma': 40,
+                              'eta': 1},
+                  steps_moving_bounds={'threshold': 30,
+                                       'width': 30,
+                                       'lambda': 20,
+                                       'gamma': 20,
+                                       'eta': 1},
+                  priors={'gamma': lambda x: scipy.stats.beta.pdf(x, 2, 2)},
+                  **kwargs)
+    result_combined = psignifit(np.r_[data, compare_data], **config)
+    result_data = psignifit(data, **config)
+    result_compare_data = psignifit(compare_data, **config)
 
-    MAP = _mcolors.LinearSegmentedColormap.from_list('Tuebingen', [midBlue, lightBlue, [1, 1, 1]], N=steps, gamma=1.0)
-    _cm.register_cmap(name='Tuebingen', cmap=MAP)
-    return MAP
+    plt.figure()
+    ax = plt.axes([0.15, 4.35 / 6, 0.75, 1.5 / 6])
 
+    plot_psychmetric_function(result_combined, ax=ax)
+    plot_psychmetric_function(result_data, ax=ax, line_color=[1, 0, 0], data_color=[1, 0, 0])
+    plot_psychmetric_function(result_compare_data, ax=ax, line_color=[0, 0, 1], data_color=[0, 0, 1])
+    plt.ylim([0, 1])
 
-def plotPrior(result,
-              lineWidth=2,
-              lineColor=np.array([0, 105, 170]) / 255,
-              markerSize=30,
-              showImediate=True):
-    """ Plot the priors on the different parameters
-    """
+    for param in ['threshold', 'width', 'lambda', 'gamma']:
+        ax = plt.axes([0.15, 3.35 / 6, 0.75, 0.5 / 6])
+        plot_marginal(result_combined, param, ax=ax, plot_prior=False, line_color=[0, 0, 0])
 
-    data = result['data']
-
-    if np.size(result['options']['stimulusRange']) <= 1:
-        result['options']['stimulusRange'] = np.array(
-            [min(data[:, 0]), max(data[:, 0])])
-        stimRangeSet = False
-    else:
-        stimRangeSet = True
-
-    stimRange = result['options']['stimulusRange']
-    r = stimRange[1] - stimRange[0]
-
-    # get bounds for width
-    # minimum = minimal difference of two stimulus levels
-
-    if len(np.unique(data[:, 0])) > 1 and not (stimRangeSet):
-        widthmin = min(np.diff(np.sort(np.unique(data[:, 0]))))
-    else:
-        widthmin = 100 * np.spacing(stimRange[1])
-    # maximum = spread of the data
-
-    # We use the same prior as we previously used... e.g. we use the factor by
-    # which they differ for the cumulative normal function
-    Cfactor = ((_utils.norminv(.95) - _utils.norminv(.05)) /
-               (_utils.norminv(1 - result['options']['widthalpha']) - _utils.norminv(result['options']['widthalpha'])))
-    widthmax = r
-
-    steps = 10000
-    theta = np.empty(5)
-    ranges = [
-        (stimRange[0] - .5 * r, stimRange[1] + .5 * r),
-        (min(result['X1D'][1]), max(result['X1D'][1], )),
-        (0, .5),
-        (0, .5),
-        (0, 1),
-    ]
-    for itheta in range(0, 5):
-        x = np.linspace(ranges[itheta][0], ranges[itheta][1], steps)
-        y = result['options']['priors'][itheta](x)
-        theta[itheta] = np.sum(x * y) / np.sum(y)
-
-    if result['options'].experiment_type == ExperimentType.EQ_ASYMPTOTE:
-        theta[3] = theta[2]
-    if result['options'].experiment_type == ExperimentType.N_AFC:
-        theta[3] = 1 / result['options'].experiment_choices
-
-    # get limits for the psychometric function plots
-    xLimit = [stimRange[0] - .5 * r, stimRange[1] + .5 * r]
-    """ threshold """
-
-    xthresh = np.linspace(xLimit[0], xLimit[1], steps)
-    ythresh = result['options']['priors'][0](xthresh)
-    wthresh = _convn(np.diff(xthresh), .5 * np.array([1, 1]))
-    cthresh = np.cumsum(ythresh * wthresh)
-
-    plt.subplot(2, 3, 1)
-    plt.plot(xthresh, ythresh, lw=lineWidth, c=lineColor)
-    # plt.hold(True)
-    plt.xlim(xLimit)
-    plt.title('Threshold', fontsize=18)
-    plt.ylabel('Density', fontsize=18)
-
-    plt.subplot(2, 3, 4)
-    plt.plot(data[:, 0], np.zeros(data[:, 0].shape), 'k.', ms=markerSize * .75)
-    # plt.hold(True)
-    plt.ylabel('Percent Correct', fontsize=18)
-    plt.xlim(xLimit)
-
-    x = np.linspace(xLimit[0], xLimit[1], steps)
-    thetas = [theta[0],
-              min(xthresh),
-              xthresh[-cthresh[cthresh >= .25].size],
-              xthresh[-cthresh[cthresh >= .75].size],
-              max(xthresh)]
-    colors = [
-       'k', [1, 200 / 255, 0], 'r', 'b', 'g',
-    ]
-    for xcurrent, color in zip(thetas, colors):
-        y = 100 * (theta[3] + ((1 - theta[2]) - theta[3]) *
-                   result['options']['sigmoidHandle'](x, xcurrent, theta[1]))
-
-        plt.subplot(2, 3, 4)
-        plt.plot(x, y, '-', lw=lineWidth, c=color)
-        plt.subplot(2, 3, 1)
-        plt.plot(xcurrent,
-                 result['options']['priors'][0](xcurrent),
-                 '.',
-                 c=color,
-                 ms=markerSize)
-    """ width"""
-    xwidth = np.linspace(widthmin, 3 / Cfactor * widthmax, steps)
-    ywidth = result['options']['priors'][1](xwidth)
-    wwidth = _convn(np.diff(xwidth), .5 * np.array([1, 1]))
-    cwidth = np.cumsum(ywidth * wwidth)
-
-    plt.subplot(2, 3, 2)
-    plt.plot(xwidth, ywidth, lw=lineWidth, c=lineColor)
-    # plt.hold(True)
-    plt.xlim([widthmin, 3 / Cfactor * widthmax])
-    plt.title('Width', fontsize=18)
-
-    plt.subplot(2, 3, 5)
-    plt.plot(data[:, 0], np.zeros(data[:, 0].size), 'k.', ms=markerSize * .75)
-    # plt.hold(True)
-    plt.xlim(xLimit)
-    plt.xlabel('Stimulus Level', fontsize=18)
-
-    x = np.linspace(xLimit[0], xLimit[1], steps)
-    widths = [theta[1],
-              min(xwidth),
-              xwidth[-cwidth[cwidth >= .25].size],
-              xwidth[-cwidth[cwidth >= .75].size],
-              max(xwidth)]
-    for xcurrent, color in zip(widths, colors):
-        y = 100 * (theta[3] + (1 - theta[2] - theta[3]) *
-                   result['options']['sigmoidHandle'](x, theta[0], xcurrent))
-        plt.subplot(2, 3, 5)
-        plt.plot(x, y, '-', lw=lineWidth, c=color)
-        plt.subplot(2, 3, 2)
-        plt.plot(xcurrent,
-                 result['options']['priors'][1](xcurrent),
-                 '.',
-                 c=color,
-                 ms=markerSize)
-    """ lapse """
-
-    xlapse = np.linspace(0, .5, steps)
-    ylapse = result['options']['priors'][2](xlapse)
-    wlapse = _convn(np.diff(xlapse), .5 * np.array([1, 1]))
-    clapse = np.cumsum(ylapse * wlapse)
-    plt.subplot(2, 3, 3)
-    plt.plot(xlapse, ylapse, lw=lineWidth, c=lineColor)
-    # plt.hold(True)
-    plt.xlim([0, .5])
-    plt.title('\\lambda', fontsize=18)
-
-    plt.subplot(2, 3, 6)
-    plt.plot(data[:, 0], np.zeros(data[:, 0].size), 'k.', ms=markerSize * .75)
-    # plt.hold(True)
-    plt.xlim(xLimit)
-
-    x = np.linspace(xLimit[0], xLimit[1], steps)
-    lapses = [theta[2],
-              0,
-              xlapse[-clapse[clapse >= .25].size],
-              xlapse[-clapse[clapse >= .75].size],
-              0.5]
-    for xcurrent, color in zip(lapses, colors):
-        y = 100 * (theta[3] + (1 - xcurrent - theta[3]) *
-                   result['options']['sigmoidHandle'](x, theta[0], theta[1]))
-        plt.subplot(2, 3, 6)
-        plt.plot(x, y, '-', lw=lineWidth, c=color)
-        plt.subplot(2, 3, 3)
-        plt.plot(np.array(xcurrent),
-                 result['options']['priors'][2](np.array(xcurrent)),
-                 '.',
-                 c=color,
-                 ms=markerSize)
-    if (showImediate):
-        plt.show(0)
-
-
-def plot2D(result,
-           par1,
-           par2,
-           colorMap=uni_tuebingen_cm(),
-           labelSize=15,
-           fontSize=10,
-           axisHandle=None,
-           showImediate=True):
-    """ Constructs a 2 dimensional marginal plot of the posterior density.
-
-    This is the same plot as it is displayed in plotBayes in an
-    unmodifyable way.
-
-    The result struct is passed as result.
-    par1 and par2 should code the two parameters to plot:
-
-        0 = threshold
-        1 = width
-        2 = lambda
-        3 = gamma
-        4 = eta
-
-    Further plotting options may be passed.
-    """
-    # convert strings to dimension number
-    par1, label1 = _utils.strToDim(str(par1))
-    par2, label2 = _utils.strToDim(str(par2))
-
-    assert (par1 != par2), 'par1 and par2 must be different numbers to code for the parameters to plot'
-
-    if axisHandle is None:
-        axisHandle = plt.gca()
-
-    try:
-        plt.sca(axisHandle)
-    except TypeError:
-        raise ValueError('Invalid axes handle provided to plot in.')
-
-    plt.set_cmap(colorMap)
-
-    marg, _, _ = marginalize(result, np.array([par1, par2]))
-
-    if par1 > par2:
-        marg = marg.T
-
-    if 1 in marg.shape:
-        if len(result['X1D'][par1]) == 1:
-            plotMarginal(result, par2)
-        else:
-            plotMarginal(result, par2)
-    else:
-        e = [result['X1D'][par2][0], result['X1D'][par2][-1],
-             result['X1D'][par1][0], result['X1D'][par1][-1]]
-        plt.imshow(marg, extent=e)
-        plt.ylabel(label1, fontsize=labelSize)
-        plt.xlabel(label2, fontsize=labelSize)
-
-    plt.tick_params(direction='out', right=False, top=False)
-    for side in ['top', 'right']:
-        axisHandle.spines[side].set_visible(False)
-    plt.ticklabel_format(style='sci', scilimits=(-2, 4))
-    if (showImediate):
-        plt.show(0)
+        plot_marginal(result_data, param, ax=ax, line_color=[1, 0, 0])
+        plot_marginal(result_compare_data, param, ax=ax, line_color=[0, 0, 1])
+        ax.relim()
+        ax.autoscale_view()

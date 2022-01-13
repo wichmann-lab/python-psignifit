@@ -3,8 +3,8 @@ from unittest.mock import patch
 
 import pytest
 
-from psignifit.configuration import Configuration
-from psignifit.utils import PsignifitException
+from psignifit._configuration import Configuration
+from psignifit._utils import PsignifitException
 
 
 def test_setting_valid_option():

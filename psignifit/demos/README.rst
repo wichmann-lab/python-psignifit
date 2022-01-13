@@ -1,6 +1,6 @@
 .. _demo_index:
 
-Demos
-=====
+Examples
+========
 
-This is a gallery of demos
+These examples show practical applications of python-psignifit.

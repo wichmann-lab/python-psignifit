@@ -7,9 +7,6 @@ import pytest
 from psignifit import psignifit, psigniplot
 
 
-pytestmark = pytest.mark.skip("Skip basic tests until refactoring is complete")
-
-
 def get_data():
     return np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
                      [0.0020, 44.0000, 90.0000], [0.0025, 44.0000, 90.0000],
@@ -22,68 +19,76 @@ def get_data():
 
 def get_std_options():
     options = dict()
-    options['sigmoidName'] = 'norm'  # choose a cumulative Gauss as the sigmoid
-    options.experiment_type = '2AFC'
-    options['fixedPars'] = np.nan * np.ones(5)
-    options['fixedPars'][2] = 0.01
-    options['fixedPars'][3] = 0.5
+    options['sigmoid'] = 'norm'  # choose a cumulative Gauss as the sigmoid
+    options['experiment_type'] = '2AFC'
+    options['fixed_parameters'] = {'lambda': 0.01,
+                                   'gamma': 0.5}
     return options
 
 
 def test_fit_basic():
     data = get_data()
     options = get_std_options()
-    res = psignifit(data, options)
-    threshold, width, lapsus_rate, guess_rate, eta = res['Fit']
-    assert isclose(threshold, 0.0045938670588426232)
-    assert isclose(width, 0.0044734344997461074)
-    assert isclose(lapsus_rate, 0.01)
-    assert isclose(guess_rate, 0.5)
-    assert isclose(eta, 5.8328681737030612e-06)
+    res = psignifit(data, **options)
+    param = res.parameter_estimate
+    assert isclose(param['threshold'], 0.0046, abs_tol=0.0001)
+    assert isclose(param['width'], 0.0045, abs_tol=0.0001)
+    assert isclose(param['lambda'], 0.01, abs_tol=0.0001)
+    assert isclose(param['gamma'], 0.5, abs_tol=0.0001)
+    assert isclose(param['eta'], 5.8e-06, abs_tol=0.0001)
 
 
-@pytest.mark.skip
-def test_plotPsych():
+def test_plot_psych():
     data = get_data()
     options = get_std_options()
-    res = psignifit(data, options)
+    res = psignifit(data, **options)
     plt.figure()
-    psigniplot.plotPsych(res, showImediate=False)
+    psigniplot.plot_psychmetric_function(res)
     plt.close('all')
-    assert True
 
 
-@pytest.mark.skip
-def test_plotMarginal():
+def test_plot_marginal():
     data = get_data()
     options = get_std_options()
-    res = psignifit(data, options)
+    res = psignifit(data, **options)
     plt.figure()
-    psigniplot.plotMarginal(res, 0, showImediate=False)
+    psigniplot.plot_marginal(res, 'threshold')
     plt.close('all')
-    assert True
 
 
-@pytest.mark.skip
 def test_plot2D():
     data = get_data()
     options = get_std_options()
-    res = psignifit(data, options)
+    res = psignifit(data, return_posterior=True, **options)
     plt.figure()
-    psigniplot.plot2D(res, 0, 1, showImediate=False)
+    psigniplot.plot_2D_margin(res, 'threshold', 'width')
     plt.close('all')
-    assert True
+
+    with pytest.raises(ValueError):
+        res.posterior_mass = None
+        psigniplot.plot_2D_margin(res, 'threshold', 'width')
+
+
+def test_bias_analysis():
+    data = get_data()
+    plt.figure()
+    other_data = np.array(data)
+    other_data[:, 1] += 2
+    other_data[:, 2] += 5
+    psigniplot.plot_bias_analysis(data, other_data)
+    plt.close('all')
 
 
 def test_fixedPars():
     data = get_data()
     options = get_std_options()
-    res = psignifit(data, options)
+    res = psignifit(data, **options)
+    estim_param = res.parameter_estimate
+    fixed_param = res.configuration.fixed_parameters
+    all_param_values = res.parameter_values
+
     # Check that fit and bounds are actually set to the fixed parametervalues
-    assert np.all(res['Fit'][np.isfinite(options['fixedPars'])] ==
-                  options['fixedPars'][np.isfinite(options['fixedPars'])])
-    assert np.all(
-        res['options']['bounds'][np.isfinite(options['fixedPars']), 0] ==
-        options['fixedPars'][np.isfinite(options['fixedPars'])])
-    assert np.all(res['options']['bounds'][np.isfinite(options['fixedPars']), 1] ==
-                  options['fixedPars'][np.isfinite(options['fixedPars'])])
+    for name, fixed_value in fixed_param.items():
+        assert isclose(estim_param[name], fixed_value)
+        assert len(all_param_values[name]) == 1
+        assert isclose(all_param_values[name][0], fixed_value)

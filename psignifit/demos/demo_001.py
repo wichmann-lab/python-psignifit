@@ -1,6 +1,6 @@
 """
- DEMO_001 BASIC USAGE
- ====================
+ 1. Basic Usage
+ ==============
 
  The Psignifit 101
 """
@@ -11,13 +11,18 @@ import numpy as np
 import psignifit as ps
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# SAVE DATA IN RIGHT FORMAT
-# -------------------------
+# Save Data in the Right Format
+# -----------------------------
 #
-# First we need the data in the format (x | nCorrect | total)
+# First we need the data in the format (x | nCorrect | total).
 # As an example we use the following dataset from a 2AFC experiment with 90
 # trials at each stimulus level. This dataset comes from a simple signal
 # detection experiment.
+#
+# .. warning::
+#     This format differs slightly from the format used in older
+#     psignifit versions. You can convert your data by using the reformat
+#     comand. If you are a user of the older psignifits.
 
 data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
                  [0.0020, 44.0000, 90.0000], [0.0025, 44.0000, 90.0000],
@@ -29,95 +34,91 @@ data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
 
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# SAVE DATA IN RIGHT FORMAT
-# remark: This format differs slightly from the format used in older
-# psignifit versions. You can convert your data by using the reformat
-# comand. If you are a user of the older psignifits.
+# Run psignifit with options
+# --------------------------
+# Running psignifit fits a sigmoid function to the data.
+# You obtain a result object, which contains all the information about
+# the fitted function.
 #
+# Running psignifit requires to specify the sigmoid and the experiment type.
 #
-# CONSTRUCT THE OPTIONS DICTONARY
-# -------------------------------
-#
-# To start psignifit you need to pass a dictionary, which specifies, what kind
-# of experiment you did and any other parameters of the fit you might want
-#
-#
-# You can create an empty dictionary by simply calling <name> = dict()
+# Here we choose a cumulative Gauss as the sigmoid and a 2-AFC as the paradigm of the experiment.
+# This sets the guessing rate to .5 and fits the rest of the parameters '''
 
-options = dict()  # initialize as an empty dict
+res = ps.psignifit(data, sigmoid_name='norm', experiment_type='2AFC')
 
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Now you can set the different options with lines of the form
-# <name>['<key>'] as in the following lines:
+# Alternatively, you could create and pass a dictionary with the options.
 
-options['sigmoidName'] = 'norm'  # choose a cumulative Gauss as the sigmoid
-options.experiment_type = '2AFC'  # choose 2-AFC as the paradigm of the experiment
-# this sets the guessing rate to .5 and
-# fits the rest of the parameters '''
+config = {
+    'sigmoid_name': 'norm',
+    'experiment_type': '2AFC'
+}
+res = ps.psignifit(data, **config)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #  There are 3 other types of experiments supported out of the box:
 #
-#  n alternative forces choice: The guessing rate is known.
-#        options.experiment_type = ExperimentType.N_AFC
-#        options.experiment_choices    = <number of alternatives>
-#  Yes/No experiments: A free guessing and lapse rate is estimated
-#        options.experiment_type = ExperimentType.YES_NO
-#  equal asymptote: As Yes/No, but enforces that guessing and lapsing occure equally often
-#        options.experiment_type = ExperimentType.EQ_ASYMPTOTE
+#  n alternative forces choice: `experiment_type = '2AFC' (or '3AFC'` or ...)
+#       The guessing rate is known. Fixes the lower asymptote to 1/n and fits the rest.
+#  Yes/No experiments: `experiment_type = 'yes/no'`
+#       A free guessing and lapse rate is estimated
+#  equal asymptote: `experiment_type = 'equal asymptote'`
+#     As Yes/No, but enforces that guessing and lapsing occure equally often
 #
 #  Out of the box psignifit supports the following sigmoid functions,
-#  choosen by:
-#  options.sigmoidName = ...
+#  choosen by `sigmoid_name = ...`:
 #
-#  'norm'        a cummulative gauss distribution
-#  'logistic'    a logistic function
-#  'gumbel'      a cummulative gumbel distribution
-#  'rgumbel'     a reversed gumbel distribution
-#  'tdist'       a t-distribution with df=1 as a heavytail distribution
+#  ==================== ================================================
+#  `sigmoid_name = ...` Distribution
+#  ==================== ================================================
+#  'norm'               Cummulative gauss distribution. The default.
+#  'logistic'           Logistic function. Standard alternative.
+#  'gumbel'             Cummulative gumbel distribution.
+#                       Asymmetric, with a longer lower tail.
+#  'rgumbel'            Reversed gumbel distribution. Asymmetric, with a longer upper tail.
+#  'tdist'              Student t-distribution with df=1 for heavy tailed functions.
+#  ==================== ================================================
 #
-#  for positive stimulus levels which make sence on a log-scale:
+# For positive data on a log-scale, you may want to use one of the following:
 #
-#  'logn'        a cumulative lognormal distribution
-#  'Weibull'     a Weibull function
+#  ==================== ================================================
+#  'logn'               Cumulative log-normal distribution.
+#  'weibull'            Weibull distribution.
+#  ==================== ================================================
 #
-#  There are many other options you can set in the options-file. You find
-#  them in demo_002
+#  Find plots of these sigmoids in the :ref:`Sigmoid Demo <sphx_glr_generated_examples_plot_all_sigmoids.py>`.
 #
-#
-# NOW RUN PSIGNIFIT
-# -----------------
-#
-#  Now we are ready to run the main function, which fits the function to the
-#  data. You obtain a struct, which contains all the information about the
-#  fitted function and can be passed to the many other functions in this
-#  toolbox, to further process the results.
-
-res = ps.psignifit(data, options)
+#  There are many other options you can set. You find
+#  them in :ref:`Demo 2 <sphx_glr_generated_examples_demo_002.py>`.
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# VISUALIZE THE RESULTS
+# Visualize the Results
 # ---------------------
 #
-# For example you can use the result dict res to plot your psychometric
+# For example you can use the result object res to plot your psychometric
 # function with the data:
 
-ps.psigniplot.plotPsych(res)
+ps.psigniplot.plot_sigmoid(res)
 
 plt.show()
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# REMARK FOR INSUFFICIENT MEMORY ISSUES
+# Remark for Insufficient Memory Issues
 # -------------------------------------
 #
-# Especially for YesNo experiments the result structs can become rather
-# large. If you run into memory issues you can drop the Posterior from the
-# result with the following command.
+# Especially for `yes/no` experiments the result object can become rather
+# large. If you run into memory issues you can drop the posterior grid from the
+# result with the following command and run the garbage collection.
+#
+# .. warning::
+#   Without these fields you will not be able to use the 2D Bayesian plots
+#   anymore. Also, testing results for equality will fail.
+#   All other functions work without them.
+import gc  # noqa: E402
 
-del res['Posterior']
-del res['weight']
+
+res.posterior_grid = None
+res.weights = None
+gc.collect()
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Without these fields you will not be able to use the 2D Bayesian plots
-# anymore and the equalityTest will fail. All other functions work without
-# it.

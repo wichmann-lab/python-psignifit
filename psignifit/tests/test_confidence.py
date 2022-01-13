@@ -9,9 +9,9 @@ import numpy as np
 from numpy.testing import assert_allclose
 import pytest
 
-from psignifit.getConfRegion import confidence_intervals
-from psignifit.getConfRegion import grid_hdi
-from psignifit.getConfRegion import percentile_intervals
+from psignifit._confidence import confidence_intervals
+from psignifit._confidence import grid_hdi
+from psignifit._confidence import percentile_intervals
 
 N = 100
 GRID_RANGE = (-3, 3)

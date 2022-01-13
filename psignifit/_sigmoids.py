@@ -9,12 +9,21 @@ import numpy as np
 import scipy as sp
 import scipy.stats
 
-from .utils import normcdf
-from .utils import norminv
-from .utils import norminvg
-from .utils import t1cdf
-from .utils import t1icdf
+# Alias common distribution to be reused all over the place.
 
+# - Normal distribution:
+#   - This one is useful when we want mean=0, std=1
+#     Percent point function -> inverse of cumulative normal distribution function
+#     returns percentiles
+norminv = scipy.stats.norm(loc=0, scale=1).ppf
+#   - also instantiate a generic version
+norminvg = scipy.stats.norm.ppf
+#   - Cumulative normal distribution function
+normcdf = scipy.stats.norm.cdf
+
+# T-Student with df=1
+t1cdf = scipy.stats.t(1).cdf
+t1icdf = scipy.stats.t(1).ppf
 
 # sigmoid can be calculated on single floats, or on numpy arrays of floats
 N = TypeVar('N', float, np.ndarray)
@@ -159,18 +168,18 @@ class Sigmoid:
         and the provided sigmoid parameters.
 
         Two checks for relations between parameters:
-          - sigmoid(threshold_stimulus_level) == threshold_percent_correct
-          - |X_L - X_R| == width
-            with sigmoid(X_L) == alpha
-            and  sigmoid(X_R) == 1 - alpha
+          - `sigmoid(threshold_stimulus_level) == threshold_percent_correct`
+          - `|X_L - X_R| == width`
+            with `sigmoid(X_L) == alpha`
+            and  `sigmoid(X_R) == 1 - alpha`
 
         Two checks for the inverse:
-          - inverse(PC) == threshold_stimulus_level
-          - inverse(inverse(stimulus_levels) == stimulus_levels
+          - `inverse(PC) == threshold_stimulus_level`
+          - `inverse(inverse(stimulus_levels) == stimulus_levels`
 
         Two checks for the slope:
-          - maximum(|slope(stimulus_levels)|) close to |slope(0.5)|
-          - slope(stimulus_levels) > 0  (or < 0 for negative sigmoid)
+          - `maximum(|slope(stimulus_levels)|)` close to `|slope(0.5)|`
+          - `slope(stimulus_levels) > 0`  (or < 0 for negative sigmoid)
 
         Args:
              n_samples: Number of stimulus levels between 0 (exclusive) and 1 for tests
