@@ -83,31 +83,36 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
         bounds.update(conf.bounds)
     if conf.fixed_parameters is not None:
         for param, value in conf.fixed_parameters.items():
-            bounds[param] = (value, value)
-
+            if value is not None:
+                bounds[param] = (value, value)
     priors = setup_priors(custom_priors=conf.priors, bounds=bounds,
                           stimulus_range=stimulus_range, width_min=width_min, width_alpha=conf.width_alpha,
                           beta_prior=conf.beta_prior, threshold_perc_correct=conf.thresh_PC)
     fit_dict, posteriors, grid = _fit_parameters(data, bounds, priors, sigmoid, conf.steps_moving_bounds,
                                                  conf.max_bound_value, conf.grid_steps)
 
-    grid_values = [grid_value for _, grid_value in sorted(grid.items())]
-    intervals = confidence_intervals(posteriors, grid_values, conf.confP, conf.CI_method)
-    intervals_dict = {param: interval_per_p.tolist()
-                      for param, interval_per_p in zip(sorted(grid.keys()), intervals)}
+    grid_none_ix = tuple(ix for ix, (param, value) in enumerate(sorted(grid.items())) if value is None)
+    grid_params = [param for param, value in grid.items() if value is not None]
+    grid_values = [grid[param] for param in grid_params]
+    intervals = confidence_intervals(np.squeeze(posteriors, axis=grid_none_ix), grid_values, conf.confidence_intervals, conf.CI_method)
+    intervals_dict = {param: intervals[ix].tolist() for ix, param in enumerate(grid_params)}
     marginals = marginalize_posterior(grid, posteriors)
 
     if conf.verbose:
         _warn_marginal_sanity_checks(marginals)
 
+    if fit_dict['gamma'] is None:  # equal asymptotes
+        fit_dict['gamma'] = fit_dict['lambda']
+        intervals_dict['gamma'] = intervals_dict['lambda']
+
     if not return_posterior:
         posteriors = None
 
-    return Result(parameter_estimate=fit_dict,
+    return Result(parameter_fit=fit_dict,
                   configuration=conf,
                   confidence_intervals=intervals_dict,
-                  parameter_values={k: v.tolist() for k, v in grid.items()},
-                  prior_values={param: priors[param](values).tolist() for param, values in grid.items()},
+                  parameter_values={k: v.tolist() for k, v in grid.items() if v is not None},
+                  prior_values={param: priors[param](values).tolist() for param, values in grid.items() if values is not None },
                   marginal_posterior_values={k: v.tolist() for k, v in marginals.items()},
                   posterior_mass=posteriors,
                   data=data.tolist())

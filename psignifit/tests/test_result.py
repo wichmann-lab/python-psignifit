@@ -10,7 +10,7 @@ from psignifit._configuration import Configuration
 @pytest.fixture
 def result():
     return Result(configuration=Configuration(),
-                  parameter_estimate={
+                  parameter_fit={
                       'threshold': 0.005,
                       'width': 0.005,
                       'lambda': 1.-7,

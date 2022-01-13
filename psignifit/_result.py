@@ -18,7 +18,7 @@ class NumpyEncoder(json.JSONEncoder):
 
 @dataclasses.dataclass
 class Result:
-    parameter_estimate: Dict[str, float]
+    parameter_fit: Dict[str, float]
     configuration: Configuration
     confidence_intervals: Dict[str, List[Tuple[float, float]]]
     data: Tuple[List[float], List[float], List[float]]
@@ -100,9 +100,9 @@ class Result:
         if unscaled:  # set asymptotes to 0 for everything.
             lambd, gamma = 0, 0
         else:
-            lambd, gamma = self.parameter_estimate['lambda'], self.parameter_estimate['gamma']
-        new_threshold = sigmoid.inverse(percentage_correct, self.parameter_estimate['threshold'],
-                                        self.parameter_estimate['width'], lambd, gamma)
+            lambd, gamma = self.parameter_fit['lambda'], self.parameter_fit['gamma']
+        new_threshold = sigmoid.inverse(percentage_correct, self.parameter_fit['threshold'],
+                                        self.parameter_fit['width'], lambd, gamma)
         if not return_ci:
             return new_threshold
 
@@ -127,7 +127,7 @@ class Result:
         Returns:
             Slopes of the psychometric function at the stimulus levels.
         """
-        stimulus_level, param = np.asarray(stimulus_level), self.parameter_estimate
+        stimulus_level, param = np.asarray(stimulus_level), self.parameter_fit
         sigmoid = self.configuration.make_sigmoid()
         return sigmoid.slope(stimulus_level, param['threshold'], param['width'], param['gamma'], param['lambda'])
 
