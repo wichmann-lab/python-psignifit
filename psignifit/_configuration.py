@@ -7,7 +7,7 @@ from typing import Any, Dict, Tuple, Optional, Union
 from . import _sigmoids
 from ._utils import PsignifitException
 from ._typing import ExperimentType, Prior
-
+from ._matlab import config_from_matlab
 
 _PARAMETERS = {'threshold', 'width', 'lambda', 'gamma', 'eta'}
 
@@ -36,11 +36,10 @@ class Configuration:
     """
     beta_prior: int = 10
     CI_method: str = 'project'
-    confP: Tuple[float, float, float] = (.95, .9, .68)
+    confidence_intervals: Tuple[float, float, float] = (.95, .9, .68)
     estimate_type: str = 'MAP'
     experiment_type: str = ExperimentType.YES_NO.value
     experiment_choices: Optional[int] = None
-    fast_optim: bool = False
     fixed_parameters: Optional[Dict[str, float]] = None
     grid_set_type: str = 'cumDist'
     instant_plot: bool = False
@@ -63,6 +62,11 @@ class Configuration:
 
     def __post_init__(self):
         self.check_attributes()
+
+    @classmethod
+    def from_matlab_options(cls, option_dict: Dict[str, Any], **kwargs):
+        python_configs = config_from_matlab(option_dict, **kwargs)
+        return cls(**python_configs)
 
     @classmethod
     def from_dict(cls, config_dict: Dict[str, Any]):
