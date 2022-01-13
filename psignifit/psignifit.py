@@ -83,8 +83,8 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
         bounds.update(conf.bounds)
     if conf.fixed_parameters is not None:
         for param, value in conf.fixed_parameters.items():
-            bounds[param] = (value, value)
-
+            if value is not None:
+                bounds[param] = (value, value)
     priors = setup_priors(custom_priors=conf.priors, bounds=bounds,
                           stimulus_range=stimulus_range, width_min=width_min, width_alpha=conf.width_alpha,
                           beta_prior=conf.beta_prior, threshold_perc_correct=conf.thresh_PC)

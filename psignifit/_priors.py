@@ -155,8 +155,9 @@ def setup_priors(custom_priors, bounds, stimulus_range, width_min, width_alpha, 
         priors.update(custom_priors)
     check_priors(priors, stimulus_range, width_min)
 
-    for parameter, prior in priors.items():
-        priors[parameter] = normalize_prior(prior, bounds[parameter])
+    for parameter, bound in bounds.items():
+        if bound:
+            priors[parameter] = normalize_prior(priors[parameter], bound)
     return priors
 
 
