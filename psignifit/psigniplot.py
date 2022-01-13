@@ -25,7 +25,7 @@ def plot_psychmetric_function(result: Result,  # noqa: C901, this function is to
                               y_label='Proportion Correct'):
     """ Plot oted psychometric function with the data.
     """
-    params = result.parameter_estimate
+    params = result.parameter_fit
     data = np.asarray(result.data)
     config = result.configuration
 
@@ -88,7 +88,7 @@ def plot_block_residuals(result: Result, ax: matplotlib.axes.Axes = plt.gca()) -
 
 
 def _plot_residuals(x_values: np.ndarray, x_label: str, result: Result, ax: matplotlib.axes.Axes = plt.gca()):
-    params = result.parameter_estimate
+    params = result.parameter_fit
     data = result.data
     sigmoid = result.configuration.make_sigmoid()
 
@@ -178,7 +178,7 @@ def plot_marginal(result: Result,
             ci_x = np.r_[CI[0], x[(x >= CI[0]) & (x <= CI[1])], CI[1]]
             ax.fill_between(ci_x, np.zeros_like(ci_x), np.interp(ci_x, x, marginal), color=line_color, alpha=0.5)
 
-        param_value = result.parameter_estimate[parameter]
+        param_value = result.parameter_fit[parameter]
         ax.plot([param_value] * 2, [0, np.interp(param_value, x, marginal)], color=line_color)
 
     if plot_prior:
@@ -229,12 +229,12 @@ def plot_prior(result: Result,
 
     parameter_keys = ['threshold', 'width', 'lambda']
     sigmoid_x = np.linspace(stimulus_range[0], stimulus_range[1], 10000)
-    sigmoid_params = {param: result.parameter_estimate[param] for param in parameter_keys}
+    sigmoid_params = {param: result.parameter_fit[param] for param in parameter_keys}
     for i, param in enumerate(parameter_keys):
         prior_x = params[param]
         weights = convolve(np.diff(prior_x), np.array([0.5, 0.5]))
         cumprior = np.cumsum(priors[param] * weights)
-        x_percentiles = [result.parameter_estimate[param], min(prior_x), prior_x[-cumprior[cumprior >= .25].size],
+        x_percentiles = [result.parameter_fit[param], min(prior_x), prior_x[-cumprior[cumprior >= .25].size],
                          prior_x[-cumprior[cumprior >= .75].size], max(prior_x)]
         plt.subplot(2, 3, i + 1)
         plt.plot(params[param], priors[param], lw=line_width, c=line_color)
@@ -261,7 +261,7 @@ def plot_2D_margin(result: Result,
     if result.posterior_mass is None:
         ValueError("Expects posterior_mass in result, got None. You could try psignifit(return_posterior=True).")
 
-    parameter_indices = {param: i for i, param in enumerate(sorted(result.parameter_estimate.keys()))}
+    parameter_indices = {param: i for i, param in enumerate(sorted(result.parameter_fit.keys()))}
     other_param_ix = tuple(i for param, i in parameter_indices.items()
                            if param != first_param and param != second_param)
     marginal_2d = np.sum(result.posterior_mass, axis=other_param_ix)

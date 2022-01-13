@@ -29,7 +29,7 @@ res = ps.psignifit(data, sigmoid_name='norm', experiment_type='2AFC')
 # The most important result are the fitted parameters of the psychometric
 # function. They can be found in a dictionary format.
 
-print(res.parameter_estimate)
+print(res.parameter_fit)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # For each of these parameters, also the confidence interval is contained

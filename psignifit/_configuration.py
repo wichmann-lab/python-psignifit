@@ -67,7 +67,7 @@ class Configuration:
     @classmethod
     def from_dict(cls, config_dict: Dict[str, Any]):
         config_dict = config_dict.copy()
-        return cls(confP=tuple(config_dict.pop('confP')),
+        return cls(confidence_intervals=tuple(config_dict.pop('confidence_intervals')),
                    **config_dict)
 
     def as_dict(self) -> Dict[str, Any]:
@@ -138,7 +138,7 @@ class Configuration:
         if not (is_valid or is_nafc):
             raise PsignifitException(
                 f'Invalid experiment type: "{value}"\nValid types: {valid_values},' +
-                ', or "2AFC", "3AFC", etc...')
+                ' or "2AFC", "3AFC", etc...')
         if is_nafc:
             self.experiment_choices = int(value[:-3])
             self.experiment_type = ExperimentType.N_AFC.value
