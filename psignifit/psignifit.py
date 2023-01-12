@@ -377,13 +377,9 @@ def psignifitCore(data, options):
     
     for idx in range(0,d):
         m, mX, mW = marginalize(result,np.array(idx))
-        result['marginals'].append(m)
-        result['marginalsX'].append(mX)
-        result['marginalsW'].append(mW) 
-    
-    result['marginals'] = np.squeeze(result['marginals'])
-    result['marginalsX'] = np.squeeze(result['marginalsX'])
-    result['marginalsW'] = np.squeeze(result['marginalsW'])
+        result['marginals'].append(np.squeeze(m))
+        result['marginalsX'].append(np.squeeze(mX))
+        result['marginalsW'].append(np.squeeze(mW)) 
         
     '''Find point estimate'''
     if (options['estimateType'] in ['MAP','MLE']):
