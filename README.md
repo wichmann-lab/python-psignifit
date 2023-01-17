@@ -1,6 +1,6 @@
 # psignifit
 
-[![Build Status](https://github.com/tomwallis/python-psignifit/actions/workflows/test.yml/badge.svg)](https://github.com/tomwallis/python-psignifit/actions/workflows/test.yml)
+[![Build Status](https://github.com/wichmann-lab/python-psignifit/actions/workflows/test.yml/badge.svg)](https://github.com/wichmann-lab/python-psignifit/actions/workflows/test.yml)
 
 Python toolbox for Bayesian psychometric function estimation.
 
