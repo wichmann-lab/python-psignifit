@@ -183,7 +183,7 @@ def plotsModelfit(result,
     else:
         plt.ylim([0,1])
     plt.xlabel('Stimulus Level',  fontsize=14)
-    plt.ylabel('Percent Correct', fontsize=14)
+    plt.ylabel('Proportion Correct', fontsize=14)
     plt.title('Psychometric Function', fontsize=20)
     plt.tick_params(right=False,top=False)
     for side in ['top','right']: ax.spines[side].set_visible(False)
@@ -416,7 +416,7 @@ def plotPrior(result,
     plt.subplot(2,3,4)    
     plt.plot(data[:,0], np.zeros(data[:,0].shape), 'k.', ms = markerSize*.75 )
     #plt.hold(True)
-    plt.ylabel('Percent Correct', fontsize = 18)
+    plt.ylabel('Proportion Correct', fontsize = 18)
     plt.xlim(xLimit)
     
     x = np.linspace(xLimit[0],xLimit[1],steps)
