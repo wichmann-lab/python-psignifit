@@ -11,9 +11,6 @@ from . import psignifit
 from ._typing import ExperimentType
 from ._result import Result
 
-def aa():
-    pass
-
 def plot_psychmetric_function(result: Result,  # noqa: C901, this function is too complex
                               ax: matplotlib.axes.Axes = None,
                               plot_data: bool = True,
