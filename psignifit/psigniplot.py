@@ -5,16 +5,17 @@ import matplotlib.pyplot as plt
 import matplotlib.axes
 import numpy as np
 import scipy.stats
-from matplotlib import pyplot as plt
 from scipy.signal import convolve
 
 from . import psignifit
 from ._typing import ExperimentType
 from ._result import Result
 
+def aa():
+    pass
 
 def plot_psychmetric_function(result: Result,  # noqa: C901, this function is too complex
-                              ax: matplotlib.axes.Axes = plt.gca(),
+                              ax: matplotlib.axes.Axes = None,
                               plot_data: bool = True,
                               plot_parameter: bool = True,
                               data_color: Union[str, List[float], np.ndarray] = '#0069AA',  # blue
@@ -25,6 +26,9 @@ def plot_psychmetric_function(result: Result,  # noqa: C901, this function is to
                               y_label='Proportion Correct'):
     """ Plot oted psychometric function with the data.
     """
+    if ax is None:
+        ax = plt.gca()
+
     params = result.parameter_estimate
     data = np.asarray(result.data)
     config = result.configuration
@@ -79,15 +83,21 @@ def plot_psychmetric_function(result: Result,  # noqa: C901, this function is to
     return ax
 
 
-def plot_stimulus_residuals(result: Result, ax: matplotlib.axes.Axes = plt.gca()) -> matplotlib.axes.Axes:
+def plot_stimulus_residuals(result: Result, ax: matplotlib.axes.Axes = None) -> matplotlib.axes.Axes:
+    if ax is None:
+        ax = plt.gca()
     return _plot_residuals(result.data[:, 0], 'Stimulus Level', result, ax)
 
 
-def plot_block_residuals(result: Result, ax: matplotlib.axes.Axes = plt.gca()) -> matplotlib.axes.Axes:
+def plot_block_residuals(result: Result, ax: matplotlib.axes.Axes = None) -> matplotlib.axes.Axes:
+    if ax is None:
+        ax = plt.gca()
     return _plot_residuals(range(result.data.shape[0]), 'Block Number', result, ax)
 
 
-def _plot_residuals(x_values: np.ndarray, x_label: str, result: Result, ax: matplotlib.axes.Axes = plt.gca()):
+def _plot_residuals(x_values: np.ndarray, x_label: str, result: Result, ax: matplotlib.axes.Axes = None):
+    if ax is None:
+        ax = plt.gca()
     params = result.parameter_estimate
     data = result.data
     sigmoid = result.configuration.make_sigmoid()
@@ -149,7 +159,7 @@ def plot_modelfit(result: Result) -> matplotlib.figure.Figure:
 
 def plot_marginal(result: Result,
                   parameter: str,
-                  ax: matplotlib.axes.Axes = plt.gca(),
+                  ax: matplotlib.axes.Axes = None,
                   line_color: Union[str, List[float], np.ndarray] = '#0069AA',  # blue
                   line_width: float = 2,
                   y_label: str ='Marginal Density',
@@ -162,6 +172,8 @@ def plot_marginal(result: Result,
         result: should be a result struct from the main psignifit routine
         dim: The parameter to plot. 1=threshold, 2=width, 3=lambda, 4=gamma, 5=sigma
     """
+    if ax is None:
+        ax = plt.gca()
     if parameter not in result.marginal_posterior_values:
         raise ValueError(f'Expects parameter {parameter} in {{{result.marginal_posterior_values.keys()}}}')
 
@@ -256,8 +268,10 @@ def plot_prior(result: Result,
 def plot_2D_margin(result: Result,
                    first_param: str,
                    second_param: str,
-                   ax: matplotlib.axes.Axes = plt.gca()):
+                   ax: matplotlib.axes.Axes = None):
     """ Constructs a 2 dimensional marginal plot of the posterior density. """
+    if ax is None:
+        ax = plt.gca()
     if result.posterior_mass is None:
         ValueError("Expects posterior_mass in result, got None. You could try psignifit(return_posterior=True).")
 
