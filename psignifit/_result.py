@@ -21,7 +21,7 @@ class Result:
     parameter_estimate: Dict[str, float]
     configuration: Configuration
     confidence_intervals: Dict[str, List[Tuple[float, float]]]
-    data: Tuple[List[float], List[float], List[float]]
+    data: np.ndarray
     parameter_values: Dict[str, List[float]]
     prior_values: Dict[str, List[float]]
     marginal_posterior_values: Dict[str, List[float]]
@@ -52,6 +52,7 @@ class Result:
 
     def save_json(self, file: Union[TextIO, str, Path], **kwargs: Any):
         if 'cls' not in kwargs:
+            # converts data automatically to lists of lists
             kwargs['cls'] = NumpyEncoder
 
         result_dict = self.as_dict()
@@ -68,6 +69,14 @@ class Result:
         else:
             with open(file, 'r') as f:
                 result_dict = json.load(f, **kwargs)
+
+        result_dict['parameter_values'] = {
+            k: np.asarray(v) for k, v in result_dict['parameter_values'].items()}
+        result_dict['prior_values'] = {
+            k: np.asarray(v) for k, v in result_dict['prior_values'].items()}
+        result_dict['marginal_posterior_values'] = {
+            k: np.asarray(v) for k, v in result_dict['marginal_posterior_values'].items()}
+        result_dict['data'] = np.asarray(result_dict['data'])
         return cls.from_dict(result_dict)
 
     def threshold(self, percentage_correct: np.ndarray, unscaled: bool = False, return_ci: bool = True
