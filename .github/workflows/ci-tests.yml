@@ -2,8 +2,9 @@
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 name: Test
 
-on: 
+on:
   push
+  pull_request
 
 jobs:
   test:
@@ -22,7 +23,7 @@ jobs:
         with:
           python-version: ${{ matrix.python_version }}
           architecture: x64
-          
+
       - name: Install (testing) requirements
         run: |
           python -m pip install --upgrade pip setuptools
