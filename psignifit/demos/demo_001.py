@@ -79,10 +79,11 @@ res = ps.psignifit(data, **config)
 #  'tdist'              Student t-distribution with df=1 for heavy tailed functions.
 #  ==================== ================================================
 #
-# For positive data on a log-scale, you may want to use one of the following:
+# For positive data on a log-scale, we define the 'weibull' sigmoid class. Notice that it is left
+# to the user to transform the stimulus level in logarithmic space, and the threshold and width
+# back to linear space. 'weibull' is therefore just an alias for 'gumbel'.
 #
 #  ==================== ================================================
-#  'logn'               Cumulative log-normal distribution.
 #  'weibull'            Weibull distribution.
 #  ==================== ================================================
 #
