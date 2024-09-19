@@ -174,20 +174,6 @@ def _warn_marginal_sanity_checks(marginals):
                       'This indicates that your data is not sufficient to exclude much higher widths.\n'
                       'Refer to the paper or the manual for more info on this topic.')
 
-    for param, marginal in marginals.items():
-        if marginal.size < 3:
-            continue
-
-        peak = marginal.max() / 1000
-        if marginal[0] > peak or marginal[-1] > peak:
-            warnings.warn(f'''psignifit:boundWarning\n
-                             The marginal on the {param} bounds is not smaller than 1/1000 of the peak
-                             it means that the prior of the {param} parameter has an influence to the result.\n
-                             This means (1) the prior may be too narrow, or (2) you know what you are doing.\n
-                             If you were using the default settings, this is a bug in the software or your data
-                             are highly unusual,
-                             if you changed the defaults please check the priors and parameter bounds.''')
-
 
 def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
                     priors: Dict[str, Prior], sigmoid: _sigmoids.Sigmoid,
