@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "psignifit"
+version = "5.0.0"
+description = "Python toolbox for Bayesian psychometric function estimation"
+license = {text = "GNU General Public License v3 or later (GPLv3+)"}
+readme = "README.md"
+requires-python = ">= 3.9"
+dependencies = [
+    "scipy",
+    "matplotlib",
+    "pytest",
+]
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'Intended Audience :: Science/Research',
+    'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
+    'Programming Language :: Python :: 3',
+]
+
+[project.optional-dependencies]
+tests = ["pytest", "pytest-cov", "flake8"]
+docs = [
+    'sphinx',
+    'sphinx-gallery',
+    'sphinx_rtd_theme',
+]
