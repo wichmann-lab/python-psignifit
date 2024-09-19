@@ -202,13 +202,8 @@ def plot_marginal(result: Result,
 
 def _parameter_label(parameter):
     label_defaults = {'threshold': 'Threshold', 'width': 'Width',
-                      'lambda': r'$\lambda$', 'gamma': r'$\gamma$', 'eta': r'$\eta$'}
-    try:
-        plt.rcParams.update({"text.usetex": True})
-        x_label = label_defaults[parameter]
-    except:
-        x_label = parameter.capitalize()
-    return x_label
+                      'lambda': '\u03BB', 'gamma': '\u03B3', 'eta': '\u03B7'}
+    return label_defaults[parameter]
 
 
 def plot_prior(result: Result,
@@ -339,3 +334,4 @@ def plot_bias_analysis(data: np.ndarray, compare_data: np.ndarray, **kwargs) -> 
         plot_marginal(result_compare_data, param, ax=ax, line_color=[0, 0, 1])
         ax.relim()
         ax.autoscale_view()
+        
