@@ -12,8 +12,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [Ubuntu, macOS]
-        python_version: ['3.8', '3.9', '3.10', '3.11']
+        os: Ubuntu
+        python_version: ['3.10', '3.11', '3.12']
     steps:
       - uses: actions/checkout@v3
 
@@ -33,5 +33,4 @@ jobs:
       - name: Run tests for ${{ matrix.python_version }} through nox
         run: |
           pytest -vv    
-
 
