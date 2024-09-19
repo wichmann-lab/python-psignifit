@@ -31,7 +31,7 @@ N = TypeVar('N', float, np.ndarray)
 class Sigmoid:
     """ Base class for sigmoid implementation.
 
-    Handels logarithmic input and negative output
+    Handles logarithmic input and negative output
     for the specific sigmoid implementations.
 
     Sigmoid classes should derive from this class and implement
