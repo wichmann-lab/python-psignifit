@@ -37,7 +37,6 @@ def test_sigmoid_by_name(sigmoid_name):
     s = _sigmoids.sigmoid_by_name(sigmoid_name, PC=PC, alpha=ALPHA)
     assert isinstance(s, _sigmoids.Sigmoid)
 
-    assert (sigmoid_name in LOG_SIGS) == s.logspace
     assert sigmoid_name.startswith('neg_') == s.negative
 
 
@@ -53,3 +52,13 @@ def test_sigmoid_sanity_check(sigmoid_name):
     sigmoid.assert_sanity_checks(n_samples=100,
                                  threshold=THRESHOLD_PARAM,
                                  width=WIDTH_PARAM)
+
+
+@pytest.mark.parametrize('sigmoid_name', _sigmoids.ALL_SIGMOID_NAMES)
+def test_sigmoid_roundtrip(sigmoid_name):
+    sigmoid = _sigmoids.sigmoid_by_name(sigmoid_name, PC=PC, alpha=ALPHA)
+    x = 0.5
+    y = sigmoid(x, THRESHOLD_PARAM, WIDTH_PARAM)
+    reverse_x = sigmoid.inverse(y, THRESHOLD_PARAM, WIDTH_PARAM)
+    assert np.isclose(x, reverse_x, atol=1e-6)
+

@@ -1,7 +1,6 @@
 """ All sigmoid functions.
 
 If you add a new sigmoid type, add it to the CLASS_BY_NAME constant
-and to the _LOGSPACE_NAMES, if it expects stimulus on an exponential scale.
 """
 from typing import Optional, TypeVar
 
@@ -48,20 +47,17 @@ class Sigmoid:
          psi(X_(1-alpha)) = 0.95 = 1-alpha
          psi(X_(alpha)) = 0.05 = alpha
     """
-    logspace = False
     negate = False
 
-    def __init__(self, PC=0.5, alpha=0.05, negative=False, logspace=False):
+    def __init__(self, PC=0.5, alpha=0.05, negative=False):
         """
         Args:
              PC: Percentage correct (sigmoid function value) at threshold
              alpha: Scaling parameter
              negative: Flip sigmoid such percentage correct is decreasing.
-             logspace: Expect log-scaled stimulus correct
         """
         self.alpha = alpha
         self.negative = negative
-        self.logspace = logspace
         if negative:
             self.PC = 1 - PC
         else:
@@ -71,8 +67,7 @@ class Sigmoid:
         return (isinstance(o, self.__class__)
                 and o.PC == self.PC
                 and o.alpha == self.alpha
-                and o.negative == self.negative
-                and o.logspace == self.logspace)
+                and o.negative == self.negative)
 
     def __call__(self, stimulus_level: N, threshold: N, width: N) -> N:
         """ Calculate the sigmoid value at specified stimulus levels.
@@ -86,8 +81,6 @@ class Sigmoid:
         Returns:
             Percentage correct at the stimulus values.
         """
-        if self.logspace:
-            stimulus_level = np.log(stimulus_level)
         value = self._value(stimulus_level, threshold, width)
 
         if self.negative:
@@ -107,8 +100,6 @@ class Sigmoid:
         Returns:
             Slope at the stimulus values.
         """
-        if self.logspace:
-            stimulus_level = np.log(stimulus_level)
 
         slope = (1 - gamma - lambd) * self._slope(stimulus_level, threshold, width)
 
@@ -143,10 +134,7 @@ class Sigmoid:
             perc_correct = 1 - perc_correct
 
         result = self._inverse(perc_correct, threshold, width)
-        if self.logspace:
-            return np.exp(result)
-        else:
-            return result
+        return result
 
     def _value(self, stimulus_level: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
         raise NotImplementedError("This should be overwritten by an implementation.")
@@ -192,9 +180,6 @@ class Sigmoid:
         threshold_stimulus_level = threshold
         if self.negative:
             stimulus_levels = 1 - stimulus_levels
-        if self.logspace:
-            threshold_stimulus_level = np.exp(threshold)
-            stimulus_levels = np.exp(stimulus_levels)
 
         # sigmoid(threshold_stimulus_level) == threshold_percent_correct
         np.testing.assert_allclose(self(threshold_stimulus_level, threshold, width), self.PC)
@@ -321,10 +306,6 @@ _CLASS_BY_NAME = {
     'logn': Gaussian,
 }
 
-_LOGSPACE_NAMES = [
-    'weibull',
-    'logn'
-]
 
 ALL_SIGMOID_NAMES = set(_CLASS_BY_NAME.keys())
 ALL_SIGMOID_NAMES |= {'neg_' + name for name in ALL_SIGMOID_NAMES}
@@ -354,7 +335,5 @@ def sigmoid_by_name(name, PC=None, alpha=None):
     if name.startswith('neg_'):
         name = name[4:]
         kwargs['negative'] = True
-    if name in _LOGSPACE_NAMES:
-        kwargs['logspace'] = True
 
     return _CLASS_BY_NAME[name](**kwargs)
