@@ -293,6 +293,16 @@ class Student(Sigmoid):
         return (t1icdf(perc_correct) - t1icdf(self.PC)) * width / C + threshold
 
 
+class Weibull(Gumbel):
+    """ Sigmoid based on the Weibull function.
+
+    IMPORTANT: All the sigmoids in `psignifit` work in linear space. This sigmoid class is an
+    alias for the `Gumbel` class. It is left to the user to transform stimulus values to
+    logarithmic space.
+    """
+    pass
+
+
 _CLASS_BY_NAME = {
     'norm': Gaussian,
     'gauss': Gaussian,
@@ -302,8 +312,7 @@ _CLASS_BY_NAME = {
     'tdist': Student,
     'student': Student,
     'heavytail': Student,
-    'weibull': Gumbel,
-    'logn': Gaussian,
+    'weibull': Weibull,
 }
 
 
