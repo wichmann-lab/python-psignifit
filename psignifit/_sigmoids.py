@@ -47,7 +47,6 @@ class Sigmoid:
          psi(X_(1-alpha)) = 0.95 = 1-alpha
          psi(X_(alpha)) = 0.05 = alpha
     """
-    negate = False
 
     def __init__(self, PC=0.5, alpha=0.05, negative=False):
         """

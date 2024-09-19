@@ -12,15 +12,11 @@ PC = 0.5
 ALPHA = 0.05
 
 
-# list of all sigmoids (after having removed aliases)
-LOG_SIGS = ('weibull', 'logn', 'neg_weibull', 'neg_logn')
-
-
 def test_ALL_SIGMOID_NAMES():
     TEST_SIGS = (
         'norm', 'gauss', 'neg_norm', 'neg_gauss', 'logistic', 'neg_logistic',
         'gumbel', 'neg_gumbel', 'rgumbel', 'neg_rgumbel',
-        'logn', 'neg_logn', 'weibull', 'neg_weibull',
+        'weibull', 'neg_weibull',
         'tdist', 'student', 'heavytail', 'neg_tdist', 'neg_student', 'neg_heavytail')
     for name in TEST_SIGS:
         assert name in _sigmoids.ALL_SIGMOID_NAMES
