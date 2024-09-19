@@ -91,8 +91,6 @@ class Result:
             thresholds: stimulus values for all provided percentage_correct (if return_ci=False)
             (thresholds, ci): stimulus values along with confidence intervals
 
-            For the sigmoids in logspace this also returns values in the linear
-            stimulus level domain.
         """
         percentage_correct = np.asarray(percentage_correct)
         sigmoid = self.configuration.make_sigmoid()

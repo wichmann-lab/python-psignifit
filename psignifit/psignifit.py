@@ -18,10 +18,14 @@ from ._utils import (PsignifitException, check_data)
 
 def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
               return_posterior: bool = False, **kwargs) -> Result:
-    """
-    Main function for fitting psychometric functions function
+    """ Fit a psychometric function to experimental data.
 
     This function is the user interface for fitting psychometric functions to data.
+
+    Notice that the parameters of the psychometric function are always fit in linear space, even
+    for psychometric function that are supposed to work in a logarithmic space, like the Weibull
+    function. It is left to the user to transform the stimulus level to logarithmic space before
+    calling this function.
 
     pass your data in the n x 3 matrix of the form:
     [x-value, number correct, number of trials]
@@ -51,7 +55,7 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
             "Can't handle conf together with other keyword arguments!")
 
     sigmoid = conf.make_sigmoid()
-    data = check_data(data, logspace=sigmoid.logspace)
+    data = check_data(data)
 
     levels, ntrials = data[:, 0], data[:, 2]
     if conf.verbose:
@@ -60,13 +64,7 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
 
     stimulus_range = conf.stimulus_range
     if stimulus_range is None:
-        if sigmoid.logspace:
-            stimulus_range = (levels[levels > 0].min(), levels.max())
-        else:
-            stimulus_range = (levels.min(), levels.max())
-    if sigmoid.logspace:
-        stimulus_range = (np.log(stimulus_range[0]), np.log(stimulus_range[1]))
-        levels = np.log(levels)
+        stimulus_range = (levels.min(), levels.max())
 
     width_min = conf.width_min
     if width_min is None:
