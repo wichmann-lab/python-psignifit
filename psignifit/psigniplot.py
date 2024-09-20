@@ -223,7 +223,9 @@ def plot_prior(result: Result,
     data = result.data
     params = result.parameter_values
     priors = result.prior_values
+    priors_func = result.debug['priors']
     sigmoid = result.configuration.make_sigmoid()
+    
 
     colors = ['k', [1, 200 / 255, 0], 'r', 'b', 'g']
     stimulus_range = result.configuration.stimulus_range
@@ -245,8 +247,10 @@ def plot_prior(result: Result,
         cumprior = np.cumsum(priors[param] * weights)
         x_percentiles = [result.parameter_estimate[param], min(prior_x), prior_x[-cumprior[cumprior >= .25].size],
                          prior_x[-cumprior[cumprior >= .75].size], max(prior_x)]
+        x_priors = np.linspace(min(prior_x)*-1.0, max(prior_x)*3, 1000)
+        
         plt.subplot(2, 3, i + 1)
-        plt.plot(params[param], priors[param], lw=line_width, c=line_color)
+        plt.plot(x_priors, priors_func[param](x_priors), lw=line_width, c=line_color)
         plt.scatter(x_percentiles, np.interp(x_percentiles, prior_x, priors[param]), s=marker_size, c=colors)
         plt.xlabel('Stimulus Level')
         plt.ylabel('Density')
