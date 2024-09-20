@@ -220,6 +220,8 @@ def plot_prior(result: Result,
     The coloured psychometric functions correspond to the 0%, 25%, 75% and 100%
     quantiles of the prior.
     """
+    fig = plt.figure(figsize=(12, 8))
+    
     data = result.data
     params = result.parameter_values
     priors = result.prior_values
@@ -232,9 +234,9 @@ def plot_prior(result: Result,
     width = stimulus_range[1] - stimulus_range[0]
     stimulus_range = [stimulus_range[0] - .5 * width , stimulus_range[1] + .5 * width]
 
-    titles = {'threshold': 'Threshold m',
-              'width': 'Width w',
-              'lambda': r'Lapse Rate $\lambda$'}
+    titles = {'threshold': 'Threshold',
+              'width': 'Width',
+              'lambda': 'Lapse Rate \u03BB'}
 
     parameter_keys = ['threshold', 'width', 'lambda']
     sigmoid_x = np.linspace(stimulus_range[0], stimulus_range[1], 10000)
@@ -251,15 +253,21 @@ def plot_prior(result: Result,
         plt.xlabel('Stimulus Level')
         plt.ylabel('Density')
         plt.title(titles[param])
+        plt.gca().spines[['top', 'right']].set_visible(False)
 
         plt.subplot(2, 3, i + 4)
         for param_value, color in zip(x_percentiles, colors):
             this_sigmoid_params = dict(sigmoid_params)
             this_sigmoid_params[param] = param_value
-            plt.plot(sigmoid_x, sigmoid(sigmoid_x, **this_sigmoid_params), line_width=line_width, color=color)
-        plt.plot(data[:, 0], np.zeros(data[:, 0].shape), 'k.', s=marker_size * .75)
+            y = sigmoid(sigmoid_x, this_sigmoid_params['threshold'], this_sigmoid_params['width'])
+            y = (1 - result.parameter_estimate['gamma'] - this_sigmoid_params['lambda']) * y + result.parameter_estimate['gamma']
+            plt.plot(sigmoid_x, y, linewidth=line_width, color=color)
+        plt.scatter(data[:, 0], np.zeros(data[:, 0].shape), s=marker_size*.75, c='k')
         plt.xlabel('Stimulus Level')
-        plt.ylabel('Percent Correct')
+        plt.ylabel('Proportion Correct')
+        plt.gca().spines[['top', 'right']].set_visible(False)
+    
+    
 
 
 def plot_2D_margin(result: Result,
