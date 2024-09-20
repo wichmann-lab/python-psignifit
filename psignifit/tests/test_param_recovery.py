@@ -3,13 +3,13 @@ import pytest
 from scipy import stats
 
 from psignifit import psignifit
-from psignifit._sigmoids import Gaussian, ALL_SIGMOID_NAMES, sigmoid_by_name
+from psignifit._sigmoids import ALL_SIGMOID_NAMES, sigmoid_by_name
+
 
 RANDOMSTATE = np.random.RandomState(837400)
 
 
-def psychometric(stimulus_level, threshold, width, gamma, lambda_,
-                 sigmoid_name):
+def psychometric(stimulus_level, threshold, width, gamma, lambda_, sigmoid_name):
     """ Psychometric function aka percent correct function.
 
     Generates percent correct values for a range of stimulus levels given a
@@ -47,12 +47,7 @@ def psychometric(stimulus_level, threshold, width, gamma, lambda_,
 def psychometric_with_eta(stimulus_level, threshold, width, gamma, lambda_,
                  sigmoid_name, eta, random_state=np.random.RandomState(42)):
 
-    # we use the defaults for pc and alpha in the sigmoids:
-    # pc = 0.5
-    # alpha = 0.05
-    sigmoid = sigmoid_by_name(sigmoid_name)
-    sigmoid_values = sigmoid(stimulus_level, threshold=threshold, width=width)
-    psi = gamma + (1.0 - lambda_ - gamma) * sigmoid_values
+    psi = psychometric(stimulus_level, threshold, width, gamma, lambda_, sigmoid_name)
     new_psi = []
     for p in psi:
         a = ((1/eta**2) - 1) * p
@@ -60,7 +55,6 @@ def psychometric_with_eta(stimulus_level, threshold, width, gamma, lambda_,
         noised_p = stats.beta.rvs(a=a, b=b, size=1, random_state=random_state)
         new_psi.append(noised_p)
     return np.array(new_psi).squeeze()
-
 
 
 @pytest.mark.parametrize("sigmoid", list(ALL_SIGMOID_NAMES))
@@ -98,7 +92,7 @@ def test_parameter_recovery_2afc(sigmoid):
 
 @pytest.mark.parametrize("eta", [0.1, 0.2, 0.3])
 def test_parameter_recovery_2afc_eta(eta):
-    sigmoid="norm"
+    sigmoid = "norm"
     width = 0.3
     stim_range = [0.001, 0.001 + width * 1.1]
     threshold = stim_range[1]/3
@@ -131,12 +125,10 @@ def test_parameter_recovery_2afc_eta(eta):
     assert np.isclose(res.parameter_estimate['width'], width, atol=0.05)
 
 
-
 # threshold and width can not be fixed.
 @pytest.mark.parametrize("fixed_param",  ['lambda', 'gamma', 'eta'])
 def test_parameter_recovery_2afc_fixed_params(fixed_param):
     sigmoid = "norm"
-    all_possible_params = ['lambda', 'gamma', 'eta', 'threshold', 'width']
     width = 0.3
     stim_range = [0.001, 0.001 + width * 1.1]
     nsteps = 50
@@ -174,11 +166,6 @@ def test_parameter_recovery_2afc_fixed_params(fixed_param):
     assert np.isclose(res.parameter_estimate[fixed_param], sim_params[fixed_param]+0.1, atol=1e-10)
 
 
-
-    # TODO: Also check for warnings
-    # TODO: add simulation test for Y/N paradigm
-    # todo check that experiment type 2afc fixes gamma, gives correct warning
-
-    # 1 block per stimulus level
-    # number of trials no should be (rule of thumb) 40-50 trials. No more than 200, since it assymptotes
-    
+# TODO: Also check for warnings
+# TODO: add simulation test for Y/N paradigm
+# todo check that experiment type 2afc fixes gamma, gives correct warning
