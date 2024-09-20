@@ -126,18 +126,18 @@ def test_parameter_recovery_2afc_eta(eta):
 
 
 # threshold and width can not be fixed.
-@pytest.mark.parametrize("fixed_param",  ['lambda', 'gamma', 'eta'])
-def test_parameter_recovery_2afc_fixed_params(fixed_param):
+@pytest.mark.parametrize("fixed_param",  ['lambda', 'gamma', 'eta', 'threshold', 'width'])
+def test_parameter_recovery_fixed_params(fixed_param):
     sigmoid = "norm"
-    width = 0.3
+    width = 0.3000000000123
     stim_range = [0.001, 0.001 + width * 1.1]
     nsteps = 50
     sim_params = {
         "width" : width,
         "stim_range" : stim_range,
-        "threshold" : stim_range[1]/3,
-        "gamma" : 0.5,  # 2-AFC
-        "lambda" : 0.0232,
+        "threshold" : stim_range[1]/3 + 0.000006767,
+        "gamma" : 0.5000000543,
+        "lambda" : 0.1000000978,
         "nsteps" : nsteps,
         "eta": 0,
         "stimulus_level" : np.linspace(stim_range[0], stim_range[1], nsteps)
@@ -156,14 +156,20 @@ def test_parameter_recovery_2afc_fixed_params(fixed_param):
 
     options = {}
     options['sigmoid'] = sigmoid  # choose a cumulative Gauss as the sigmoid
-    options['experiment_type'] = '2AFC'
+    options['experiment_type'] = 'yes/no'
     options["stimulus_range"] = stim_range
     options['fixed_parameters'] = {}
     # we fix it to a slightly off value, so we can check if stays fixed
-    options['fixed_parameters'][fixed_param] = sim_params[fixed_param]+0.1
+    options['fixed_parameters'][fixed_param] = sim_params[fixed_param]
 
     res = psignifit(data, **options)
-    assert np.isclose(res.parameter_estimate[fixed_param], sim_params[fixed_param]+0.1, atol=1e-10)
+    # check fixed params are not touched
+    assert res.parameter_estimate[fixed_param] == sim_params[fixed_param]
+
+    for p in ['lambda', 'gamma', 'threshold', 'width', 'eta']:
+        # check all other params are estimated correctly
+        #print(p)
+        assert np.isclose(res.parameter_estimate[p], sim_params[p], rtol=1e-4, atol=1/40),  f"failed for parameter {p} for estimation with fixed: {fixed_param}."
 
 
 @pytest.mark.parametrize("sigmoid", list(ALL_SIGMOID_NAMES))
