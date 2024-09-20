@@ -1,8 +1,9 @@
 import numpy as np
 import pytest
 
-from psignifit._configuration import Configuration
-from psignifit.psignifit import psignifit, PsignifitException
+from psignifit import Configuration
+from psignifit import psignifit
+from psignifit.psignifit import PsignifitException
 
 
 # with pytest.raises(conf.Psignif

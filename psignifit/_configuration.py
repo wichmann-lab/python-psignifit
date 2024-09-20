@@ -4,7 +4,7 @@ import re
 import dataclasses
 from typing import Any, Dict, Tuple, Optional, Union
 
-from . import _sigmoids
+from . import sigmoids
 from ._utils import PsignifitException
 from ._typing import ExperimentType, Prior
 
@@ -48,7 +48,7 @@ class Configuration:
     move_bounds: bool = True
     pool_max_blocks: int = 25
     priors: Optional[Dict[str, Prior]] = dataclasses.field(default=None, hash=False)
-    sigmoid: Union[str, _sigmoids.Sigmoid] = 'norm'
+    sigmoid: Union[str, sigmoids.Sigmoid] = 'norm'
     stimulus_range: Optional[Tuple[float, float]] = None
     thresh_PC: float = 0.5
     verbose: bool = True
@@ -212,15 +212,15 @@ class Configuration:
             except Exception:
                 raise PsignifitException("Option width_min must be a number")
 
-    def make_sigmoid(self) -> _sigmoids.Sigmoid:
+    def make_sigmoid(self) -> sigmoids.Sigmoid:
         """ Construct sigmoid according to this configuration.
 
         Returns:
              Sigmoid object with percentage correct and alpha according to config.
         """
-        if isinstance(self.sigmoid, _sigmoids.Sigmoid):
+        if isinstance(self.sigmoid, sigmoids.Sigmoid):
             self.sigmoid.PC = self.thresh_PC
             self.sigmoid.alpha = self.width_alpha
             return self.sigmoid
         else:
-            return _sigmoids.sigmoid_by_name(self.sigmoid, PC=self.thresh_PC, alpha=self.width_alpha)
+            return sigmoids.sigmoid_by_name(self.sigmoid, PC=self.thresh_PC, alpha=self.width_alpha)
