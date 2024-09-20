@@ -1,25 +1,11 @@
 import numpy as np
 import pytest
-from scipy import stats
 
 from psignifit import psignifit
 from psignifit.sigmoids import ALL_SIGMOID_NAMES
-from psignifit.tools import psychometric
+from psignifit.tools import psychometric, psychometric_with_eta
 
 RANDOMSTATE = np.random.RandomState(837400)
-
-
-def psychometric_with_eta(stimulus_level, threshold, width, gamma, lambda_,
-                 sigmoid_name, eta, random_state=np.random.RandomState(42)):
-
-    psi = psychometric(stimulus_level, threshold, width, gamma, lambda_, sigmoid_name)
-    new_psi = []
-    for p in psi:
-        a = ((1/eta**2) - 1) * p
-        b = ((1/eta**2) - 1) * (1 - p)
-        noised_p = stats.beta.rvs(a=a, b=b, size=1, random_state=random_state)
-        new_psi.append(noised_p)
-    return np.array(new_psi).squeeze()
 
 
 @pytest.mark.parametrize("sigmoid", list(ALL_SIGMOID_NAMES))
