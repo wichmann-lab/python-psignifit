@@ -72,11 +72,27 @@ def test_threshold_slope(result):
                                result.slope_at_percentage_correct(percentage_correct))
 
 
+def _close_numpy_dict(first, second):
+    """ Test if two dicts of numpy arrays are equal"""
+    if first.keys() != second.keys():
+        return False
+    return np.all(np.isclose(first[key], second[key]) for key in first)
+
+
 def test_save_load_result_json(result, tmp_path):
     result_file = tmp_path / 'result.json'
 
     assert not result_file.exists()
     result.save_json(result_file)
     assert result_file.exists()
-    print(result)
-    assert result == Result.load_json(result_file)
+    other = Result.load_json(result_file)
+
+    assert result.parameter_estimate == other.parameter_estimate
+    assert result.configuration == other.configuration
+    assert result.confidence_intervals == other.confidence_intervals
+    assert np.all(np.isclose(result.data, other.data))
+    assert _close_numpy_dict(
+        result.parameter_values, other.parameter_values)
+    assert _close_numpy_dict(result.prior_values, other.prior_values)
+    assert _close_numpy_dict(
+        result.marginal_posterior_values, other.marginal_posterior_values)

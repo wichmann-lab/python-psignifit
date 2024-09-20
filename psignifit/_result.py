@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import numpy as np
+from numpy.typing import NDArray
 
 from ._configuration import Configuration
 from ._typing import ParameterGrid
@@ -21,11 +22,11 @@ class Result:
     parameter_estimate: Dict[str, float]
     configuration: Configuration
     confidence_intervals: Dict[str, List[Tuple[float, float]]]
-    data: np.ndarray
-    parameter_values: Dict[str, List[float]]
-    prior_values: Dict[str, List[float]]
-    marginal_posterior_values: Dict[str, List[float]]
-    posterior_mass: Optional[np.ndarray] = dataclasses.field(compare=False, default=None)
+    data: NDArray[float]
+    parameter_values: Dict[str, NDArray[float]]
+    prior_values: Dict[str, NDArray[float]]
+    marginal_posterior_values: Dict[str, NDArray[float]]
+    posterior_mass: Optional[NDArray[float]] = dataclasses.field(compare=False, default=None)
 
     # If future attributes should contain numpy arrays,
     # run np.asarray in __post_init__.
@@ -34,11 +35,6 @@ class Result:
         if self.posterior_mass is not None:
             self.posterior_mass = np.asarray(self.posterior_mass)
 
-    def _equal_numpy_dict(first, second):
-        """ Test if two dicts of numpy arrays are equal"""
-        if first.keys() != second.keys():
-            return False
-        return all(np.array_equal(first[key], second[key]) for key in first)
 
     @classmethod
     def from_dict(cls, result_dict: Dict[str, Any]):
