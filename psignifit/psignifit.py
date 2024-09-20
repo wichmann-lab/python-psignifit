@@ -98,7 +98,7 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
     if conf.verbose:
         _warn_marginal_sanity_checks(marginals)
 
-    if fit_dict['gamma'] is None:  # equal asymptotes
+    if 'gamma' not in fit_dict:  # equal asymptotes
         fit_dict['gamma'] = fit_dict['lambda']
         intervals_dict['gamma'] = intervals_dict['lambda']
 

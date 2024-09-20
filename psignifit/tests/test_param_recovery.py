@@ -164,7 +164,7 @@ def test_parameter_recovery_fixed_params(fixed_param):
     res = psignifit(data, **options)
 
     # check fixed params are not touched
-    assert res.parameter_estimate[fixed_param] == sim_params[fixed_param]
+    assert res.parameter_fit[fixed_param] == sim_params[fixed_param]
 
     for p in ['lambda', 'gamma', 'threshold', 'width', 'eta']:
         # check all other params are estimated correctly
