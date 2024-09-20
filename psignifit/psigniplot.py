@@ -255,7 +255,7 @@ def plot_prior(result: Result,
             plt.plot(sigmoid_x, sigmoid(sigmoid_x, **this_sigmoid_params), line_width=line_width, color=color)
         plt.plot(data[:, 0], np.zeros(data[:, 0].shape), 'k.', s=marker_size * .75)
         plt.xlabel('Stimulus Level')
-        plt.ylabel('Percent Correct')
+        plt.ylabel('proportion correct')
 
 
 def plot_2D_margin(result: Result,

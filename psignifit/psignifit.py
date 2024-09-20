@@ -84,7 +84,7 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
 
     priors = setup_priors(custom_priors=conf.priors, bounds=bounds,
                           stimulus_range=stimulus_range, width_min=width_min, width_alpha=conf.width_alpha,
-                          beta_prior=conf.beta_prior, threshold_perc_correct=conf.thresh_PC)
+                          beta_prior=conf.beta_prior, threshold_prop_correct=conf.thresh_PC)
     fit_dict, posteriors, grid = _fit_parameters(data, bounds, priors, sigmoid, conf.steps_moving_bounds,
                                                  conf.max_bound_value, conf.grid_steps)
 
