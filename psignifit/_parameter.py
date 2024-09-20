@@ -80,6 +80,7 @@ def masked_parameter_bounds(grid: Dict[str, Optional[np.ndarray]], mesh_mask: np
     """
     new_bounds = dict()
     mask_indices = mesh_mask.nonzero()
+    # "sorted" is required so that the parameters are matched to the axes in  alphabetical order
     for axis, (parameter_name, parameter_values) in enumerate(sorted(grid.items())):
         indices = mask_indices[axis]
         left, right = 0, len(parameter_values) - 1
