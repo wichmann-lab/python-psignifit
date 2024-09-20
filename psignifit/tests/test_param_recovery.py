@@ -53,7 +53,7 @@ def test_parameter_recovery_2afc_eta(eta):
     nsteps = 100
     stimulus_level = np.linspace(stim_range[0], stim_range[1], nsteps)
 
-    perccorr = tools.psychometric_with_eta(stimulus_level, threshold, width, gamma, lambda_,
+    perccorr = psychometric_with_eta(stimulus_level, threshold, width, gamma, lambda_,
                             sigmoid, eta=eta, random_state=RANDOMSTATE)
 
     ntrials = np.ones(nsteps) * 500
