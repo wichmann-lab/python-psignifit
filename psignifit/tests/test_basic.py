@@ -43,7 +43,7 @@ def test_plot_psych():
     options = get_std_options()
     res = psignifit(data, **options)
     plt.figure()
-    psigniplot.plot_psychmetric_function(res)
+    psigniplot.plot_psychometric_function(res)
     plt.close('all')
 
 
