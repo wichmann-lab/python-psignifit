@@ -21,8 +21,8 @@ compatibility with different python 3 versions on Ubuntu Linux and Windows. We d
 
 .. _pip install:
 
-Installing the latest release
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Installing the latest release (preferred method)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Install python-psignifit with all dependencies:
 
@@ -40,18 +40,13 @@ To install psignifit go to
 https://github.com/wichmann-lab/python-psignifit and click on the “Clone
 or Download” button on the right or click here: `Download
 ZIP <https://github.com/wichmann-lab/python-psignifit/archive/master.zip>`__.
-Then unpack the ZIP file and run the contained setup.py file:
+Then unpack the ZIP file, navigate with the command line inside the folder
+python-psignifit, and then run:
 
 ::
 
-   python setup.py install
-   # OR to make use of changes in the code:
-   python setup.py develop
-
-This should work on Linux, MAC and Windows equally well.
-
-If you “installed” this way and you want to update your psignifit,
-simply download again and replace the folder.
+   pip install .
+   
 
 
 .. _git install:
@@ -69,7 +64,9 @@ To clone the repository for the first time, change to the directory
 where psignifit should be placed. There use the following command in a
 terminal:
 
-``git clone https://github.com/wichmann-lab/python-psignifit.git``
+::
+
+   git clone https://github.com/wichmann-lab/python-psignifit.git``
 
 Now you should have a directory called “python-psignifit” there. This
 contains all the code you need and you can proceed to adding the code to
@@ -78,6 +75,13 @@ your path as well.
 To update your local copy you only need to change to the
 “python-psignifit” folder and type:
 
-``git pull``
+::
 
-Install as described in :ref:`zip install`.
+   git pull
+
+Then reinstall the new version with
+
+::
+
+   pip install .
+   
