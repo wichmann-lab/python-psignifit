@@ -242,9 +242,13 @@ def maximize_posterior(data, param_init: Dict[str, float], param_fixed: Dict[str
 def marginalize_posterior(parameter_grid: ParameterGrid, posterior_mass: np.ndarray) -> Dict[str, np.ndarray]:
     marginals = dict()
     for i, (param, grid) in enumerate(sorted(parameter_grid.items())):
-        if grid is None:
+        if grid is None or len(grid)==1:
             marginals[param] = None
-        axis = tuple(range(0, i)) + tuple(range(i + 1, len(parameter_grid)))
-        marginals[param] = np.squeeze(posterior_mass.sum(axis))
+        else:
+            axis = tuple(range(0, i)) + tuple(range(i + 1, len(parameter_grid)))
+            # we get first the unnormalized marginal, and then we scale it
+            nmarginal = np.squeeze(posterior_mass.sum(axis))
+            integral = np.trapz(nmarginal, x=grid)
+            marginals[param] = nmarginal / integral
 
     return marginals
