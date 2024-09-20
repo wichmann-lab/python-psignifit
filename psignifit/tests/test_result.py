@@ -3,8 +3,8 @@ import dataclasses
 import pytest
 import numpy as np
 
-from psignifit._result import Result
-from psignifit._configuration import Configuration
+from psignifit import Result
+from psignifit import Configuration
 
 
 @pytest.fixture

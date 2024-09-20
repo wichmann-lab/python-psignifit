@@ -3,8 +3,9 @@
 import re
 import dataclasses
 from typing import Any, Dict, Tuple, Optional, Union
+import warnings
 
-from . import _sigmoids
+from . import sigmoids
 from ._utils import PsignifitException
 from ._typing import ExperimentType, Prior
 
@@ -48,7 +49,7 @@ class Configuration:
     move_bounds: bool = True
     pool_max_blocks: int = 25
     priors: Optional[Dict[str, Prior]] = dataclasses.field(default=None, hash=False)
-    sigmoid: Union[str, _sigmoids.Sigmoid] = 'norm'
+    sigmoid: Union[str, sigmoids.Sigmoid] = 'norm'
     stimulus_range: Optional[Tuple[float, float]] = None
     thresh_PC: float = 0.5
     verbose: bool = True
@@ -93,6 +94,7 @@ class Configuration:
                 sanity_check_method = getattr(self, sanity_check_name)
                 attribute_value = getattr(self, attribute.name)
                 sanity_check_method(attribute_value)
+        self.check_experiment_type_matches_fixed_parameters(self.fixed_parameters, self.experiment_type)
 
     def check_bounds(self, value):
         if value is not None:
@@ -120,7 +122,7 @@ class Configuration:
     def check_fixed_parameters(self, value):
         if value is not None:
             # fixed parameters is a dict in the form {'parameter_name': value}
-            if type(value) != dict:
+            if isinstance(type(value), dict):
                 raise PsignifitException(
                     f'Option fixed_parameters must be a dictionary ({type(value).__name__} given)!'
                 )
@@ -130,6 +132,14 @@ class Configuration:
                 raise PsignifitException(
                     f'Option fixed_paramters keys must be in {vkeys}. Given {list(value.keys())}!'
                 )
+
+
+    def check_experiment_type_matches_fixed_parameters(self, fixed_params, experiment_type):
+        if experiment_type == ExperimentType.N_AFC.value:
+            if fixed_params is not None and 'gamma' in fixed_params:
+                warnings.warn(
+                    f'The parameter gamma was fixed to {fixed_params["gamma"]}. In {ExperimentType.N_AFC.value} experiments gamma must be fixed to 1/n. Ignoring fixed gamma.')
+
 
     def check_experiment_type(self, value):
         valid_values = [type.value for type in ExperimentType]
@@ -212,15 +222,15 @@ class Configuration:
             except Exception:
                 raise PsignifitException("Option width_min must be a number")
 
-    def make_sigmoid(self) -> _sigmoids.Sigmoid:
+    def make_sigmoid(self) -> sigmoids.Sigmoid:
         """ Construct sigmoid according to this configuration.
 
         Returns:
              Sigmoid object with percentage correct and alpha according to config.
         """
-        if isinstance(self.sigmoid, _sigmoids.Sigmoid):
+        if isinstance(self.sigmoid, sigmoids.Sigmoid):
             self.sigmoid.PC = self.thresh_PC
             self.sigmoid.alpha = self.width_alpha
             return self.sigmoid
         else:
-            return _sigmoids.sigmoid_by_name(self.sigmoid, PC=self.thresh_PC, alpha=self.width_alpha)
+            return sigmoids.sigmoid_by_name(self.sigmoid, PC=self.thresh_PC, alpha=self.width_alpha)

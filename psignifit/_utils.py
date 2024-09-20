@@ -19,12 +19,11 @@ class fp_error_handler(np.errstate):
     pass
 
 
-def check_data(data: np.ndarray, logspace: Optional[bool] = None) -> np.ndarray:
+def check_data(data: np.ndarray) -> np.ndarray:
     """ Check data format, type and range.
 
     Args:
         data: The data matrix with columns levels, number of correct and number of trials
-        logspace: Data should be used logarithmically. If None, no test on logspace is performed.
     Returns:
         data as float numpy array
     Raises:
@@ -47,7 +46,5 @@ def check_data(data: np.ndarray, logspace: Optional[bool] = None) -> np.ndarray:
     if not np.allclose(ntrials, ntrials.astype(int)):
         raise PsignifitException('The number of trials column contains non'
                                  ' integer numbers!')
-    if logspace is True and levels.min() < 0:
-        raise PsignifitException(f'Sigmoid {data.sigmoid} expects non-negative stimulus level data.')
 
     return data

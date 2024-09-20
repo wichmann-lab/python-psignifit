@@ -4,11 +4,11 @@ import pytest
 import psignifit._parameter
 import psignifit._posterior
 import psignifit._priors
-from psignifit import _posterior
-from psignifit import _sigmoids
+from psignifit import sigmoids
+from psignifit import Configuration
 from psignifit._priors import default_priors
 from psignifit._parameter import parameter_bounds
-from psignifit._configuration import Configuration
+from psignifit import _posterior
 from psignifit import _utils
 
 from .data import DATA
@@ -23,7 +23,7 @@ def setup_experiment(**kwargs):
     bounds = parameter_bounds(min_width=width_min, experiment_type=conf.experiment_type, stimulus_range=stimulus_range,
                               alpha=conf.width_alpha, nafc_choices=conf.experiment_choices)
 
-    sigmoid = _sigmoids.sigmoid_by_name(conf.sigmoid, PC=conf.thresh_PC, alpha=conf.width_alpha)
+    sigmoid = sigmoids.sigmoid_by_name(conf.sigmoid, PC=conf.thresh_PC, alpha=conf.width_alpha)
 
     priors = default_priors(stimulus_range, width_min, conf.width_alpha, conf.beta_prior)
     for parameter, prior in priors.items():

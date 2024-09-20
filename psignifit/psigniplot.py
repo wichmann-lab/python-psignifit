@@ -11,6 +11,7 @@ from . import psignifit
 from ._typing import ExperimentType
 from ._result import Result
 
+
 def plot_psychmetric_function(result: Result,  # noqa: C901, this function is too complex
                               ax: matplotlib.axes.Axes = None,
                               plot_data: bool = True,
@@ -139,7 +140,7 @@ def plot_modelfit(result: Result) -> matplotlib.figure.Figure:
     fig = plt.figure(figsize=(15, 5))
 
     ax = plt.subplot(1, 3, 1)
-    plot_psychmetric_function(result, ax, plot_data=True, plot_parameter=False, extrapolate_stimulus=0)
+    plot_psychometric_function(result, ax, plot_data=True, plot_parameter=False, extrapolate_stimulus=0)
     ax.set_title('Psychometric Function')
 
     ax = plt.subplot(1, 3, 2)
@@ -203,13 +204,8 @@ def plot_marginal(result: Result,
 
 def _parameter_label(parameter):
     label_defaults = {'threshold': 'Threshold', 'width': 'Width',
-                      'lambda': r'$\lambda$', 'gamma': r'$\gamma$', 'eta': r'$\eta$'}
-    try:
-        plt.rcParams.update({"text.usetex": True})
-        x_label = label_defaults[parameter]
-    except:
-        x_label = parameter.capitalize()
-    return x_label
+                      'lambda': '\u03BB', 'gamma': '\u03B3', 'eta': '\u03B7'}
+    return label_defaults[parameter]
 
 
 def plot_prior(result: Result,
@@ -327,9 +323,9 @@ def plot_bias_analysis(data: np.ndarray, compare_data: np.ndarray, **kwargs) -> 
     plt.figure()
     ax = plt.axes([0.15, 4.35 / 6, 0.75, 1.5 / 6])
 
-    plot_psychmetric_function(result_combined, ax=ax)
-    plot_psychmetric_function(result_data, ax=ax, line_color=[1, 0, 0], data_color=[1, 0, 0])
-    plot_psychmetric_function(result_compare_data, ax=ax, line_color=[0, 0, 1], data_color=[0, 0, 1])
+    plot_psychometric_function(result_combined, ax=ax)
+    plot_psychometric_function(result_data, ax=ax, line_color=[1, 0, 0], data_color=[1, 0, 0])
+    plot_psychometric_function(result_compare_data, ax=ax, line_color=[0, 0, 1], data_color=[0, 0, 1])
     plt.ylim([0, 1])
 
     for param in ['threshold', 'width', 'lambda', 'gamma']:

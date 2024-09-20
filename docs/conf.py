@@ -21,8 +21,8 @@ from sphinx_gallery.sorting import ExampleTitleSortKey
 # -- Project information -----------------------------------------------------
 
 project = 'psignifit'
-author = 'Original: Heiko Schütt, Stefan Harmeling, Jakob Macke, and Felix Wichmann; Python implementation: David-Elias Künstle, Tiziano Zito'
-copyright = '2020, ' + author
+author = 'psignifit contributors, www.wichmann-lab.org'
+copyright = '2024, ' + author
 
 
 # -- General configuration ---------------------------------------------------

@@ -5,7 +5,7 @@ from typing import Dict, Optional
 
 import numpy as np
 
-from . import _sigmoids
+from . import sigmoids
 from ._parameter import parameter_bounds, masked_parameter_bounds, parameter_grid
 from ._configuration import Configuration
 from ._confidence import confidence_intervals
@@ -18,10 +18,14 @@ from ._utils import (PsignifitException, check_data)
 
 def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
               return_posterior: bool = False, **kwargs) -> Result:
-    """
-    Main function for fitting psychometric functions function
+    """ Fit a psychometric function to experimental data.
 
     This function is the user interface for fitting psychometric functions to data.
+
+    Notice that the parameters of the psychometric function are always fit in linear space, even
+    for psychometric function that are supposed to work in a logarithmic space, like the Weibull
+    function. It is left to the user to transform the stimulus level to logarithmic space before
+    calling this function.
 
     pass your data in the n x 3 matrix of the form:
     [x-value, number correct, number of trials]
@@ -51,7 +55,7 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
             "Can't handle conf together with other keyword arguments!")
 
     sigmoid = conf.make_sigmoid()
-    data = check_data(data, logspace=sigmoid.logspace)
+    data = check_data(data)
 
     levels, ntrials = data[:, 0], data[:, 2]
     if conf.verbose:
@@ -60,13 +64,7 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
 
     stimulus_range = conf.stimulus_range
     if stimulus_range is None:
-        if sigmoid.logspace:
-            stimulus_range = (levels[levels > 0].min(), levels.max())
-        else:
-            stimulus_range = (levels.min(), levels.max())
-    if sigmoid.logspace:
-        stimulus_range = (np.log(stimulus_range[0]), np.log(stimulus_range[1]))
-        levels = np.log(levels)
+        stimulus_range = (levels.min(), levels.max())
 
     width_min = conf.width_min
     if width_min is None:
@@ -110,7 +108,7 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
                   prior_values={param: priors[param](values) for param, values in grid.items()},
                   marginal_posterior_values=marginals,
                   posterior_mass=posteriors,
-                  data=data)
+                  data=data.tolist())
 
 
 def _warn_common_data_mistakes(levels, ntrials, has_user_stimulus_range, pool_max_blocks) -> None:
@@ -176,23 +174,9 @@ def _warn_marginal_sanity_checks(marginals):
                       'This indicates that your data is not sufficient to exclude much higher widths.\n'
                       'Refer to the paper or the manual for more info on this topic.')
 
-    for param, marginal in marginals.items():
-        if marginal.size < 3:
-            continue
-
-        peak = marginal.max() / 1000
-        if marginal[0] > peak or marginal[-1] > peak:
-            warnings.warn(f'''psignifit:boundWarning\n
-                             The marginal on the {param} bounds is not smaller than 1/1000 of the peak
-                             it means that the prior of the {param} parameter has an influence to the result.\n
-                             This means (1) the prior may be too narrow, or (2) you know what you are doing.\n
-                             If you were using the default settings, this is a bug in the software or your data
-                             are highly unusual,
-                             if you changed the defaults please check the priors and parameter bounds.''')
-
 
 def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
-                    priors: Dict[str, Prior], sigmoid: _sigmoids.Sigmoid,
+                    priors: Dict[str, Prior], sigmoid: sigmoids.Sigmoid,
                     steps_moving_bounds: Dict[str, int], max_bound_value: float,
                     grid_steps: Dict[str, int]) -> Dict[str, float]:
     """ Fit sigmoid parameters in a three step procedure.
