@@ -3,6 +3,7 @@
 import re
 import dataclasses
 from typing import Any, Dict, Tuple, Optional, Union
+import warnings
 
 from . import _sigmoids
 from ._utils import PsignifitException
@@ -93,6 +94,7 @@ class Configuration:
                 sanity_check_method = getattr(self, sanity_check_name)
                 attribute_value = getattr(self, attribute.name)
                 sanity_check_method(attribute_value)
+        self.check_experiment_type_matches_fixed_parameters(self.fixed_parameters, self.experiment_type)
 
     def check_bounds(self, value):
         if value is not None:
@@ -120,7 +122,7 @@ class Configuration:
     def check_fixed_parameters(self, value):
         if value is not None:
             # fixed parameters is a dict in the form {'parameter_name': value}
-            if type(value) != dict:
+            if isinstance(type(value), dict):
                 raise PsignifitException(
                     f'Option fixed_parameters must be a dictionary ({type(value).__name__} given)!'
                 )
@@ -130,6 +132,14 @@ class Configuration:
                 raise PsignifitException(
                     f'Option fixed_paramters keys must be in {vkeys}. Given {list(value.keys())}!'
                 )
+
+
+    def check_experiment_type_matches_fixed_parameters(self, fixed_params, experiment_type):
+        if experiment_type == ExperimentType.N_AFC.value:
+            if 'gamma' in fixed_params:
+                warnings.warn(
+                    f'The parameter gamma was fixed to {fixed_params["gamma"]}. In {ExperimentType.N_AFC.value} experiments gamma must be fixed to 1/n. Ignoring fixed gamma.')
+
 
     def check_experiment_type(self, value):
         valid_values = [type.value for type in ExperimentType]

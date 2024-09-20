@@ -2,6 +2,7 @@ import dataclasses
 from unittest.mock import patch
 
 import pytest
+import numpy as np
 
 from psignifit._configuration import Configuration
 from psignifit._utils import PsignifitException
@@ -99,3 +100,26 @@ def test_set_width_alpha_wrong_range():
 def test_set_width_min_wrong_type():
     with pytest.raises(PsignifitException):
         Configuration(width_min=(1, 2, 3))
+
+
+def test_warning_for_2afc_and_wrong_gamma():
+    sigmoid = "norm"
+    width = 0.3
+    stim_range = [0.001, 0.001 + width * 1.1]
+    threshold = stim_range[1]/3
+    lambda_ = 0.0232
+    gamma = 0.1
+
+
+    options = {}
+    options['sigmoid'] = sigmoid  # choose a cumulative Gauss as the sigmoid
+    options['experiment_type'] = '2AFC'
+    options['fixed_parameters'] = {'lambda': lambda_,
+                                   'gamma': gamma}
+    options["stimulus_range"] = stim_range
+
+    with pytest.warns(UserWarning, match='gamma was fixed'):
+        conf = Configuration(**options)
+
+
+
