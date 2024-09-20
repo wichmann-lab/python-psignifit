@@ -83,10 +83,10 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
         for param, value in conf.fixed_parameters.items():
             bounds[param] = (value, value)
 
-    npriors, priors = setup_priors(custom_priors=conf.priors, bounds=bounds,
-                            stimulus_range=stimulus_range, width_min=width_min, width_alpha=conf.width_alpha,
-                            beta_prior=conf.beta_prior, threshold_perc_correct=conf.thresh_PC)
-    fit_dict, posteriors, grid = _fit_parameters(data, bounds, npriors, sigmoid, conf.steps_moving_bounds,
+    priors = setup_priors(custom_priors=conf.priors, bounds=bounds,
+                          stimulus_range=stimulus_range, width_min=width_min, width_alpha=conf.width_alpha,
+                          beta_prior=conf.beta_prior, threshold_perc_correct=conf.thresh_PC)
+    fit_dict, posteriors, grid = _fit_parameters(data, bounds, priors, sigmoid, conf.steps_moving_bounds,
                                                  conf.max_bound_value, conf.grid_steps)
 
     grid_values = [grid_value for _, grid_value in sorted(grid.items())]
@@ -104,9 +104,9 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
     return Result(parameter_estimate=fit_dict,
                   configuration=conf,
                   confidence_intervals=intervals_dict,
-                  parameter_values={k: v.tolist() for k, v in grid.items()},
-                  prior_values={param: priors[param](values).tolist() for param, values in grid.items()},
-                  marginal_posterior_values={k: v.tolist() for k, v in marginals.items()},
+                  parameter_values=grid,
+                  prior_values={param: priors[param](values) for param, values in grid.items()},
+                  marginal_posterior_values=marginals,
                   posterior_mass=posteriors,
                   data=data.tolist())
 
