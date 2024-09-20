@@ -13,15 +13,15 @@ from ._result import Result
 
 
 def plot_psychometric_function(result: Result,  # noqa: C901, this function is too complex
-                              ax: matplotlib.axes.Axes = None,
-                              plot_data: bool = True,
-                              plot_parameter: bool = True,
-                              data_color: Union[str, List[float], np.ndarray] = '#0069AA',  # blue
-                              line_color: Union[str, List[float], np.ndarray] = '#000000',  # black
-                              line_width: float = 2,
-                              extrapolate_stimulus: float = 0.2,
-                              x_label='Stimulus Level',
-                              y_label='Proportion Correct'):
+                               ax: matplotlib.axes.Axes = None,
+                               plot_data: bool = True,
+                               plot_parameter: bool = True,
+                               data_color: Union[str, List[float], np.ndarray] = '#0069AA',  # blue
+                               line_color: Union[str, List[float], np.ndarray] = '#000000',  # black
+                               line_width: float = 2,
+                               extrapolate_stimulus: float = 0.2,
+                               x_label='Stimulus Level',
+                               y_label='Proportion Correct'):
     """ Plot psychometric function fit together with the data.
     """
     if ax is None:
