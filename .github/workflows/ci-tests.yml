@@ -2,9 +2,9 @@
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 name: Test
 
-on: 
-  push
-  pull_request
+on:
+  push:
+  pull_request:
   schedule:  # At 00:00 on day-of-month 1
     - cron: '0 0 1 * *'
 
@@ -35,7 +35,7 @@ jobs:
           pip install .
       - name: Run tests for ${{ matrix.python_version }} through nox
         run: |
-          pytest -vv    
+          pytest -vv
 
   lint:
     runs-on: ubuntu-latest
@@ -78,4 +78,3 @@ jobs:
     - name: Build the documentation
       run: |
         cd docs && make html
-
