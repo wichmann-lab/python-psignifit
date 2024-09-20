@@ -113,5 +113,7 @@ Next steps
 ~~~~~~~~~~
 
 We covered the basic steps in using *python-psignifit*.
-Please refer to the :ref:`user-guides` and :ref:`demo-index`to dive deeper. The :ref:`how_tos` and :ref:`api_ref`
-are helpful resources during the practical application.
+Please refer to the examples following this page to learn how
+to change the default parameters and explore other possibilities. 
+
+The :ref:`api_ref` are helpful resources to dive deeper.
