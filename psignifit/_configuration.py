@@ -136,7 +136,7 @@ class Configuration:
 
     def check_experiment_type_matches_fixed_parameters(self, fixed_params, experiment_type):
         if experiment_type == ExperimentType.N_AFC.value:
-            if 'gamma' in fixed_params:
+            if fixed_params is not None and 'gamma' in fixed_params:
                 warnings.warn(
                     f'The parameter gamma was fixed to {fixed_params["gamma"]}. In {ExperimentType.N_AFC.value} experiments gamma must be fixed to 1/n. Ignoring fixed gamma.')
 
