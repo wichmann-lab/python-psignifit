@@ -166,24 +166,34 @@ def _warn_marginal_sanity_checks(marginals):
         threshold_marginals = marginals['threshold'] / np.sum(marginals['threshold'])
         if threshold_marginals[0] > .001:
             warnings.warn('psignifit:boundWarning\n'
-                        'The marginal for the threshold is not near 0 at the bound.\n'
-                        'This indicates that smaller Thresholds would be possible.')
+                        'The posterior marginal distribution of the parameter <threshold> can not be fully captured inside the estimation grid which is based on the prior\n'
+                        'The probability at the lower bound (i.e. the lowest sampled value) is not near 0.\n'
+                        'This indicates that your data is not sufficient to exclude lower thresholds than are included in the estimation space.\n'
+                        'Either change the prior or ensure that the data is sufficient to constrain the posterior.\n'
+                        'Refer to the paper or the manual for more info on this topic.')
         if threshold_marginals[-1] > .001:
             warnings.warn('psignifit:boundWarning\n'
-                        'The marginal for the threshold is not near 0 at the upper bound.\n'
-                        'This indicates that your data is not sufficient to exclude much higher thresholds.\n'
+                        'The posterior marginal distribution of the parameter <threshold> can not be fully captured inside the estimation grid which is based on the prior\n'
+                        'The probability at the upper bound (i.e. the highest sampled value) is not near 0.\n'
+                        'This indicates that your data is not sufficient to exclude higher thresholds than are included in the estimation space.\n'
+                        'Either change the prior or ensure that the data is sufficient to constrain the posterior.\n'
                         'Refer to the paper or the manual for more info on this topic.')
+            
     if 'width' in marginals:
         width_marginals = marginals['width'] / np.sum(marginals['width'])
         if width_marginals[0] > .001:
             warnings.warn('psignifit:boundWarning\n'
-                        'The marginal for the width is not near 0 at the lower bound.\n'
-                        'This indicates that your data is not sufficient to exclude much lower widths.\n'
+                        'The posterior marginal distribution of the parameter <width> can not be fully captured inside the estimation grid which is based on the prior\n'
+                        'The probability at the lower bound (i.e. the lowest sampled value) is not near 0.\n'
+                        'This indicates that your data is not sufficient to exclude lower widths than are included in the estimation space.\n'
+                        'Either change the prior or ensure that the data is sufficient to constrain the posterior.\n'
                         'Refer to the paper or the manual for more info on this topic.')
         if width_marginals[-1] > .001:
             warnings.warn('psignifit:boundWarning\n'
-                        'The marginal for the width is not near 0 at the lower bound.\n'
-                        'This indicates that your data is not sufficient to exclude much higher widths.\n'
+                        'The posterior marginal distribution of the parameter <width> can not be fully captured inside the estimation grid which is based on the prior\n'
+                        'The probability at the higher bound (i.e. the highest sampled value) is not near 0.\n'
+                        'This indicates that your data is not sufficient to exclude higher widths than are included in the estimation space.\n'
+                        'Either change the prior or ensure that the data is sufficient to constrain the posterior.\n'
                         'Refer to the paper or the manual for more info on this topic.')
 
 
