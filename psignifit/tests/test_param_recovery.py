@@ -131,9 +131,9 @@ def test_parameter_recovery_2afc_eta(eta):
     assert np.isclose(res.parameter_estimate['width'], width, atol=0.05)
 
 
-# todo check that experiment type 2afc fixes gamma, gives correct warning
 
-@pytest.mark.parametrize("fixed_param",  ['lambda', 'gamma', 'eta', 'threshold', 'width'])
+# threshold and width can not be fixed.
+@pytest.mark.parametrize("fixed_param",  ['lambda', 'gamma', 'eta'])
 def test_parameter_recovery_2afc_fixed_params(fixed_param):
     sigmoid = "norm"
     all_possible_params = ['lambda', 'gamma', 'eta', 'threshold', 'width']
@@ -177,7 +177,7 @@ def test_parameter_recovery_2afc_fixed_params(fixed_param):
 
     # TODO: Also check for warnings
     # TODO: add simulation test for Y/N paradigm
-
+    # todo check that experiment type 2afc fixes gamma, gives correct warning
 
     # 1 block per stimulus level
     # number of trials no should be (rule of thumb) 40-50 trials. No more than 200, since it assymptotes
