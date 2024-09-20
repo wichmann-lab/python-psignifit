@@ -3,7 +3,7 @@ import pytest
 from scipy import stats
 
 from psignifit import psignifit
-from psignifit._sigmoids import ALL_SIGMOID_NAMES, sigmoid_by_name
+from psignifit.sigmoids import ALL_SIGMOID_NAMES, sigmoid_by_name
 
 
 RANDOMSTATE = np.random.RandomState(837400)

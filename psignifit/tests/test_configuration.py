@@ -99,3 +99,20 @@ def test_set_width_alpha_wrong_range():
 def test_set_width_min_wrong_type():
     with pytest.raises(PsignifitException):
         Configuration(width_min=(1, 2, 3))
+
+
+def test_warning_for_2afc_and_wrong_gamma():
+    sigmoid = "norm"
+    stim_range = [0.001, 0.2]
+    lambda_ = 0.0232
+    gamma = 0.1
+
+    options = {}
+    options['sigmoid'] = sigmoid  # choose a cumulative Gauss as the sigmoid
+    options['experiment_type'] = '2AFC'
+    options['fixed_parameters'] = {'lambda': lambda_,
+                                   'gamma': gamma}
+    options["stimulus_range"] = stim_range
+
+    with pytest.warns(UserWarning, match='gamma was fixed'):
+        Configuration(**options)
