@@ -167,7 +167,7 @@ def plot_marginal(result: Result,
 
     Args:
         result: should be a result struct from the main psignifit routine
-        dim: The parameter to plot. 1=threshold, 2=width, 3=lambda, 4=gamma, 5=sigma
+        dim: The parameter to plot. 'threshold', 'width', 'lambda', 'gamma', 'eta'
     """
     if ax is None:
         ax = plt.gca()
@@ -188,7 +188,7 @@ def plot_marginal(result: Result,
             ax.fill_between(ci_x, np.zeros_like(ci_x), np.interp(ci_x, x, marginal), color=line_color, alpha=0.5)
 
         param_value = result.parameter_estimate[parameter]
-        ax.plot([param_value] * 2, [0, np.interp(param_value, x, marginal)], color=line_color)
+        ax.plot([param_value] * 2, [0, np.interp(param_value, x, marginal)], color='#000000')
 
     if plot_prior:
         ax.plot(x, result.prior_values[parameter], ls='--', color=prior_color, clip_on=False)
@@ -196,6 +196,7 @@ def plot_marginal(result: Result,
     ax.plot(x, marginal, lw=line_width, c=line_color, clip_on=False)
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
+    ax.spines[['top', 'right']].set_visible(False)
 
     return ax
 
