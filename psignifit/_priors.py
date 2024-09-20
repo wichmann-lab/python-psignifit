@@ -71,20 +71,26 @@ def eta_prior(x, k):
     return scipy.stats.beta.pdf(x, 1, k)
 
 
-def default_priors(stimulus_range: Tuple[float, float], width_min: float,
+def default_prior(parameter: str, stimulus_range: Tuple[float, float], width_min: float,
                    width_alpha: float, beta: float, threshold_percent_correct: float = 0.5) -> Dict[str, Prior]:
     if not np.isclose(threshold_percent_correct, 0.5):
         raise ValueError("Default prior 'threshold' expects thresh_PC=0.5, got {thresh_PC = }")
 
-    return {
-        'threshold': partial(threshold_prior, stimulus_range=stimulus_range),
-        'width': partial(width_prior, wmin=width_min,
+    if parameter == 'threshold':
+        prior =  partial(threshold_prior, stimulus_range=stimulus_range)
+    elif parameter == 'width':
+        prior = partial(width_prior, wmin=width_min,
                          wmax=stimulus_range[1] - stimulus_range[0],
                          alpha=width_alpha),
-        'lambda': lambda_prior,
-        'gamma': gamma_prior,
-        'eta': partial(eta_prior, k=beta),
-    }
+    elif parameter == 'lambda':
+        prior = lambda_prior
+    elif parameter == 'gamma':
+        prior = gamma_prior
+    elif parameter == 'eta':
+        prior = partial(eta_prior, k=beta)
+    else:
+        raise ValueError(f"Unknown parameter '{parameter}'")
+    return prior
 
 
 def _check_prior(priors, name, values):
@@ -150,7 +156,10 @@ def normalize_prior(func: Prior, interval: Tuple[float, float], steps: int = 100
 
 
 def setup_priors(custom_priors, bounds, stimulus_range, width_min, width_alpha, beta_prior, threshold_perc_correct):
-    priors = default_priors(stimulus_range, width_min, width_alpha, beta_prior, threshold_perc_correct)
+    priors = {}
+    for parameter in bounds:
+        priors[parameter] = default_prior(parameter, stimulus_range, width_min, width_alpha, beta_prior, threshold_perc_correct)
+
     if custom_priors is not None:
         priors.update(custom_priors)
     check_priors(priors, stimulus_range, width_min)
