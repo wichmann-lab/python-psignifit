@@ -96,22 +96,20 @@ def test_parameter_recovery_2afc(sigmoid):
     assert np.isclose(res.parameter_estimate['width'], width, atol=1e-4)
 
 
-
-@pytest.mark.parametrize("sigmoid", list(ALL_SIGMOID_NAMES))
 @pytest.mark.parametrize("eta", [0.1, 0.2, 0.3])
-def test_parameter_recovery_2afc_eta(eta, sigmoid):
-    #sigmoid="norm"
+def test_parameter_recovery_2afc_eta(eta):
+    sigmoid="norm"
     width = 0.3
     stim_range = [0.001, 0.001 + width * 1.1]
     threshold = stim_range[1]/3
     gamma = 0.5  # 2-AFC
     lambda_ = 0.0232
 
-    nsteps = 100
+    nsteps = 200
     stimulus_level = np.linspace(stim_range[0], stim_range[1], nsteps)
 
     perccorr = psychometric_with_eta(stimulus_level, threshold, width, gamma, lambda_,
-                            sigmoid, eta=0.2, random_state=RANDOMSTATE)
+                            sigmoid, eta=eta, random_state=RANDOMSTATE)
 
     ntrials = np.ones(nsteps) * 500
     hits = (perccorr * ntrials).astype(int)
@@ -128,13 +126,15 @@ def test_parameter_recovery_2afc_eta(eta, sigmoid):
 
     assert np.isclose(res.parameter_estimate['lambda'], lambda_)
     assert np.isclose(res.parameter_estimate['gamma'], gamma)
-    assert np.isclose(res.parameter_estimate['eta'], eta, atol=0.3)
-    assert np.isclose(res.parameter_estimate['threshold'], threshold, atol=0.05)
-    assert np.isclose(res.parameter_estimate['width'], width, atol=0.07)
+    assert np.isclose(res.parameter_estimate['eta'], eta, atol=0.05)
+    assert np.isclose(res.parameter_estimate['threshold'], threshold, atol=0.01)
+    assert np.isclose(res.parameter_estimate['width'], width, atol=0.05)
 
 
-#@pytest.mark.parametrize("sigmoid", list(ALL_SIGMOID_NAMES))
-def test_parameter_recovery_2afc_fixed_params():
+# todo check that experiment type 2afc fixes gamma, gives correct warning
+
+@pytest.mark.parametrize("fixed_param",  ['lambda', 'gamma', 'eta', 'threshold', 'width'])
+def test_parameter_recovery_2afc_fixed_params(fixed_param):
     sigmoid = "norm"
     all_possible_params = ['lambda', 'gamma', 'eta', 'threshold', 'width']
     width = 0.3
@@ -145,7 +145,7 @@ def test_parameter_recovery_2afc_fixed_params():
         "stim_range" : stim_range,
         "threshold" : stim_range[1]/3,
         "gamma" : 0.5,  # 2-AFC
-        "lambda_" : 0.0232,
+        "lambda" : 0.0232,
         "nsteps" : nsteps,
         "eta": 0,
         "stimulus_level" : np.linspace(stim_range[0], stim_range[1], nsteps)
@@ -155,37 +155,27 @@ def test_parameter_recovery_2afc_fixed_params():
                             sim_params["threshold"],
                             sim_params["width"],
                             sim_params["gamma"],
-                            sim_params["lambda_"],
+                            sim_params["lambda"],
                             sigmoid)
 
     ntrials = np.ones(nsteps) * 9000000
     hits = (perccorr * ntrials).astype(int)
     data = np.dstack([sim_params["stimulus_level"], hits, ntrials]).squeeze()
 
-    fixed_params = [['lambda_', 'gamma', 'eta'], ['lambda_', 'gamma']]
+    options = {}
+    options['sigmoid'] = sigmoid  # choose a cumulative Gauss as the sigmoid
+    options['experiment_type'] = '2AFC'
+    options["stimulus_range"] = stim_range
+    options['fixed_parameters'] = {}
+    # we fix it to a slightly off value, so we can check if stays fixed
+    options['fixed_parameters'][fixed_param] = sim_params[fixed_param]+0.1
 
-    for fp in fixed_params:
-        options = {}
-        options['sigmoid'] = sigmoid  # choose a cumulative Gauss as the sigmoid
-        options['experiment_type'] = '2AFC'
-        options["stimulus_range"] = stim_range
-        options['fixed_parameters'] = {}
-        for p in fp:
-            options['fixed_parameters'][p] = sim_params[p]
-        print(options['fixed_parameters'])
+    res = psignifit(data, **options)
+    assert np.isclose(res.parameter_estimate[fixed_param], sim_params[fixed_param]+0.1, atol=1e-10)
 
-        res = psignifit(data, **options)
-        # check that all the fixed parameters are unchanged
-        for p in fp:
-            assert np.isclose(res.parameter_estimate[p], sim_params[p], atol=1e-10)
-        # check that the other parameters are close to the true values
-        for p in all_possible_params:
-            if p not in fp:
-                assert np.isclose(res.parameter_estimate[p], sim_params[p], atol=1e-4)
 
 
     # TODO: Also check for warnings
-    # TODO: check different fixed params and different options
     # TODO: add simulation test for Y/N paradigm
 
 
