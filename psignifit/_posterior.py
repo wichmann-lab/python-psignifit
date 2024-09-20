@@ -9,6 +9,12 @@ from ._utils import fp_error_handler, PsignifitException
 from ._typing import Prior, ParameterGrid
 from .sigmoids import Sigmoid
 
+# accomodate numpy versions < 2
+try:
+    from numpy import trapezoid
+except ImportError:
+    from numpy import trapz as trapezoid
+
 
 def integral_weights(grid):
     """Calculate integral of multivariate function using composite trapezoidal rule
@@ -248,13 +254,14 @@ def maximize_posterior(data, param_init: Dict[str, float], param_fixed: Dict[str
 def marginalize_posterior(parameter_grid: ParameterGrid, posterior_mass: np.ndarray) -> Dict[str, np.ndarray]:
     marginals = dict()
     for i, (param, grid) in enumerate(sorted(parameter_grid.items())):
-        if grid is None or len(grid)==1:
-            marginals[param] = None
+        if len(grid)==1:
+            # this parameter is fixed and therefore there is no marginal
+            continue
         else:
             axis = tuple(range(0, i)) + tuple(range(i + 1, len(parameter_grid)))
             # we get first the unnormalized marginal, and then we scale it
             nmarginal = np.squeeze(posterior_mass.sum(axis))
-            integral = np.trapezoid(nmarginal, x=grid)
+            integral = trapezoid(nmarginal, x=grid)
             marginals[param] = nmarginal / integral
 
     return marginals
