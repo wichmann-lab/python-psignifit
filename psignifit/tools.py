@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import stats
 
 from psignifit._utils import check_data
 from psignifit.sigmoids import sigmoid_by_name

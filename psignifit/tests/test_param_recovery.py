@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-from scipy import stats
 
 from psignifit import psignifit
 from psignifit.sigmoids import ALL_SIGMOID_NAMES
