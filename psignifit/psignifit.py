@@ -17,7 +17,7 @@ from ._utils import (PsignifitException, check_data)
 
 
 def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
-              return_posterior: bool = False, **kwargs) -> Result:
+              debug: bool = False, **kwargs) -> Result:
     """ Fit a psychometric function to experimental data.
 
     This function is the user interface for fitting psychometric functions to data.
@@ -44,7 +44,8 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
     Args:
         data: Trials as described above.
         conf: Optional configuration object.
-        return_posterior: If true, posterior matrix will be added to result object.
+        debug: If true, posterior matrix and prior functions will be returned to result object. 
+               In this mode the result object cannot be serialized.
         kwargs: Configurations as function parameters.
     """
     if conf is None:
@@ -97,7 +98,7 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
     if conf.verbose:
         _warn_marginal_sanity_checks(marginals)
 
-    if not return_posterior:
+    if not debug:
         posteriors = None
 
     if conf.experiment_type == 'equal asymptote':

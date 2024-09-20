@@ -266,7 +266,7 @@ def plot_2D_margin(result: Result,
     if ax is None:
         ax = plt.gca()
     if result.posterior_mass is None:
-        ValueError("Expects posterior_mass in result, got None. You could try psignifit(return_posterior=True).")
+        ValueError("Expects posterior_mass in result, got None. You could try psignifit(debug=True).")
 
     parameter_indices = {param: i for i, param in enumerate(sorted(result.parameter_estimate.keys()))}
     other_param_ix = tuple(i for param, i in parameter_indices.items()
