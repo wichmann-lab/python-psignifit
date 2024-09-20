@@ -148,7 +148,7 @@ def normalize_prior(func: Prior, interval: Tuple[float, float], steps: int = 100
             return np.ones_like(y)
     else:
         x = np.linspace(interval[0], interval[1], steps)
-        integral = np.trapz(func(x), x=x)
+        integral = np.trapezoid(func(x), x=x)
 
         def nfunc(y):
             return func(y) / integral

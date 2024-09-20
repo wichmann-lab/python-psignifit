@@ -71,9 +71,8 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
         if conf.stimulus_range is None:
             width_min = np.diff(np.unique(levels)).min()
         else:
-            # For user specified stimulus range, use very conservative estimate of width_min.
-            # https: // en.wikipedia.org / wiki / Unit_in_the_last_place
-            width_min = 100 * np.spacing(stimulus_range[1])
+            # For user specified stimulus range, use conservative estimate of width_min.
+            width_min = (conf.stimulus_range[1] - conf.stimulus_range[0]) / 100
 
     bounds = parameter_bounds(min_width=width_min, experiment_type=conf.experiment_type, stimulus_range=stimulus_range,
                               alpha=conf.width_alpha, nafc_choices=conf.experiment_choices)
@@ -164,22 +163,24 @@ def _warn_common_data_mistakes(levels, ntrials, has_user_stimulus_range, pool_ma
 
 def _warn_marginal_sanity_checks(marginals):
     if 'threshold' in marginals:
-        if marginals['threshold'][0] > .001:
+        threshold_marginals = marginals['threshold'] / np.sum(marginals['threshold'])
+        if threshold_marginals[0] > .001:
             warnings.warn('psignifit:boundWarning\n'
                         'The marginal for the threshold is not near 0 at the bound.\n'
                         'This indicates that smaller Thresholds would be possible.')
-        if marginals['threshold'][-1] > .001:
+        if threshold_marginals[-1] > .001:
             warnings.warn('psignifit:boundWarning\n'
                         'The marginal for the threshold is not near 0 at the upper bound.\n'
                         'This indicates that your data is not sufficient to exclude much higher thresholds.\n'
                         'Refer to the paper or the manual for more info on this topic.')
     if 'width' in marginals:
-        if marginals['width'][0] > .001:
+        width_marginals = marginals['width'] / np.sum(marginals['width'])
+        if width_marginals[0] > .001:
             warnings.warn('psignifit:boundWarning\n'
                         'The marginal for the width is not near 0 at the lower bound.\n'
                         'This indicates that your data is not sufficient to exclude much lower widths.\n'
                         'Refer to the paper or the manual for more info on this topic.')
-        if marginals['width'][-1] > .001:
+        if width_marginals[-1] > .001:
             warnings.warn('psignifit:boundWarning\n'
                         'The marginal for the width is not near 0 at the lower bound.\n'
                         'This indicates that your data is not sufficient to exclude much higher widths.\n'
