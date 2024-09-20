@@ -3,45 +3,10 @@ import pytest
 from scipy import stats
 
 from psignifit import psignifit
-from psignifit.sigmoids import ALL_SIGMOID_NAMES, sigmoid_by_name
-
+from psignifit.sigmoids import ALL_SIGMOID_NAMES
+from psignifit.tools import psychometric
 
 RANDOMSTATE = np.random.RandomState(837400)
-
-
-def psychometric(stimulus_level, threshold, width, gamma, lambda_, sigmoid_name):
-    """ Psychometric function aka percent correct function.
-
-    Generates percent correct values for a range of stimulus levels given a
-    sigmoid.
-    Implementation of Eq 1 in Schuett, Harmeling, Macke and Wichmann (2016)
-
-    Parameters:
-        stimulus_level: array
-          Values of the stimulus value
-        threshold: float
-            Threshold of the psychometric function
-        width: float
-            Width of the psychometric function
-        gamma: float
-            Guess rate
-        lambda_: float
-            Lapse rate
-        sigmoid: callable
-            Sigmoid function to use. Default is Gaussian
-
-    Returns:
-        psi: array
-            Percent correct values for each stimulus level
-
-    """
-    # we use the defaults for pc and alpha in the sigmoids:
-    # pc = 0.5
-    # alpha = 0.05
-    sigmoid = sigmoid_by_name(sigmoid_name)
-    sigmoid_values = sigmoid(stimulus_level, threshold=threshold, width=width)
-    psi = gamma + (1.0 - lambda_ - gamma) * sigmoid_values
-    return psi
 
 
 def psychometric_with_eta(stimulus_level, threshold, width, gamma, lambda_,
