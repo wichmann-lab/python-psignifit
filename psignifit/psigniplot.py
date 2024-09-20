@@ -45,7 +45,9 @@ def plot_psychometric_function(result: Result,  # noqa: C901, this function is t
     x_data = data[:, 0]
     if plot_data:
         y_data = data[:, 1] / data[:, 2]
-        size = np.sqrt(data_size / 2 * data[:, 2])
+        # the size is proportional to the amount of data. Factor 10 is to make
+        # it visually similar to the MATLAB figure version
+        size = np.sqrt(data_size / 2 * data[:, 2])*10
         ax.scatter(x_data, y_data, s=size, c=data_color, marker='.', clip_on=False)
 
     sigmoid = config.make_sigmoid()
@@ -77,6 +79,7 @@ def plot_psychometric_function(result: Result,  # noqa: C901, this function is t
     plt.xlabel(x_label, fontsize=14)
     plt.ylabel(y_label, fontsize=14)
     plt.ylim([ymin, 1])
+    ax.spines[['top', 'right']].set_visible(False)
     return ax
 
 
@@ -116,6 +119,7 @@ def _plot_residuals(x_values: np.ndarray, x_label: str, result: Result, ax: matp
 
     ax.set_xlabel(x_label, fontsize=14)
     ax.set_ylabel('Deviance', fontsize=14)
+    ax.spines[['top', 'right']].set_visible(False)
     return ax
 
 
