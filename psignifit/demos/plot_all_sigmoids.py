@@ -11,6 +11,7 @@ import numpy as np
 from psignifit import sigmoids
 
 
+LOG_SIGMOIDS = ('weibull',)
 STIMULUS_LEVELS = np.linspace(1e-12, 1-1e-12, num=10000)
 M = 0.5
 WIDTH = 0.9
@@ -22,8 +23,6 @@ def plot_sigmoid(sigmoid, name, x, threshold=M, width=WIDTH, axes=None):
     if axes is None:
         axes = plt.gca()
 
-    if sigmoid.logspace:
-        x = np.exp(x)
     y = sigmoid(x, threshold, width)
     slope = sigmoid.slope(x, threshold, width)
 
@@ -69,14 +68,16 @@ print(f"Found {len(unique_sigmoids)} sigmoids and "
 # %%
 # First, let's plot the basic sigmoids.
 standard_sigmoids = [(sigmoid, name) for sigmoid, name in zip(unique_sigmoids, names)
-                     if not sigmoid.negative and not sigmoid.logspace]
+                     if not sigmoid.negative and name not in LOG_SIGMOIDS]
 plot_sigmoids(standard_sigmoids, STIMULUS_LEVELS, cols=3)
 plt.show()
 
 # %%
-# Some sigmoids expect, that the stimulus level is on a log-scale.
+# For Weibull functions it makes sense
+# that the stimulus level is on a log-scale.
+# Here we convert the data appropriately
 log_sigmoids = [(sigmoid, name) for sigmoid, name in zip(unique_sigmoids, names)
-                if not sigmoid.negative and sigmoid.logspace]
+                if not sigmoid.negative and name in LOG_SIGMOIDS]
 plot_sigmoids(log_sigmoids, STIMULUS_LEVELS, cols=2)
 plt.show()
 
