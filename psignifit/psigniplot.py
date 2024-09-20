@@ -265,13 +265,13 @@ def plot_2D_margin(result: Result,
     """ Constructs a 2 dimensional marginal plot of the posterior density. """
     if ax is None:
         ax = plt.gca()
-    if result.posterior_mass is None:
-        ValueError("Expects posterior_mass in result, got None. You could try psignifit(debug=True).")
+    if result.debug=={}:
+        raise ValueError("Expects posterior_mass in result, got None. You could try psignifit(debug=True).")
 
     parameter_indices = {param: i for i, param in enumerate(sorted(result.parameter_estimate.keys()))}
     other_param_ix = tuple(i for param, i in parameter_indices.items()
                            if param != first_param and param != second_param)
-    marginal_2d = np.sum(result.posterior_mass, axis=other_param_ix)
+    marginal_2d = np.sum(result.debug['posteriors'], axis=other_param_ix)
     if len(marginal_2d.shape) != 2 or np.any(marginal_2d.shape == 1):
         raise ValueError(f'The marginal is not two-dimensional. Were the parameters fixed during optimization?')
 

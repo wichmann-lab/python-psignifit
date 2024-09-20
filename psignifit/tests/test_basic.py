@@ -56,14 +56,12 @@ def test_plot_marginal(data):
 
 def test_plot2D(data):
     options = get_std_options()
-    res = psignifit(data, return_posterior=True, **options)
-    plt.figure()
-    psigniplot.plot_2D_margin(res, 'threshold', 'width')
-    plt.close('all')
+    res = psignifit(data, debug=False, **options)
 
     with pytest.raises(ValueError):
-        res.posterior_mass = None
+        plt.figure()
         psigniplot.plot_2D_margin(res, 'threshold', 'width')
+        plt.close('all')
 
 
 def test_bias_analysis(data):
