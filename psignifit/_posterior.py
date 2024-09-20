@@ -254,7 +254,7 @@ def marginalize_posterior(parameter_grid: ParameterGrid, posterior_mass: np.ndar
             axis = tuple(range(0, i)) + tuple(range(i + 1, len(parameter_grid)))
             # we get first the unnormalized marginal, and then we scale it
             nmarginal = np.squeeze(posterior_mass.sum(axis))
-            integral = np.trapz(nmarginal, x=grid)
+            integral = np.trapezoid(nmarginal, x=grid)
             marginals[param] = nmarginal / integral
 
     return marginals

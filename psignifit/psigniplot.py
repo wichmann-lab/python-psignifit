@@ -15,8 +15,8 @@ def plot_psychometric_function(result: Result,  # noqa: C901, this function is t
                                ax: matplotlib.axes.Axes = None,
                                plot_data: bool = True,
                                plot_parameter: bool = True,
-                               data_color: Union[str, List[float], np.ndarray] = '#0069AA',  # blue
-                               line_color: Union[str, List[float], np.ndarray] = '#000000',  # black
+                               data_color: str = '#0069AA',  # blue
+                               line_color: str = '#000000',  # black
                                line_width: float = 2,
                                extrapolate_stimulus: float = 0.2,
                                x_label='Stimulus Level',
@@ -46,7 +46,7 @@ def plot_psychometric_function(result: Result,  # noqa: C901, this function is t
     if plot_data:
         y_data = data[:, 1] / data[:, 2]
         size = np.sqrt(data_size / 2 * data[:, 2])
-        ax.scatter(x_data, y_data, s=size, c=data_color, marker='.', clip_on=False)
+        ax.scatter(x_data, y_data, s=size, color=data_color, marker='.', clip_on=False)
 
     sigmoid = config.make_sigmoid()
     x = np.linspace(x_data.min(), x_data.max(), num=1000)
