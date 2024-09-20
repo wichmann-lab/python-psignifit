@@ -166,6 +166,74 @@ def test_parameter_recovery_2afc_fixed_params(fixed_param):
     assert np.isclose(res.parameter_estimate[fixed_param], sim_params[fixed_param]+0.1, atol=1e-10)
 
 
+@pytest.mark.parametrize("sigmoid", list(ALL_SIGMOID_NAMES))
+def test_parameter_recovery_YN(sigmoid):
+    width = 0.3
+    stim_range = [0.001, 0.001 + width * 1.1]
+    threshold = stim_range[1]/3
+    lambda_ = 0.0232
+    gamma = 0.1
+
+    nsteps = 20
+    stimulus_level = np.linspace(stim_range[0], stim_range[1], nsteps)
+
+    perccorr = psychometric(stimulus_level, threshold, width, gamma, lambda_,
+                            sigmoid)
+    ntrials = np.ones(nsteps) * 900000000
+    hits = (perccorr * ntrials).astype(int)
+    data = np.dstack([stimulus_level, hits, ntrials]).squeeze()
+
+    options = {}
+    options['sigmoid'] = sigmoid  # choose a cumulative Gauss as the sigmoid
+    options['experiment_type'] = 'yes/no'
+    options['fixed_parameters'] = {'lambda': lambda_}
+    options["stimulus_range"] = stim_range
+
+    res = psignifit(data, **options)
+
+    assert np.isclose(res.parameter_estimate['lambda'], lambda_, atol=1e-4)
+    assert np.isclose(res.parameter_estimate['gamma'], gamma, atol=1e-4)
+    assert np.isclose(res.parameter_estimate['eta'], 0, atol=1e-4)
+    assert np.isclose(res.parameter_estimate['threshold'], threshold, atol=1e-4)
+    assert np.isclose(res.parameter_estimate['width'], width, atol=1e-4)
+
+
+@pytest.mark.parametrize("sigmoid", list(ALL_SIGMOID_NAMES))
+def test_parameter_recovery_eq_asymptote(sigmoid):
+    width = 0.3
+    stim_range = [0.001, 0.001 + width * 1.1]
+    threshold = stim_range[1]/3
+    lambda_ = 0.0232
+    gamma = 0.1
+
+    nsteps = 20
+    stimulus_level = np.linspace(stim_range[0], stim_range[1], nsteps)
+
+    perccorr = psychometric(stimulus_level, threshold, width, gamma, lambda_,
+                            sigmoid)
+    ntrials = np.ones(nsteps) * 900000000
+    hits = (perccorr * ntrials).astype(int)
+    data = np.dstack([stimulus_level, hits, ntrials]).squeeze()
+
+    options = {}
+    options['sigmoid'] = sigmoid  # choose a cumulative Gauss as the sigmoid
+    options['experiment_type'] = 'equal asymptote'
+    options['fixed_parameters'] = {}
+    # just lambda doesnt run
+    # just gamma runs
+    # both runs
+    # none doent run !! 
+    options["stimulus_range"] = stim_range
+
+    res = psignifit(data, **options)
+
+    assert np.isclose(res.parameter_estimate['lambda'], lambda_, atol=1e-4)
+    assert np.isclose(res.parameter_estimate['gamma'], gamma, atol=1e-4)
+    assert np.isclose(res.parameter_estimate['eta'], 0, atol=1e-4)
+    assert np.isclose(res.parameter_estimate['threshold'], threshold, atol=1e-4)
+    assert np.isclose(res.parameter_estimate['width'], width, atol=1e-4)
+
+
+
 # TODO: Also check for warnings
-# TODO: add simulation test for Y/N paradigm
 # todo check that experiment type 2afc fixes gamma, gives correct warning
