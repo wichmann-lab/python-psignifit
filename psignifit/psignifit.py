@@ -101,6 +101,15 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
     if not return_posterior:
         posteriors = None
 
+    if conf.experiment_type == 'equal asymptote':
+        fit_dict['gamma'] = fit_dict['lambda'].copy()
+        grid['gamma'] = grid['lambda'].copy()
+        priors['gamma'] = priors['lambda']
+        marginals['gamma'] = marginals['lambda'].copy()
+        if posteriors is not None:
+            posteriors['gamma'] = posteriors['lambda'].copy()
+
+
     return Result(parameter_estimate=fit_dict,
                   configuration=conf,
                   confidence_intervals=intervals_dict,

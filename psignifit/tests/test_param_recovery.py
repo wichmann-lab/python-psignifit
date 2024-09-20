@@ -203,7 +203,7 @@ def test_parameter_recovery_eq_asymptote(sigmoid):
     width = 0.3
     stim_range = [0.001, 0.001 + width * 1.1]
     threshold = stim_range[1]/3
-    lambda_ = 0.0232
+    lambda_ = 0.1
     gamma = 0.1
 
     nsteps = 20
@@ -219,10 +219,6 @@ def test_parameter_recovery_eq_asymptote(sigmoid):
     options['sigmoid'] = sigmoid  # choose a cumulative Gauss as the sigmoid
     options['experiment_type'] = 'equal asymptote'
     options['fixed_parameters'] = {}
-    # just lambda doesnt run
-    # just gamma runs
-    # both runs
-    # none doent run !! 
     options["stimulus_range"] = stim_range
 
     res = psignifit(data, **options)
@@ -232,8 +228,3 @@ def test_parameter_recovery_eq_asymptote(sigmoid):
     assert np.isclose(res.parameter_estimate['eta'], 0, atol=1e-4)
     assert np.isclose(res.parameter_estimate['threshold'], threshold, atol=1e-4)
     assert np.isclose(res.parameter_estimate['width'], width, atol=1e-4)
-
-
-
-# TODO: Also check for warnings
-# todo check that experiment type 2afc fixes gamma, gives correct warning
