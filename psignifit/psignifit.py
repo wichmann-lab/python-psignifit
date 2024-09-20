@@ -108,7 +108,7 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
                   prior_values={param: priors[param](values) for param, values in grid.items()},
                   marginal_posterior_values=marginals,
                   posterior_mass=posteriors,
-                  data=data.tolist())
+                  data=np.array(data))
 
 
 def _warn_common_data_mistakes(levels, ntrials, has_user_stimulus_range, pool_max_blocks) -> None:
