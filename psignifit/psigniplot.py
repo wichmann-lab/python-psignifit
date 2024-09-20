@@ -223,7 +223,9 @@ def plot_prior(result: Result,
     data = result.data
     params = result.parameter_values
     priors = result.prior_values
+    priors_func = result.debug['priors']
     sigmoid = result.configuration.make_sigmoid()
+    
 
     colors = ['k', [1, 200 / 255, 0], 'r', 'b', 'g']
     stimulus_range = result.configuration.stimulus_range
@@ -245,8 +247,10 @@ def plot_prior(result: Result,
         cumprior = np.cumsum(priors[param] * weights)
         x_percentiles = [result.parameter_estimate[param], min(prior_x), prior_x[-cumprior[cumprior >= .25].size],
                          prior_x[-cumprior[cumprior >= .75].size], max(prior_x)]
+        x_priors = np.linspace(min(prior_x)*-1.0, max(prior_x)*3, 1000)
+        
         plt.subplot(2, 3, i + 1)
-        plt.plot(params[param], priors[param], lw=line_width, c=line_color)
+        plt.plot(x_priors, priors_func[param](x_priors), lw=line_width, c=line_color)
         plt.scatter(x_percentiles, np.interp(x_percentiles, prior_x, priors[param]), s=marker_size, c=colors)
         plt.xlabel('Stimulus Level')
         plt.ylabel('Density')
@@ -273,13 +277,13 @@ def plot_2D_margin(result: Result,
     """ Constructs a 2 dimensional marginal plot of the posterior density. """
     if ax is None:
         ax = plt.gca()
-    if result.posterior_mass is None:
-        ValueError("Expects posterior_mass in result, got None. You could try psignifit(return_posterior=True).")
+    if result.debug=={}:
+        raise ValueError("Expects posterior_mass in result, got None. You could try psignifit(debug=True).")
 
     parameter_indices = {param: i for i, param in enumerate(sorted(result.parameter_estimate.keys()))}
     other_param_ix = tuple(i for param, i in parameter_indices.items()
                            if param != first_param and param != second_param)
-    marginal_2d = np.sum(result.posterior_mass, axis=other_param_ix)
+    marginal_2d = np.sum(result.debug['posteriors'], axis=other_param_ix)
     if len(marginal_2d.shape) != 2 or np.any(marginal_2d.shape == 1):
         raise ValueError(f'The marginal is not two-dimensional. Were the parameters fixed during optimization?')
 

@@ -46,7 +46,7 @@ def result():
                       'gamma': np.random.rand(5,).tolist(),
                       'eta': np.random.rand(16,).tolist()
                   },
-                  posterior_mass=np.random.rand(5, ))
+                  debug={'posteriors': np.random.rand(5, ).tolist()})
 
 
 def test_from_to_result_dict(result):

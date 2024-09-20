@@ -17,7 +17,7 @@ from ._utils import (PsignifitException, check_data)
 
 
 def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
-              return_posterior: bool = False, **kwargs) -> Result:
+              debug: bool = False, **kwargs) -> Result:
     """ Fit a psychometric function to experimental data.
 
     This function is the user interface for fitting psychometric functions to data.
@@ -44,7 +44,8 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
     Args:
         data: Trials as described above.
         conf: Optional configuration object.
-        return_posterior: If true, posterior matrix will be added to result object.
+        debug: If true, posterior matrix and prior functions will be returned to result object. 
+               In this mode the result object cannot be serialized.
         kwargs: Configurations as function parameters.
     """
     if conf is None:
@@ -96,18 +97,20 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
 
     if conf.verbose:
         _warn_marginal_sanity_checks(marginals)
-
-    if not return_posterior:
-        posteriors = None
+        
 
     if conf.experiment_type == 'equal asymptote':
         fit_dict['gamma'] = fit_dict['lambda'].copy()
         grid['gamma'] = grid['lambda'].copy()
         priors['gamma'] = priors['lambda']
         marginals['gamma'] = marginals['lambda'].copy()
-        if posteriors is not None:
-            posteriors['gamma'] = posteriors['lambda'].copy()
-
+        # we may want to add a dimension to the posterior array for gamma,
+        # which is a copy of the lambda dimension
+        
+    debug_dict = {}
+    if debug:
+        debug_dict['posteriors'] = posteriors
+        debug_dict['priors'] = priors
 
     return Result(parameter_estimate=fit_dict,
                   configuration=conf,
@@ -115,7 +118,7 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
                   parameter_values=grid,
                   prior_values={param: priors[param](values) for param, values in grid.items()},
                   marginal_posterior_values=marginals,
-                  posterior_mass=posteriors,
+                  debug=debug_dict,
                   data=data)
 
 
