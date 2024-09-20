@@ -66,7 +66,7 @@ def posterior_grid(data, sigmoid: Sigmoid, priors: Dict[str, Prior],
         Grid: Dictionary of parameter name and numpy array with possible parameter values.
     Returns:
         p: Numpy array with a posterior value for each entry in the grid.
-           The axis correspond to the the grid entries in alphabetic order.
+           The axis correspond to the grid entries in alphabetic order.
            If the grid entry is None there is no corresponding axis.
         grid_max: Dictionary of parameter names with the parameter values,
                   which maximize the posterior_grid.
@@ -103,7 +103,7 @@ def log_posterior(data: np.ndarray, sigmoid: Sigmoid, priors: Dict[str, Prior], 
         grid: dictionary of parameter name and numpy array with parameter values.
     Returns:
         Numpy array with the log-posterior_grid for each parameter combination in grid.
-        The axis correspond to the the grid entries in alphabetic order.
+        The axis correspond to the grid entries in alphabetic order.
         If the grid entry is None there is no corresponding axis.
 
     .. [Schuett2016] Schütt, H. H., Harmeling, S., Macke, J. H. and Wichmann, F. A. (2016).
@@ -130,6 +130,9 @@ def log_posterior(data: np.ndarray, sigmoid: Sigmoid, priors: Dict[str, Prior], 
     ncorrect = data[:, 1]
     ntrials = data[:, 2]
 
+    # IMPORTANT! At this point we create the posterior grid, and we need to decide which parameter
+    # corresponds to which axis.
+    # THE CONVENTION WE USE IS TO ORDER THE PARAMETERS IN ALPHABETICAL ORDER
     if gamma is None and eta_prime is None:
         lambd, thres, width = np.meshgrid(lambd, thres, width, copy=False, sparse=True, indexing='ij')
     elif gamma is None:
@@ -197,7 +200,7 @@ def log_posterior(data: np.ndarray, sigmoid: Sigmoid, priors: Dict[str, Prior], 
     p += np.log(priors['threshold'](thres))
     p += np.log(priors['width'](width))
     p += np.log(priors['lambda'](lambd))
-    # if gamma is not in the grid (i.e. it is not estimated in the the equal asymptote experiment)
+    # if gamma is not in the grid (i.e. it is not estimated in the equal asymptote experiment)
     # then the gamma dimension is equal to the lambda dimension.
     if 'gamma' in grid:
         p += np.log(priors['gamma'](gamma))
@@ -208,8 +211,6 @@ def log_posterior(data: np.ndarray, sigmoid: Sigmoid, priors: Dict[str, Prior], 
         p = np.expand_dims(p, axis=0)
     else:
         p += np.log(priors['eta'](eta_std.reshape(-1, *eta_prime.shape[1:])))
-    #if 'gamma' not in grid:
-    #    p = np.expand_dims(p, axis=1)
     return p
 
 
@@ -241,18 +242,22 @@ def maximize_posterior(data, param_init: Dict[str, float], param_fixed: Dict[str
             raise PsignifitException(f'Expects scalar number as initialization of {name}, got {value}.')
 
     def objective(x):
+        # "sorted" is required so that the parameters are matched to the axes in  alphabetical order
         optimized_param = dict(zip(sorted(param_init.keys()), x))
         _grid = {**param_fixed, **optimized_param}
         return -log_posterior(data, sigmoid=sigmoid, priors=priors, grid=_grid)
 
+    # "sorted" is required so that the parameters are matched to the axes in  alphabetical order
     init_values = [value for name, value in sorted(param_init.items())]
     optimized_values = optimize.fmin(objective, init_values, disp=False)
+    # "sorted" is required so that the parameters are matched to the axes in  alphabetical order
     optimized_param = dict(zip(sorted(param_init.keys()), optimized_values))
     return {**param_fixed, **optimized_param}
 
 
 def marginalize_posterior(parameter_grid: ParameterGrid, posterior_mass: np.ndarray) -> Dict[str, np.ndarray]:
     marginals = dict()
+    # "sorted" is required so that the parameters are matched to the axes in  alphabetical order
     for i, (param, grid) in enumerate(sorted(parameter_grid.items())):
         if len(grid)==1:
             # this parameter is fixed and therefore there is no marginal

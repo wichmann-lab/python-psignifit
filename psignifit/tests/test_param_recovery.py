@@ -27,8 +27,7 @@ def test_parameter_recovery_2afc(sigmoid):
     options = {}
     options['sigmoid'] = sigmoid  # choose a cumulative Gauss as the sigmoid
     options['experiment_type'] = '2AFC'
-    options['fixed_parameters'] = {'lambda': lambda_,
-                                   'gamma': gamma}
+    options['fixed_parameters'] = {'lambda': lambda_}
     options["stimulus_range"] = stim_range
 
     res = psignifit(data, **options)
@@ -62,8 +61,7 @@ def test_parameter_recovery_2afc_eta(eta):
     options = {}
     options['sigmoid'] = sigmoid  # choose a cumulative Gauss as the sigmoid
     options['experiment_type'] = '2AFC'
-    options['fixed_parameters'] = {'lambda': lambda_,
-                                   'gamma': gamma}
+    options['fixed_parameters'] = {'lambda': lambda_}
     options["stimulus_range"] = stim_range
 
     res = psignifit(data, **options)
@@ -79,8 +77,8 @@ def test_parameter_recovery_2afc_eta(eta):
 @pytest.mark.parametrize("fixed_param",  ['lambda', 'gamma', 'eta', 'threshold', 'width'])
 def test_parameter_recovery_fixed_params(fixed_param):
     sigmoid = "norm"
-    width = 0.3000000000123
-    stim_range = [0.001, 0.001 + width * 1.1]
+    width = 0.2000000000123
+    stim_range = [0.001, 0.001 + width * 1.5]
     nsteps = 10
     sim_params = {
         "width" : width,
@@ -118,7 +116,6 @@ def test_parameter_recovery_fixed_params(fixed_param):
 
     for p in ['lambda', 'gamma', 'threshold', 'width', 'eta']:
         # check all other params are estimated correctly
-        #print(p)
         assert np.isclose(res.parameter_estimate[p], sim_params[p], rtol=1e-4, atol=1/40),  f"failed for parameter {p} for estimation with fixed: {fixed_param}."
 
 
