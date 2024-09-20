@@ -10,7 +10,7 @@ dependencies = [
   "scipy",
   "matplotlib",
 ]
-readme = 'README.md'
+readme = {file = "README.md", content-type = "text/markdown"}
 # Python psignifit - based on Matlab psignifit by Heiko Schütt with help from
 # Felix Wichmann, Jakob Macke and Stefan Harmeling.
 # Refactoring done by multiple researchers, see Github contributors.
