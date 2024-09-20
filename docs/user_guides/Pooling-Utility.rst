@@ -7,7 +7,6 @@ Pooling works the same way in python as it does in
 `MATLAB <https://github.com/wichmann-lab/psignifit/wiki/Pooling-Utility>`__.
 The corresponding fields can be set in python with commands using the
 following syntax:
-TODO: Refactor to ne pooling
 
 ::
 

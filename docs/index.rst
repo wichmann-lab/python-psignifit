@@ -71,9 +71,8 @@ Contents
 
    install_guide.rst
    getting_started.rst
-   user_guides/index.rst
-   how_to/index.rst
    generated_examples/index.rst
+   how_to/index.rst
    test_MATLAB_version.rst
    references/index.rst
 

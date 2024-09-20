@@ -114,8 +114,8 @@ config['confP'] = [.95, .9, .68, .5]
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Parameters
 # ----------
-# Which percent correct correspond to the threshold?
-# Given in Percent correct on the unscaled sigmoid (reaching from 0 to 1).
+# Which proportion correct correspond to the threshold?
+# Given in proportion correct on the unscaled sigmoid (reaching from 0 to 1).
 # For example to define the threshold as 90% correct try:
 
 config['thresh_PC'] = .9

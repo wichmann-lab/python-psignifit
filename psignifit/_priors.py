@@ -161,10 +161,10 @@ def normalize_prior(func: Prior, interval: Tuple[float, float], steps: int = 100
     return nfunc
 
 
-def setup_priors(custom_priors, bounds, stimulus_range, width_min, width_alpha, beta_prior, threshold_perc_correct):
+def setup_priors(custom_priors, bounds, stimulus_range, width_min, width_alpha, beta_prior, threshold_prop_correct):
     priors = {}
     for parameter in bounds:
-        priors[parameter] = default_prior(parameter, stimulus_range, width_min, width_alpha, beta_prior, threshold_perc_correct)
+        priors[parameter] = default_prior(parameter, stimulus_range, width_min, width_alpha, beta_prior, threshold_prop_correct)
 
     if custom_priors is not None:
         priors.update(custom_priors)

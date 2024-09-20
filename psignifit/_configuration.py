@@ -236,7 +236,7 @@ class Configuration:
         """ Construct sigmoid according to this configuration.
 
         Returns:
-             Sigmoid object with percentage correct and alpha according to config.
+             Sigmoid object with proportion correct and alpha according to config.
         """
         if isinstance(self.sigmoid, sigmoids.Sigmoid):
             self.sigmoid.PC = self.thresh_PC

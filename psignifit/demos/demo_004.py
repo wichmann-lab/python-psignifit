@@ -94,7 +94,7 @@ plt.figure()
 ps.psigniplot.plot_psych(res)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# You should notice that the percent correct is larger than 50 and we did
+# You should notice that the proportion correct is larger than 50 and we did
 # not measure a stimulus level clearly below threshold. Thus it might be
 # that the theshold is below our data, as it is the case actually in our
 # example.
