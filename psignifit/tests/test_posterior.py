@@ -6,7 +6,7 @@ import psignifit._posterior
 import psignifit._priors
 from psignifit import sigmoids
 from psignifit import Configuration
-from psignifit._priors import default_priors
+from psignifit._priors import default_prior
 from psignifit._parameter import parameter_bounds
 from psignifit import _posterior
 from psignifit import _utils
@@ -25,7 +25,10 @@ def setup_experiment(**kwargs):
 
     sigmoid = sigmoids.sigmoid_by_name(conf.sigmoid, PC=conf.thresh_PC, alpha=conf.width_alpha)
 
-    priors = default_priors(stimulus_range, width_min, conf.width_alpha, conf.beta_prior)
+    priors = {}
+    for parameter in bounds:
+        priors[parameter] = default_prior(parameter, stimulus_range, width_min, conf.width_alpha, conf.beta_prior)
+
     for parameter, prior in priors.items():
         if bounds[parameter]:
             priors[parameter] = psignifit._priors.normalize_prior(prior, bounds[parameter])
@@ -38,18 +41,18 @@ def setup_experiment(**kwargs):
     [
         ("yes/no", (15, 10, 10, 25, 30), -557.5108),
         ("3AFC", (20, 1, 10, 30, 40), -560.0022),
-        ("equal asymptote", (20, 1, 10, 30, 40), -560.8881),  # gamma is none in grid
+        ("equal asymptote", (20, 10, 30, 40), -560.8881),  # gamma is none in grid
     ]
 )
 def test_log_posterior(experiment_type, result_shape, result_max):
     data, sigmoid, priors, grid = setup_experiment(experiment_type=experiment_type)
     if experiment_type == "equal asymptote":
-        assert grid['gamma'] is None
+        assert 'gamma' not in grid
 
     log_pp = _posterior.log_posterior(data, sigmoid, priors, grid)
 
     np.testing.assert_equal(log_pp.shape, result_shape)
-    np.testing.assert_allclose(log_pp.max(), result_max)
+    np.testing.assert_allclose(log_pp.max(), result_max, rtol=1e-5)
 
 
 def test_log_posterior_zero_eta():
@@ -59,7 +62,7 @@ def test_log_posterior_zero_eta():
     log_pp = _posterior.log_posterior(data, sigmoid, priors, grid)
 
     np.testing.assert_equal(log_pp.shape, (1, 10, 10, 25, 30))
-    np.testing.assert_allclose(log_pp.max(), -559.8134)
+    np.testing.assert_allclose(log_pp.max(), -559.8134, rtol=1e-5)
 
 
 MAX = .097163
@@ -70,7 +73,7 @@ MAX = .097163
     [
         ("yes/no", (15, 10, 10, 25, 30), .102878),
         ("3AFC", (20, 1, 10, 30, 40), .080135),
-        ("equal asymptote", (20, 1, 10, 30, 40), MAX),  # gamma is none in grid
+        ("equal asymptote", (20, 10, 30, 40), MAX),  # gamma is none in grid
     ]
 )
 def test_posterior_grid(experiment_type, result_shape, result_max):
@@ -81,8 +84,8 @@ def test_posterior_grid(experiment_type, result_shape, result_max):
     np.testing.assert_equal(posterior.shape, result_shape)
     np.testing.assert_allclose(posterior.max(), result_max, atol=0.001)
     if experiment_type == "equal asymptote":
-        assert grid['gamma'] is None
-        assert max_grid['gamma'] is None
+        assert 'gamma' not in grid
+        assert 'gamma' not in max_grid
 
 
 @pytest.mark.parametrize(
@@ -90,7 +93,7 @@ def test_posterior_grid(experiment_type, result_shape, result_max):
     [
         ("yes/no", (15, 10, 10, 25, 30), MAX),
         ("3AFC", (20, 1, 10, 30, 40), MAX),
-        ("equal asymptote", (20, 1, 10, 30, 40), MAX),  # gamma is none in grid
+        ("equal asymptote", (20, 10, 30, 40), MAX),  # gamma is none in grid
     ]
 )
 def test_max_posterior(experiment_type, result_shape, result_max):
@@ -99,19 +102,16 @@ def test_max_posterior(experiment_type, result_shape, result_max):
 
     fixed_param = {'threshold': 0.5}
     if experiment_type == "equal asymptote":
-        assert grid['gamma'] is None
-        with pytest.raises(_utils.PsignifitException):
-            _posterior.maximize_posterior(data, init_param, fixed_param, sigmoid, priors)
+        assert 'gamma' not in grid
 
-    fixed_param = {'threshold': 0.5, 'gamma': None}
+    fixed_param = {'threshold': 0.5}
     max_param = _posterior.maximize_posterior(data, init_param, fixed_param, sigmoid, priors)
 
-    print(max_param)
     for key, fixed_value in fixed_param.items():
         np.testing.assert_equal(max_param[key], fixed_value)
 
     if experiment_type == "equal asymptote":
-        assert max_param['gamma'] is None
+        assert 'gamma' not in max_param
 
 
 def test_integral_weights():

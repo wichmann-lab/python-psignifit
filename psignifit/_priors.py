@@ -81,7 +81,7 @@ def default_prior(parameter: str, stimulus_range: Tuple[float, float], width_min
     elif parameter == 'width':
         prior = partial(width_prior, wmin=width_min,
                          wmax=stimulus_range[1] - stimulus_range[0],
-                         alpha=width_alpha),
+                         alpha=width_alpha)
     elif parameter == 'lambda':
         prior = lambda_prior
     elif parameter == 'gamma':
@@ -94,6 +94,8 @@ def default_prior(parameter: str, stimulus_range: Tuple[float, float], width_min
 
 
 def _check_prior(priors, name, values):
+    if name not in priors:
+        return
     result = priors[name](values)
     assert np.all(np.isfinite(result)), f"Prior '{name}' returns non-finite values."
     assert np.all(result >= 0), f"Prior '{name}' returns negative values."
@@ -117,7 +119,6 @@ def check_priors(priors: Dict[str, Prior], stimulus_range: Tuple[float, float],
     """
     data_min, data_max = stimulus_range
     dataspread = data_max - data_min
-
     test_values = np.linspace(data_min - .4 * dataspread, data_max + .4 * dataspread, n_test_values)
     _check_prior(priors, "threshold", test_values)
 

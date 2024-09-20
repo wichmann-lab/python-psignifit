@@ -211,9 +211,7 @@ def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
 
     fixed_param = {}
     for parm_name, parm_values in grid.items():
-        if parm_values is None:
-            fixed_param[parm_name] = parm_values
-        elif len(parm_values) <= 1:
+        if len(parm_values) == 1:
             fixed_param[parm_name] = parm_values[0]
     fit_dict = maximize_posterior(data, param_init=grid_max, param_fixed=fixed_param, sigmoid=sigmoid, priors=priors)
 

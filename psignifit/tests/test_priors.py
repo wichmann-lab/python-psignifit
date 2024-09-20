@@ -8,8 +8,10 @@ from psignifit import _priors
 def test_check_priors():
     stimulus_range = (0., 1.)
     width_min = 0.1
-    prior_dict = _priors.default_priors(stimulus_range=stimulus_range,
-                                        width_min=width_min, width_alpha=0.05, beta=10)
+    prior_dict = {}
+    for parameter in ['threshold', 'width', 'lambda', 'gamma', 'eta']:
+        prior_dict[parameter] = _priors.default_prior(parameter, stimulus_range, width_min, width_alpha=0.05, beta=10)
+
 
     # should not fail for default priors
     _priors.check_priors(prior_dict, stimulus_range, width_min)
