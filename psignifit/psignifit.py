@@ -104,8 +104,9 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
         grid['gamma'] = grid['lambda'].copy()
         priors['gamma'] = priors['lambda']
         marginals['gamma'] = marginals['lambda'].copy()
-        posteriors['gamma'] = posteriors['lambda'].copy()
-
+        # we may want to add a dimension to the posterior array for gamma,
+        # which is a copy of the lambda dimension
+        
     debug_dict = {}
     if debug:
         debug_dict['posteriors'] = posteriors
