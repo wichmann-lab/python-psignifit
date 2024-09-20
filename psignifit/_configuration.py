@@ -37,7 +37,7 @@ class Configuration:
     """
     beta_prior: int = 10
     CI_method: str = 'project'
-    confidence_intervals: Tuple[float, float, float] = (.95, .9, .68)
+    confidence_percentiles: Tuple[float, float, float] = (.95, .9, .68)
     estimate_type: str = 'MAP'
     experiment_type: str = ExperimentType.YES_NO.value
     experiment_choices: Optional[int] = None

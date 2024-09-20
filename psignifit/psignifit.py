@@ -91,7 +91,7 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
     grid_none_ix = tuple(ix for ix, (param, value) in enumerate(sorted(grid.items())) if value is None)
     grid_params = [param for param, value in grid.items() if value is not None]
     grid_values = [grid[param] for param in grid_params]
-    intervals = confidence_intervals(np.squeeze(posteriors, axis=grid_none_ix), grid_values, conf.confidence_intervals, conf.CI_method)
+    intervals = confidence_intervals(np.squeeze(posteriors, axis=grid_none_ix), grid_values, conf.confidence_percentiles, conf.CI_method)
     intervals_dict = {param: intervals[ix].tolist() for ix, param in enumerate(grid_params)}
     marginals = marginalize_posterior(grid, posteriors)
 
