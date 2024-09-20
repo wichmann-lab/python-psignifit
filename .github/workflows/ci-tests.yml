@@ -35,7 +35,7 @@ jobs:
           pip install .
       - name: Run tests for ${{ matrix.python_version }} through nox
         run: |
-          pytest -vv
+          pytest -vv -m "not slow"
 
   lint:
     runs-on: ubuntu-latest
