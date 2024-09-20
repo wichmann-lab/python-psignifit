@@ -1,6 +1,6 @@
 import numpy as np
 
-from psignifit._pooling import pool_blocks
+from psignifit.tools import pool_blocks
 
 
 def test_pooling_minimal_default():
