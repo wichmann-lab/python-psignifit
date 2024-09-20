@@ -7,7 +7,8 @@ import pytest
 from psignifit import psignifit, psigniplot
 
 
-def get_data():
+@pytest.fixture
+def data():
     return np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
                      [0.0020, 44.0000, 90.0000], [0.0025, 44.0000, 90.0000],
                      [0.0030, 52.0000, 90.0000], [0.0035, 53.0000, 90.0000],
@@ -26,8 +27,7 @@ def get_std_options():
     return options
 
 
-def test_fit_basic():
-    data = get_data()
+def test_fit_basic(data):
     options = get_std_options()
     res = psignifit(data, **options)
     param = res.parameter_estimate
@@ -38,8 +38,7 @@ def test_fit_basic():
     assert isclose(param['eta'], 5.8e-06, abs_tol=0.0001)
 
 
-def test_plot_psych():
-    data = get_data()
+def test_plot_psych(data):
     options = get_std_options()
     res = psignifit(data, **options)
     plt.figure()
@@ -47,8 +46,7 @@ def test_plot_psych():
     plt.close('all')
 
 
-def test_plot_marginal():
-    data = get_data()
+def test_plot_marginal(data):
     options = get_std_options()
     res = psignifit(data, **options)
     plt.figure()
@@ -56,8 +54,7 @@ def test_plot_marginal():
     plt.close('all')
 
 
-def test_plot2D():
-    data = get_data()
+def test_plot2D(data):
     options = get_std_options()
     res = psignifit(data, return_posterior=True, **options)
     plt.figure()
@@ -69,8 +66,7 @@ def test_plot2D():
         psigniplot.plot_2D_margin(res, 'threshold', 'width')
 
 
-def test_bias_analysis():
-    data = get_data()
+def test_bias_analysis(data):
     plt.figure()
     other_data = np.array(data)
     other_data[:, 1] += 2
@@ -79,15 +75,14 @@ def test_bias_analysis():
     plt.close('all')
 
 
-def test_fixedPars():
-    data = get_data()
+def test_fixed_parameters(data):
     options = get_std_options()
     res = psignifit(data, **options)
     estim_param = res.parameter_estimate
     fixed_param = res.configuration.fixed_parameters
     all_param_values = res.parameter_values
 
-    # Check that fit and bounds are actually set to the fixed parametervalues
+    # Check that fit and bounds are actually set to the fixed parameter values
     for name, fixed_value in fixed_param.items():
         assert isclose(estim_param[name], fixed_value)
         assert len(all_param_values[name]) == 1

@@ -4,7 +4,7 @@ from typing import Tuple, Optional, Dict
 import numpy as np
 import scipy.stats
 
-from ._typing import ExperimentType, ParameterBounds
+from ._typing import ExperimentType
 from ._typing import ParameterBounds
 
 

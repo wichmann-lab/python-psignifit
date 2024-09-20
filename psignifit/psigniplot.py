@@ -46,7 +46,7 @@ def plot_psychmetric_function(result: Result,  # noqa: C901, this function is to
     if plot_data:
         y_data = data[:, 1] / data[:, 2]
         size = np.sqrt(data_size / 2 * data[:, 2])
-        ax.scatter(x_data, y_data, s=size, c=data_color, marker='.', clip_on=False)
+        ax.scatter(x_data, y_data, s=size, color=data_color, marker='.', clip_on=False)
 
     sigmoid = config.make_sigmoid()
     x = np.linspace(x_data.min(), x_data.max(), num=1000)
@@ -334,4 +334,4 @@ def plot_bias_analysis(data: np.ndarray, compare_data: np.ndarray, **kwargs) -> 
         plot_marginal(result_compare_data, param, ax=ax, line_color=[0, 0, 1])
         ax.relim()
         ax.autoscale_view()
-        
+

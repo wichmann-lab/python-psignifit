@@ -60,16 +60,15 @@ def psychometric_with_eta(stimulus_level, threshold, width, gamma, lambda_,
 @pytest.mark.parametrize("sigmoid", list(ALL_SIGMOID_NAMES))
 def test_parameter_recovery_2afc(sigmoid):
     width = 0.3
-    stim_range = [0.001, 0.001 + width * 1.1]
-    threshold = stim_range[1]/3
+    stim_range = [0.01, 0.01 + width * 1.1]
+    threshold = stim_range[1] / 2.5
     gamma = 0.5  # 2-AFC
-    lambda_ = 0.0232
+    lambda_ = 0.0532
 
-    nsteps = 50
+    nsteps = 10
     stimulus_level = np.linspace(stim_range[0], stim_range[1], nsteps)
 
-    perccorr = psychometric(stimulus_level, threshold, width, gamma, lambda_,
-                            sigmoid)
+    perccorr = psychometric(stimulus_level, threshold, width, gamma, lambda_, sigmoid)
     ntrials = np.ones(nsteps) * 9000000
     hits = (perccorr * ntrials).astype(int)
     data = np.dstack([stimulus_level, hits, ntrials]).squeeze()
@@ -93,13 +92,13 @@ def test_parameter_recovery_2afc(sigmoid):
 @pytest.mark.parametrize("eta", [0.1, 0.2, 0.3])
 def test_parameter_recovery_2afc_eta(eta):
     sigmoid = "norm"
-    width = 0.3
+    width = 0.1
     stim_range = [0.001, 0.001 + width * 1.1]
-    threshold = stim_range[1]/3
+    threshold = stim_range[1] / 2.5
     gamma = 0.5  # 2-AFC
     lambda_ = 0.0232
 
-    nsteps = 200
+    nsteps = 100
     stimulus_level = np.linspace(stim_range[0], stim_range[1], nsteps)
 
     perccorr = psychometric_with_eta(stimulus_level, threshold, width, gamma, lambda_,
@@ -131,16 +130,16 @@ def test_parameter_recovery_2afc_fixed_params(fixed_param):
     sigmoid = "norm"
     width = 0.3
     stim_range = [0.001, 0.001 + width * 1.1]
-    nsteps = 50
+    nsteps = 10
     sim_params = {
-        "width" : width,
-        "stim_range" : stim_range,
-        "threshold" : stim_range[1]/3,
-        "gamma" : 0.5,  # 2-AFC
-        "lambda" : 0.0232,
-        "nsteps" : nsteps,
+        "width": width,
+        "stim_range": stim_range,
+        "threshold": stim_range[1] / 3,
+        "gamma": 0.5,  # 2-AFC
+        "lambda": 0.0232,
+        "nsteps": nsteps,
         "eta": 0,
-        "stimulus_level" : np.linspace(stim_range[0], stim_range[1], nsteps)
+        "stimulus_level": np.linspace(stim_range[0], stim_range[1], nsteps)
     }
 
     perccorr = psychometric(sim_params["stimulus_level"],
