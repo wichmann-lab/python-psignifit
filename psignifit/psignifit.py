@@ -73,7 +73,7 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
         else:
             # For user specified stimulus range, use very conservative estimate of width_min.
             # https: // en.wikipedia.org / wiki / Unit_in_the_last_place
-            width_min = 1e-2
+            width_min = (conf.stimulus_range[1] - conf.stimulus_range[0]) / 100
 
     bounds = parameter_bounds(min_width=width_min, experiment_type=conf.experiment_type, stimulus_range=stimulus_range,
                               alpha=conf.width_alpha, nafc_choices=conf.experiment_choices)
