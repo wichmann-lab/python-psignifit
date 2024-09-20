@@ -7,6 +7,11 @@ import scipy.stats
 
 from ._typing import Prior
 
+# accomodate numpy versions < 2
+try:
+    from numpy import trapezoid
+except ImportError:
+    from numpy import trapz as trapezoid
 
 def threshold_prior(x, stimulus_range: Tuple[float, float]):
     """Default prior for the threshold parameter
@@ -148,7 +153,7 @@ def normalize_prior(func: Prior, interval: Tuple[float, float], steps: int = 100
             return np.ones_like(y)
     else:
         x = np.linspace(interval[0], interval[1], steps)
-        integral = np.trapezoid(func(x), x=x)
+        integral = trapezoid(func(x), x=x)
 
         def nfunc(y):
             return func(y) / integral
