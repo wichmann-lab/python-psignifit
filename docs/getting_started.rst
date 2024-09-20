@@ -44,6 +44,7 @@ Fitting a psychometric function
 A simple call to :func:`psignifit.psignifit` will fit your sigmoid function to the data:
 
 ::
+
    import psignifit as ps
    result = ps.psignifit(data, experiment_type='2AFC);
 
@@ -53,23 +54,40 @@ Find more about experiment types in the :ref:`user guide <experiment-types>`.
 Advanced users can pass many more arguments to fine-tune the fitting procedure, as described :ref:`here <options-dictionary>`.
 
 The ``result`` is a python object with all information obtained from fitting your data.
-Perhaps of primary interest are the fitted sigmoid parameters and the confidence intervals:
+Perhaps of primary interest are the fitted parameters and the confidence intervals:
 
 ::
 
-   print(result.sigmoid_parameters)
-   print(result.confidence_intervals)
+   print(result.parameter_estimate)
+   >> {'gamma': np.float64(0.5), 'eta': np.float64(0.00020997063016872368), 'lambda': np.float64(1.1284903011143352e-07), 'threshold': np.float64(0.00464706821831707), 'width': np.float64(0.004661060791841996)}
+   
+This is a python dictionary containing the estimated parameters. 
+Similarly you obtain the confidence intervals for each parameter, for
+example for the threshold 
 
-This gives you the basic result of your fit. The five values reported
-are:
+::
+
+   print(result.confidence_intervals['threshold'])
+   [[0.004139257294429708, 0.005141909814323608], 
+    [0.0041870026525198945, 0.0050941644562334226], 
+    [0.004282493368700266, 0.0049986737400530504]]
+    
+Which is a list of lists. Each element in the list contain the lower 
+and upper bound for the asked confidences. In this case the default
+returns a list of 3 for the 95%, 90% and 68% confidence interval 
+(in that order).
+
+The parameters estimated by psignifit are:
 
 1. *threshold*, the stimulus value of equal-odds
-2. *width*, the difference between the 95 and the 5 percentile of the unscaled sigmoid
-3. *lambda*, the lapse rate and upper asymptote of the sigmoid
-4. *gamma*, the guess rate and lower asymptote of the sigmoid
-5. *eta*,the extra variance introduced. A value near zero
-   indicates your data to be basically binomially distributed, whereas
+2. *width*, the difference between the 5 and the 95 percentile of the unscaled sigmoid
+3. *lambda*, the lapse rate (upper asymptote of the sigmoid)
+4. *gamma*, the guess rate (lower asymptote of the sigmoid). 
+   This parameter is fixed for `nAFC` experiment types. 
+5. *eta*,the overdispersion parameter. A value near zero
+   indicates your data behaves binomially distributed, whereas
    values near one indicate severely overdispersed data.
+
 
 Plotting the fitted function
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -82,7 +100,9 @@ For example, running
 
 ::
 
+   plt.figure()
    ps.psigniplot.plot_psychometric_function(result)
+   plt.show()
 
 
 See :ref:`this user guide <plot-functions>` to learn more about the visualizations.
