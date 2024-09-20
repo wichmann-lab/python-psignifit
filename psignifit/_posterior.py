@@ -7,7 +7,7 @@ from scipy import optimize
 
 from ._utils import fp_error_handler, PsignifitException
 from ._typing import Prior, ParameterGrid
-from ._sigmoids import Sigmoid
+from .sigmoids import Sigmoid
 
 
 def integral_weights(grid):

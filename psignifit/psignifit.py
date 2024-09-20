@@ -5,7 +5,7 @@ from typing import Dict, Optional
 
 import numpy as np
 
-from . import _sigmoids
+from . import sigmoids
 from ._parameter import parameter_bounds, masked_parameter_bounds, parameter_grid
 from ._configuration import Configuration
 from ._confidence import confidence_intervals
@@ -176,7 +176,7 @@ def _warn_marginal_sanity_checks(marginals):
 
 
 def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
-                    priors: Dict[str, Prior], sigmoid: _sigmoids.Sigmoid,
+                    priors: Dict[str, Prior], sigmoid: sigmoids.Sigmoid,
                     steps_moving_bounds: Dict[str, int], max_bound_value: float,
                     grid_steps: Dict[str, int]) -> Dict[str, float]:
     """ Fit sigmoid parameters in a three step procedure.
