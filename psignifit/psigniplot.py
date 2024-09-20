@@ -264,8 +264,6 @@ def plot_prior(result: Result,
         plt.xlabel('Stimulus Level')
         plt.ylabel('Proportion Correct')
         plt.gca().spines[['top', 'right']].set_visible(False)
-    
-    
 
 
 def plot_2D_margin(result: Result,

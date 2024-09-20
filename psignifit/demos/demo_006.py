@@ -32,11 +32,11 @@ res = ps.psignifit(data, **config)
 # --------------------------
 #
 # For comparison to other estimation techniques we provide functions to
-# calculate thresholds at any given percent correct.
+# calculate thresholds at any given proportion correct.
 #
 # Calculating the threshold of the function fit in result with pCorrect
 # proportion correct. Unscaled toggles, whether you refer to the pCorrect
-# obtained in the experiment (default), or to the percent correct on the
+# obtained in the experiment (default), or to the proportion correct on the
 # original function unscaled by guessing and lapse rate.
 #
 # For example: This call will find the value at which our function reaches
@@ -84,7 +84,7 @@ ps.getSlope(res, 0.006)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # getSlopePC(res,pCorrect,unscaled), will calculate the slope at a given
-# percent correct.
+# proportion correct.
 
 # For example:
 ps.getSlopePC(res, 0.6)
@@ -94,7 +94,7 @@ ps.getSlopePC(res, 0.6)
 # 60% correct (at 0.0034). This slope is 89.0673.
 #
 # as for the getThreshold function, the unscaled option allows you to
-# specify the percent correct on the unscaled sigmoid instead.
+# specify the proportion correct on the unscaled sigmoid instead.
 # For example we can calculate the slope at the midpoint of the
 # psychometric function using:
 

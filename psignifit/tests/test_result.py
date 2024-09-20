@@ -64,12 +64,12 @@ def test_from_to_result_dict(result):
 def test_threshold_slope(result):
     with pytest.raises(ValueError):
         #  PC outside of sigmoid
-        percentage_correct = np.linspace(1e-12, 1 - 1e-12, num=1000)
-        result.threshold(percentage_correct)
-    percentage_correct = np.linspace(0.2, 0.5, num=1000)
-    stimulus_levels, confidence_intervals = result.threshold(percentage_correct)
+        proportion_correct = np.linspace(1e-12, 1 - 1e-12, num=1000)
+        result.threshold(proportion_correct)
+    proportion_correct = np.linspace(0.2, 0.5, num=1000)
+    stimulus_levels, confidence_intervals = result.threshold(proportion_correct)
     np.testing.assert_allclose(result.slope(stimulus_levels),
-                               result.slope_at_percentage_correct(percentage_correct))
+                               result.slope_at_proportion_correct(proportion_correct))
 
 
 def _close_numpy_dict(first, second):

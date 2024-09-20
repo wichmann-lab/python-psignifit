@@ -52,9 +52,9 @@ def pool_blocks(data: np.ndarray, max_tol=0, max_gap=np.inf, max_length=np.inf):
 
 
 def psychometric(stimulus_level, threshold, width, gamma, lambda_, sigmoid_name):
-    """ Psychometric function aka percent correct function.
+    """ Psychometric function aka proportion correct function.
 
-    Generates percent correct values for a range of stimulus levels given a
+    Generates proportion correct values for a range of stimulus levels given a
     sigmoid.
     Implementation of Eq 1 in Schuett, Harmeling, Macke and Wichmann (2016)
 
@@ -74,7 +74,7 @@ def psychometric(stimulus_level, threshold, width, gamma, lambda_, sigmoid_name)
 
     Returns:
         psi: array
-            Percent correct values for each stimulus level
+            proportion correct values for each stimulus level
 
     """
     # we use the defaults for pc and alpha in the sigmoids:
