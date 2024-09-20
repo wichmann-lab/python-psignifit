@@ -83,3 +83,16 @@ def psychometric(stimulus_level, threshold, width, gamma, lambda_, sigmoid_name)
     sigmoid_values = sigmoid(stimulus_level, threshold=threshold, width=width)
     psi = gamma + (1.0 - lambda_ - gamma) * sigmoid_values
     return psi
+
+
+def psychometric_with_eta(stimulus_level, threshold, width, gamma, lambda_,
+                 sigmoid_name, eta, random_state=np.random.RandomState(42)):
+
+    psi = psychometric(stimulus_level, threshold, width, gamma, lambda_, sigmoid_name)
+    new_psi = []
+    for p in psi:
+        a = ((1/eta**2) - 1) * p
+        b = ((1/eta**2) - 1) * (1 - p)
+        noised_p = stats.beta.rvs(a=a, b=b, size=1, random_state=random_state)
+        new_psi.append(noised_p)
+    return np.array(new_psi).squeeze()
