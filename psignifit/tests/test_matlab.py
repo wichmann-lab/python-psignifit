@@ -47,12 +47,12 @@ def compare_with_matlab(data, options, results):
     # 'X1D', 'logPmax', 'integral', 'marginals', 'marginalsX', 'marginalsW', 'data',
     # 'devianceResiduals', 'deviance', 'Cov', 'Cor', 'timestamp', 'meanFit', 'MAP'
 
-    ## POINT ESTIMATE
+    ## POINT ESTIMATE should only be allowed 5% off
     np.testing.assert_allclose(param_pydict2matlist(pyresults.parameter_fit),
                                results['Fit'],
-                               atol=0.001, rtol=1)
+                               atol=0.001, rtol=0.05)
 
-    # INTERVAL ESTIMATE
+    # INTERVAL ESTIMATE should only be allowed 10% off
     mat_ci = results['conf_Intervals']
     if options['expType'] == 'equalAsymptote':
         # matlab returns gamma filled with Nones, but python expects gamma==lambda
@@ -60,10 +60,10 @@ def compare_with_matlab(data, options, results):
     # matlab dims are (n_param, 2, n_ci), but python expects (n_param, n_ci, 2),
     mat_ci = np.transpose(mat_ci, (0, 2, 1))
     py_ci = param_pydict2matlist(pyresults.confidence_intervals)
-    np.testing.assert_allclose(py_ci, mat_ci, atol=0.001, rtol=2)
+    np.testing.assert_allclose(py_ci, mat_ci, atol=0.001, rtol=.1)
 
 
-@pytest.mark.skip(reason="Testing all cases takes approx 30min, should be run explicitly.")
+@pytest.mark.slow  # runs for about 30 minutes
 @pytest.mark.parametrize('data,options,results', yield_test_data(), ids=yield_test_cases())
 def test_all_matlab_cases(data, options, results):
     compare_with_matlab(data, options, results)
