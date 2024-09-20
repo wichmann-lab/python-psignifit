@@ -5,7 +5,7 @@ from typing import Dict, Optional
 
 import numpy as np
 
-from . import _sigmoids
+from . import sigmoids
 from ._parameter import parameter_bounds, masked_parameter_bounds, parameter_grid
 from ._configuration import Configuration
 from ._confidence import confidence_intervals
@@ -83,10 +83,10 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
         for param, value in conf.fixed_parameters.items():
             bounds[param] = (value, value)
 
-    npriors, priors = setup_priors(custom_priors=conf.priors, bounds=bounds,
-                            stimulus_range=stimulus_range, width_min=width_min, width_alpha=conf.width_alpha,
-                            beta_prior=conf.beta_prior, threshold_perc_correct=conf.thresh_PC)
-    fit_dict, posteriors, grid = _fit_parameters(data, bounds, npriors, sigmoid, conf.steps_moving_bounds,
+    priors = setup_priors(custom_priors=conf.priors, bounds=bounds,
+                          stimulus_range=stimulus_range, width_min=width_min, width_alpha=conf.width_alpha,
+                          beta_prior=conf.beta_prior, threshold_perc_correct=conf.thresh_PC)
+    fit_dict, posteriors, grid = _fit_parameters(data, bounds, priors, sigmoid, conf.steps_moving_bounds,
                                                  conf.max_bound_value, conf.grid_steps)
 
     grid_values = [grid_value for _, grid_value in sorted(grid.items())]
@@ -176,7 +176,7 @@ def _warn_marginal_sanity_checks(marginals):
 
 
 def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
-                    priors: Dict[str, Prior], sigmoid: _sigmoids.Sigmoid,
+                    priors: Dict[str, Prior], sigmoid: sigmoids.Sigmoid,
                     steps_moving_bounds: Dict[str, int], max_bound_value: float,
                     grid_steps: Dict[str, int]) -> Dict[str, float]:
     """ Fit sigmoid parameters in a three step procedure.

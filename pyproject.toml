@@ -3,7 +3,6 @@ requires = ["setuptools >= 61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-dynamic = ["version"]
 name = "psignifit"
 version = "4.1a"
 requires-python = ">= 3.10"
@@ -11,6 +10,7 @@ dependencies = [
   "scipy",
   "matplotlib",
 ]
+readme = {file = "README.md", content-type = "text/markdown"}
 # Python psignifit - based on Matlab psignifit by Heiko Schütt with help from
 # Felix Wichmann, Jakob Macke and Stefan Harmeling.
 # Refactoring done by multiple researchers, see Github contributors.
@@ -30,8 +30,8 @@ classifiers = [
   #   5 - Production/Stable
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Science/Research",
-  "Topic :: Scientific/Engineering :: Information Analysis"
-  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)"
+  "Topic :: Scientific/Engineering :: Information Analysis",
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
@@ -45,7 +45,7 @@ Repository = "https://github.com/wichmann-lab/python-psignifit.git"
 Issues = "https://github.com/wichmann-lab/python-psignifit/issues"
 
 [project.optional-dependencies]
-tests = ["pytest", "pytest-cov", "flake8"],
+tests = ["pytest", "pytest-cov", "flake8"]
 docs = [
     'sphinx',
     'sphinx-gallery',

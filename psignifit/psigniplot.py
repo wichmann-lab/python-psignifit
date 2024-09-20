@@ -11,16 +11,16 @@ from . import psignifit
 from ._typing import ExperimentType
 from ._result import Result
 
-def plot_psychmetric_function(result: Result,  # noqa: C901, this function is too complex
-                              ax: matplotlib.axes.Axes = None,
-                              plot_data: bool = True,
-                              plot_parameter: bool = True,
-                              data_color: Union[str, List[float], np.ndarray] = '#0069AA',  # blue
-                              line_color: Union[str, List[float], np.ndarray] = '#000000',  # black
-                              line_width: float = 2,
-                              extrapolate_stimulus: float = 0.2,
-                              x_label='Stimulus Level',
-                              y_label='Proportion Correct'):
+def plot_psychometric_function(result: Result,  # noqa: C901, this function is too complex
+                               ax: matplotlib.axes.Axes = None,
+                               plot_data: bool = True,
+                               plot_parameter: bool = True,
+                               data_color: Union[str, List[float], np.ndarray] = '#0069AA',  # blue
+                               line_color: Union[str, List[float], np.ndarray] = '#000000',  # black
+                               line_width: float = 2,
+                               extrapolate_stimulus: float = 0.2,
+                               x_label='Stimulus Level',
+                               y_label='Proportion Correct'):
     """ Plot oted psychometric function with the data.
     """
     if ax is None:
@@ -139,7 +139,7 @@ def plot_modelfit(result: Result) -> matplotlib.figure.Figure:
     fig = plt.figure(figsize=(15, 5))
 
     ax = plt.subplot(1, 3, 1)
-    plot_psychmetric_function(result, ax, plot_data=True, plot_parameter=False, extrapolate_stimulus=0)
+    plot_psychometric_function(result, ax, plot_data=True, plot_parameter=False, extrapolate_stimulus=0)
     ax.set_title('Psychometric Function')
 
     ax = plt.subplot(1, 3, 2)
@@ -321,9 +321,9 @@ def plot_bias_analysis(data: np.ndarray, compare_data: np.ndarray, **kwargs) -> 
     plt.figure()
     ax = plt.axes([0.15, 4.35 / 6, 0.75, 1.5 / 6])
 
-    plot_psychmetric_function(result_combined, ax=ax)
-    plot_psychmetric_function(result_data, ax=ax, line_color=[1, 0, 0], data_color=[1, 0, 0])
-    plot_psychmetric_function(result_compare_data, ax=ax, line_color=[0, 0, 1], data_color=[0, 0, 1])
+    plot_psychometric_function(result_combined, ax=ax)
+    plot_psychometric_function(result_data, ax=ax, line_color=[1, 0, 0], data_color=[1, 0, 0])
+    plot_psychometric_function(result_compare_data, ax=ax, line_color=[0, 0, 1], data_color=[0, 0, 1])
     plt.ylim([0, 1])
 
     for param in ['threshold', 'width', 'lambda', 'gamma']:
@@ -334,4 +334,3 @@ def plot_bias_analysis(data: np.ndarray, compare_data: np.ndarray, **kwargs) -> 
         plot_marginal(result_compare_data, param, ax=ax, line_color=[0, 0, 1])
         ax.relim()
         ax.autoscale_view()
-        
