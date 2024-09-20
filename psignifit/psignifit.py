@@ -97,18 +97,19 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
 
     if conf.verbose:
         _warn_marginal_sanity_checks(marginals)
-
-    if not debug:
-        posteriors = None
+        
 
     if conf.experiment_type == 'equal asymptote':
         fit_dict['gamma'] = fit_dict['lambda'].copy()
         grid['gamma'] = grid['lambda'].copy()
         priors['gamma'] = priors['lambda']
         marginals['gamma'] = marginals['lambda'].copy()
-        if posteriors is not None:
-            posteriors['gamma'] = posteriors['lambda'].copy()
+        posteriors['gamma'] = posteriors['lambda'].copy()
 
+    debug_dict = {}
+    if debug:
+        debug_dict['posteriors'] = posteriors
+        debug_dict['priors'] = priors
 
     return Result(parameter_estimate=fit_dict,
                   configuration=conf,
@@ -116,7 +117,7 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
                   parameter_values=grid,
                   prior_values={param: priors[param](values) for param, values in grid.items()},
                   marginal_posterior_values=marginals,
-                  posterior_mass=posteriors,
+                  debug=debug_dict,
                   data=data)
 
 

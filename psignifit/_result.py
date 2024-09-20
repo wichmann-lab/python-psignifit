@@ -26,15 +26,7 @@ class Result:
     parameter_values: Dict[str, NDArray[float]]
     prior_values: Dict[str, NDArray[float]]
     marginal_posterior_values: Dict[str, NDArray[float]]
-    posterior_mass: Optional[NDArray[float]] = dataclasses.field(compare=False, default=None)
-
-    # If future attributes should contain numpy arrays,
-    # run np.asarray in __post_init__.
-    # Otherwise, load_json may result in nested lists instead.
-    def __post_init__(self):
-        if self.posterior_mass is not None:
-            self.posterior_mass = np.asarray(self.posterior_mass)
-
+    debug: Dict[Any, Any]
 
     @classmethod
     def from_dict(cls, result_dict: Dict[str, Any]):
