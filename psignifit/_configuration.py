@@ -65,11 +65,6 @@ class Configuration:
         self.check_attributes()
 
     @classmethod
-    def from_matlab_options(cls, option_dict: Dict[str, Any], **kwargs):
-        python_configs = config_from_matlab(option_dict, **kwargs)
-        return cls(**python_configs)
-
-    @classmethod
     def from_dict(cls, config_dict: Dict[str, Any]):
         config_dict = config_dict.copy()
         return cls(confidence_intervals=tuple(config_dict.pop('confidence_intervals')),

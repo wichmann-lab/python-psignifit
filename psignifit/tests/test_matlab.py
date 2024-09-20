@@ -36,7 +36,7 @@ def yield_test_data(cases=yield_test_cases()):
 
 
 def compare_with_matlab(data, options, results):
-    config = psignifit.Configuration.from_matlab_options(options, raise_matlab_only=False)
+    config = psignifit.config_from_matlab(options, raise_matlab_only=False)
     pyresults = psignifit.psignifit(data, conf=config)
     # Testing for similarity:
     # allclose(actual, desired) = abs(actual - desired) <= atol + rtol * abs(desired)
@@ -73,5 +73,3 @@ test_case_subset = random.sample(list(yield_test_cases()), 5)
 @pytest.mark.parametrize('data,options,results', yield_test_data(test_case_subset), ids=test_case_subset)
 def test_few_matlab_cases(data, options, results):
     compare_with_matlab(data, options, results)
-
-
