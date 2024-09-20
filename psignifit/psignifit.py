@@ -88,7 +88,7 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
                                                  conf.max_bound_value, conf.grid_steps)
 
     grid_values = [grid_value for _, grid_value in sorted(grid.items())]
-    intervals = confidence_intervals(posteriors, grid_values, conf.confP, conf.CI_method)
+    intervals = confidence_intervals(posteriors, grid_values, conf.confidence_percentiles, conf.CI_method)
     intervals_dict = {param: interval_per_p.tolist()
                       for param, interval_per_p in zip(sorted(grid.keys()), intervals)}
     marginals = marginalize_posterior(grid, posteriors)

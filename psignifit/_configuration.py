@@ -200,7 +200,8 @@ class Configuration:
         try:
             self.make_sigmoid()
         except KeyError:
-            raise PsignifitException('Invalid sigmoid name "{value}", use one of {sigmoids.ALL_SIGMOID_NAMES}')
+            raise PsignifitException(
+                f'Invalid sigmoid name "{value}", use one of {sigmoids.ALL_SIGMOID_NAMES}')
 
     def check_stimulus_range(self, value):
         if value:

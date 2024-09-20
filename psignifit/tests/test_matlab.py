@@ -37,7 +37,7 @@ def yield_test_data(cases=yield_test_cases()):
 
 def compare_with_matlab(data, options, results):
     config = psignifit.config_from_matlab(options, raise_matlab_only=False)
-    pyresults = psignifit.psignifit(data, conf=config)
+    pyresults = psignifit.psignifit(data, **config)
     # Testing for similarity:
     # allclose(actual, desired) = abs(actual - desired) <= atol + rtol * abs(desired)
     # ==> atol=0.001 assures equality of small differences
@@ -47,12 +47,12 @@ def compare_with_matlab(data, options, results):
     # 'X1D', 'logPmax', 'integral', 'marginals', 'marginalsX', 'marginalsW', 'data',
     # 'devianceResiduals', 'deviance', 'Cov', 'Cor', 'timestamp', 'meanFit', 'MAP'
 
-    ## POINT ESTIMATE should only be allowed 5% off
+    ## POINT ESTIMATE should only be 5% off
     np.testing.assert_allclose(param_pydict2matlist(pyresults.parameter_fit),
                                results['Fit'],
                                atol=0.001, rtol=0.05)
 
-    # INTERVAL ESTIMATE should only be allowed 10% off
+    # INTERVAL ESTIMATE should only be 10% off
     mat_ci = results['conf_Intervals']
     if options['expType'] == 'equalAsymptote':
         # matlab returns gamma filled with Nones, but python expects gamma==lambda
@@ -69,7 +69,7 @@ def test_all_matlab_cases(data, options, results):
     compare_with_matlab(data, options, results)
 
 
-test_case_subset = random.sample(list(yield_test_cases()), 5)
+test_case_subset = random.sample(list(yield_test_cases()), 1)
 @pytest.mark.parametrize('data,options,results', yield_test_data(test_case_subset), ids=test_case_subset)
 def test_few_matlab_cases(data, options, results):
     compare_with_matlab(data, options, results)

@@ -3,7 +3,7 @@ _CONFIG_KEYS_MAT2PY = {
     'expType': 'experiment_type',
     'expN': 'experiment_choices',
     'estimateType': 'estimate_type',
-    'confP': 'confidence_intervals',
+    'confP': 'confidence_percentiles',
     'instantPlot': 'instant_plot',
     'maxBorderValue': 'max_bound_value',
     'moveBorders': 'move_bounds',
