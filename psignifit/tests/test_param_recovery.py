@@ -5,9 +5,6 @@ from psignifit import psignifit
 from psignifit.sigmoids import ALL_SIGMOID_NAMES
 from psignifit.tools import psychometric, psychometric_with_eta
 
-RANDOMSTATE = np.random.RandomState(837400)
-
-
 @pytest.mark.parametrize("sigmoid", list(ALL_SIGMOID_NAMES))
 def test_parameter_recovery_2afc(sigmoid):
     width = 0.3
@@ -40,7 +37,7 @@ def test_parameter_recovery_2afc(sigmoid):
 
 
 @pytest.mark.parametrize("eta", [0.1, 0.2, 0.3])
-def test_parameter_recovery_2afc_eta(eta):
+def test_parameter_recovery_2afc_eta(random_state, eta):
     sigmoid = "norm"
     width = 0.1
     stim_range = [0.001, 0.001 + width * 1.1]
@@ -52,7 +49,7 @@ def test_parameter_recovery_2afc_eta(eta):
     stimulus_level = np.linspace(stim_range[0], stim_range[1], nsteps)
 
     perccorr = psychometric_with_eta(stimulus_level, threshold, width, gamma, lambda_,
-                            sigmoid, eta=eta, random_state=RANDOMSTATE)
+                            sigmoid, eta=eta, random_state=random_state)
 
     ntrials = np.ones(nsteps) * 500
     hits = (perccorr * ntrials).astype(int)
