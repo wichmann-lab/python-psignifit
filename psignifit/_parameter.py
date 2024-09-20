@@ -4,7 +4,7 @@ from typing import Tuple, Optional, Dict
 import numpy as np
 import scipy.stats
 
-from ._typing import ExperimentType, ParameterBounds
+from ._typing import ExperimentType
 from ._typing import ParameterBounds
 
 
@@ -48,20 +48,24 @@ def parameter_bounds(min_width: float, experiment_type: ExperimentType, stimulus
     width_spread = spread / ((norminv(.95) - norminv(.05)) / (norminv(1 - alpha) - norminv(alpha)))
 
     experiment_type = ExperimentType(experiment_type)
+    # in case where gamma doesnt exist as a dimension, it should not appear in
+    # the dictionary
     if experiment_type == ExperimentType.YES_NO:
-        gamma = (0., 0.5)
+        variable_bounds = {'gamma': (0., 0.5)}
     elif experiment_type == ExperimentType.EQ_ASYMPTOTE:
-        gamma = None
+        variable_bounds = {}
     elif experiment_type == ExperimentType.N_AFC:
-        gamma = (1. / nafc_choices, 1. / nafc_choices)
+        variable_bounds = {'gamma': (1. / nafc_choices, 1. / nafc_choices)}
 
-    return {
+    bounds_dict = {
         'threshold': threshold,
         'width': (min_width, 3 * width_spread),
         'lambda': (0., 0.5),
-        'gamma': gamma,
         'eta': (0., 1 - 1e-10)
-    }
+        }
+    bounds_dict.update(variable_bounds)
+
+    return bounds_dict
 
 
 def masked_parameter_bounds(grid: Dict[str, Optional[np.ndarray]], mesh_mask: np.ndarray) -> ParameterBounds:
@@ -98,7 +102,6 @@ def parameter_grid(bounds: ParameterBounds, steps: Dict[str, int]) -> Dict[str, 
 
     If the bound start and end values are close, a fixed value is assumed and the grid entry contains
     only the start.
-    If the bound is None, the grid entry will be None.
 
     Args:
        bounds: a dictionary {parameter : (min_val, max_val)}
@@ -109,9 +112,7 @@ def parameter_grid(bounds: ParameterBounds, steps: Dict[str, int]) -> Dict[str, 
     """
     grid = {}
     for param, bound in bounds.items():
-        if bound is None:
-            grid[param] = None
-        elif np.isclose(bound[0], bound[1]):
+        if np.isclose(bound[0], bound[1]):
             grid[param] = np.array([bound[0]])
         else:
             grid[param] = np.linspace(*bound, num=steps[param])

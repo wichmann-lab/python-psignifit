@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import numpy as np
+from numpy.typing import NDArray
 
 from ._configuration import Configuration
 from ._typing import ParameterGrid
@@ -21,11 +22,11 @@ class Result:
     parameter_fit: Dict[str, float]
     configuration: Configuration
     confidence_intervals: Dict[str, List[Tuple[float, float]]]
-    data: Tuple[List[float], List[float], List[float]]
-    parameter_values: Dict[str, List[float]]
-    prior_values: Dict[str, List[float]]
-    marginal_posterior_values: Dict[str, List[float]]
-    posterior_mass: Optional[np.ndarray] = dataclasses.field(compare=False, default=None)
+    data: NDArray[float]
+    parameter_values: Dict[str, NDArray[float]]
+    prior_values: Dict[str, NDArray[float]]
+    marginal_posterior_values: Dict[str, NDArray[float]]
+    posterior_mass: Optional[NDArray[float]] = dataclasses.field(compare=False, default=None)
 
     # If future attributes should contain numpy arrays,
     # run np.asarray in __post_init__.
@@ -34,11 +35,6 @@ class Result:
         if self.posterior_mass is not None:
             self.posterior_mass = np.asarray(self.posterior_mass)
 
-    def _equal_numpy_dict(first, second):
-        """ Test if two dicts of numpy arrays are equal"""
-        if first.keys() != second.keys():
-            return False
-        return all(np.array_equal(first[key], second[key]) for key in first)
 
     @classmethod
     def from_dict(cls, result_dict: Dict[str, Any]):
@@ -52,6 +48,7 @@ class Result:
 
     def save_json(self, file: Union[TextIO, str, Path], **kwargs: Any):
         if 'cls' not in kwargs:
+            # converts data automatically to lists of lists
             kwargs['cls'] = NumpyEncoder
 
         result_dict = self.as_dict()
@@ -68,6 +65,14 @@ class Result:
         else:
             with open(file, 'r') as f:
                 result_dict = json.load(f, **kwargs)
+
+        result_dict['parameter_values'] = {
+            k: np.asarray(v) for k, v in result_dict['parameter_values'].items()}
+        result_dict['prior_values'] = {
+            k: np.asarray(v) for k, v in result_dict['prior_values'].items()}
+        result_dict['marginal_posterior_values'] = {
+            k: np.asarray(v) for k, v in result_dict['marginal_posterior_values'].items()}
+        result_dict['data'] = np.asarray(result_dict['data'])
         return cls.from_dict(result_dict)
 
     def threshold(self, percentage_correct: np.ndarray, unscaled: bool = False, return_ci: bool = True
@@ -91,8 +96,6 @@ class Result:
             thresholds: stimulus values for all provided percentage_correct (if return_ci=False)
             (thresholds, ci): stimulus values along with confidence intervals
 
-            For the sigmoids in logspace this also returns values in the linear
-            stimulus level domain.
         """
         percentage_correct = np.asarray(percentage_correct)
         sigmoid = self.configuration.make_sigmoid()

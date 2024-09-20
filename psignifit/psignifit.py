@@ -5,7 +5,7 @@ from typing import Dict, Optional
 
 import numpy as np
 
-from . import _sigmoids
+from . import sigmoids
 from ._parameter import parameter_bounds, masked_parameter_bounds, parameter_grid
 from ._configuration import Configuration
 from ._confidence import confidence_intervals
@@ -18,10 +18,14 @@ from ._utils import (PsignifitException, check_data)
 
 def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
               return_posterior: bool = False, **kwargs) -> Result:
-    """
-    Main function for fitting psychometric functions function
+    """ Fit a psychometric function to experimental data.
 
     This function is the user interface for fitting psychometric functions to data.
+
+    Notice that the parameters of the psychometric function are always fit in linear space, even
+    for psychometric function that are supposed to work in a logarithmic space, like the Weibull
+    function. It is left to the user to transform the stimulus level to logarithmic space before
+    calling this function.
 
     pass your data in the n x 3 matrix of the form:
     [x-value, number correct, number of trials]
@@ -51,7 +55,7 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
             "Can't handle conf together with other keyword arguments!")
 
     sigmoid = conf.make_sigmoid()
-    data = check_data(data, logspace=sigmoid.logspace)
+    data = check_data(data)
 
     levels, ntrials = data[:, 0], data[:, 2]
     if conf.verbose:
@@ -60,22 +64,15 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
 
     stimulus_range = conf.stimulus_range
     if stimulus_range is None:
-        if sigmoid.logspace:
-            stimulus_range = (levels[levels > 0].min(), levels.max())
-        else:
-            stimulus_range = (levels.min(), levels.max())
-    if sigmoid.logspace:
-        stimulus_range = (np.log(stimulus_range[0]), np.log(stimulus_range[1]))
-        levels = np.log(levels)
+        stimulus_range = (levels.min(), levels.max())
 
     width_min = conf.width_min
     if width_min is None:
         if conf.stimulus_range is None:
             width_min = np.diff(np.unique(levels)).min()
         else:
-            # For user specified stimulus range, use very conservative estimate of width_min.
-            # https: // en.wikipedia.org / wiki / Unit_in_the_last_place
-            width_min = 100 * np.spacing(stimulus_range[1])
+            # For user specified stimulus range, use conservative estimate of width_min.
+            width_min = (conf.stimulus_range[1] - conf.stimulus_range[0]) / 100
 
     bounds = parameter_bounds(min_width=width_min, experiment_type=conf.experiment_type, stimulus_range=stimulus_range,
                               alpha=conf.width_alpha, nafc_choices=conf.experiment_choices)
@@ -108,14 +105,22 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
     if not return_posterior:
         posteriors = None
 
-    return Result(parameter_fit=fit_dict,
+    if conf.experiment_type == 'equal asymptote':
+        fit_dict['gamma'] = fit_dict['lambda'].copy()
+        grid['gamma'] = grid['lambda'].copy()
+        priors['gamma'] = priors['lambda']
+        marginals['gamma'] = marginals['lambda'].copy()
+        if posteriors is not None:
+            posteriors['gamma'] = posteriors['lambda'].copy()
+
+    return Result(parameter_estimate=fit_dict,
                   configuration=conf,
                   confidence_intervals=intervals_dict,
-                  parameter_values={k: v.tolist() for k, v in grid.items() if v is not None},
-                  prior_values={param: priors[param](values).tolist() for param, values in grid.items() if values is not None },
-                  marginal_posterior_values={k: v.tolist() for k, v in marginals.items()},
+                  parameter_values=grid,
+                  prior_values={param: priors[param](values) for param, values in grid.items()},
+                  marginal_posterior_values=marginals,
                   posterior_mass=posteriors,
-                  data=data.tolist())
+                  data=data)
 
 
 def _warn_common_data_mistakes(levels, ntrials, has_user_stimulus_range, pool_max_blocks) -> None:
@@ -161,43 +166,32 @@ def _warn_common_data_mistakes(levels, ntrials, has_user_stimulus_range, pool_ma
 
 
 def _warn_marginal_sanity_checks(marginals):
-    if marginals['threshold'][0] > .001:
+    threshold_marginals = marginals['threshold'] / np.sum(marginals['threshold'])
+    if threshold_marginals[0] > .001:
         warnings.warn('psignifit:boundWarning\n'
                       'The marginal for the threshold is not near 0 at the bound.\n'
                       'This indicates that smaller Thresholds would be possible.')
-    if marginals['threshold'][-1] > .001:
+    if threshold_marginals[-1] > .001:
         warnings.warn('psignifit:boundWarning\n'
                       'The marginal for the threshold is not near 0 at the upper bound.\n'
                       'This indicates that your data is not sufficient to exclude much higher thresholds.\n'
                       'Refer to the paper or the manual for more info on this topic.')
-    if marginals['width'][0] > .001:
+
+    width_marginals = marginals['width'] / np.sum(marginals['width'])
+    if width_marginals[0] > .001:
         warnings.warn('psignifit:boundWarning\n'
                       'The marginal for the width is not near 0 at the lower bound.\n'
                       'This indicates that your data is not sufficient to exclude much lower widths.\n'
                       'Refer to the paper or the manual for more info on this topic.')
-    if marginals['width'][-1] > .001:
+    if width_marginals[-1] > .001:
         warnings.warn('psignifit:boundWarning\n'
                       'The marginal for the width is not near 0 at the lower bound.\n'
                       'This indicates that your data is not sufficient to exclude much higher widths.\n'
                       'Refer to the paper or the manual for more info on this topic.')
 
-    for param, marginal in marginals.items():
-        if marginal.size < 3:
-            continue
-
-        peak = marginal.max() / 1000
-        if marginal[0] > peak or marginal[-1] > peak:
-            warnings.warn(f'''psignifit:boundWarning\n
-                             The marginal on the {param} bounds is not smaller than 1/1000 of the peak
-                             it means that the prior of the {param} parameter has an influence to the result.\n
-                             This means (1) the prior may be too narrow, or (2) you know what you are doing.\n
-                             If you were using the default settings, this is a bug in the software or your data
-                             are highly unusual,
-                             if you changed the defaults please check the priors and parameter bounds.''')
-
 
 def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
-                    priors: Dict[str, Prior], sigmoid: _sigmoids.Sigmoid,
+                    priors: Dict[str, Prior], sigmoid: sigmoids.Sigmoid,
                     steps_moving_bounds: Dict[str, int], max_bound_value: float,
                     grid_steps: Dict[str, int]) -> Dict[str, float]:
     """ Fit sigmoid parameters in a three step procedure.
@@ -232,9 +226,7 @@ def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
 
     fixed_param = {}
     for parm_name, parm_values in grid.items():
-        if parm_values is None:
-            fixed_param[parm_name] = parm_values
-        elif len(parm_values) <= 1:
+        if len(parm_values) == 1:
             fixed_param[parm_name] = parm_values[0]
     fit_dict = maximize_posterior(data, param_init=grid_max, param_fixed=fixed_param, sigmoid=sigmoid, priors=priors)
 

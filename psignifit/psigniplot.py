@@ -11,17 +11,17 @@ from . import psignifit
 from ._typing import ExperimentType
 from ._result import Result
 
-def plot_psychmetric_function(result: Result,  # noqa: C901, this function is too complex
-                              ax: matplotlib.axes.Axes = None,
-                              plot_data: bool = True,
-                              plot_parameter: bool = True,
-                              data_color: Union[str, List[float], np.ndarray] = '#0069AA',  # blue
-                              line_color: Union[str, List[float], np.ndarray] = '#000000',  # black
-                              line_width: float = 2,
-                              extrapolate_stimulus: float = 0.2,
-                              x_label='Stimulus Level',
-                              y_label='Proportion Correct'):
-    """ Plot oted psychometric function with the data.
+def plot_psychometric_function(result: Result,  # noqa: C901, this function is too complex
+                               ax: matplotlib.axes.Axes = None,
+                               plot_data: bool = True,
+                               plot_parameter: bool = True,
+                               data_color: str = '#0069AA',  # blue
+                               line_color: str = '#000000',  # black
+                               line_width: float = 2,
+                               extrapolate_stimulus: float = 0.2,
+                               x_label='Stimulus Level',
+                               y_label='Proportion Correct'):
+    """ Plot psychometric function fit together with the data.
     """
     if ax is None:
         ax = plt.gca()
@@ -47,7 +47,7 @@ def plot_psychmetric_function(result: Result,  # noqa: C901, this function is to
     if plot_data:
         y_data = data[:, 1] / data[:, 2]
         size = np.sqrt(data_size / 2 * data[:, 2])
-        ax.scatter(x_data, y_data, s=size, c=data_color, marker='.', clip_on=False)
+        ax.scatter(x_data, y_data, s=size, color=data_color, marker='.', clip_on=False)
 
     sigmoid = config.make_sigmoid()
     x = np.linspace(x_data.min(), x_data.max(), num=1000)
@@ -75,8 +75,8 @@ def plot_psychmetric_function(result: Result,  # noqa: C901, this function is to
 
     # AXIS SETTINGS
     plt.axis('tight')
-    plt.xlabel(x_label)
-    plt.ylabel(y_label)
+    plt.xlabel(x_label, fontsize=14)
+    plt.ylabel(y_label, fontsize=14)
     plt.ylim([ymin, 1])
     return ax
 
@@ -90,7 +90,7 @@ def plot_stimulus_residuals(result: Result, ax: matplotlib.axes.Axes = None) -> 
 def plot_block_residuals(result: Result, ax: matplotlib.axes.Axes = None) -> matplotlib.axes.Axes:
     if ax is None:
         ax = plt.gca()
-    return _plot_residuals(range(result.data.shape[0]), 'Block Number', result, ax)
+    return _plot_residuals(result.data[:, 0], 'Block Number', result, ax)
 
 
 def _plot_residuals(x_values: np.ndarray, x_label: str, result: Result, ax: matplotlib.axes.Axes = None):
@@ -116,8 +116,8 @@ def _plot_residuals(x_values: np.ndarray, x_label: str, result: Result, ax: matp
     linefit = np.polyfit(x_values, deviance, 3)
     ax.plot(x, np.polyval(linefit, x), 'k:', clip_on=False)
 
-    ax.xlabel(x_label, fontsize=14)
-    ax.ylabel('Deviance', fontsize=14)
+    ax.set_xlabel(x_label, fontsize=14)
+    ax.set_ylabel('Deviance', fontsize=14)
     return ax
 
 
@@ -141,7 +141,7 @@ def plot_modelfit(result: Result) -> matplotlib.figure.Figure:
     fig = plt.figure(figsize=(15, 5))
 
     ax = plt.subplot(1, 3, 1)
-    plot_psychmetric_function(result, ax, plot_data=True, plot_parameter=False, extrapolate_stimulus=0)
+    plot_psychometric_function(result, ax, plot_data=True, plot_parameter=False, extrapolate_stimulus=0)
     ax.set_title('Psychometric Function')
 
     ax = plt.subplot(1, 3, 2)
@@ -169,7 +169,7 @@ def plot_marginal(result: Result,
 
     Args:
         result: should be a result struct from the main psignifit routine
-        dim: The parameter to plot. 1=threshold, 2=width, 3=lambda, 4=gamma, 5=sigma
+        dim: The parameter to plot. 'threshold', 'width', 'lambda', 'gamma', 'eta'
     """
     if ax is None:
         ax = plt.gca()
@@ -190,7 +190,7 @@ def plot_marginal(result: Result,
             ax.fill_between(ci_x, np.zeros_like(ci_x), np.interp(ci_x, x, marginal), color=line_color, alpha=0.5)
 
         param_value = result.parameter_fit[parameter]
-        ax.plot([param_value] * 2, [0, np.interp(param_value, x, marginal)], color=line_color)
+        ax.plot([param_value] * 2, [0, np.interp(param_value, x, marginal)], color='#000000')
 
     if plot_prior:
         ax.plot(x, result.prior_values[parameter], ls='--', color=prior_color, clip_on=False)
@@ -198,19 +198,15 @@ def plot_marginal(result: Result,
     ax.plot(x, marginal, lw=line_width, c=line_color, clip_on=False)
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
+    ax.spines[['top', 'right']].set_visible(False)
 
     return ax
 
 
 def _parameter_label(parameter):
     label_defaults = {'threshold': 'Threshold', 'width': 'Width',
-                      'lambda': r'$\lambda$', 'gamma': r'$\gamma$', 'eta': r'$\eta$'}
-    try:
-        plt.rcParams.update({"text.usetex": True})
-        x_label = label_defaults[parameter]
-    except:
-        x_label = parameter.capitalize()
-    return x_label
+                      'lambda': '\u03BB', 'gamma': '\u03B3', 'eta': '\u03B7'}
+    return label_defaults[parameter]
 
 
 def plot_prior(result: Result,
@@ -249,7 +245,7 @@ def plot_prior(result: Result,
                          prior_x[-cumprior[cumprior >= .75].size], max(prior_x)]
         plt.subplot(2, 3, i + 1)
         plt.plot(params[param], priors[param], lw=line_width, c=line_color)
-        plt.scatter(x_percentiles, np.interp(x_percentiles, prior_x, priors[param]), ms=marker_size, c=colors)
+        plt.scatter(x_percentiles, np.interp(x_percentiles, prior_x, priors[param]), s=marker_size, c=colors)
         plt.xlabel('Stimulus Level')
         plt.ylabel('Density')
         plt.title(titles[param])
@@ -259,7 +255,7 @@ def plot_prior(result: Result,
             this_sigmoid_params = dict(sigmoid_params)
             this_sigmoid_params[param] = param_value
             plt.plot(sigmoid_x, sigmoid(sigmoid_x, **this_sigmoid_params), line_width=line_width, color=color)
-        plt.plot(data[:, 0], np.zeros(data[:, 0].shape), 'k.', ms=marker_size * .75)
+        plt.plot(data[:, 0], np.zeros(data[:, 0].shape), 'k.', s=marker_size * .75)
         plt.xlabel('Stimulus Level')
         plt.ylabel('Percent Correct')
 
@@ -328,9 +324,9 @@ def plot_bias_analysis(data: np.ndarray, compare_data: np.ndarray, **kwargs) -> 
     plt.figure()
     ax = plt.axes([0.15, 4.35 / 6, 0.75, 1.5 / 6])
 
-    plot_psychmetric_function(result_combined, ax=ax)
-    plot_psychmetric_function(result_data, ax=ax, line_color=[1, 0, 0], data_color=[1, 0, 0])
-    plot_psychmetric_function(result_compare_data, ax=ax, line_color=[0, 0, 1], data_color=[0, 0, 1])
+    plot_psychometric_function(result_combined, ax=ax)
+    plot_psychometric_function(result_data, ax=ax, line_color=[1, 0, 0], data_color=[1, 0, 0])
+    plot_psychometric_function(result_compare_data, ax=ax, line_color=[0, 0, 1], data_color=[0, 0, 1])
     plt.ylim([0, 1])
 
     for param in ['threshold', 'width', 'lambda', 'gamma']:

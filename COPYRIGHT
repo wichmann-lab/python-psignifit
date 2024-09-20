@@ -4,7 +4,7 @@ Python toolbox for Bayesian psychometric function estimation.
 
 All the code in this package is distributed under the following conditions:
 
-Copyright (c) 2016-2017, psignifit contributors, www.wichmann-lab.org 
+Copyright (c) 2016-2024, psignifit contributors, www.wichmann-lab.org 
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,4 +18,3 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
-

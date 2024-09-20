@@ -71,23 +71,31 @@ def eta_prior(x, k):
     return scipy.stats.beta.pdf(x, 1, k)
 
 
-def default_priors(stimulus_range: Tuple[float, float], width_min: float,
+def default_prior(parameter: str, stimulus_range: Tuple[float, float], width_min: float,
                    width_alpha: float, beta: float, threshold_percent_correct: float = 0.5) -> Dict[str, Prior]:
     if not np.isclose(threshold_percent_correct, 0.5):
         raise ValueError("Default prior 'threshold' expects thresh_PC=0.5, got {thresh_PC = }")
 
-    return {
-        'threshold': partial(threshold_prior, stimulus_range=stimulus_range),
-        'width': partial(width_prior, wmin=width_min,
+    if parameter == 'threshold':
+        prior =  partial(threshold_prior, stimulus_range=stimulus_range)
+    elif parameter == 'width':
+        prior = partial(width_prior, wmin=width_min,
                          wmax=stimulus_range[1] - stimulus_range[0],
-                         alpha=width_alpha),
-        'lambda': lambda_prior,
-        'gamma': gamma_prior,
-        'eta': partial(eta_prior, k=beta),
-    }
+                         alpha=width_alpha)
+    elif parameter == 'lambda':
+        prior = lambda_prior
+    elif parameter == 'gamma':
+        prior = gamma_prior
+    elif parameter == 'eta':
+        prior = partial(eta_prior, k=beta)
+    else:
+        raise ValueError(f"Unknown parameter '{parameter}'")
+    return prior
 
 
 def _check_prior(priors, name, values):
+    if name not in priors:
+        return
     result = priors[name](values)
     assert np.all(np.isfinite(result)), f"Prior '{name}' returns non-finite values."
     assert np.all(result >= 0), f"Prior '{name}' returns negative values."
@@ -111,7 +119,6 @@ def check_priors(priors: Dict[str, Prior], stimulus_range: Tuple[float, float],
     """
     data_min, data_max = stimulus_range
     dataspread = data_max - data_min
-
     test_values = np.linspace(data_min - .4 * dataspread, data_max + .4 * dataspread, n_test_values)
     _check_prior(priors, "threshold", test_values)
 
@@ -141,7 +148,7 @@ def normalize_prior(func: Prior, interval: Tuple[float, float], steps: int = 100
             return np.ones_like(y)
     else:
         x = np.linspace(interval[0], interval[1], steps)
-        integral = np.trapz(func(x), x=x)
+        integral = np.trapezoid(func(x), x=x)
 
         def nfunc(y):
             return func(y) / integral
@@ -150,7 +157,10 @@ def normalize_prior(func: Prior, interval: Tuple[float, float], steps: int = 100
 
 
 def setup_priors(custom_priors, bounds, stimulus_range, width_min, width_alpha, beta_prior, threshold_perc_correct):
-    priors = default_priors(stimulus_range, width_min, width_alpha, beta_prior, threshold_perc_correct)
+    priors = {}
+    for parameter in bounds:
+        priors[parameter] = default_prior(parameter, stimulus_range, width_min, width_alpha, beta_prior, threshold_perc_correct)
+
     if custom_priors is not None:
         priors.update(custom_priors)
     check_priors(priors, stimulus_range, width_min)

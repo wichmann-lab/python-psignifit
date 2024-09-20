@@ -87,7 +87,7 @@ For example, running
 
 See :ref:`this user guide <plot-functions>` to learn more about the visualizations.
 
-.. figure:: ../images/demo_001_1.png
+.. figure:: ./images/demo_001_1.png
 
 Next steps
 ~~~~~~~~~~
