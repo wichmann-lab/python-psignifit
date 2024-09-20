@@ -113,7 +113,7 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
         if posteriors is not None:
             posteriors['gamma'] = posteriors['lambda'].copy()
 
-    return Result(parameter_estimate=fit_dict,
+    return Result(parameter_fit=fit_dict,
                   configuration=conf,
                   confidence_intervals=intervals_dict,
                   parameter_values=grid,

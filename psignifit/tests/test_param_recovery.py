@@ -82,11 +82,11 @@ def test_parameter_recovery_2afc(sigmoid):
 
     res = psignifit(data, **options)
 
-    assert np.isclose(res.parameter_estimate['lambda'], lambda_)
-    assert np.isclose(res.parameter_estimate['gamma'], gamma)
-    assert np.isclose(res.parameter_estimate['eta'], 0, atol=1e-4)
-    assert np.isclose(res.parameter_estimate['threshold'], threshold, atol=1e-4)
-    assert np.isclose(res.parameter_estimate['width'], width, atol=1e-4)
+    assert np.isclose(res.parameter_fit['lambda'], lambda_)
+    assert np.isclose(res.parameter_fit['gamma'], gamma)
+    assert np.isclose(res.parameter_fit['eta'], 0, atol=1e-4)
+    assert np.isclose(res.parameter_fit['threshold'], threshold, atol=1e-4)
+    assert np.isclose(res.parameter_fit['width'], width, atol=1e-4)
 
 
 @pytest.mark.parametrize("eta", [0.1, 0.2, 0.3])
@@ -117,11 +117,11 @@ def test_parameter_recovery_2afc_eta(eta):
 
     res = psignifit(data, **options)
 
-    assert np.isclose(res.parameter_estimate['lambda'], lambda_)
-    assert np.isclose(res.parameter_estimate['gamma'], gamma)
-    assert np.isclose(res.parameter_estimate['eta'], eta, atol=0.05)
-    assert np.isclose(res.parameter_estimate['threshold'], threshold, atol=0.01)
-    assert np.isclose(res.parameter_estimate['width'], width, atol=0.05)
+    assert np.isclose(res.parameter_fit['lambda'], lambda_)
+    assert np.isclose(res.parameter_fit['gamma'], gamma)
+    assert np.isclose(res.parameter_fit['eta'], eta, atol=0.05)
+    assert np.isclose(res.parameter_fit['threshold'], threshold, atol=0.01)
+    assert np.isclose(res.parameter_fit['width'], width, atol=0.05)
 
 
 # threshold and width can not be fixed.
@@ -162,7 +162,7 @@ def test_parameter_recovery_2afc_fixed_params(fixed_param):
     options['fixed_parameters'][fixed_param] = sim_params[fixed_param]+0.1
 
     res = psignifit(data, **options)
-    assert np.isclose(res.parameter_estimate[fixed_param], sim_params[fixed_param]+0.1, atol=1e-10)
+    assert np.isclose(res.parameter_fit[fixed_param], sim_params[fixed_param]+0.1, atol=1e-10)
 
 
 @pytest.mark.parametrize("sigmoid", list(ALL_SIGMOID_NAMES))
@@ -190,11 +190,11 @@ def test_parameter_recovery_YN(sigmoid):
 
     res = psignifit(data, **options)
 
-    assert np.isclose(res.parameter_estimate['lambda'], lambda_, atol=1e-4)
-    assert np.isclose(res.parameter_estimate['gamma'], gamma, atol=1e-4)
-    assert np.isclose(res.parameter_estimate['eta'], 0, atol=1e-4)
-    assert np.isclose(res.parameter_estimate['threshold'], threshold, atol=1e-4)
-    assert np.isclose(res.parameter_estimate['width'], width, atol=1e-4)
+    assert np.isclose(res.parameter_fit['lambda'], lambda_, atol=1e-4)
+    assert np.isclose(res.parameter_fit['gamma'], gamma, atol=1e-4)
+    assert np.isclose(res.parameter_fit['eta'], 0, atol=1e-4)
+    assert np.isclose(res.parameter_fit['threshold'], threshold, atol=1e-4)
+    assert np.isclose(res.parameter_fit['width'], width, atol=1e-4)
 
 
 @pytest.mark.parametrize("sigmoid", list(ALL_SIGMOID_NAMES))
@@ -222,8 +222,8 @@ def test_parameter_recovery_eq_asymptote(sigmoid):
 
     res = psignifit(data, **options)
 
-    assert np.isclose(res.parameter_estimate['lambda'], lambda_, atol=1e-4)
-    assert np.isclose(res.parameter_estimate['gamma'], gamma, atol=1e-4)
-    assert np.isclose(res.parameter_estimate['eta'], 0, atol=1e-4)
-    assert np.isclose(res.parameter_estimate['threshold'], threshold, atol=1e-4)
-    assert np.isclose(res.parameter_estimate['width'], width, atol=1e-4)
+    assert np.isclose(res.parameter_fit['lambda'], lambda_, atol=1e-4)
+    assert np.isclose(res.parameter_fit['gamma'], gamma, atol=1e-4)
+    assert np.isclose(res.parameter_fit['eta'], 0, atol=1e-4)
+    assert np.isclose(res.parameter_fit['threshold'], threshold, atol=1e-4)
+    assert np.isclose(res.parameter_fit['width'], width, atol=1e-4)

@@ -87,7 +87,7 @@ def test_save_load_result_json(result, tmp_path):
     assert result_file.exists()
     other = Result.load_json(result_file)
 
-    assert result.parameter_estimate == other.parameter_estimate
+    assert result.parameter_fit == other.parameter_fit
     assert result.configuration == other.configuration
     assert result.confidence_intervals == other.confidence_intervals
     assert np.all(np.isclose(result.data, other.data))
