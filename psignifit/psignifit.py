@@ -101,6 +101,15 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
     if not return_posterior:
         posteriors = None
 
+    if conf.experiment_type == 'equal asymptote':
+        fit_dict['gamma'] = fit_dict['lambda'].copy()
+        grid['gamma'] = grid['lambda'].copy()
+        priors['gamma'] = priors['lambda']
+        marginals['gamma'] = marginals['lambda'].copy()
+        if posteriors is not None:
+            posteriors['gamma'] = posteriors['lambda'].copy()
+
+
     return Result(parameter_estimate=fit_dict,
                   configuration=conf,
                   confidence_intervals=intervals_dict,
@@ -211,9 +220,7 @@ def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
 
     fixed_param = {}
     for parm_name, parm_values in grid.items():
-        if parm_values is None:
-            fixed_param[parm_name] = parm_values
-        elif len(parm_values) <= 1:
+        if len(parm_values) == 1:
             fixed_param[parm_name] = parm_values[0]
     fit_dict = maximize_posterior(data, param_init=grid_max, param_fixed=fixed_param, sigmoid=sigmoid, priors=priors)
 

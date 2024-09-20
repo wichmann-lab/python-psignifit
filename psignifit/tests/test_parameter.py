@@ -12,7 +12,6 @@ def test_parameter_bounds():
     true_bounds = {'threshold': (-0.5, 1.5),
                    'width': (0.1, 4.242957250279646),
                    'lambda': (0.0, 0.5),
-                   'gamma': None,
                    'eta': (0.0, 0.9999999999)}
 
     for key, true_value in true_bounds.items():
@@ -41,16 +40,13 @@ def test_mask_bounds():
 
 def test_parameter_grid():
     bounds = {
-        'none': None,
         'fixed': (0.5, 0.5),
         'normal': (0, 1),
     }
     steps = {
-        'none': 3,
         'normal': 15,
     }
 
     grid = psignifit._parameter.parameter_grid(bounds, steps)
-    assert grid['none'] is None
     assert grid['normal'].shape == (15,)
     np.testing.assert_equal(grid['fixed'], [0.5])

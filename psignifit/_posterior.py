@@ -72,9 +72,6 @@ def posterior_grid(data, sigmoid: Sigmoid, priors: Dict[str, Prior],
 
     grid_max = dict()
     for index, (name, grid_values) in zip(ind_max, sorted(grid.items())):
-        if grid_values is None:
-            grid_max[name] = None
-        else:
             grid_max[name] = grid_values[index]
 
     # normalize the posterior_grid
@@ -110,7 +107,10 @@ def log_posterior(data: np.ndarray, sigmoid: Sigmoid, priors: Dict[str, Prior], 
     thres = grid['threshold']
     width = grid['width']
     lambd = grid['lambda']
-    gamma = grid['gamma']
+    if 'gamma' in grid:
+        gamma = grid['gamma']
+    else:
+        gamma = None
     eta_std = grid['eta']
 
     if np.allclose(eta_std, [0]):
@@ -191,13 +191,19 @@ def log_posterior(data: np.ndarray, sigmoid: Sigmoid, priors: Dict[str, Prior], 
     p += np.log(priors['threshold'](thres))
     p += np.log(priors['width'](width))
     p += np.log(priors['lambda'](lambd))
-    p += np.log(priors['gamma'](gamma))
+    # if gamma is not in the grid (i.e. it is not estimated in the the equal asymptote experiment)
+    # then the gamma dimension is equal to the lambda dimension.
+    if 'gamma' in grid:
+        p += np.log(priors['gamma'](gamma))
+    else:
+        p += np.log(priors['lambda'](lambd))
+
     if eta_prime is None:
         p = np.expand_dims(p, axis=0)
     else:
         p += np.log(priors['eta'](eta_std.reshape(-1, *eta_prime.shape[1:])))
-    if grid['gamma'] is None:
-        p = np.expand_dims(p, axis=1)
+    #if 'gamma' not in grid:
+    #    p = np.expand_dims(p, axis=1)
     return p
 
 
@@ -205,7 +211,7 @@ def maximize_posterior(data, param_init: Dict[str, float], param_fixed: Dict[str
                        sigmoid: Sigmoid, priors: Dict[str, Prior]) -> Dict[str, float]:
     """ Finds the parameters which maximize the log posterior_grid using hill climbing.
 
-     Parameters with None or a single entry in `grid` are treated as fixed.
+     Parameters with a single entry in `grid` are treated as fixed.
      The objective is described in :func:`psignifit.likelihood.log_posterior:.
      It is optimized by :func:`scipy.optimize.fmin` with default settings,
      using the downhill simplex algorithm.
