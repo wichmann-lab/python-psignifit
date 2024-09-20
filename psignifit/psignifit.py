@@ -191,7 +191,7 @@ def _warn_marginal_sanity_checks(marginals):
         if width_marginals[-1] > .001:
             warnings.warn('psignifit:boundWarning\n'
                         'The posterior marginal distribution of the parameter <width> can not be fully captured inside the estimation grid which is based on the prior\n'
-                        'The probability at the higher bound (i.e. the highest sampled value) is not near 0.\n'
+                        'The probability at the upper bound (i.e. the highest sampled value) is not near 0.\n'
                         'This indicates that your data is not sufficient to exclude higher widths than are included in the estimation space.\n'
                         'Either change the prior or ensure that the data is sufficient to constrain the posterior.\n'
                         'Refer to the paper or the manual for more info on this topic.')
