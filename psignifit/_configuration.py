@@ -138,7 +138,7 @@ class Configuration:
         if experiment_type == ExperimentType.N_AFC.value:
             if fixed_params is not None and 'gamma' in fixed_params:
                 warnings.warn(
-                    f'The parameter gamma was fixed to {fixed_params["gamma"]}. In {ExperimentType.N_AFC.value} experiments gamma must be fixed to 1/n. Ignoring fixed gamma.')
+                    f'The parameter gamma was fixed to {fixed_params["gamma"]}. In {ExperimentType.N_AFC.value} experiments gamma is automatically fixed to 1/n. Ignoring fixed gamma.')
         if experiment_type != ExperimentType.EQ_ASYMPTOTE.value:
             if fixed_params is not None:
                 if 'gamma' in fixed_params:
