@@ -189,10 +189,10 @@ def plot_marginal(result: Result,
 
     x = np.asarray(result.parameter_values[parameter])
     if plot_estimate:
-        CIs = np.asarray(result.confidence_intervals[parameter])
-        for CI in CIs:
-            ci_x = np.r_[CI[0], x[(x >= CI[0]) & (x <= CI[1])], CI[1]]
-            ax.fill_between(ci_x, np.zeros_like(ci_x), np.interp(ci_x, x, marginal), color=line_color, alpha=0.5)
+        # takes first confidence interval from the list
+        CI= np.asarray(result.confidence_intervals[parameter][0])
+        ci_x = np.r_[CI[0], x[(x >= CI[0]) & (x <= CI[1])], CI[1]]
+        ax.fill_between(ci_x, np.zeros_like(ci_x), np.interp(ci_x, x, marginal), color=line_color, alpha=0.5)
 
         param_value = result.parameter_estimate[parameter]
         ax.plot([param_value] * 2, [0, np.interp(param_value, x, marginal)], color='#000000')
@@ -201,8 +201,8 @@ def plot_marginal(result: Result,
         ax.plot(x, result.prior_values[parameter], ls='--', color=prior_color, clip_on=False)
 
     ax.plot(x, marginal, lw=line_width, c=line_color, clip_on=False)
-    ax.set_xlabel(x_label)
-    ax.set_ylabel(y_label)
+    ax.set_xlabel(x_label, fontsize=14)
+    ax.set_ylabel(y_label, fontsize=14)
     ax.spines[['top', 'right']].set_visible(False)
 
     return ax
