@@ -45,7 +45,9 @@ def plot_psychometric_function(result: Result,  # noqa: C901, this function is t
     x_data = data[:, 0]
     if plot_data:
         y_data = data[:, 1] / data[:, 2]
-        size = np.sqrt(data_size / 2 * data[:, 2])
+        # the size is proportional to the sqrt of the data size, as in the MATLAB version.
+        # We added a factor of 10 to make visually similar to the MATLAB version
+        size = np.sqrt(data_size / data[:, 2])*1000
         ax.scatter(x_data, y_data, s=size, color=data_color, marker='.', clip_on=False)
 
     sigmoid = config.make_sigmoid()
