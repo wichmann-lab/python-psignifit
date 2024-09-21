@@ -110,12 +110,12 @@ def _plot_residuals(x_values: np.ndarray, x_label: str, result: Result, ax: matp
     x = np.linspace(x_values.min(), x_values.max(), 1000)
 
     ax.plot(x_values, deviance, 'k.', ms=10, clip_on=False)
-    linefit = np.polyfit(x_values, deviance, 1)
-    ax.plot(x, np.polyval(linefit, x), 'k-', clip_on=False)
-    linefit = np.polyfit(x_values, deviance, 2)
-    ax.plot(x, np.polyval(linefit, x), 'k--', clip_on=False)
-    linefit = np.polyfit(x_values, deviance, 3)
-    ax.plot(x, np.polyval(linefit, x), 'k:', clip_on=False)
+    devfit = np.polyfit(x_values, deviance, 1)
+    ax.plot(x, np.polyval(devfit, x), 'k-', clip_on=False)
+    devfit = np.polyfit(x_values, deviance, 2)
+    ax.plot(x, np.polyval(devfit, x), 'k--', clip_on=False)
+    devfit = np.polyfit(x_values, deviance, 3)
+    ax.plot(x, np.polyval(devfit, x), 'k:', clip_on=False)
 
     ax.set_xlabel(x_label, fontsize=14)
     ax.set_ylabel('Deviance', fontsize=14)
@@ -139,6 +139,9 @@ def plot_modelfit(result: Result) -> matplotlib.figure.Figure:
     The right plot shows the Deviance residuals against "time", e.g. against
     the order of the passed blocks. A trend in this plot would indicate
     learning/ changes in performance over time.
+    
+    For the central and right plot, dashes lines depict a line, qudratic and 
+    cubic fit; these should help in detecting systematic deviations from zero.
     """
     fig = plt.figure(figsize=(15, 5))
 
@@ -170,8 +173,8 @@ def plot_marginal(result: Result,
     """ Plots the marginal for a single dimension.
 
     Args:
-        result: should be a result struct from the main psignifit routine
-        dim: The parameter to plot. 'threshold', 'width', 'lambda', 'gamma', 'eta'
+        result: should be a result objeect from the main psignifit routine
+        parameter: The name of the parameter to plot,'threshold', 'width', 'lambda', 'gamma', 'eta'
     """
     if ax is None:
         ax = plt.gca()
@@ -215,10 +218,15 @@ def plot_prior(result: Result,
                line_color: Union[str, List[float], np.ndarray] = '#0069AA',  # blue
                line_width: float = 2,
                marker_size: float = 30):
-    """ Plot the priors on the different parameters.
-
-    The coloured psychometric functions correspond to the 0%, 25%, 75% and 100%
-    quantiles of the prior.
+    """ Plot the priors for the threshold, width and lambda parameters.
+    
+    The upper pannels show the priors. The lower pannels show a set of psychometric 
+    functions at selected prior values; these values are shown as markers in the 
+    upper row pannels.
+    
+    The black function/markers indicate the value of the estimated psychometric function
+    from the data. The coloured function/markers correspond to the 
+    0%, 25%, 75% and 100% quantiles of the prior.
     """
     fig = plt.figure(figsize=(12, 8))
     
@@ -276,7 +284,8 @@ def plot_2D_margin(result: Result,
                    first_param: str,
                    second_param: str,
                    ax: matplotlib.axes.Axes = None):
-    """ Constructs a 2 dimensional marginal plot of the posterior density. """
+    """ Constructs a 2 dimensional marginal plot of the posterior density for
+    two given parameters."""
     if ax is None:
         ax = plt.gca()
     if result.debug=={}:
@@ -301,7 +310,7 @@ def plot_2D_margin(result: Result,
 def plot_bias_analysis(data: np.ndarray, compare_data: np.ndarray, **kwargs) -> None:
     """ Analyse and plot 2-AFC dataset bias.
 
-    This short analysis is used to see whether two 2AFC datasets have a bias and
+    This analysis is used to see whether two 2AFC datasets have a bias and
     whether it can be explained with a "finger bias" (a bias in guessing).
 
     It runs psignifit on the datasets `data`, `compare_data`, and
