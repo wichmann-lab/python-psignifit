@@ -22,8 +22,7 @@ def get_std_options():
     options = dict()
     options['sigmoid'] = 'norm'  # choose a cumulative Gauss as the sigmoid
     options['experiment_type'] = '2AFC'
-    options['fixed_parameters'] = {'lambda': 0.01,
-                                   'gamma': 0.5}
+    options['fixed_parameters'] = {'lambda': 0.01}
     return options
 
 
