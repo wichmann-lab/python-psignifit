@@ -30,7 +30,7 @@ def get_std_options():
 def test_fit_basic(data):
     options = get_std_options()
     res = psignifit(data, **options)
-    param = res.parameter_estimate
+    param = res.parameter_fit
     assert isclose(param['threshold'], 0.0046, abs_tol=0.0001)
     assert isclose(param['width'], 0.0045, abs_tol=0.0001)
     assert isclose(param['lambda'], 0.01, abs_tol=0.0001)
@@ -78,7 +78,7 @@ def test_bias_analysis(data):
 def test_fixed_parameters(data):
     options = get_std_options()
     res = psignifit(data, **options)
-    estim_param = res.parameter_estimate
+    estim_param = res.parameter_fit
     fixed_param = res.configuration.fixed_parameters
     all_param_values = res.parameter_values
 

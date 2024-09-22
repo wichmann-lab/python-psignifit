@@ -68,7 +68,7 @@ def parameter_bounds(min_width: float, experiment_type: ExperimentType, stimulus
     return bounds_dict
 
 
-def masked_parameter_bounds(grid: Dict[str, Optional[np.ndarray]], mesh_mask: np.ndarray) -> ParameterBounds:
+def masked_parameter_bounds(grid: Dict[str, np.ndarray], mesh_mask: np.ndarray) -> ParameterBounds:
     """ Calculate the bounds as the first and last parameter value under the mask.
 
     Args:

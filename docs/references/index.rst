@@ -15,6 +15,7 @@ This is the class and function reference of psignifit.
 
     psignifit
     pool_blocks
+    config_from_matlab
     Configuration
     Result
 

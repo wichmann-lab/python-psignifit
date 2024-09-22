@@ -8,6 +8,8 @@ import subprocess
 
 # import here the main function
 from .psignifit import psignifit
+from ._configuration import Configuration
 from ._pooling import pool_blocks
 from ._configuration import Configuration
 from ._result import Result
+from ._matlab import config_from_matlab
