@@ -289,14 +289,14 @@ def plot_2D_margin(result: Result,
     if ax is None:
         ax = plt.gca()
     if result.debug=={}:
-        raise ValueError("Expects the posterior mass saved in result, got None. You could try psignifit(debug=True).")
+        raise ValueError("Expects posterior_mass in result, got None. You could try psignifit(debug=True).")
 
     parameter_indices = {param: i for i, param in enumerate(sorted(result.parameter_estimate.keys()))}
     other_param_ix = tuple(i for param, i in parameter_indices.items()
                            if param != first_param and param != second_param)
     marginal_2d = np.sum(result.debug['posteriors'], axis=other_param_ix)
     if len(np.squeeze(marginal_2d).shape) != 2 or np.any(np.array(marginal_2d.shape) == 1):
-        raise ValueError('The marginal is not two-dimensional. Were the parameters fixed during optimization? If so, then use plot_marginal() to obtain the marginal for the unfixed parameter.')
+        raise ValueError('The marginal is not two-dimensional. Were the parameters fixed during optimization? If so, then change the arguments to parametes that were unfixed, or use plot_marginal() to obtain a 1D marginal for a parameter.')
 
     if parameter_indices[first_param] > parameter_indices[second_param]:
         marginal_2d = np.transpose(marginal_2d)
