@@ -220,9 +220,9 @@ def plot_prior(result: Result,
                marker_size: float = 30):
     """ Plot the priors for the threshold, width and lambda parameters.
     
-    The upper pannels show the priors. The lower pannels show a set of psychometric 
+    The upper panels show the priors. The lower panels show a set of psychometric 
     functions at selected prior values; these values are shown as markers in the 
-    upper row pannels.
+    upper row panels.
     
     The black function/markers indicate the value of the estimated psychometric function
     from the data. The coloured function/markers correspond to the 
