@@ -36,7 +36,7 @@ class Configuration:
     for `foobar`.
     """
     beta_prior: int = 10
-    CI_method: str = 'project'
+    CI_method: str = 'percentiles'
     confP: Tuple[float, float, float] = (.95, .9, .68)
     estimate_type: str = 'MAP'
     experiment_type: str = ExperimentType.YES_NO.value
@@ -95,6 +95,11 @@ class Configuration:
                 attribute_value = getattr(self, attribute.name)
                 sanity_check_method(attribute_value)
         self.check_experiment_type_matches_fixed_parameters(self.fixed_parameters, self.experiment_type)
+
+    def check_CI_method(self, value):
+        supported = ('percentiles', 'project')
+        if value not in supported:
+            raise PsignifitException(f'CI method {value} unknown. Supported methods: {supported}.')
 
     def check_bounds(self, value):
         if value is not None:
