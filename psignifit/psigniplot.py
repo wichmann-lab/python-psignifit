@@ -173,7 +173,7 @@ def plot_marginal(result: Result,
     """ Plots the marginal for a single dimension.
 
     Args:
-        result: should be a result objeect from the main psignifit routine
+        result: should be a result object from the main psignifit routine
         parameter: The name of the parameter to plot,'threshold', 'width', 'lambda', 'gamma', 'eta'
     """
     if ax is None:
