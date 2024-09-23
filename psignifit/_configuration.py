@@ -139,6 +139,18 @@ class Configuration:
             if fixed_params is not None and 'gamma' in fixed_params:
                 warnings.warn(
                     f'The parameter gamma was fixed to {fixed_params["gamma"]}. In {ExperimentType.N_AFC.value} experiments gamma is automatically fixed to 1/n. Ignoring fixed gamma.')
+        if experiment_type == ExperimentType.EQ_ASYMPTOTE.value:
+            if fixed_params is not None:
+                if 'gamma' in fixed_params:
+                    pass # we assume the user knows what they are doing
+                if 'lambda' in fixed_params:
+                    pass # we assume the user knows what they are doing
+                if 'lambda' in fixed_params and 'gamma' in fixed_params:
+                    if fixed_params['gamma'] != fixed_params['lambda']:
+                        raise PsignifitException(
+                            f'The parameters lambda {fixed_params["lambda"]} and'
+                            f' gamma {fixed_params["gamma"]} were fixed to different values.'
+                            f' In {experiment_type} experiments gamma and lambda need to be equal. ')
 
 
     def check_experiment_type(self, value):
