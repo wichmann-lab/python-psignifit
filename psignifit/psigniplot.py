@@ -161,6 +161,46 @@ def plot_modelfit(result: Result) -> matplotlib.figure.Figure:
     return fig
 
 
+def plot_bayes(result: Result) -> matplotlib.figure.Figure:
+    """ Plot all posteriors 
+
+    Plots 2D marginals for all combinations of parameters.
+    """
+    if result.debug=={}:
+        raise ValueError("Expects posterior_mass in result, got None. You could try psignifit(debug=True).")
+        
+    fig, axes = plt.subplots(4, 4, figsize=(14, 12))
+    panel_indices = {'threshold': 0,
+                     'width': 1,
+                     'lambda': 2,
+                     'gamma': 3,
+                     'eta': 4}
+    for yparam, i in panel_indices.items():
+        for xparam, j in panel_indices.items():
+            if yparam == xparam or i>j:
+                continue
+            try:
+                plot_2D_margin(result, yparam, xparam, ax=axes[i][j-1])
+            except ValueError:
+                if len(result.parameter_values[xparam])==1:
+                    fixedparam = xparam
+                elif len(result.parameter_values[yparam])==1:
+                    fixedparam = yparam
+                axes[i][j-1].text(0.5, 0.5, 
+                                  f"Parameter {fixedparam} was\nfixed during fitting,\nthere is no data to show", 
+                                  ha='center')
+                axes[i][j-1].axis("off")
+
+    # hide unused axes
+    axes[1][0].axis("off")
+    axes[2][0].axis("off")
+    axes[3][0].axis("off")
+    axes[2][1].axis("off")
+    axes[3][1].axis("off")
+    axes[3][2].axis("off")
+    plt.tight_layout()
+    return fig
+
 def plot_marginal(result: Result,
                   parameter: str,
                   ax: matplotlib.axes.Axes = None,
@@ -315,7 +355,7 @@ def plot_2D_margin(result: Result,
         marginal_2d = np.transpose(marginal_2d)
     extent = [result.parameter_values[second_param][0], result.parameter_values[second_param][-1],
               result.parameter_values[first_param][0], result.parameter_values[first_param][-1]]
-    ax.imshow(marginal_2d, extent=extent, cmap='OrRd_r',  aspect='auto')
+    ax.imshow(marginal_2d, extent=extent, cmap='Reds_r',  aspect='auto')
     ax.set_xlabel(_parameter_label(second_param))
     ax.set_ylabel(_parameter_label(first_param))
 
