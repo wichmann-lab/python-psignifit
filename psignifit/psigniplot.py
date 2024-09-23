@@ -289,20 +289,20 @@ def plot_2D_margin(result: Result,
     if ax is None:
         ax = plt.gca()
     if result.debug=={}:
-        raise ValueError("Expects posterior_mass in result, got None. You could try psignifit(debug=True).")
+        raise ValueError("Expects the posterior mass saved in result, got None. You could try psignifit(debug=True).")
 
     parameter_indices = {param: i for i, param in enumerate(sorted(result.parameter_estimate.keys()))}
     other_param_ix = tuple(i for param, i in parameter_indices.items()
                            if param != first_param and param != second_param)
     marginal_2d = np.sum(result.debug['posteriors'], axis=other_param_ix)
-    if len(marginal_2d.shape) != 2 or np.any(marginal_2d.shape == 1):
-        raise ValueError(f'The marginal is not two-dimensional. Were the parameters fixed during optimization?')
+    if len(np.squeeze(marginal_2d).shape) != 2 or np.any(np.array(marginal_2d.shape) == 1):
+        raise ValueError('The marginal is not two-dimensional. Were the parameters fixed during optimization? If so, then use plot_marginal() to obtain the marginal for the unfixed parameter.')
 
     if parameter_indices[first_param] > parameter_indices[second_param]:
-        (second_param, first_param) = (first_param, second_param)
+        marginal_2d = np.transpose(marginal_2d)
     extent = [result.parameter_values[second_param][0], result.parameter_values[second_param][-1],
               result.parameter_values[first_param][0], result.parameter_values[first_param][-1]]
-    ax.imshow(marginal_2d, extent=extent)
+    ax.imshow(marginal_2d, extent=extent, cmap='OrRd_r',  aspect='auto')
     ax.set_xlabel(_parameter_label(second_param))
     ax.set_ylabel(_parameter_label(first_param))
 
