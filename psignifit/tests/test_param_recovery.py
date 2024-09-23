@@ -45,13 +45,13 @@ def test_parameter_recovery_2afc_eta(random_state, eta):
     gamma = 0.5  # 2-AFC
     lambda_ = 0.0232
 
-    nsteps = 100
+    nsteps = 200
     stimulus_level = np.linspace(stim_range[0], stim_range[1], nsteps)
 
     perccorr = psychometric_with_eta(stimulus_level, threshold, width, gamma, lambda_,
                             sigmoid, eta=eta, random_state=random_state)
 
-    ntrials = np.ones(nsteps) * 500
+    ntrials = np.ones(nsteps) * 10000
     hits = (perccorr * ntrials).astype(int)
     data = np.dstack([stimulus_level, hits, ntrials]).squeeze()
 
