@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.axes
 import numpy as np
 import scipy.stats
-from scipy.signal import convolve
+from scipy.special import ndtri
 
 from . import psignifit
 from ._typing import ExperimentType
@@ -161,6 +161,46 @@ def plot_modelfit(result: Result) -> matplotlib.figure.Figure:
     return fig
 
 
+def plot_bayes(result: Result) -> matplotlib.figure.Figure:
+    """ Plot all posteriors 
+
+    Plots 2D marginals for all combinations of parameters.
+    """
+    if result.debug=={}:
+        raise ValueError("Expects posterior_mass in result, got None. You could try psignifit(debug=True).")
+        
+    fig, axes = plt.subplots(4, 4, figsize=(14, 12))
+    panel_indices = {'threshold': 0,
+                     'width': 1,
+                     'lambda': 2,
+                     'gamma': 3,
+                     'eta': 4}
+    for yparam, i in panel_indices.items():
+        for xparam, j in panel_indices.items():
+            if yparam == xparam or i>j:
+                continue
+            try:
+                plot_2D_margin(result, yparam, xparam, ax=axes[i][j-1])
+            except ValueError:
+                if len(result.parameter_values[xparam])==1:
+                    fixedparam = xparam
+                elif len(result.parameter_values[yparam])==1:
+                    fixedparam = yparam
+                axes[i][j-1].text(0.5, 0.5, 
+                                  f"Parameter {fixedparam} was\nfixed during fitting,\nthere is no data to show", 
+                                  ha='center')
+                axes[i][j-1].axis("off")
+
+    # hide unused axes
+    axes[1][0].axis("off")
+    axes[2][0].axis("off")
+    axes[3][0].axis("off")
+    axes[2][1].axis("off")
+    axes[3][1].axis("off")
+    axes[3][2].axis("off")
+    plt.tight_layout()
+    return fig
+
 def plot_marginal(result: Result,
                   parameter: str,
                   ax: matplotlib.axes.Axes = None,
@@ -235,34 +275,46 @@ def plot_prior(result: Result,
     priors = result.prior_values
     priors_func = result.debug['priors']
     sigmoid = result.configuration.make_sigmoid()
-    
+    width_alpha = result.configuration.width_alpha
 
     colors = ['k', [1, 200 / 255, 0], 'r', 'b', 'g']
     stimulus_range = result.configuration.stimulus_range
     if stimulus_range is None:
         stimulus_range = [data[:, 0].min(), data[:, 0].max()]
     width = stimulus_range[1] - stimulus_range[0]
-    stimulus_range = [stimulus_range[0] - .5 * width , stimulus_range[1] + .5 * width]
+
+    # get borders for width
+    # Cfactor, width_min and width_max are used to determine the range
+    # in which we show the width prior.
+    widthmin = 1e-10
+    Cfactor   = (ndtri(.95) - ndtri(.05))/(ndtri(1-width_alpha) - ndtri(width_alpha))
+    widthmax = width
 
     titles = {'threshold': 'Threshold',
               'width': 'Width',
-              'lambda': 'Lapse Rate \u03BB'}
+              'lambda': '\u03BB'}
 
     parameter_keys = ['threshold', 'width', 'lambda']
-    sigmoid_x = np.linspace(stimulus_range[0], stimulus_range[1], 10000)
+    
     sigmoid_params = {param: result.parameter_estimate[param] for param in parameter_keys}
     for i, param in enumerate(parameter_keys):
-        prior_x = params[param]
-        weights = convolve(np.diff(prior_x), np.array([0.5, 0.5]))
-        cumprior = np.cumsum(priors[param] * weights)
-        x_percentiles = [result.parameter_estimate[param], min(prior_x), prior_x[-cumprior[cumprior >= .25].size],
-                         prior_x[-cumprior[cumprior >= .75].size], max(prior_x)]
-        x_priors = np.linspace(min(prior_x)*-1.0, max(prior_x)*3, 1000)
-        
+        if param =='threshold':
+            prior_x = np.linspace(stimulus_range[0]-0.5*width, stimulus_range[1]+0.5*width, 10000)
+            sigmoid_x = np.linspace(min(prior_x), max(prior_x), 10000)
+        elif param == 'width':
+            prior_x = np.linspace(widthmin, 3./Cfactor*widthmax, 10000)
+        elif param == 'lambda':
+            prior_x = np.linspace(0,.5,10000)
+
+        x_percentiles = [result.parameter_estimate[param], 
+                         min(prior_x), 
+                         np.quantile(prior_x, q=0.25),
+                         np.quantile(prior_x, q=0.75), 
+                         max(prior_x)]
+                
         plt.subplot(2, 3, i + 1)
-        plt.plot(x_priors, priors_func[param](x_priors), lw=line_width, c=line_color)
-        plt.scatter(x_percentiles, np.interp(x_percentiles, prior_x, priors[param]), s=marker_size, c=colors)
-        plt.xlabel('Stimulus Level')
+        plt.plot(prior_x, priors_func[param](prior_x), lw=line_width, c=line_color)
+        plt.scatter(x_percentiles, np.interp(x_percentiles, prior_x, priors_func[param](prior_x)), s=marker_size, c=colors)
         plt.ylabel('Density')
         plt.title(titles[param])
         plt.gca().spines[['top', 'right']].set_visible(False)
@@ -277,6 +329,7 @@ def plot_prior(result: Result,
         plt.scatter(data[:, 0], np.zeros(data[:, 0].shape), s=marker_size*.75, c='k')
         plt.xlabel('Stimulus Level')
         plt.ylabel('Proportion Correct')
+        plt.xlim(min(sigmoid_x), max(sigmoid_x))
         plt.gca().spines[['top', 'right']].set_visible(False)
 
 
@@ -295,14 +348,14 @@ def plot_2D_margin(result: Result,
     other_param_ix = tuple(i for param, i in parameter_indices.items()
                            if param != first_param and param != second_param)
     marginal_2d = np.sum(result.debug['posteriors'], axis=other_param_ix)
-    if len(marginal_2d.shape) != 2 or np.any(marginal_2d.shape == 1):
-        raise ValueError(f'The marginal is not two-dimensional. Were the parameters fixed during optimization?')
+    if len(np.squeeze(marginal_2d).shape) != 2 or np.any(np.array(marginal_2d.shape) == 1):
+        raise ValueError('The marginal is not two-dimensional. Were the parameters fixed during optimization? If so, then change the arguments to parametes that were unfixed, or use plot_marginal() to obtain a 1D marginal for a parameter.')
 
     if parameter_indices[first_param] > parameter_indices[second_param]:
-        (second_param, first_param) = (first_param, second_param)
+        marginal_2d = np.transpose(marginal_2d)
     extent = [result.parameter_values[second_param][0], result.parameter_values[second_param][-1],
               result.parameter_values[first_param][0], result.parameter_values[first_param][-1]]
-    ax.imshow(marginal_2d, extent=extent)
+    ax.imshow(marginal_2d, extent=extent, cmap='Reds_r',  aspect='auto')
     ax.set_xlabel(_parameter_label(second_param))
     ax.set_ylabel(_parameter_label(first_param))
 
