@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.axes
 import numpy as np
 import scipy.stats
-from scipy.signal import convolve
+from scipy.special import ndtri
 
 from . import psignifit
 from ._typing import ExperimentType
@@ -235,34 +235,46 @@ def plot_prior(result: Result,
     priors = result.prior_values
     priors_func = result.debug['priors']
     sigmoid = result.configuration.make_sigmoid()
-    
+    width_alpha = result.configuration.width_alpha
 
     colors = ['k', [1, 200 / 255, 0], 'r', 'b', 'g']
     stimulus_range = result.configuration.stimulus_range
     if stimulus_range is None:
         stimulus_range = [data[:, 0].min(), data[:, 0].max()]
     width = stimulus_range[1] - stimulus_range[0]
-    stimulus_range = [stimulus_range[0] - .5 * width , stimulus_range[1] + .5 * width]
+
+    # get borders for width
+    # Cfactor, width_min and width_max are used to determine the range
+    # in which we show the width prior.
+    widthmin = 1e-10
+    Cfactor   = (ndtri(.95) - ndtri(.05))/(ndtri(1-width_alpha) - ndtri(width_alpha))
+    widthmax = width
 
     titles = {'threshold': 'Threshold',
               'width': 'Width',
-              'lambda': 'Lapse Rate \u03BB'}
+              'lambda': '\u03BB'}
 
     parameter_keys = ['threshold', 'width', 'lambda']
-    sigmoid_x = np.linspace(stimulus_range[0], stimulus_range[1], 10000)
+    
     sigmoid_params = {param: result.parameter_estimate[param] for param in parameter_keys}
     for i, param in enumerate(parameter_keys):
-        prior_x = params[param]
-        weights = convolve(np.diff(prior_x), np.array([0.5, 0.5]))
-        cumprior = np.cumsum(priors[param] * weights)
-        x_percentiles = [result.parameter_estimate[param], min(prior_x), prior_x[-cumprior[cumprior >= .25].size],
-                         prior_x[-cumprior[cumprior >= .75].size], max(prior_x)]
-        x_priors = np.linspace(min(prior_x)*-1.0, max(prior_x)*3, 1000)
-        
+        if param =='threshold':
+            prior_x = np.linspace(stimulus_range[0]-0.5*width, stimulus_range[1]+0.5*width, 10000)
+            sigmoid_x = np.linspace(min(prior_x), max(prior_x), 10000)
+        elif param == 'width':
+            prior_x = np.linspace(widthmin, 3./Cfactor*widthmax, 10000)
+        elif param == 'lambda':
+            prior_x = np.linspace(0,.5,10000)
+
+        x_percentiles = [result.parameter_estimate[param], 
+                         min(prior_x), 
+                         np.quantile(prior_x, q=0.25),
+                         np.quantile(prior_x, q=0.75), 
+                         max(prior_x)]
+                
         plt.subplot(2, 3, i + 1)
-        plt.plot(x_priors, priors_func[param](x_priors), lw=line_width, c=line_color)
-        plt.scatter(x_percentiles, np.interp(x_percentiles, prior_x, priors[param]), s=marker_size, c=colors)
-        plt.xlabel('Stimulus Level')
+        plt.plot(prior_x, priors_func[param](prior_x), lw=line_width, c=line_color)
+        plt.scatter(x_percentiles, np.interp(x_percentiles, prior_x, priors_func[param](prior_x)), s=marker_size, c=colors)
         plt.ylabel('Density')
         plt.title(titles[param])
         plt.gca().spines[['top', 'right']].set_visible(False)
@@ -277,6 +289,7 @@ def plot_prior(result: Result,
         plt.scatter(data[:, 0], np.zeros(data[:, 0].shape), s=marker_size*.75, c='k')
         plt.xlabel('Stimulus Level')
         plt.ylabel('Proportion Correct')
+        plt.xlim(min(sigmoid_x), max(sigmoid_x))
         plt.gca().spines[['top', 'right']].set_visible(False)
 
 
