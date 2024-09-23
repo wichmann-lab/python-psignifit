@@ -9,7 +9,7 @@ from psignifit import Configuration
 from psignifit._priors import default_prior
 from psignifit._parameter import parameter_bounds
 from psignifit import _posterior
-from psignifit import _utils
+from psignifit._utils import fp_error_handler
 
 from .data import DATA
 
@@ -44,6 +44,7 @@ def setup_experiment(**kwargs):
         ("equal asymptote", (20, 10, 30, 40), -560.8881),  # gamma is none in grid
     ]
 )
+@fp_error_handler(over='ignore', invalid='ignore')
 def test_log_posterior(experiment_type, result_shape, result_max):
     data, sigmoid, priors, grid = setup_experiment(experiment_type=experiment_type)
     if experiment_type == "equal asymptote":
@@ -55,6 +56,7 @@ def test_log_posterior(experiment_type, result_shape, result_max):
     np.testing.assert_allclose(log_pp.max(), result_max, rtol=1e-5)
 
 
+@fp_error_handler(over='ignore', invalid='ignore')
 def test_log_posterior_zero_eta():
     data, sigmoid, priors, grid = setup_experiment(experiment_type='yes/no')
     grid['eta'] = np.array([0])
@@ -76,6 +78,7 @@ MAX = .097163
         ("equal asymptote", (20, 10, 30, 40), MAX),  # gamma is none in grid
     ]
 )
+@fp_error_handler(over='ignore', invalid='ignore')
 def test_posterior_grid(experiment_type, result_shape, result_max):
     data, sigmoid, priors, grid = setup_experiment(experiment_type=experiment_type)
 
@@ -96,6 +99,7 @@ def test_posterior_grid(experiment_type, result_shape, result_max):
         ("equal asymptote", (20, 10, 30, 40), MAX),  # gamma is none in grid
     ]
 )
+@fp_error_handler(over='ignore', invalid='ignore')
 def test_max_posterior(experiment_type, result_shape, result_max):
     data, sigmoid, priors, grid = setup_experiment(experiment_type=experiment_type)
     __, init_param = _posterior.posterior_grid(data, sigmoid, priors, grid)
@@ -114,6 +118,7 @@ def test_max_posterior(experiment_type, result_shape, result_max):
         assert 'gamma' not in max_param
 
 
+@fp_error_handler(over='ignore', invalid='ignore')
 def test_integral_weights():
     # Simple case
     weights = psignifit._posterior.integral_weights([[0, 1], [0, 1], [0, 1]])

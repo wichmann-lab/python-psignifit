@@ -4,8 +4,10 @@ import pytest
 from psignifit import psignifit
 from psignifit.sigmoids import ALL_SIGMOID_NAMES
 from psignifit.tools import psychometric, psychometric_with_eta
+from psignifit._utils import fp_error_handler
 
 @pytest.mark.parametrize("sigmoid", list(ALL_SIGMOID_NAMES))
+@fp_error_handler(over='ignore', invalid='ignore')
 def test_parameter_recovery_2afc(sigmoid):
     width = 0.3
     stim_range = [0.01, 0.01 + width * 1.1]
@@ -37,6 +39,7 @@ def test_parameter_recovery_2afc(sigmoid):
 
 
 @pytest.mark.parametrize("eta", [0.1, 0.2, 0.3])
+@fp_error_handler(over='ignore', invalid='ignore')
 def test_parameter_recovery_2afc_eta(random_state, eta):
     sigmoid = "norm"
     width = 0.1
@@ -72,6 +75,7 @@ def test_parameter_recovery_2afc_eta(random_state, eta):
 
 # threshold and width can not be fixed.
 @pytest.mark.parametrize("fixed_param",  ['lambda', 'gamma', 'eta', 'threshold', 'width'])
+@fp_error_handler(over='ignore', invalid='ignore')
 def test_parameter_recovery_fixed_params(fixed_param):
     sigmoid = "norm"
     width = 0.2000000000123
@@ -117,6 +121,7 @@ def test_parameter_recovery_fixed_params(fixed_param):
 
 
 @pytest.mark.parametrize("sigmoid", list(ALL_SIGMOID_NAMES))
+@fp_error_handler(over='ignore', invalid='ignore')
 def test_parameter_recovery_YN(sigmoid):
     width = 0.3
     stim_range = [0.001, 0.001 + width * 1.1]
@@ -149,6 +154,7 @@ def test_parameter_recovery_YN(sigmoid):
 
 
 @pytest.mark.parametrize("sigmoid", list(ALL_SIGMOID_NAMES))
+@fp_error_handler(over='ignore', invalid='ignore')
 def test_parameter_recovery_eq_asymptote(sigmoid):
     width = 0.3
     stim_range = [0.001, 0.001 + width * 1.1]
