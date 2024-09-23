@@ -100,6 +100,10 @@ def test_set_width_min_wrong_type():
     with pytest.raises(PsignifitException):
         Configuration(width_min=(1, 2, 3))
 
+def test_set_wrong_CI_method():
+    with pytest.raises(PsignifitException):
+        Configuration(CI_method='something')
+
 
 def test_warning_for_2afc_and_wrong_gamma():
     sigmoid = "norm"
