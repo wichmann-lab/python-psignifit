@@ -1,13 +1,12 @@
 import dataclasses
-from typing import Any, Dict, Tuple, List, TextIO, Union, Optional
 import json
+from typing import Any, Dict, Tuple, List, TextIO, Union
 from pathlib import Path
 
 import numpy as np
 from numpy.typing import NDArray
 
 from ._configuration import Configuration
-from ._typing import ParameterGrid
 
 
 class NumpyEncoder(json.JSONEncoder):

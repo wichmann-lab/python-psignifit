@@ -56,7 +56,7 @@ class Configuration:
     width_alpha: float = 0.05
     width_min: Optional[float] = None
 
-    # attributes, if not specified, will be initialize based on others
+    # attributes, if not specified, will be initialized based on others
     bounds: Optional[Dict[str, Tuple[float, float]]] = None
     grid_steps: Dict[str, int] = dataclasses.field(default_factory=dict)
     steps_moving_bounds: Dict[str, int] = dataclasses.field(default_factory=dict)

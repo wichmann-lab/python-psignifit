@@ -1,10 +1,10 @@
 import dataclasses
 
-import pytest
 import numpy as np
+import pytest
 
-from psignifit import Result
 from psignifit import Configuration
+from psignifit import Result
 
 
 @pytest.fixture
