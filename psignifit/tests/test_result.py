@@ -92,6 +92,7 @@ def test_threshold_slope(result):
 
 
 def test_threshold_value():
+    # This test fails before PR #139
     lambda_ = 0.1
     gamma = 0.2
     width = 1.0 - 0.05*2
@@ -112,7 +113,6 @@ def test_threshold_value():
     result = _build_result(parameter_estimate, confidence_intervals)
 
     # The threshold at the middle of the gamma-to-(1-lambda) range must be 0.5 for a Gaussian
-    # (this used to fail before PR #139)
     thr, thr_ci = result.threshold(
         proportion_correct=np.array([(1 - lambda_ - gamma) / 2.0 + gamma]),
         unscaled=False, return_ci=True,
