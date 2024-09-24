@@ -61,11 +61,18 @@ def test_from_to_result_dict(result):
     assert result.configuration == Configuration.from_dict(result_dict['configuration'])
 
 
-def test_threshold_slope(result):
+def test_threshold_raises_error_when_outside_valid_range(result):
+    # proportion correct lower than gamma
+    proportion_correct = np.array([result.parameter_estimate['gamma'] / 2.0])
     with pytest.raises(ValueError):
-        #  PC outside of sigmoid
-        proportion_correct = np.linspace(1e-12, 1 - 1e-12, num=1000)
         result.threshold(proportion_correct)
+    # proportion correct higher than gamma
+    proportion_correct = np.array([result.parameter_estimate['lambda'] + 1e-4])
+    with pytest.raises(ValueError):
+        result.threshold(proportion_correct)
+
+
+def test_threshold_slope(result):
     proportion_correct = np.linspace(0.2, 0.5, num=1000)
     stimulus_levels, confidence_intervals = result.threshold(proportion_correct)
     np.testing.assert_allclose(result.slope(stimulus_levels),
