@@ -30,7 +30,7 @@ def test_sigmoid_by_name(sigmoid_name):
     s = sigmoids.sigmoid_by_name(sigmoid_name.upper())
     assert isinstance(s, sigmoids.Sigmoid)
 
-    s = sigmoids.sigmoid_by_name(sigmoid_name, PC=PC, alpha=ALPHA)
+    s = sigmoids.sigmoid_by_name(sigmoid_name, PC=0.2, alpha=0.132)
     assert isinstance(s, sigmoids.Sigmoid)
 
     assert sigmoid_name.startswith('neg_') == s.negative
@@ -44,16 +44,30 @@ def test_sigmoid_sanity_check(sigmoid_name):
     as well as rule of thumbs which can be derived from visual inspection
     of the sigmoid functions.
     """
-    sigmoid = sigmoids.sigmoid_by_name(sigmoid_name, PC=PC, alpha=ALPHA)
-    sigmoid.assert_sanity_checks(n_samples=100,
-                                 threshold=THRESHOLD_PARAM,
-                                 width=WIDTH_PARAM)
+
+    # fixed parameters for simple sigmoid sanity checks
+    PC = 0.4
+    threshold = 0.460172162722971  # Computed by hand to correspond to PC
+    alpha = 0.083
+
+    sigmoid = sigmoids.sigmoid_by_name(sigmoid_name, PC=PC, alpha=alpha)
+
+    assert_sanity_checks(
+        sigmoid,
+        n_samples=10000,
+        threshold=threshold,
+    )
 
 
 @pytest.mark.parametrize('sigmoid_name', sigmoids.ALL_SIGMOID_NAMES)
 def test_sigmoid_roundtrip(sigmoid_name):
-    sigmoid = sigmoids.sigmoid_by_name(sigmoid_name, PC=PC, alpha=ALPHA)
-    x = 0.5
-    y = sigmoid(x, THRESHOLD_PARAM, WIDTH_PARAM)
-    reverse_x = sigmoid.inverse(y, THRESHOLD_PARAM, WIDTH_PARAM)
-    assert np.isclose(x, reverse_x, atol=1e-6)
+    pc = 0.7
+    alpha = 0.12
+    threshold = 0.6
+    width = 0.6
+
+    sigmoid = sigmoids.sigmoid_by_name(sigmoid_name, PC=pc, alpha=alpha)
+    for x in np.linspace(0.1, 0.9, 10):
+        y = sigmoid(x, threshold, width)
+        reverse_x = sigmoid.inverse(y, threshold, width)
+        assert np.isclose(x, reverse_x, atol=1e-6)
