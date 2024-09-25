@@ -58,10 +58,6 @@ class Sigmoid:
         self.alpha = alpha
         self.negative = negative
         self.PC = PC
-        # if negative:
-        #     self.PC = 1 - PC
-        # else:
-        #     self.PC = PC
 
     def __eq__(self, o: object) -> bool:
         return (isinstance(o, self.__class__)
@@ -128,9 +124,7 @@ class Sigmoid:
             if (prop_correct < gamma).any() or (prop_correct > (1 - lambd)).any():
                 raise ValueError(f'prop_correct={prop_correct} has to be between {gamma} and {1 - lambd}.')
             prop_correct = (prop_correct - gamma) / (1 - lambd - gamma)
-        PC = self.PC
         if self.negative:
-            PC = 1 - PC
             prop_correct = 1 - prop_correct
 
         result = self._inverse(prop_correct, threshold, width)

@@ -4,7 +4,7 @@ import pytest
 from psignifit import sigmoids
 
 
-def assert_sanity_checks(sigmoid, n_samples: int, threshold: float):
+def assert_sanity_checks(sigmoid, threshold: float):
     """ Assert multiple sanity checks on this sigmoid implementation.
 
     These checks cannot completely assure the correct implementation of a sigmoid,
@@ -36,22 +36,25 @@ def assert_sanity_checks(sigmoid, n_samples: int, threshold: float):
     Raises:
         AssertionError if a sanity check fails.
     """
-    stimulus_levels = np.linspace(-0.3, 1.3, n_samples)
-    threshold_stimulus_level = threshold
+    stimulus_levels = np.linspace(-0.3, 1.3, 10000)
     width = 1 - sigmoid.alpha * 2
 
     # Test that sigmoid(threshold_stimulus_level) == threshold_percent_correct
-    expected_PC = sigmoid.PC
+    threshold_stimulus_level = threshold
+    # The threshold passed to the test was computed  by hand to correspond to PC on regular
+    # sigmoids. For negative sigmoids, we'll compare this threshold with the value at 1 - PC.
+    threshold_prop_correct = sigmoid.PC
     if sigmoid.negative:
-        expected_PC = 1 - sigmoid.PC
-    np.testing.assert_allclose(sigmoid(threshold_stimulus_level, threshold, width), expected_PC)
+        threshold_prop_correct = 1 - sigmoid.PC
+    prop_correct = sigmoid(threshold_stimulus_level, threshold, width)
+    np.testing.assert_allclose(prop_correct, threshold_prop_correct)
 
     # Test that the width is equal to the
     # |X_L - X_R| == WIDTH, with
     # with sigmoid(X_L) == ALPHA
     # and  sigmoid(X_R) == 1 - ALPHA
     prop_correct = sigmoid(stimulus_levels, threshold, width)
-    # When the sigmoid is negative, it is decreasing so we compute the width on 1-prop_correct
+    # When the sigmoid is negative, it is decreasing, so we compute the width on 1-prop_correct
     # (Alternatively, we could have used `argmax` and swapped the indices)
     if sigmoid.negative:
         prop_correct = 1 - prop_correct
@@ -62,19 +65,14 @@ def assert_sanity_checks(sigmoid, n_samples: int, threshold: float):
 
     # Inverse sigmoid at threshold proportion correct (y-axis)
     # Expects the threshold stimulus level (x-axis).
-    stimulus_level_from_inverse = sigmoid.inverse(expected_PC,
+    stimulus_level_from_inverse = sigmoid.inverse(threshold_prop_correct,
                                                   threshold=threshold,
                                                   width=width)
     np.testing.assert_allclose(stimulus_level_from_inverse, threshold_stimulus_level)
-    # Expects inverse(value(x)) == x
-    y = sigmoid(stimulus_levels, threshold=threshold, width=width)
-    np.testing.assert_allclose(stimulus_levels,
-                               sigmoid.inverse(y, threshold=threshold, width=width),
-                               atol=1e-9)
 
-    slope = sigmoid.slope(stimulus_levels, threshold=threshold, width=width, gamma=0, lambd=0)
     # Expects maximal slope at a medium stimulus level
-    #assert 0.4 * len(slope) < np.argmax(np.abs(slope)) < 0.6 * len(slope)
+    slope = sigmoid.slope(stimulus_levels, threshold=threshold, width=width, gamma=0, lambd=0)
+    assert 0.4 * len(slope) < np.argmax(np.abs(slope)) < 0.6 * len(slope)
     # Expects slope to be all positive/negative for standard/decreasing sigmoid
     if sigmoid.negative:
         assert np.all(slope < 0)
@@ -117,16 +115,13 @@ def test_sigmoid_sanity_check(sigmoid_name):
 
     # fixed parameters for simple sigmoid sanity checks
     PC = 0.4
-    threshold = 0.460172162722971  # Computed by hand to correspond to PC
+    # Threshold computed by hand to correspond to PC (for negative sigmoids, we'll compare this
+    # threshold with the value at 1 - PC)
+    threshold = 0.460172162722971
     alpha = 0.083
 
     sigmoid = sigmoids.sigmoid_by_name(sigmoid_name, PC=PC, alpha=alpha)
-
-    assert_sanity_checks(
-        sigmoid,
-        n_samples=10000,
-        threshold=threshold,
-    )
+    assert_sanity_checks(sigmoid, threshold=threshold)
 
 
 @pytest.mark.parametrize('sigmoid_name', sigmoids.ALL_SIGMOID_NAMES)
@@ -137,7 +132,7 @@ def test_sigmoid_roundtrip(sigmoid_name):
     width = 0.6
 
     sigmoid = sigmoids.sigmoid_by_name(sigmoid_name, PC=pc, alpha=alpha)
-    for x in np.linspace(0.1, 0.9, 10):
-        y = sigmoid(x, threshold, width)
-        reverse_x = sigmoid.inverse(y, threshold, width)
-        assert np.isclose(x, reverse_x, atol=1e-6)
+    x = np.linspace(0.1, 0.9, 10)
+    y = sigmoid(x, threshold, width)
+    reverse_x = sigmoid.inverse(y, threshold, width)
+    np.testing.assert_allclose(x, reverse_x, atol=1e-6)
