@@ -11,6 +11,7 @@ from . import psignifit
 from ._typing import ExperimentType
 from ._result import Result
 
+
 def plot_psychometric_function(result: Result,  # noqa: C901, this function is too complex
                                ax: matplotlib.axes.Axes = None,
                                plot_data: bool = True,
@@ -66,7 +67,7 @@ def plot_psychometric_function(result: Result,  # noqa: C901, this function is t
         ax.plot(x, y, '-', c=line_color)
 
         ax.axhline(y=1 - params['lambda'], linestyle=':', color=line_color)
-        ax.axhline(y=1 - params['gamma'], linestyle=':', color=line_color)
+        ax.axhline(y=params['gamma'], linestyle=':', color=line_color)
 
         CI = np.asarray(result.confidence_intervals['threshold'])
         y = np.array([params['gamma'] + .5 * (1 - params['lambda'] - params['gamma'])] * 2)
@@ -139,8 +140,8 @@ def plot_modelfit(result: Result) -> matplotlib.figure.Figure:
     The right plot shows the Deviance residuals against "time", e.g. against
     the order of the passed blocks. A trend in this plot would indicate
     learning/ changes in performance over time.
-    
-    For the central and right plot, dashes lines depict a line, qudratic and 
+
+    For the central and right plot, dashes lines depict a line, quadratic and
     cubic fit; these should help in detecting systematic deviations from zero.
     """
     fig = plt.figure(figsize=(15, 5))
@@ -162,13 +163,13 @@ def plot_modelfit(result: Result) -> matplotlib.figure.Figure:
 
 
 def plot_bayes(result: Result) -> matplotlib.figure.Figure:
-    """ Plot all posteriors 
+    """ Plot all posteriors
 
     Plots 2D marginals for all combinations of parameters.
     """
     if result.debug=={}:
         raise ValueError("Expects posterior_mass in result, got None. You could try psignifit(debug=True).")
-        
+
     fig, axes = plt.subplots(4, 4, figsize=(14, 12))
     panel_indices = {'threshold': 0,
                      'width': 1,
@@ -186,8 +187,8 @@ def plot_bayes(result: Result) -> matplotlib.figure.Figure:
                     fixedparam = xparam
                 elif len(result.parameter_values[yparam])==1:
                     fixedparam = yparam
-                axes[i][j-1].text(0.5, 0.5, 
-                                  f"Parameter {fixedparam} was\nfixed during fitting,\nthere is no data to show", 
+                axes[i][j-1].text(0.5, 0.5,
+                                  f"Parameter {fixedparam} was\nfixed during fitting,\nthere is no data to show",
                                   ha='center')
                 axes[i][j-1].axis("off")
 
@@ -259,17 +260,17 @@ def plot_prior(result: Result,
                line_width: float = 2,
                marker_size: float = 30):
     """ Plot the priors for the threshold, width and lambda parameters.
-    
-    The upper panels show the priors. The lower panels show a set of psychometric 
-    functions at selected prior values; these values are shown as markers in the 
+
+    The upper panels show the priors. The lower panels show a set of psychometric
+    functions at selected prior values; these values are shown as markers in the
     upper row panels.
-    
+
     The black function/markers indicate the value of the estimated psychometric function
-    from the data. The coloured function/markers correspond to the 
+    from the data. The coloured function/markers correspond to the
     0%, 25%, 75% and 100% quantiles of the prior.
     """
     fig = plt.figure(figsize=(12, 8))
-    
+
     data = result.data
     params = result.parameter_values
     priors = result.prior_values
@@ -295,7 +296,7 @@ def plot_prior(result: Result,
               'lambda': '\u03BB'}
 
     parameter_keys = ['threshold', 'width', 'lambda']
-    
+
     sigmoid_params = {param: result.parameter_estimate[param] for param in parameter_keys}
     for i, param in enumerate(parameter_keys):
         if param =='threshold':
@@ -306,12 +307,12 @@ def plot_prior(result: Result,
         elif param == 'lambda':
             prior_x = np.linspace(0,.5,10000)
 
-        x_percentiles = [result.parameter_estimate[param], 
-                         min(prior_x), 
+        x_percentiles = [result.parameter_estimate[param],
+                         min(prior_x),
                          np.quantile(prior_x, q=0.25),
-                         np.quantile(prior_x, q=0.75), 
+                         np.quantile(prior_x, q=0.75),
                          max(prior_x)]
-                
+
         plt.subplot(2, 3, i + 1)
         plt.plot(prior_x, priors_func[param](prior_x), lw=line_width, c=line_color)
         plt.scatter(x_percentiles, np.interp(x_percentiles, prior_x, priors_func[param](prior_x)), s=marker_size, c=colors)
