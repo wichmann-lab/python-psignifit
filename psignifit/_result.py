@@ -1,13 +1,12 @@
 import dataclasses
-from typing import Any, Dict, Tuple, List, TextIO, Union, Optional
 import json
+from typing import Any, Dict, Tuple, List, TextIO, Union
 from pathlib import Path
 
 import numpy as np
 from numpy.typing import NDArray
 
 from ._configuration import Configuration
-from ._typing import ParameterGrid
 
 
 class NumpyEncoder(json.JSONEncoder):
@@ -97,7 +96,7 @@ class Result:
         else:
             lambd, gamma = self.parameter_estimate['lambda'], self.parameter_estimate['gamma']
         new_threshold = sigmoid.inverse(proportion_correct, self.parameter_estimate['threshold'],
-                                        self.parameter_estimate['width'], lambd, gamma)
+                                        self.parameter_estimate['width'], gamma, lambd)
         if not return_ci:
             return new_threshold
 
@@ -108,8 +107,8 @@ class Result:
 
         new_ci = []
         for (thres_ci, width_ci, lambd_ci, gamma_ci) in zip(*param_cis):
-            ci_min = sigmoid.inverse(proportion_correct, thres_ci[0], width_ci[0], lambd_ci[0], gamma_ci[0])
-            ci_max = sigmoid.inverse(proportion_correct, thres_ci[1], width_ci[1], lambd_ci[1], gamma_ci[1])
+            ci_min = sigmoid.inverse(proportion_correct, thres_ci[0], width_ci[0], gamma_ci[0], lambd_ci[0])
+            ci_max = sigmoid.inverse(proportion_correct, thres_ci[1], width_ci[1], gamma_ci[1], lambd_ci[1])
             new_ci.append([ci_min, ci_max])
 
         return new_threshold, new_ci
