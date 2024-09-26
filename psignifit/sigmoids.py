@@ -147,8 +147,8 @@ class Sigmoid:
 class Gaussian(Sigmoid):
     """ Sigmoid based on the Gaussian distribution's CDF. """
     def _value(self, stimulus_level, threshold, width):
-        C = width / (norminv(1 - self.alpha) - norminv(self.alpha))
-        return normcdf(stimulus_level, (threshold - norminvg(self._PC, 0, C)), C)
+        C =(norminv(1 - self.alpha) - norminv(self.alpha))
+        return normcdf(stimulus_level, (threshold - norminvg(self._PC, 0,  width / C)),  width / C)
 
     def _slope(self, stimulus_level: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
         C = norminv(1 - self.alpha) - norminv(self.alpha)
