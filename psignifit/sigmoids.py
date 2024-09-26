@@ -58,6 +58,10 @@ class Sigmoid:
         self.alpha = alpha
         self.negative = negative
         self.PC = PC
+        if negative:
+            self._PC = 1 - PC
+        else:
+            self._PC = self.PC
 
     def __eq__(self, o: object) -> bool:
         return (isinstance(o, self.__class__)
@@ -144,80 +148,81 @@ class Gaussian(Sigmoid):
     """ Sigmoid based on the Gaussian distribution's CDF. """
     def _value(self, stimulus_level, threshold, width):
         C = width / (norminv(1 - self.alpha) - norminv(self.alpha))
-        return normcdf(stimulus_level, (threshold - norminvg(self.PC, 0, C)), C)
+        return normcdf(stimulus_level, (threshold - norminvg(self._PC, 0, C)), C)
 
     def _slope(self, stimulus_level: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
         C = norminv(1 - self.alpha) - norminv(self.alpha)
-        normalized_stimulus_level = (stimulus_level - threshold) / threshold * C
+        m = (threshold - norminvg(self._PC, 0, width / C))
+        normalized_stimulus_level = (stimulus_level - m) / width * C
         normalized_slope = sp.stats.norm.pdf(normalized_stimulus_level)
         return normalized_slope * C / width
 
     def _inverse(self, prop_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
         C = norminv(1 - self.alpha) - norminv(self.alpha)
-        return norminvg(prop_correct, threshold - norminvg(self.PC, 0, width / C), width / C)
-
+        return norminvg(prop_correct, threshold - norminvg(self._PC, 0, width / C), width / C)
 
 class Logistic(Sigmoid):
     """ Sigmoid based on the Logistic distribution's CDF. """
     def _value(self, stimulus_level, threshold, width):
         return 1 / (1 + np.exp(-2 * np.log(1 / self.alpha - 1) / width * (stimulus_level - threshold)
-                               + np.log(1 / self.PC - 1)))
+                               + np.log(1 / self._PC - 1)))
 
     def _slope(self, stimulus_level: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
         C = 2 * np.log(1 / self.alpha - 1) / width
-        unscaled_slope = np.exp(-C * (stimulus_level - threshold) + np.log(1 / self.PC - 1))
+        unscaled_slope = np.exp(-C * (stimulus_level - threshold) + np.log(1 / self._PC - 1))
         return C * unscaled_slope / (1 + unscaled_slope)**2
 
     def _inverse(self, prop_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
-        return threshold - width * (np.log(1 / prop_correct - 1) - np.log(1 / self.PC - 1)) / 2 / np.log(1 / self.alpha - 1)
+        return (threshold - width * (np.log(1 / prop_correct - 1) - np.log(1 / self._PC - 1)) / 2
+                / np.log(1 / self.alpha - 1))
 
 
 class Gumbel(Sigmoid):
     """ Sigmoid based on the Gumbel distribution's CDF. """
     def _value(self, stimulus_level, threshold, width):
         C = np.log(-np.log(self.alpha)) - np.log(-np.log(1 - self.alpha))
-        return 1 - np.exp(-np.exp(C / width * (stimulus_level - threshold) + np.log(-np.log(1 - self.PC))))
+        return 1 - np.exp(-np.exp(C / width * (stimulus_level - threshold) + np.log(-np.log(1 - self._PC))))
 
     def _slope(self, stimulus_level: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
         C = np.log(-np.log(self.alpha)) - np.log(-np.log(1 - self.alpha))
-        unscaled_stimulus_level = np.exp(C / width * (stimulus_level - threshold) + np.log(-np.log(1 - self.PC)))
+        unscaled_stimulus_level = np.exp(C / width * (stimulus_level - threshold) + np.log(-np.log(1 - self._PC)))
         return C / width * np.exp(-unscaled_stimulus_level) * unscaled_stimulus_level
 
     def _inverse(self, prop_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
         C = np.log(-np.log(self.alpha)) - np.log(-np.log(1 - self.alpha))
-        return threshold + (np.log(-np.log(1 - prop_correct)) - np.log(-np.log(1 - self.PC))) * width / C
+        return threshold + (np.log(-np.log(1 - prop_correct)) - np.log(-np.log(1 - self._PC))) * width / C
 
 
 class ReverseGumbel(Sigmoid):
     """ Sigmoid based on the reversed Gumbel distribution's CDF. """
     def _value(self, stimulus_level, threshold, width):
         C = np.log(-np.log(1 - self.alpha)) - np.log(-np.log(self.alpha))
-        return np.exp(-np.exp(C / width * (stimulus_level - threshold) + np.log(-np.log(self.PC))))
+        return np.exp(-np.exp(C / width * (stimulus_level - threshold) + np.log(-np.log(self._PC))))
 
     def _slope(self, stimulus_level: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
         C = np.log(-np.log(1 - self.alpha)) - np.log(-np.log(self.alpha))
-        unscaled_stimulus_level = np.exp(C / width * (stimulus_level - threshold) + np.log(-np.log(self.PC)))
+        unscaled_stimulus_level = np.exp(C / width * (stimulus_level - threshold) + np.log(-np.log(self._PC)))
         return -C / width * np.exp(-unscaled_stimulus_level) * unscaled_stimulus_level
 
     def _inverse(self, prop_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
         C = np.log(-np.log(1 - self.alpha)) - np.log(-np.log(self.alpha))
-        return threshold + (np.log(-np.log(prop_correct)) - np.log(-np.log(self.PC))) * width / C
+        return threshold + (np.log(-np.log(prop_correct)) - np.log(-np.log(self._PC))) * width / C
 
 
 class Student(Sigmoid):
     """ Sigmoid based on the Student-t distribution's CDF. """
     def _value(self, stimulus_level, threshold, width):
         C = (t1icdf(1 - self.alpha) - t1icdf(self.alpha))
-        return t1cdf(C * (stimulus_level - threshold) / width + t1icdf(self.PC))
+        return t1cdf(C * (stimulus_level - threshold) / width + t1icdf(self._PC))
 
     def _slope(self, stimulus_level: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
         C = (t1icdf(1 - self.alpha) - t1icdf(self.alpha))
-        stimLevel = (stimulus_level - threshold) * C / width + t1icdf(self.PC)
+        stimLevel = (stimulus_level - threshold) * C / width + t1icdf(self._PC)
         return C / width * sp.stats.t.pdf(stimLevel, df=1)
 
     def _inverse(self, prop_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
         C = (t1icdf(1 - self.alpha) - t1icdf(self.alpha))
-        return (t1icdf(prop_correct) - t1icdf(self.PC)) * width / C + threshold
+        return (t1icdf(prop_correct) - t1icdf(self._PC)) * width / C + threshold
 
 
 class Weibull(Gumbel):
