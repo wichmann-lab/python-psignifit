@@ -24,27 +24,10 @@ def test_sigmoid_by_name(sigmoid_name):
 
     s = sigmoids.sigmoid_by_name(sigmoid_name, PC=0.2, alpha=0.132)
     assert isinstance(s, sigmoids.Sigmoid)
+    assert s.PC == 0.2
+    assert s.alpha == 0.132
 
     assert sigmoid_name.startswith('neg_') == s.negative
-
-
-@pytest.mark.parametrize('sigmoid_name', sigmoids.ALL_SIGMOID_NAMES)
-def test_sigmoid_sanity_check(sigmoid_name):
-    """ Basic sanity checks for sigmoids.
-
-    These sanity checks test some basic relations between the parameters
-    as well as rule of thumbs which can be derived from visual inspection
-    of the sigmoid functions.
-    """
-    # fixed parameters for simple sigmoid sanity checks
-    PC = 0.45
-    # Threshold computed by hand to correspond to PC (for negative sigmoids, we'll compare this
-    # threshold with the value at 1 - PC)
-    threshold = 0.54
-    alpha = 0.083
-
-    sigmoid = sigmoids.sigmoid_by_name(sigmoid_name, PC=PC, alpha=alpha)
-    sigmoid.assert_sanity_checks(n_samples=10000, threshold=threshold, width=0.7)
 
 
 @pytest.mark.parametrize(
@@ -97,3 +80,24 @@ def test_sigmoid_slope(sigmoid_name):
             / (2 * delta)
     )
     np.testing.assert_allclose(slope, numerical_slope, atol=1e-6)
+
+
+@pytest.mark.parametrize('sigmoid_name', sigmoids.ALL_SIGMOID_NAMES)
+def test_sigmoid_sanity_check(sigmoid_name):
+    """ Basic sanity checks for sigmoids.
+
+    These sanity checks test some basic relations between the parameters
+    as well as rule of thumbs which can be derived from visual inspection
+    of the sigmoid functions.
+    """
+    # fixed parameters for simple sigmoid sanity checks
+    PC = 0.45
+    # Threshold computed by hand to correspond to PC (for negative sigmoids, we'll compare this
+    # threshold with the value at 1 - PC)
+    threshold = 0.54
+    alpha = 0.083
+
+    sigmoid = sigmoids.sigmoid_by_name(sigmoid_name, PC=PC, alpha=alpha)
+    sigmoids.assert_sigmoid_sanity_checks(
+        sigmoid, n_samples=10000, threshold=threshold, width=0.7,
+    )
