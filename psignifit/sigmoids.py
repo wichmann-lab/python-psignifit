@@ -57,10 +57,11 @@ class Sigmoid:
         """
         self.alpha = alpha
         self.negative = negative
+        self.PC = PC
         if negative:
-            self.PC = 1 - PC
+            self._PC = 1 - PC
         else:
-            self.PC = PC
+            self._PC = self.PC
 
     def __eq__(self, o: object) -> bool:
         return (isinstance(o, self.__class__)
@@ -127,9 +128,7 @@ class Sigmoid:
             if (prop_correct < gamma).any() or (prop_correct > (1 - lambd)).any():
                 raise ValueError(f'prop_correct={prop_correct} has to be between {gamma} and {1 - lambd}.')
             prop_correct = (prop_correct - gamma) / (1 - lambd - gamma)
-        PC = self.PC
         if self.negative:
-            PC = 1 - PC
             prop_correct = 1 - prop_correct
 
         result = self._inverse(prop_correct, threshold, width)
@@ -144,152 +143,86 @@ class Sigmoid:
     def _inverse(self, prop_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
         raise NotImplementedError("This should be overwritten by an implementation.")
 
-    def assert_sanity_checks(self, n_samples: int, threshold: float, width: float):
-        """ Assert multiple sanity checks on this sigmoid implementation.
-
-        These checks cannot completely assure the correct implementation of a sigmoid,
-        but try to catch common and obvious mistakes.
-        We recommend to use these for custom sigmoid subclasses.
-
-        The checks are performed on linear spaced stimulus levels between 0 and 1
-        and the provided sigmoid parameters.
-
-        Two checks for relations between parameters:
-          - `sigmoid(threshold_stimulus_level) == threshold_percent_correct`
-          - `|X_L - X_R| == width`
-            with `sigmoid(X_L) == alpha`
-            and  `sigmoid(X_R) == 1 - alpha`
-
-        Two checks for the inverse:
-          - `inverse(PC) == threshold_stimulus_level`
-          - `inverse(inverse(stimulus_levels) == stimulus_levels`
-
-        Two checks for the slope:
-          - `maximum(|slope(stimulus_levels)|)` close to `|slope(0.5)|`
-          - `slope(stimulus_levels) > 0`  (or < 0 for negative sigmoid)
-
-        Args:
-             n_samples: Number of stimulus levels between 0 (exclusive) and 1 for tests
-             threshold: Parameter value for threshold at PC
-             width: Width of the sigmoid
-        Raises:
-              AssertionError if a sanity check fails.
-        """
-        stimulus_levels = np.linspace(1e-8, 1, n_samples)
-        threshold_stimulus_level = threshold
-        if self.negative:
-            stimulus_levels = 1 - stimulus_levels
-
-        # sigmoid(threshold_stimulus_level) == threshold_percent_correct
-        np.testing.assert_allclose(self(threshold_stimulus_level, threshold, width), self.PC)
-        # |X_L - X_R| == WIDTH, with
-        # with sigmoid(X_L) == ALPHA
-        # and  sigmoid(X_R) == 1 - ALPHA
-        prop_correct = self(stimulus_levels, threshold, width)
-        idx_alpha, idx_nalpha = (np.abs(prop_correct - self.alpha).argmin(),
-                                 np.abs(prop_correct - (1 - self.alpha)).argmin())
-        np.testing.assert_allclose(prop_correct[idx_nalpha] - prop_correct[idx_alpha], width, atol=0.02)
-
-        # Inverse sigmoid at threshold proportion correct (y-axis)
-        # Expects the threshold stimulus level (x-axis).
-        stimulus_level_from_inverse = self.inverse(self.PC,
-                                                   threshold=threshold,
-                                                   width=width)
-        np.testing.assert_allclose(stimulus_level_from_inverse, threshold_stimulus_level)
-        # Expects inverse(value(x)) == x
-        y = self(stimulus_levels, threshold=threshold, width=width)
-        np.testing.assert_allclose(stimulus_levels,
-                                   self.inverse(y, threshold=threshold, width=width),
-                                   atol=1e-9)
-
-        slope = self.slope(stimulus_levels, threshold=threshold, width=width, gamma=0, lambd=0)
-        # Expects maximal slope at a medium stimulus level
-        assert 0.4 * len(slope) < np.argmax(np.abs(slope)) < 0.6 * len(slope)
-        # Expects slope to be all positive/negative for standard/decreasing sigmoid
-        if self.negative:
-            assert np.all(slope < 0)
-        else:
-            assert np.all(slope > 0)
-
 
 class Gaussian(Sigmoid):
     """ Sigmoid based on the Gaussian distribution's CDF. """
     def _value(self, stimulus_level, threshold, width):
-        C = width / (norminv(1 - self.alpha) - norminv(self.alpha))
-        return normcdf(stimulus_level, (threshold - norminvg(self.PC, 0, C)), C)
+        C =(norminv(1 - self.alpha) - norminv(self.alpha))
+        return normcdf(stimulus_level, (threshold - norminvg(self._PC, 0,  width / C)),  width / C)
 
     def _slope(self, stimulus_level: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
         C = norminv(1 - self.alpha) - norminv(self.alpha)
-        normalized_stimulus_level = (stimulus_level - threshold) / threshold * C
+        m = (threshold - norminvg(self._PC, 0, width / C))
+        normalized_stimulus_level = (stimulus_level - m) / width * C
         normalized_slope = sp.stats.norm.pdf(normalized_stimulus_level)
         return normalized_slope * C / width
 
     def _inverse(self, prop_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
         C = norminv(1 - self.alpha) - norminv(self.alpha)
-        return norminvg(prop_correct, threshold - norminvg(self.PC, 0, width / C), width / C)
-
+        return norminvg(prop_correct, threshold - norminvg(self._PC, 0, width / C), width / C)
 
 class Logistic(Sigmoid):
     """ Sigmoid based on the Logistic distribution's CDF. """
     def _value(self, stimulus_level, threshold, width):
         return 1 / (1 + np.exp(-2 * np.log(1 / self.alpha - 1) / width * (stimulus_level - threshold)
-                               + np.log(1 / self.PC - 1)))
+                               + np.log(1 / self._PC - 1)))
 
     def _slope(self, stimulus_level: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
         C = 2 * np.log(1 / self.alpha - 1) / width
-        unscaled_slope = np.exp(-C * (stimulus_level - threshold) + np.log(1 / self.PC - 1))
+        unscaled_slope = np.exp(-C * (stimulus_level - threshold) + np.log(1 / self._PC - 1))
         return C * unscaled_slope / (1 + unscaled_slope)**2
 
     def _inverse(self, prop_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
-        return threshold - width * (np.log(1 / prop_correct - 1) - np.log(1 / self.PC - 1)) / 2 / np.log(1 / self.alpha - 1)
+        return (threshold - width * (np.log(1 / prop_correct - 1) - np.log(1 / self._PC - 1)) / 2
+                / np.log(1 / self.alpha - 1))
 
 
 class Gumbel(Sigmoid):
     """ Sigmoid based on the Gumbel distribution's CDF. """
     def _value(self, stimulus_level, threshold, width):
         C = np.log(-np.log(self.alpha)) - np.log(-np.log(1 - self.alpha))
-        return 1 - np.exp(-np.exp(C / width * (stimulus_level - threshold) + np.log(-np.log(1 - self.PC))))
+        return 1 - np.exp(-np.exp(C / width * (stimulus_level - threshold) + np.log(-np.log(1 - self._PC))))
 
     def _slope(self, stimulus_level: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
         C = np.log(-np.log(self.alpha)) - np.log(-np.log(1 - self.alpha))
-        unscaled_stimulus_level = np.exp(C / width * (stimulus_level - threshold) + np.log(-np.log(1 - self.PC)))
+        unscaled_stimulus_level = np.exp(C / width * (stimulus_level - threshold) + np.log(-np.log(1 - self._PC)))
         return C / width * np.exp(-unscaled_stimulus_level) * unscaled_stimulus_level
 
     def _inverse(self, prop_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
         C = np.log(-np.log(self.alpha)) - np.log(-np.log(1 - self.alpha))
-        return threshold + (np.log(-np.log(1 - prop_correct)) - np.log(-np.log(1 - self.PC))) * width / C
+        return threshold + (np.log(-np.log(1 - prop_correct)) - np.log(-np.log(1 - self._PC))) * width / C
 
 
 class ReverseGumbel(Sigmoid):
     """ Sigmoid based on the reversed Gumbel distribution's CDF. """
     def _value(self, stimulus_level, threshold, width):
         C = np.log(-np.log(1 - self.alpha)) - np.log(-np.log(self.alpha))
-        return np.exp(-np.exp(C / width * (stimulus_level - threshold) + np.log(-np.log(self.PC))))
+        return np.exp(-np.exp(C / width * (stimulus_level - threshold) + np.log(-np.log(self._PC))))
 
     def _slope(self, stimulus_level: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
         C = np.log(-np.log(1 - self.alpha)) - np.log(-np.log(self.alpha))
-        unscaled_stimulus_level = np.exp(C / width * (stimulus_level - threshold) + np.log(-np.log(self.PC)))
+        unscaled_stimulus_level = np.exp(C / width * (stimulus_level - threshold) + np.log(-np.log(self._PC)))
         return -C / width * np.exp(-unscaled_stimulus_level) * unscaled_stimulus_level
 
     def _inverse(self, prop_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
         C = np.log(-np.log(1 - self.alpha)) - np.log(-np.log(self.alpha))
-        return threshold + (np.log(-np.log(prop_correct)) - np.log(-np.log(self.PC))) * width / C
+        return threshold + (np.log(-np.log(prop_correct)) - np.log(-np.log(self._PC))) * width / C
 
 
 class Student(Sigmoid):
     """ Sigmoid based on the Student-t distribution's CDF. """
     def _value(self, stimulus_level, threshold, width):
         C = (t1icdf(1 - self.alpha) - t1icdf(self.alpha))
-        return t1cdf(C * (stimulus_level - threshold) / width + t1icdf(self.PC))
+        return t1cdf(C * (stimulus_level - threshold) / width + t1icdf(self._PC))
 
     def _slope(self, stimulus_level: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
         C = (t1icdf(1 - self.alpha) - t1icdf(self.alpha))
-        stimLevel = (stimulus_level - threshold) * C / width + t1icdf(self.PC)
+        stimLevel = (stimulus_level - threshold) * C / width + t1icdf(self._PC)
         return C / width * sp.stats.t.pdf(stimLevel, df=1)
 
     def _inverse(self, prop_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
         C = (t1icdf(1 - self.alpha) - t1icdf(self.alpha))
-        return (t1icdf(prop_correct) - t1icdf(self.PC)) * width / C + threshold
+        return (t1icdf(prop_correct) - t1icdf(self._PC)) * width / C + threshold
 
 
 class Weibull(Gumbel):
@@ -345,3 +278,75 @@ def sigmoid_by_name(name, PC=None, alpha=None):
         kwargs['negative'] = True
 
     return _CLASS_BY_NAME[name](**kwargs)
+
+
+def assert_sigmoid_sanity_checks(sigmoid, n_samples: int, threshold: float, width: float):
+    """ Assert multiple sanity checks on this sigmoid implementation.
+
+    This is support code to have a first sanity check for  custom sigmoid subclasses.
+    These checks cannot completely assure the correct implementation of a sigmoid,
+    but try to catch common and obvious mistakes.
+
+    The checks are performed on linear spaced stimulus levels between 0 and 1
+    and the provided sigmoid parameters.
+
+    Two checks for relations between parameters:
+      - `sigmoid(threshold_stimulus_level) == threshold_percent_correct`
+      - `|X_L - X_R| == width`
+        with `sigmoid(X_L) == alpha`
+        and  `sigmoid(X_R) == 1 - alpha`
+
+    Two checks for the inverse:
+      - `inverse(PC) == threshold_stimulus_level`
+      - `inverse(inverse(stimulus_levels) == stimulus_levels`
+
+    Two checks for the slope:
+      - `maximum(|slope(stimulus_levels)|)` close to `|slope(0.5)|`
+      - `slope(stimulus_levels) > 0`  (or < 0 for negative sigmoid)
+
+    Args:
+         n_samples: Number of stimulus levels between 0 (exclusive) and 1 for tests
+         threshold: Parameter value for threshold at PC
+         width: Width of the sigmoid
+    Raises:
+          AssertionError if a sanity check fails.
+    """
+    stimulus_levels = np.linspace(1e-8, 1, n_samples)
+    threshold_stimulus_level = threshold
+
+    # sigmoid(threshold_stimulus_level) == threshold_percent_correct
+    np.testing.assert_allclose(sigmoid(threshold_stimulus_level, threshold, width), sigmoid.PC)
+    # |X_L - X_R| == WIDTH, with
+    # with sigmoid(X_L) == ALPHA
+    # and  sigmoid(X_R) == 1 - ALPHA
+    prop_correct = sigmoid(stimulus_levels, threshold, width)
+    # When the sigmoid is negative, it is decreasing, so we compute the width on 1-prop_correct
+    # (Alternatively, we could have used `argmax` and swapped the indices)
+    if sigmoid.negative:
+        stimulus_levels = 1 - stimulus_levels
+    idx_alpha, idx_nalpha = (np.abs(prop_correct - sigmoid.alpha).argmin(),
+                             np.abs(prop_correct - (1 - sigmoid.alpha)).argmin())
+    np.testing.assert_allclose(
+        stimulus_levels[idx_nalpha] - stimulus_levels[idx_alpha],
+        width, atol=0.02)
+
+    # Inverse sigmoid at threshold proportion correct (y-axis)
+    # Expects the threshold stimulus level (x-axis).
+    stimulus_level_from_inverse = sigmoid.inverse(sigmoid.PC,
+                                                  threshold=threshold,
+                                                  width=width)
+    np.testing.assert_allclose(stimulus_level_from_inverse, threshold_stimulus_level)
+    # Expects inverse(value(x)) == x
+    y = sigmoid(stimulus_levels, threshold=threshold, width=width)
+    np.testing.assert_allclose(stimulus_levels,
+                               sigmoid.inverse(y, threshold=threshold, width=width),
+                               atol=1e-8)
+
+    slope = sigmoid.slope(stimulus_levels, threshold=threshold, width=width, gamma=0, lambd=0)
+    # Expects maximal slope at a medium stimulus level
+    assert 0.3 * len(slope) < np.argmax(np.abs(slope)) < 0.7 * len(slope)
+    # Expects slope to be all positive/negative for standard/decreasing sigmoid
+    if sigmoid.negative:
+        assert np.all(slope < 0)
+    else:
+        assert np.all(slope > 0)
