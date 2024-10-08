@@ -238,6 +238,7 @@ def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
     for parm_name, parm_values in grid.items():
         if len(parm_values) == 1:
             fixed_param[parm_name] = parm_values[0]
+    # Compute MAP estimate of parameters on the joint posterior
     fit_dict = maximize_posterior(data, param_init=grid_max, param_fixed=fixed_param, sigmoid=sigmoid, priors=priors)
 
     return fit_dict, posteriors, grid

@@ -42,19 +42,6 @@ res = ps.psignifit(data, **config)
 # a subclass of :class:`psignifit.sigmoids.Sigmoid`.
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Estimation Type
-# ---------------
-# How you want to estimate your fit from the posterior
-# 'mean' The posterior mean. In a Bayesian sence a more suitable estimate.
-# the expected value of the Posterior.
-# 'MAP' The MAP estimator is the maximum a posteriori computed from
-# the posterior.
-
-config['estimate_type'] = 'MAP'
-config['estimate_type'] = 'mean'
-
-
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Optimization Steps
 # ------------------
 # This sets the number of grid points on each dimension in the final
