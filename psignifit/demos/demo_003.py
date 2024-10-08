@@ -24,10 +24,14 @@ res = ps.psignifit(data, sigmoid_name='norm', experiment_type='2AFC')
 
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# now we can have a look at the res dictionary and all its fields.
+# Now we can have a look at the res dictionary and all its fields.
 #
-# The most important result are the fitted parameters of the psychometric
-# function. They can be found in a dictionary format.
+# The most important result is the Maximum-A-Posteriori (MAP) estimate of the
+# parameters of the psychometric function. The MAP estimate is the value of the
+# parameters that has maximum probability given the observed data and the prior
+# over parameters.
+#
+# The MAP estimate of each parameter is stored in the `parameter_estimate` dictionary.
 
 print(res.parameter_estimate)
 
