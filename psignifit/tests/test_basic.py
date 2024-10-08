@@ -47,7 +47,7 @@ def test_plot_psych(data):
 
 def test_plot_marginal(data):
     options = get_std_options()
-    res = psignifit(data, **options)
+    res = psignifit(data, debug=True, **options)
     plt.figure()
     psigniplot.plot_marginal(res, 'threshold')
     plt.close('all')
@@ -61,6 +61,11 @@ def test_plot2D(data):
         plt.figure()
         psigniplot.plot_2D_margin(res, 'threshold', 'width')
         plt.close('all')
+    
+    res = psignifit(data, debug=True, **options)
+    plt.figure()
+    psigniplot.plot_2D_margin(res, 'threshold', 'width')
+    plt.close('all')
 
 
 def test_bias_analysis(data):

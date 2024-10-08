@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from typing import Union, List
 
+import warnings
 import matplotlib.pyplot as plt
 import matplotlib.axes
 import numpy as np
@@ -238,10 +239,12 @@ def plot_marginal(result: Result,
         param_value = result.parameter_estimate[parameter]
         ax.plot([param_value] * 2, [0, np.interp(param_value, x, marginal)], color='#000000')
 
-    if plot_prior:
+    if plot_prior and result.debug!={}:
         prior_x, prior_val = _get_prior_values(result, parameter)        
         ax.plot(prior_x, prior_val, ls='--', color=prior_color)
-
+    elif plot_prior and result.debug=={}:
+        warnings.warn("""Cannot plot priors without debug mode. Try calling psignifit(..., debug=True)""")
+        
     ax.plot(x, marginal, lw=line_width, c=line_color)
     ax.set_xlabel(x_label, fontsize=14)
     ax.set_ylabel(y_label, fontsize=14)
@@ -391,6 +394,7 @@ def plot_bias_analysis(data: np.ndarray, compare_data: np.ndarray, **kwargs) -> 
                                        'gamma': 20,
                                        'eta': 1},
                   priors={'gamma': lambda x: scipy.stats.beta.pdf(x, 2, 2)},
+                  debug=True,
                   **kwargs)
     result_combined = psignifit(np.r_[data, compare_data], **config)
     result_data = psignifit(data, **config)
