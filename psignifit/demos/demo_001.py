@@ -63,17 +63,17 @@ res = ps.psignifit(data, **config)
 #  Yes/No experiments: `experiment_type = 'yes/no'`
 #       A free guessing and lapse rate is estimated
 #  equal asymptote: `experiment_type = 'equal asymptote'`
-#     As Yes/No, but enforces that guessing and lapsing occure equally often
+#     As Yes/No, but enforces that guessing and lapsing occur equally often
 #
 #  Out of the box psignifit supports the following sigmoid functions,
-#  choosen by `sigmoid_name = ...`:
+#  chosen by `sigmoid_name = ...`:
 #
 #  ==================== ================================================
 #  `sigmoid_name = ...` Distribution
 #  ==================== ================================================
-#  'norm'               Cummulative gauss distribution. The default.
+#  'norm'               Cumulative gauss distribution. The default.
 #  'logistic'           Logistic function. Standard alternative.
-#  'gumbel'             Cummulative gumbel distribution.
+#  'gumbel'             Cumulative gumbel distribution.
 #                       Asymmetric, with a longer lower tail.
 #  'rgumbel'            Reversed gumbel distribution. Asymmetric, with a longer upper tail.
 #  'tdist'              Student t-distribution with df=1 for heavy tailed functions.

@@ -1,7 +1,7 @@
 """This module defines the basic configuration object for psignifit.
 """
-import re
 import dataclasses
+import re
 from typing import Any, Dict, Tuple, Optional, Union
 import warnings
 
@@ -32,7 +32,7 @@ class Configuration:
     Note for the developer: if you want to add a new valid option `foobar`,
     expand the `Conf.valid_opts` tuple (in alphabetical order) and add any
     check in a newly defined method `def check_foobar(self, value)`, which
-    raises `PsignifitException` if `value` is outside of the accepted range
+    raises `PsignifitException` if `value` is outside the accepted range
     for `foobar`.
     """
     beta_prior: int = 10

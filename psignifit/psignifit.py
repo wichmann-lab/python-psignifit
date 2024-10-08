@@ -44,7 +44,7 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
     Args:
         data: Trials as described above.
         conf: Optional configuration object.
-        debug: If true, posterior matrix and prior functions will be returned to result object. 
+        debug: If true, posterior matrix and prior functions will be returned to result object.
                In this mode the result object cannot be serialized.
         kwargs: Configurations as function parameters.
     """
@@ -97,7 +97,6 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
 
     if conf.verbose:
         _warn_marginal_sanity_checks(marginals)
-        
 
     if conf.experiment_type == 'equal asymptote':
         fit_dict['gamma'] = fit_dict['lambda'].copy()
@@ -106,7 +105,7 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
         marginals['gamma'] = marginals['lambda'].copy()
         # we may want to add a dimension to the posterior array for gamma,
         # which is a copy of the lambda dimension
-        
+
     debug_dict = {}
     if debug:
         debug_dict['posteriors'] = posteriors
@@ -181,7 +180,7 @@ def _warn_marginal_sanity_checks(marginals):
                         'This indicates that your data is not sufficient to exclude higher thresholds than are included in the estimation space.\n'
                         'Either change the prior or ensure that the data is sufficient to constrain the posterior.\n'
                         'Refer to the paper or the manual for more info on this topic.')
-            
+
     if 'width' in marginals:
         width_marginals = marginals['width'] / np.sum(marginals['width'])
         if width_marginals[0] > .001:

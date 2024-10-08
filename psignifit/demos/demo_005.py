@@ -31,7 +31,7 @@ res = ps.psignifit(data, sigmoid_name='norm', experiment_type='2AFC')
 # Plot Psychometric Function
 # --------------------------
 #
-# This funciton plots the fitted psychometric function with the measured data.
+# This function plots the fitted psychometric function with the measured data.
 #  It takes the result dict you want to plot. You can also set plotting options.
 #
 # 'dataColor': np.array([0,round(105/255,3),round(170/255,3)]),

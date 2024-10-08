@@ -257,8 +257,8 @@ ps.psigniplot.plotsModelfit(res)
 # 1) the psychometric function with the data around it as a first general
 # check.
 # 2) deviance residuals against the stimulus level. This is a check whether
-# the data systematicall lie above or below the psychometric function at a
-# range of stimulus levels. The three lines are polinomials of first
+# the data systematically lie above or below the psychometric function at a
+# range of stimulus levels. The three lines are polynomials of first
 # second and third order fitted to the points. If these dots deviate
 # strongly and/or systematically from 0, this is worrysome. Such deviations
 # indicate that the shape of the psychometric function fitted does not
@@ -282,12 +282,12 @@ resFast = ps.psignifitFast(data, **config)
 #
 #   1) It uses only a binomial model instead of the full beta-binomial model
 #      sacrificing robustness against overdispersion
-#   2) It reduces the number of gridpoints to evaluate the posterior
+#   2) It reduces the number of grid points to evaluate the posterior
 #   3) It limits the number of function evaluations for the final optimization
 #      to find the MAP.
 #
 # Using this function will issue warnings and will not provide you with
 # credible intervals as the grid we use here to evaluate the posterior
 # is probably not dense enough for this type of inference and the
-# beta-binomial model was deactivated. Otherwise the result struct has
+# beta-binomial model was deactivated. Otherwise, the result struct has
 # the same structure as for the full analysis.

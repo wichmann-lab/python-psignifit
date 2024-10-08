@@ -146,7 +146,7 @@ ps.psigniplot.plotPsych(res)
 # options['betaPrior']
 # Larger values for this parameter represent a stronger prior, e.g. stronger
 # believe in a stationary observer. Smaller values represent a more
-# conservative inference, giving nonstationary observers a higher prior
+# conservative inference, giving non-stationary observers a higher prior
 # probability.
 # 1 represents a flat prior, e.g. maximally conservative inference. Our
 # default is 10, which fitted our simulations well, around several hundred
@@ -208,7 +208,7 @@ print('Fit with beta prior = 200: ', res200.parameter_estimate)
 # own risk.
 #
 # As an example we will fix the prior on lambda the lapse rate parameter
-# of the psychometric funtion to a constant between 0 and .1 and zero
+# of the psychometric function to a constant between 0 and .1 and zero
 # elsewhere as it was done in the psignifit 2 toolbox.
 #
 # To use custom priors, first define the priors you want to use as function
