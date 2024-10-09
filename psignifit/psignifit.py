@@ -110,6 +110,7 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
     if debug:
         debug_dict['posteriors'] = posteriors
         debug_dict['priors'] = priors
+        debug_dict['bounds'] = bounds
 
     return Result(parameter_estimate=fit_dict,
                   configuration=conf,

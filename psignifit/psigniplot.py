@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from typing import Union, List
+import warnings
 
 import matplotlib.pyplot as plt
 import matplotlib.axes
 import numpy as np
 import scipy.stats
-from scipy.special import ndtri
 
 from . import psignifit
 from ._typing import ExperimentType
@@ -229,6 +229,7 @@ def plot_marginal(result: Result,
     x_label = _parameter_label(parameter)
 
     x = np.asarray(result.parameter_values[parameter])
+    xmin, xmax = x.min(), x.max()
     if plot_estimate:
         # takes first confidence interval from the list
         CI= np.asarray(result.confidence_intervals[parameter][0])
@@ -238,17 +239,35 @@ def plot_marginal(result: Result,
         param_value = result.parameter_estimate[parameter]
         ax.plot([param_value] * 2, [0, np.interp(param_value, x, marginal)], color='#000000')
 
-    if plot_prior:
-        ax.plot(x, result.prior_values[parameter], ls='--', color=prior_color, clip_on=False)
-
-    ax.plot(x, marginal, lw=line_width, c=line_color, clip_on=False)
+    if plot_prior and result.debug!={}:
+        prior_x, prior_val = _get_prior_values(result, parameter)        
+        ax.plot(prior_x, prior_val, ls='--', color=prior_color)
+        xmin = np.concatenate((x, prior_x)).min()
+        xmax = np.concatenate((x, prior_x)).max()  
+        
+    elif plot_prior and result.debug=={}:
+        warnings.warn("""Cannot plot priors without debug mode. Try calling psignifit(..., debug=True)""")
+        
+    ax.plot(x, marginal, lw=line_width, c=line_color)
     ax.set_xlabel(x_label, fontsize=14)
     ax.set_ylabel(y_label, fontsize=14)
+    ax.set_xlim(xmin, xmax)
+    ax.set_ylim(0, 1.1*marginal.max())
     ax.spines[['top', 'right']].set_visible(False)
 
     return ax
 
-
+def _get_prior_values(result, param):
+    """Get the prior evaluated on the whole prior range. This is used for plotting"""
+    
+    priors_func = result.debug['priors']
+    bounds = result.debug['bounds']
+                     
+    prior_x = np.linspace(bounds[param][0], bounds[param][1], 1000)
+    prior_vals = priors_func[param](prior_x)
+    
+    return (prior_x, prior_vals)
+    
 def _parameter_label(parameter):
     label_defaults = {'threshold': 'Threshold', 'width': 'Width',
                       'lambda': '\u03BB', 'gamma': '\u03B3', 'eta': '\u03B7'}
@@ -269,43 +288,29 @@ def plot_prior(result: Result,
     from the data. The coloured function/markers correspond to the
     0%, 25%, 75% and 100% quantiles of the prior.
     """
+    if result.debug=={}:
+        raise ValueError("Expects priors and marginals saved. Try running psignifit(....., debug=True).")
+        
     fig = plt.figure(figsize=(12, 8))
 
     data = result.data
     params = result.parameter_values
-    priors = result.prior_values
+    bounds = result.debug['bounds']
     priors_func = result.debug['priors']
     sigmoid = result.configuration.make_sigmoid()
-    width_alpha = result.configuration.width_alpha
 
+    sigmoid_x = np.linspace(bounds['threshold'][0], bounds['threshold'][1], 1000)
+    
     colors = ['k', [1, 200 / 255, 0], 'r', 'b', 'g']
-    stimulus_range = result.configuration.stimulus_range
-    if stimulus_range is None:
-        stimulus_range = [data[:, 0].min(), data[:, 0].max()]
-    width = stimulus_range[1] - stimulus_range[0]
-
-    # get borders for width
-    # Cfactor, width_min and width_max are used to determine the range
-    # in which we show the width prior.
-    widthmin = 1e-10
-    Cfactor   = (ndtri(.95) - ndtri(.05))/(ndtri(1-width_alpha) - ndtri(width_alpha))
-    widthmax = width
-
     titles = {'threshold': 'Threshold',
               'width': 'Width',
               'lambda': '\u03BB'}
 
-    parameter_keys = ['threshold', 'width', 'lambda']
-
+    parameter_keys = ['threshold', 'width', 'lambda']   
     sigmoid_params = {param: result.parameter_estimate[param] for param in parameter_keys}
     for i, param in enumerate(parameter_keys):
-        if param =='threshold':
-            prior_x = np.linspace(stimulus_range[0]-0.5*width, stimulus_range[1]+0.5*width, 10000)
-            sigmoid_x = np.linspace(min(prior_x), max(prior_x), 10000)
-        elif param == 'width':
-            prior_x = np.linspace(widthmin, 3./Cfactor*widthmax, 10000)
-        elif param == 'lambda':
-            prior_x = np.linspace(0,.5,10000)
+
+        prior_x, prior_val = _get_prior_values(result, param)
 
         x_percentiles = [result.parameter_estimate[param],
                          min(prior_x),
@@ -314,7 +319,7 @@ def plot_prior(result: Result,
                          max(prior_x)]
 
         plt.subplot(2, 3, i + 1)
-        plt.plot(prior_x, priors_func[param](prior_x), lw=line_width, c=line_color)
+        plt.plot(prior_x, prior_val, lw=line_width, c=line_color)                
         plt.scatter(x_percentiles, np.interp(x_percentiles, prior_x, priors_func[param](prior_x)), s=marker_size, c=colors)
         plt.ylabel('Density')
         plt.title(titles[param])
@@ -327,10 +332,11 @@ def plot_prior(result: Result,
             y = sigmoid(sigmoid_x, this_sigmoid_params['threshold'], this_sigmoid_params['width'])
             y = (1 - result.parameter_estimate['gamma'] - this_sigmoid_params['lambda']) * y + result.parameter_estimate['gamma']
             plt.plot(sigmoid_x, y, linewidth=line_width, color=color)
-        plt.scatter(data[:, 0], np.zeros(data[:, 0].shape), s=marker_size*.75, c='k')
+        plt.scatter(data[:, 0], np.zeros(data[:, 0].shape), s=marker_size*.75, c='k', clip_on=False)
         plt.xlabel('Stimulus Level')
         plt.ylabel('Proportion Correct')
         plt.xlim(min(sigmoid_x), max(sigmoid_x))
+        plt.ylim(0, 1)
         plt.gca().spines[['top', 'right']].set_visible(False)
 
 
@@ -343,7 +349,7 @@ def plot_2D_margin(result: Result,
     if ax is None:
         ax = plt.gca()
     if result.debug=={}:
-        raise ValueError("Expects posterior_mass in result, got None. You could try psignifit(debug=True).")
+        raise ValueError("Expects priors and marginals saved. Try running psignifit(....., debug=True).")
 
     parameter_indices = {param: i for i, param in enumerate(sorted(result.parameter_estimate.keys()))}
     other_param_ix = tuple(i for param, i in parameter_indices.items()
@@ -391,6 +397,7 @@ def plot_bias_analysis(data: np.ndarray, compare_data: np.ndarray, **kwargs) -> 
                                        'gamma': 20,
                                        'eta': 1},
                   priors={'gamma': lambda x: scipy.stats.beta.pdf(x, 2, 2)},
+                  debug=True,
                   **kwargs)
     result_combined = psignifit(np.r_[data, compare_data], **config)
     result_data = psignifit(data, **config)
