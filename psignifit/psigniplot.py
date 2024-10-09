@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 from typing import Union, List
-
 import warnings
+
 import matplotlib.pyplot as plt
 import matplotlib.axes
 import numpy as np
 import scipy.stats
-from scipy.special import ndtri
 
 from . import psignifit
 from ._typing import ExperimentType
@@ -230,6 +229,7 @@ def plot_marginal(result: Result,
     x_label = _parameter_label(parameter)
 
     x = np.asarray(result.parameter_values[parameter])
+    xmin, xmax = x.min(), x.max()
     if plot_estimate:
         # takes first confidence interval from the list
         CI= np.asarray(result.confidence_intervals[parameter][0])
@@ -242,13 +242,16 @@ def plot_marginal(result: Result,
     if plot_prior and result.debug!={}:
         prior_x, prior_val = _get_prior_values(result, parameter)        
         ax.plot(prior_x, prior_val, ls='--', color=prior_color)
+        xmin = np.concatenate((x, prior_x)).min()
+        xmax = np.concatenate((x, prior_x)).max()  
+        
     elif plot_prior and result.debug=={}:
         warnings.warn("""Cannot plot priors without debug mode. Try calling psignifit(..., debug=True)""")
         
     ax.plot(x, marginal, lw=line_width, c=line_color)
     ax.set_xlabel(x_label, fontsize=14)
     ax.set_ylabel(y_label, fontsize=14)
-    ax.set_xlim(x.min(), x.max())
+    ax.set_xlim(xmin, xmax)
     ax.set_ylim(0, 1.1*marginal.max())
     ax.spines[['top', 'right']].set_visible(False)
 
