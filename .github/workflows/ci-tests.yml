@@ -61,20 +61,3 @@ jobs:
         # print warnings if other style errors are found.
         #    see .flake8 config file for selected/ignored rules.
         #    warnings can be found in the action logs
-
-  docs:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v4
-      with:
-        python-version: "3.12"
-        cache: pip
-        cache-dependency-path: setup.cfg
-    - name: Install package with docs
-      run: |
-        python3 -m pip install --upgrade pip
-        pip install -e .[docs]
-    - name: Build the documentation
-      run: |
-        cd docs && make html

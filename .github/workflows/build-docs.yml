@@ -1,0 +1,34 @@
+name: Build Docs
+on:
+  push:
+
+      
+permissions:
+  contents: write
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          auto-activate-base: false
+          miniconda-version: 'latest'
+          python-version: 3.11
+          environment-file: docs/docs-environment.yml
+          activate-environment: psignifit-docs
+
+      - name: Install jupyter_book
+        shell: bash -l {0}
+        run: pip install git+https://github.com/ExecutableBookProject/jupyter-book.git@master
+
+      - name: Build My Book
+        shell: bash -l {0}
+        run: jb build docs/
