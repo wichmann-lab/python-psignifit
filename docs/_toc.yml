@@ -1,0 +1,15 @@
+# Table of contents
+
+format: jb-book
+root: index
+#parts:
+#  - caption: Getting started with Psignifit
+#    chapters:
+#    - file: getting-started/installation
+#    - file: getting-started/usage-example 
+#
+#
+#  - caption: Reference
+#    chapters:
+#    - file: reference/api.md
+    
