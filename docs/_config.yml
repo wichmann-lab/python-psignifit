@@ -37,8 +37,16 @@ repository:
 sphinx:
   extra_extensions:
     - sphinx.ext.intersphinx
+    - sphinx.ext.autosummary        # generate summary tables of functions in modules
+    - sphinx.ext.viewcode           # add links to source code in API reference  
+    - sphinx.ext.autodoc
     
   config:
+    autodoc_default_options: {
+     "members": True,                # Include module/class members.
+     "member-order": 'bysource',     # Order members as in source file.
+    }
+    exclude_patterns: ['_build']
     intersphinx_mapping:
         python:
           - 'https://docs.python.org/3/'
@@ -53,5 +61,4 @@ sphinx:
           - 'https://docs.scipy.org/doc/scipy/'
           - null
 
-    suppress_warnings: ["etoc.toctree"]
 

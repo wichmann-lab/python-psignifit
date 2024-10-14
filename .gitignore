@@ -55,10 +55,11 @@ coverage.xml
 # Sphinx documentation
 docs/_build/
 docs/generated_examples/
-docs/references/generated/
+docs/reference/_api/
 
 # PyBuilder
 target/
 
 #Ipython Notebook
 .ipynb_checkpoints
+

@@ -2,14 +2,44 @@
 
 format: jb-book
 root: index
-#parts:
-#  - caption: Getting started with Psignifit
-#    chapters:
-#    - file: getting-started/installation
-#    - file: getting-started/usage-example 
-#
-#
-#  - caption: Reference
-#    chapters:
-#    - file: reference/api.md
+parts:
+  - caption: Getting started
+    chapters:
+    - file: install_guide
+    - file: getting_started 
+    
+  - caption: Examples
+    chapters:
+    - file: examples/demo_001
+    - file: examples/demo_002
+    - file: examples/demo_003
+    - file: examples/demo_004
+    - file: examples/demo_005
+    - file: examples/demo_006
+    - file: examples/plot_all_sigmoids
+  
+  - caption: User guides
+    chapters:
+    - file: user_guides/Experiment-Types
+    - file: user_guides/Interval-Bias
+    - file: user_guides/Options-Dictionary
+    - file: user_guides/Plot-Functions
+    - file: user_guides/Pooling-Utility
+    - file: user_guides/Priors
+    - file: user_guides/Result-Struct
+     
+  - caption: HOW-TOs
+    chapters:
+    - file: how-to/How-to-Change-the-Threshold-Percent-Correct
+    - file: how-to/How-to-Fix-Parameters
+    - file: how-to/How-to-Get-Standard-Parameters
+    - file: how-to/How-to-Get-Thresholds-and-Slopes
+  
+  - caption: Benchmarks
+    chapters:
+    - file: test_MATLAB_version
+
+  - caption: Reference
+    chapters:
+    - file: reference/api.md
     
