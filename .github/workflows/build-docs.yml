@@ -5,7 +5,7 @@ permissions:
   contents: write
   
 jobs:
-  build:
+  build-docs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
@@ -13,20 +13,18 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Setup Miniconda
-        uses: conda-incubator/setup-miniconda@v2
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          auto-update-conda: true
-          auto-activate-base: false
-          miniconda-version: 'latest'
-          python-version: 3.11
-          environment-file: docs/docs-environment.yml
-          activate-environment: psignifit-docs
+          python-version: 3.13
 
+      - name: Install dependencies
+        run: pip install -r docs/requirements.txt
+        
       - name: Install jupyter_book
         shell: bash -l {0}
-        run: pip install git+https://github.com/ExecutableBookProject/jupyter-book.git@main
+        run: pip install -U git+https://github.com/ExecutableBookProject/jupyter-book.git@main
 
       - name: Build My Book
         shell: bash -l {0}
-        run: jb build docs/
+        run: jupyter-book build docs/

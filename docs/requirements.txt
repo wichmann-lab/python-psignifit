@@ -1,0 +1,5 @@
+- sphinx
+- numpy
+- matplotlib
+- sphinxcontrib-mermaid
+- jupyter-book
