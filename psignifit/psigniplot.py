@@ -240,14 +240,14 @@ def plot_marginal(result: Result,
         ax.plot([param_value] * 2, [0, np.interp(param_value, x, marginal)], color='#000000')
 
     if plot_prior and result.debug!={}:
-        prior_x, prior_val = _get_prior_values(result, parameter)        
+        prior_x, prior_val = _get_prior_values(result, parameter)
         ax.plot(prior_x, prior_val, ls='--', color=prior_color)
         xmin = np.concatenate((x, prior_x)).min()
-        xmax = np.concatenate((x, prior_x)).max()  
-        
+        xmax = np.concatenate((x, prior_x)).max()
+
     elif plot_prior and result.debug=={}:
         warnings.warn("""Cannot plot priors without debug mode. Try calling psignifit(..., debug=True)""")
-        
+
     ax.plot(x, marginal, lw=line_width, c=line_color)
     ax.set_xlabel(x_label, fontsize=14)
     ax.set_ylabel(y_label, fontsize=14)
@@ -259,15 +259,15 @@ def plot_marginal(result: Result,
 
 def _get_prior_values(result, param):
     """Get the prior evaluated on the whole prior range. This is used for plotting"""
-    
+
     priors_func = result.debug['priors']
     bounds = result.debug['bounds']
-                     
+
     prior_x = np.linspace(bounds[param][0], bounds[param][1], 1000)
     prior_vals = priors_func[param](prior_x)
-    
+
     return (prior_x, prior_vals)
-    
+
 def _parameter_label(parameter):
     label_defaults = {'threshold': 'Threshold', 'width': 'Width',
                       'lambda': '\u03BB', 'gamma': '\u03B3', 'eta': '\u03B7'}
@@ -290,37 +290,43 @@ def plot_prior(result: Result,
     """
     if result.debug=={}:
         raise ValueError("Expects priors and marginals saved. Try running psignifit(....., debug=True).")
-        
+
     fig = plt.figure(figsize=(12, 8))
 
     data = result.data
-    params = result.parameter_values
     bounds = result.debug['bounds']
-    priors_func = result.debug['priors']
+    params_map_estimate = result.parameter_estimate
     sigmoid = result.configuration.make_sigmoid()
 
     sigmoid_x = np.linspace(bounds['threshold'][0], bounds['threshold'][1], 1000)
-    
+
     colors = ['k', [1, 200 / 255, 0], 'r', 'b', 'g']
     titles = {'threshold': 'Threshold',
               'width': 'Width',
               'lambda': '\u03BB'}
 
-    parameter_keys = ['threshold', 'width', 'lambda']   
-    sigmoid_params = {param: result.parameter_estimate[param] for param in parameter_keys}
+    parameter_keys = ['threshold', 'width', 'lambda']
+    sigmoid_params = {param: params_map_estimate[param] for param in parameter_keys}
     for i, param in enumerate(parameter_keys):
 
         prior_x, prior_val = _get_prior_values(result, param)
 
-        x_percentiles = [result.parameter_estimate[param],
+        # Compute the CDF of the prior, to calculate the quantiles
+        prior_w = prior_x[1] - prior_x[0]
+        prior_cdf = np.cumsum(prior_val * prior_w)
+        q25_index = np.argmax(prior_cdf > 0.25)
+        q75_index = np.argmax(prior_cdf > 0.75)
+
+        x_percentiles = [params_map_estimate[param],
                          min(prior_x),
-                         np.quantile(prior_x, q=0.25),
-                         np.quantile(prior_x, q=0.75),
+                         prior_x[q25_index],
+                         prior_x[q75_index],
                          max(prior_x)]
 
         plt.subplot(2, 3, i + 1)
-        plt.plot(prior_x, prior_val, lw=line_width, c=line_color)                
-        plt.scatter(x_percentiles, np.interp(x_percentiles, prior_x, priors_func[param](prior_x)), s=marker_size, c=colors)
+        plt.plot(prior_x, prior_val, lw=line_width, c=line_color)
+        # zorder: plot dots in front of the prior line
+        plt.scatter(x_percentiles, np.interp(x_percentiles, prior_x, prior_val), s=marker_size, c=colors, zorder=1000)
         plt.ylabel('Density')
         plt.title(titles[param])
         plt.gca().spines[['top', 'right']].set_visible(False)
@@ -330,8 +336,9 @@ def plot_prior(result: Result,
             this_sigmoid_params = dict(sigmoid_params)
             this_sigmoid_params[param] = param_value
             y = sigmoid(sigmoid_x, this_sigmoid_params['threshold'], this_sigmoid_params['width'])
-            y = (1 - result.parameter_estimate['gamma'] - this_sigmoid_params['lambda']) * y + result.parameter_estimate['gamma']
+            y = (1 - params_map_estimate['gamma'] - this_sigmoid_params['lambda']) * y + params_map_estimate['gamma']
             plt.plot(sigmoid_x, y, linewidth=line_width, color=color)
+
         plt.scatter(data[:, 0], np.zeros(data[:, 0].shape), s=marker_size*.75, c='k', clip_on=False)
         plt.xlabel('Stimulus Level')
         plt.ylabel('Proportion Correct')
