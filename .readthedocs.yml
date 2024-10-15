@@ -16,11 +16,7 @@ python:
      - method: pip
        path: .
        extra_requirements:
-         - sphinx
-         - numpy
-         - matplotlib
-         - sphinxcontrib-mermaid
-         - jupyter-book
+         - docs
 
 sphinx:
   builder: html
