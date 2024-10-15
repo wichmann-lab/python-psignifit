@@ -14,9 +14,4 @@ build:
 
 python:
   install:
-    - method: pip
-      path: .
-      extra_requirements:
-        - sphinx
-        - docs
-
+    - requirements: docs/requirements.txt
