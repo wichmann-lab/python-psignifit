@@ -47,8 +47,14 @@ Issues = "https://github.com/wichmann-lab/python-psignifit/issues"
 [project.optional-dependencies]
 tests = ["pytest", "pytest-cov", "flake8"]
 docs = [
-    'sphinx',
-    'sphinx-gallery',
-    'sphinx_rtd_theme',
-    'matplotlib',
+    "sphinx",
+    "sphinx-gallery",
+    "sphinx_rtd_theme",
+    "matplotlib",
+    "jupyter-book==0.14",
+    "jupytext>=1.13.3",
+    "jupyterlab_myst",
+    "myst_nb",
+    "ipywidgets",
+    "sphinx-hoverxref",
 ]
