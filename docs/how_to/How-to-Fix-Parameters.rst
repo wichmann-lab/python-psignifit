@@ -1,6 +1,6 @@
-.. WARNING::
+.. warning::
    This documentation page is still work in progress! Some information might be outdated.
-   
+
 .. _how-to-fix-parameters:
 
 How to: Fix Parameters

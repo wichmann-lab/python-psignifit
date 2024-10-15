@@ -1,5 +1,5 @@
-.. WARNING::
-   This documentation page is still work in progress! Some information might be outdated.
+.. warning::
+   Some parts of this documentation are still work in progress! Some information might be outdated.
 
 .. psignifit documentation master file
 
