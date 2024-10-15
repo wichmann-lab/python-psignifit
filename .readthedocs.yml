@@ -10,7 +10,7 @@ build:
     python: "3.12"
   jobs:
     pre_build:
-      - jupyter-book config sphinx docs/
+      - "jupyter-book config sphinx docs/"
 
 python:
   install:
