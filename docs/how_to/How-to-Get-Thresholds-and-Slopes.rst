@@ -1,6 +1,6 @@
-.. WARNING::
+.. warning::
    This documentation page is still work in progress! Some information might be outdated.
-   
+
 .. _how-to-get-thresholds-and-slopes:
 
 How To: Get Thresholds and Slopes

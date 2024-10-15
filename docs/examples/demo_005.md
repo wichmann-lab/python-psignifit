@@ -11,6 +11,10 @@ kernelspec:
   name: python3
 ---
 
+```{warning}
+This documentation page is still work in progress! Some information might be outdated.
+```
+
 
 # 5. Plotting
 

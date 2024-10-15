@@ -1,4 +1,4 @@
-.. WARNING::
+.. warning::
    This documentation page is still work in progress! Some information might be outdated.
 
 .. _interval-bias:

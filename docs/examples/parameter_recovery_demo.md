@@ -13,6 +13,10 @@ kernelspec:
   name: python3
 ---
 
+```{warning}
+This documentation page is still work in progress! Some information might be outdated.
+```
+
 +++ {"nteract": {"transient": {"deleting": false}}}
 
 # Parameter Recovery Demo
