@@ -1,3 +1,6 @@
+.. WARNING::
+   This documentation page is still work in progress! Some information might be outdated.
+   
 .. _how-to-change-threshold-percent-correct:
 
 How to: Change the Threshold Percent Correct

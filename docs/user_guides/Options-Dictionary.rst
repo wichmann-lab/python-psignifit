@@ -1,3 +1,6 @@
+.. WARNING::
+   This documentation page is still work in progress! Some information might be outdated.
+   
 .. _options-dictionary:
 
 Options Dictionary
