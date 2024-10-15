@@ -1,0 +1,64 @@
+# Book settings
+# Learn more at https://jupyterbook.org/customize/config.html
+
+title: Psignifit
+author: Psignifit contributors
+#logo: logo.png
+copyright: "2024. Licence: GPLv2"  # Copyright year to be placed in the footer
+
+execute:
+  execute_notebooks: force
+
+#only_build_toc_files        : true
+
+# Define the name of the latex output file for PDF builds
+latex:
+  latex_documents:
+    targetname: psignifit-documentation.tex
+
+# HTML-specific settings
+html:
+  home_page_in_navbar         : true
+  use_repository_button       : true  # Whether to add a link to your repository button
+  
+
+# Add a bibtex file so that we can create citations
+#bibtex_bibfiles:
+#  - references.bib
+
+# Information about where the book exists on the web
+repository:
+  url: https://github.com/wichmann-lab/python-psignifit/  # Online location of your book
+  path_to_book: docs  # Optional path to your book, relative to the repository root
+  branch: main  # Which branch of the repository should be used when creating links (optional)
+
+   
+    
+sphinx:
+  extra_extensions:
+    - sphinx.ext.intersphinx
+    - sphinx.ext.autosummary        # generate summary tables of functions in modules
+    - sphinx.ext.viewcode           # add links to source code in API reference  
+    - sphinx.ext.autodoc
+    
+  config:
+    autodoc_default_options: {
+     "members": True,                # Include module/class members.
+     "member-order": 'bysource',     # Order members as in source file.
+    }
+    exclude_patterns: ['_build']
+    intersphinx_mapping:
+        python:
+          - 'https://docs.python.org/3/'
+          - null
+        numpy [stable]:
+          - 'https://numpy.org/doc/stable/'
+          - null
+        matplotlib [stable]:
+          - 'https://matplotlib.org/stable/'
+          - null
+        scipy [latest]:
+          - 'https://docs.scipy.org/doc/scipy/'
+          - null
+
+

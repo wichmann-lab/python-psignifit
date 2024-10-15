@@ -1,3 +1,6 @@
+.. WARNING::
+   This documentation page is still work in progress! Some information might be outdated.
+
 .. psignifit documentation master file
 
 Welcome to psignifit's documentation!
@@ -64,19 +67,3 @@ provided feedback: Nicole Eichert, Frank Jäkel, David Janssen, Britta
 Lewke, Lars Rothkegel, Joshua Solomon, Tom Wallis, Uli Wannek, Christian
 Wolf and Bei Xiao
 
-Contents
-~~~~~~~~
-.. toctree::
-   :maxdepth: 2
-
-   install_guide.rst
-   getting_started.rst
-   generated_examples/index.rst
-   how_to/index.rst
-   test_MATLAB_version.rst
-   references/index.rst
-
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

@@ -1,0 +1,33 @@
+name: Build Docs
+on: push
+      
+permissions:
+  contents: write
+  
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.13
+
+      - name: Install dependencies
+        run: pip install -r docs/requirements.txt
+      
+      - name: Install psignifit
+        run: pip install .
+          
+      - name: Install jupyter_book
+        shell: bash -l {0}
+        run: pip install -U git+https://github.com/ExecutableBookProject/jupyter-book.git@main
+
+      - name: Build My Book
+        shell: bash -l {0}
+        run: jupyter-book build docs/
