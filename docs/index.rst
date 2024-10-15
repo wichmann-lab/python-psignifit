@@ -1,3 +1,6 @@
+.. WARNING::
+   This documentation page is still work in progress! Some information might be outdated.
+
 .. psignifit documentation master file
 
 Welcome to psignifit's documentation!
