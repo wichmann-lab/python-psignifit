@@ -368,7 +368,7 @@ def plot_2D_margin(result: Result,
     if parameter_indices[first_param] > parameter_indices[second_param]:
         marginal_2d = np.transpose(marginal_2d)
     extent = [result.parameter_values[second_param][0], result.parameter_values[second_param][-1],
-              result.parameter_values[first_param][0], result.parameter_values[first_param][-1]]
+              result.parameter_values[first_param][-1], result.parameter_values[first_param][0]]
     ax.imshow(marginal_2d, extent=extent, cmap='Reds_r',  aspect='auto')
     ax.set_xlabel(_parameter_label(second_param))
     ax.set_ylabel(_parameter_label(first_param))
