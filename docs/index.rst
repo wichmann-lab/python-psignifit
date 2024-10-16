@@ -25,8 +25,8 @@ Where to start?
 
 First, :ref:`install_guide` the toolbox.
 
-Then, check out the :ref:`getting_started`
-or the :ref:`demo_index` files.
+Then, check out the :ref:`getting_started` page. 
+
 
 More information
 ~~~~~~~~~~~~~~~~
