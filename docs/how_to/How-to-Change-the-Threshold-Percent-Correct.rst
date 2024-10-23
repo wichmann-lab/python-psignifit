@@ -6,6 +6,9 @@
 How to: Change the Threshold Percent Correct
 ============================================
 
+
+Psignifit usually defines the threshold as the point where the unscaled sigmoid is 0.5, i.e. half-way up its range. Sometimes one wants to calculate thresholds for another percent correct level. To do so psignifit has an entry of the options struct:
+
 Changing the percent correct defining the threshold works as it does in
 MATLAB, see
 `here <https://github.com/wichmann-lab/psignifit/wiki/How-to-Change-the-Threshold-Percent-Correct>`__.
