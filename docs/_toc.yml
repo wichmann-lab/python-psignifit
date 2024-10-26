@@ -16,6 +16,7 @@ parts:
     - file: examples/demo_004
     - file: examples/demo_005
     - file: examples/demo_006
+    - file: examples/parameter_recovery_demo
     - file: examples/plot_all_sigmoids
   
   - caption: User guides
@@ -30,10 +31,10 @@ parts:
      
   - caption: HOW-TOs
     chapters:
-    - file: how-to/How-to-Change-the-Threshold-Percent-Correct
-    - file: how-to/How-to-Fix-Parameters
-    - file: how-to/How-to-Get-Standard-Parameters
-    - file: how-to/How-to-Get-Thresholds-and-Slopes
+    - file: how_to/How-to-Change-the-Threshold-Percent-Correct
+    - file: how_to/How-to-Fix-Parameters
+    - file: how_to/How-to-Get-Standard-Parameters
+    - file: how_to/How-to-Get-Thresholds-and-Slopes
   
   - caption: Benchmarks
     chapters:
