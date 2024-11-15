@@ -28,7 +28,6 @@ class Result:
     prior_values: Dict[str, NDArray[float]]
     marginal_posterior_values: Dict[str, NDArray[float]]
     debug: Dict[Any, Any]
-    estimate_type: EstimateType = 'MAP'
 
     @classmethod
     def from_dict(cls, result_dict: Dict[str, Any]):
@@ -74,12 +73,12 @@ class Result:
 
         Args:
             estimate_type: Type of estimate, either "MAP" or "mean".
-                If None, the value of `Result.estimate_type` is used instead.
+                If None, the value of `estimate_type` in `Result.configuration` is used instead.
         Returns:
             A dictionary mapping parameter names to parameter estimate.
         """
         if estimate_type is None:
-            estimate_type = self.estimate_type
+            estimate_type = self.configuration.estimate_type
 
         if estimate_type == 'MAP':
             estimate = self.parameters_estimate_MAP
@@ -108,7 +107,7 @@ class Result:
                       By default this function returns the one for the scaled sigmoid.
             return_ci: If the confidence bounds should be returned along with the stimulus value
             estimate_type: Type of estimate, either "MAP" or "mean".
-                If None, the value of `Result.estimate_type` is used instead.
+                If None, the value of `estimate_type` in `Result.configuration` is used instead.
         Returns:
             thresholds: stimulus values for all provided proportion_correct (if return_ci=False)
             (thresholds, ci): stimulus values along with confidence intervals
@@ -146,7 +145,7 @@ class Result:
         Args:
             stimulus_level: stimulus levels at where to evaluate the slope.
             estimate_type: Type of estimate, either "MAP" or "mean".
-                If None, the value of `Result.estimate_type` is used instead.
+                If None, the value of `estimate_type` in `Result.configuration` is used instead.
         Returns:
             Slopes of the psychometric function at the stimulus levels.
         """
@@ -164,7 +163,7 @@ class Result:
                       sigmoid or for the one scaled by lambda and gamma.
                       By default this function returns the one for the scaled sigmoid.
             estimate_type: Type of estimate, either "MAP" or "mean".
-                If None, the value of `Result.estimate_type` is used instead.
+                If None, the value of `estimate_type` in `Result.configuration` is used instead.
         Returns:
             Slopes of the psychometric function at the stimulus levels which
             correspond to the given proportion correct.
