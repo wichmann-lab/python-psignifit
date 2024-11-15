@@ -228,7 +228,7 @@ def test_parameter_recovery_mean_estimate(random_state):
 @fp_error_handler(over='ignore', invalid='ignore')
 def test_mean_vs_map_estimate(random_state):
     # Test a case where the mean and MAP estimates are expected to be different:
-    # we generate data from a mixture of two sigmoids with different width, with
+    # we generate data from a mixture of three sigmoids with different width, with
     # only a few trials. The posterior over width is broad and asymmetrical, so the
     # MAP and mean estimate are not identical.
     # The expected values of the parameters where computed independently in a notebook.
