@@ -115,8 +115,8 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
         debug_dict['priors'] = priors
         debug_dict['bounds'] = bounds
 
-    return Result(parameter_estimate=estimate_MAP_dict,
-                  parameter_estimate_mean=estimate_mean_dict,
+    return Result(parameters_estimate_MAP=estimate_MAP_dict,
+                  parameters_estimate_mean=estimate_mean_dict,
                   configuration=conf,
                   confidence_intervals=intervals_dict,
                   parameter_values=grid,

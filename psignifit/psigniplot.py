@@ -27,7 +27,7 @@ def plot_psychometric_function(result: Result,  # noqa: C901, this function is t
     if ax is None:
         ax = plt.gca()
 
-    params = result.parameter_estimate
+    params = result.parameters_estimate_MAP
     data = np.asarray(result.data)
     config = result.configuration
 
@@ -99,7 +99,7 @@ def plot_block_residuals(result: Result, ax: matplotlib.axes.Axes = None) -> mat
 def _plot_residuals(x_values: np.ndarray, x_label: str, result: Result, ax: matplotlib.axes.Axes = None):
     if ax is None:
         ax = plt.gca()
-    params = result.parameter_estimate
+    params = result.parameters_estimate_MAP
     data = result.data
     sigmoid = result.configuration.make_sigmoid()
 
@@ -236,7 +236,7 @@ def plot_marginal(result: Result,
         ci_x = np.r_[CI[0], x[(x >= CI[0]) & (x <= CI[1])], CI[1]]
         ax.fill_between(ci_x, np.zeros_like(ci_x), np.interp(ci_x, x, marginal), color=line_color, alpha=0.5)
 
-        param_value = result.parameter_estimate[parameter]
+        param_value = result.parameters_estimate_MAP[parameter]
         ax.plot([param_value] * 2, [0, np.interp(param_value, x, marginal)], color='#000000')
 
     if plot_prior and result.debug!={}:
@@ -295,7 +295,7 @@ def plot_prior(result: Result,
 
     data = result.data
     bounds = result.debug['bounds']
-    params_map_estimate = result.parameter_estimate
+    params_map_estimate = result.parameters_estimate_MAP
     sigmoid = result.configuration.make_sigmoid()
 
     sigmoid_x = np.linspace(bounds['threshold'][0], bounds['threshold'][1], 1000)
@@ -358,7 +358,7 @@ def plot_2D_margin(result: Result,
     if result.debug=={}:
         raise ValueError("Expects priors and marginals saved. Try running psignifit(....., debug=True).")
 
-    parameter_indices = {param: i for i, param in enumerate(sorted(result.parameter_estimate.keys()))}
+    parameter_indices = {param: i for i, param in enumerate(sorted(result.parameters_estimate_MAP.keys()))}
     other_param_ix = tuple(i for param, i in parameter_indices.items()
                            if param != first_param and param != second_param)
     marginal_2d = np.sum(result.debug['posteriors'], axis=other_param_ix)

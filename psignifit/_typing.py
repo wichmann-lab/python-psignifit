@@ -1,5 +1,5 @@
 import enum
-from typing import Callable, Dict, Tuple, Optional
+from typing import Callable, Dict, Literal, Tuple, Optional
 
 import numpy as np
 
@@ -33,3 +33,5 @@ except ImportError:
 
 
 Prior = Callable[[np.ndarray], np.ndarray]
+
+EstimateType = Literal['MAP', 'mean']

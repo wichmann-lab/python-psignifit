@@ -1,12 +1,13 @@
 import dataclasses
 import json
-from typing import Any, Dict, Tuple, List, Literal, Optional, TextIO, Union
+from typing import Any, Dict, Tuple, List, Optional, TextIO, Union
 from pathlib import Path
 
 import numpy as np
 from numpy.typing import NDArray
 
 from ._configuration import Configuration
+from ._typing import EstimateType
 
 
 class NumpyEncoder(json.JSONEncoder):
@@ -18,8 +19,8 @@ class NumpyEncoder(json.JSONEncoder):
 
 @dataclasses.dataclass
 class Result:
-    parameter_estimate: Dict[str, float]
-    parameter_estimate_mean: Dict[str, float]
+    parameters_estimate_MAP: Dict[str, float]
+    parameters_estimate_mean: Dict[str, float]
     configuration: Configuration
     confidence_intervals: Dict[str, List[Tuple[float, float]]]
     data: NDArray[float]
@@ -27,7 +28,7 @@ class Result:
     prior_values: Dict[str, NDArray[float]]
     marginal_posterior_values: Dict[str, NDArray[float]]
     debug: Dict[Any, Any]
-    estimate_type: Literal['MAP', 'mean'] = 'MAP'
+    estimate_type: EstimateType = 'MAP'
 
     @classmethod
     def from_dict(cls, result_dict: Dict[str, Any]):
@@ -68,12 +69,12 @@ class Result:
         result_dict['data'] = np.asarray(result_dict['data'])
         return cls.from_dict(result_dict)
 
-    def get_parameter_estimate(self, estimate_type: Optional[str]=None):
-        """ Get the estimate of the parameters by estimate type.
+    def get_parameters_estimate(self, estimate_type: Optional[EstimateType]=None):
+        """ Get the estimate of the parameters by type.
 
         Args:
-            estimate_type: Type of the parameters estimate, either "MAP" or "mean". If None, the value of
-            `Result.estimate_type` is used instead.
+            estimate_type: Type of estimate, either "MAP" or "mean".
+                If None, the value of `Result.estimate_type` is used instead.
         Returns:
             A dictionary mapping parameter names to parameter estimate.
         """
@@ -81,9 +82,9 @@ class Result:
             estimate_type = self.estimate_type
 
         if estimate_type == 'MAP':
-            estimate = self.parameter_estimate
+            estimate = self.parameters_estimate_MAP
         elif estimate_type == 'mean':
-            estimate = self.parameter_estimate_mean
+            estimate = self.parameters_estimate_mean
         else:
             raise ValueError("`estimate_type` must be either 'MAP' or 'mean'")
 
@@ -114,12 +115,13 @@ class Result:
         proportion_correct = np.asarray(proportion_correct)
         sigmoid = self.configuration.make_sigmoid()
 
+        estimate = self.get_parameter_estimate()
         if unscaled:  # set asymptotes to 0 for everything.
             lambd, gamma = 0, 0
         else:
-            lambd, gamma = self.parameter_estimate['lambda'], self.parameter_estimate['gamma']
-        new_threshold = sigmoid.inverse(proportion_correct, self.parameter_estimate['threshold'],
-                                        self.parameter_estimate['width'], gamma, lambd)
+            lambd, gamma = estimate['lambda'], estimate['gamma']
+        new_threshold = sigmoid.inverse(proportion_correct, estimate['threshold'],
+                                        estimate['width'], gamma, lambd)
         if not return_ci:
             return new_threshold
 
@@ -144,7 +146,7 @@ class Result:
         Returns:
             Slopes of the psychometric function at the stimulus levels.
         """
-        stimulus_level, param = np.asarray(stimulus_level), self.parameter_estimate
+        stimulus_level, param = np.asarray(stimulus_level), self.get_parameter_estimate()
         sigmoid = self.configuration.make_sigmoid()
         return sigmoid.slope(stimulus_level, param['threshold'], param['width'], param['gamma'], param['lambda'])
 
