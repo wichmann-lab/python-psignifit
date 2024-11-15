@@ -36,7 +36,7 @@ def plot_psychometric_function(result: Result,  # noqa: C901, this function is t
         params['gamma'] = params['lambda']
     if len(data) == 0:
         return
-    data_size = 10000. / np.sum(data[:, 2])
+    data_size = min(20, 10000. / np.sum(data[:, 2]))
 
     if ExperimentType.N_AFC == ExperimentType(config.experiment_type):
         ymin = 1. / config.experiment_choices
@@ -170,8 +170,8 @@ def plot_modelfit(result: Result, estimate_type: EstimateType = None) -> matplot
     return fig
 
 
-def plot_bayes(result: Result, estimate_type: EstimateType = None) -> matplotlib.figure.Figure:
-    """ Plot all posteriors
+def plot_bayes(result: Result) -> matplotlib.figure.Figure:
+    """ Plot all posteriors.
 
     Plots 2D marginals for all combinations of parameters.
     """
@@ -189,7 +189,7 @@ def plot_bayes(result: Result, estimate_type: EstimateType = None) -> matplotlib
             if yparam == xparam or i>j:
                 continue
             try:
-                plot_2D_margin(result, yparam, xparam, ax=axes[i][j-1], estimate_type=estimate_type)
+                plot_2D_margin(result, yparam, xparam, ax=axes[i][j-1])
             except ValueError:
                 if len(result.parameter_values[xparam])==1:
                     fixedparam = xparam
@@ -361,8 +361,7 @@ def plot_prior(result: Result,
 def plot_2D_margin(result: Result,
                    first_param: str,
                    second_param: str,
-                   ax: matplotlib.axes.Axes = None,
-                   estimate_type: EstimateType = None):
+                   ax: matplotlib.axes.Axes = None):
     """ Constructs a 2 dimensional marginal plot of the posterior density for
     two given parameters."""
     if ax is None:
@@ -370,8 +369,8 @@ def plot_2D_margin(result: Result,
     if result.debug=={}:
         raise ValueError("Expects priors and marginals saved. Try running psignifit(....., debug=True).")
 
-    estimate = result.get_parameters_estimate(estimate_type=estimate_type)
-    parameter_indices = {param: i for i, param in enumerate(sorted(estimate.keys()))}
+    parameters_keys = result.parameters_estimate_MAP.keys()
+    parameter_indices = {param: i for i, param in enumerate(sorted(parameters_keys))}
     other_param_ix = tuple(i for param, i in parameter_indices.items()
                            if param != first_param and param != second_param)
     marginal_2d = np.sum(result.debug['posteriors'], axis=other_param_ix)
