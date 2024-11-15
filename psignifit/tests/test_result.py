@@ -175,3 +175,13 @@ def test_get_parameter_estimate(result):
 
     with pytest.raises(ValueError):
         result.get_parameter_estimate(estimate_type='foo')
+
+
+def test_estimate_type_default(result):
+    result.estimate_type = 'MAP'
+    estimate = result.get_parameter_estimate()
+    assert _close_numpy_dict(estimate, result.parameter_estimate)
+
+    result.estimate_type = 'mean'
+    estimate = result.get_parameter_estimate()
+    assert _close_numpy_dict(estimate, result.parameter_estimate_mean)

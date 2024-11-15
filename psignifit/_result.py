@@ -1,6 +1,6 @@
 import dataclasses
 import json
-from typing import Any, Dict, Tuple, List, Optional, TextIO, Union
+from typing import Any, Dict, Tuple, List, Literal, Optional, TextIO, Union
 from pathlib import Path
 
 import numpy as np
@@ -27,6 +27,7 @@ class Result:
     prior_values: Dict[str, NDArray[float]]
     marginal_posterior_values: Dict[str, NDArray[float]]
     debug: Dict[Any, Any]
+    estimate_type: Literal['MAP', 'mean'] = 'MAP'
 
     @classmethod
     def from_dict(cls, result_dict: Dict[str, Any]):
@@ -67,20 +68,25 @@ class Result:
         result_dict['data'] = np.asarray(result_dict['data'])
         return cls.from_dict(result_dict)
 
-    def get_parameter_estimate(self, estimate_type: Optional[str]):
+    def get_parameter_estimate(self, estimate_type: Optional[str]=None):
         """ Get the estimate of the parameters by estimate type.
 
         Args:
-            estimate_type: Type of the parameters estimate, either "MAP" or "mean".
+            estimate_type: Type of the parameters estimate, either "MAP" or "mean". If None, the value of
+            `Result.estimate_type` is used instead.
         Returns:
             A dictionary mapping parameter names to parameter estimate.
         """
+        if estimate_type is None:
+            estimate_type = self.estimate_type
+
         if estimate_type == 'MAP':
             estimate = self.parameter_estimate
         elif estimate_type == 'mean':
             estimate = self.parameter_estimate_mean
         else:
             raise ValueError("`estimate_type` must be either 'MAP' or 'mean'")
+
         return estimate
 
     def threshold(self, proportion_correct: np.ndarray, unscaled: bool = False, return_ci: bool = True
