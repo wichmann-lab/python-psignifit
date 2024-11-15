@@ -19,6 +19,7 @@ class NumpyEncoder(json.JSONEncoder):
 @dataclasses.dataclass
 class Result:
     parameter_estimate: Dict[str, float]
+    parameter_estimate_mean: Dict[str, float]
     configuration: Configuration
     confidence_intervals: Dict[str, List[Tuple[float, float]]]
     data: NDArray[float]

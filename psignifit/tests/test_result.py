@@ -31,6 +31,7 @@ def _build_result(parameter_estimate, confidence_intervals):
     result = Result(
         configuration=Configuration(),
         parameter_estimate=parameter_estimate,
+        parameter_estimate_mean=parameter_estimate,
         confidence_intervals=confidence_intervals,
         data=np.random.rand(5, 3).tolist(),
         parameter_values={

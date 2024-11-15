@@ -184,3 +184,104 @@ def test_parameter_recovery_eq_asymptote(sigmoid):
     assert np.isclose(res.parameter_estimate['eta'], 0, atol=1e-4)
     assert np.isclose(res.parameter_estimate['threshold'], threshold, atol=1e-4)
     assert np.isclose(res.parameter_estimate['width'], width, atol=1e-4)
+
+
+@fp_error_handler(over='ignore', invalid='ignore')
+def test_parameter_recovery_mean_estimate(random_state):
+    # Check that the mean estimate also recovers the parameters with enough data
+    sigmoid = "norm"
+    width = 0.1
+    eta = 0.25
+    stim_range = [0.001, 0.001 + width * 1.1]
+    threshold = stim_range[1] / 2.5
+    gamma = 0.5  # 2-AFC
+    lambda_ = 0.0232
+
+    nsteps = 200
+    stimulus_level = np.linspace(stim_range[0], stim_range[1], nsteps)
+
+    perccorr = psychometric_with_eta(stimulus_level, threshold, width, gamma, lambda_,
+                            sigmoid, eta=eta, random_state=random_state)
+
+    ntrials = np.ones(nsteps) * 10000
+    hits = (perccorr * ntrials).astype(int)
+    data = np.dstack([stimulus_level, hits, ntrials]).squeeze()
+
+    options = {
+        'sigmoid': sigmoid,
+        'experiment_type': '2AFC',
+        'fixed_parameters': {'lambda': lambda_},
+    }
+    result = psignifit(data, **options)
+
+    expected_MAP_dict = {
+        'eta': eta,
+        'gamma': gamma,
+         'lambda': lambda_,
+         'threshold': threshold,
+         'width': width,
+    }
+    for p in expected_MAP_dict.keys():
+        assert np.isclose(result.parameter_estimate[p], expected_MAP_dict[p], atol=0.05)
+
+
+@fp_error_handler(over='ignore', invalid='ignore')
+def test_mean_vs_map_estimate(random_state):
+    # Test a case where the mean and MAP estimates are expected to be different:
+    # we generate data from a mixture of two sigmoids with different width, with
+    # only a few trials. The posterior over width is broad and asymmetrical, so the
+    # MAP and mean estimate are not identical.
+    # The expected values of the parameters where computed independently in a notebook.
+
+    widths = [1.1, 3.1, 6.3]
+    stim_range = [0.001, 0.001 + 10 * 1.1]
+    threshold = stim_range[1] / 2
+    lambda_ = 0.0232
+    gamma = 0.1
+    num_trials = 3
+
+    sigmoid = "norm"
+    nsteps = 20
+    stimulus_level = np.linspace(stim_range[0], stim_range[1], nsteps)
+
+    # The data is a mixture of three sigmoids
+    perccorr1 = psychometric(stimulus_level, threshold, widths[0], gamma, lambda_, sigmoid)
+    perccorr2 = psychometric(stimulus_level, threshold, widths[1], gamma, lambda_, sigmoid)
+    perccorr3 = psychometric(stimulus_level, threshold, widths[2], gamma, lambda_, sigmoid)
+    perccorr = np.concatenate((perccorr1, perccorr2, perccorr3))
+    levels = np.concatenate((stimulus_level, stimulus_level, stimulus_level))
+
+    # Generate trial data
+    # Fix the random state, because the expected parameters have been computed with this seed
+    ntrials = np.ones(nsteps * 3, dtype=int) * num_trials
+    random_state = np.random.RandomState(883)
+    hits = random_state.binomial(ntrials, perccorr)
+
+    data = np.dstack([levels, hits, ntrials]).squeeze()
+
+    options = {
+        'sigmoid': sigmoid,
+        'experiment_type': 'yes/no',
+        'fixed_parameters': {'lambda': 0.0232, 'gamma': 0.1},
+    }
+    result = psignifit(data, **options)
+
+    expected_MAP_dict = {
+        'eta': 1e-08,
+        'gamma': gamma,
+         'lambda': lambda_,
+         'threshold': 5.459454390045572,
+         'width': 3.679911898980962,
+    }
+    for p in expected_MAP_dict.keys():
+        assert np.isclose(result.parameter_estimate[p], expected_MAP_dict[p])
+
+    expected_mean_dict = {
+        'eta': 0.07274831038039509,
+        'gamma': gamma,
+        'lambda': lambda_,
+        'threshold': 5.429846600944022,
+        'width': 4.027280086833293,
+    }
+    for p in expected_MAP_dict.keys():
+        assert np.isclose(result.parameter_estimate_mean[p], expected_mean_dict[p])
