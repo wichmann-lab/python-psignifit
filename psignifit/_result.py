@@ -1,6 +1,6 @@
 import dataclasses
 import json
-from typing import Any, Dict, Tuple, List, TextIO, Union
+from typing import Any, Dict, Tuple, List, Optional, TextIO, Union
 from pathlib import Path
 
 import numpy as np
@@ -66,6 +66,22 @@ class Result:
             k: np.asarray(v) for k, v in result_dict['marginal_posterior_values'].items()}
         result_dict['data'] = np.asarray(result_dict['data'])
         return cls.from_dict(result_dict)
+
+    def get_parameter_estimate(self, estimate_type: Optional[str]):
+        """ Get the estimate of the parameters by estimate type.
+
+        Args:
+            estimate_type: Type of the parameters estimate, either "MAP" or "mean".
+        Returns:
+            A dictionary mapping parameter names to parameter estimate.
+        """
+        if estimate_type == 'MAP':
+            estimate = self.parameter_estimate
+        elif estimate_type == 'mean':
+            estimate = self.parameter_estimate_mean
+        else:
+            raise ValueError("`estimate_type` must be either 'MAP' or 'mean'")
+        return estimate
 
     def threshold(self, proportion_correct: np.ndarray, unscaled: bool = False, return_ci: bool = True
                   ) -> Union[np.ndarray, List[Tuple[np.ndarray, np.ndarray]]]:
