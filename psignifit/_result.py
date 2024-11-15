@@ -90,8 +90,8 @@ class Result:
 
         return estimate
 
-    def threshold(self, proportion_correct: np.ndarray, unscaled: bool = False, return_ci: bool = True
-                  ) -> Union[np.ndarray, List[Tuple[np.ndarray, np.ndarray]]]:
+    def threshold(self, proportion_correct: np.ndarray, unscaled: bool = False, return_ci: bool = True,
+                  estimate_type: Optional[EstimateType]=None) -> Union[np.ndarray, List[Tuple[np.ndarray, np.ndarray]]]:
         """ Threshold stimulus value and confidence interval for a different proportion correct cutoff.
 
         The CIs you may obtain from this are calculated based on the confidence
@@ -107,6 +107,8 @@ class Result:
                       sigmoid or for the one scaled by lambda and gamma.
                       By default this function returns the one for the scaled sigmoid.
             return_ci: If the confidence bounds should be returned along with the stimulus value
+            estimate_type: Type of estimate, either "MAP" or "mean".
+                If None, the value of `Result.estimate_type` is used instead.
         Returns:
             thresholds: stimulus values for all provided proportion_correct (if return_ci=False)
             (thresholds, ci): stimulus values along with confidence intervals
@@ -115,7 +117,7 @@ class Result:
         proportion_correct = np.asarray(proportion_correct)
         sigmoid = self.configuration.make_sigmoid()
 
-        estimate = self.get_parameter_estimate()
+        estimate = self.get_parameters_estimate(estimate_type)
         if unscaled:  # set asymptotes to 0 for everything.
             lambd, gamma = 0, 0
         else:
@@ -138,19 +140,22 @@ class Result:
 
         return new_threshold, new_ci
 
-    def slope(self, stimulus_level: np.ndarray) -> np.ndarray:
+    def slope(self, stimulus_level: np.ndarray, estimate_type: Optional[EstimateType]=None) -> np.ndarray:
         """ Slope of the psychometric function at a given stimulus levels.
 
         Args:
             stimulus_level: stimulus levels at where to evaluate the slope.
+            estimate_type: Type of estimate, either "MAP" or "mean".
+                If None, the value of `Result.estimate_type` is used instead.
         Returns:
             Slopes of the psychometric function at the stimulus levels.
         """
-        stimulus_level, param = np.asarray(stimulus_level), self.get_parameter_estimate()
+        stimulus_level, param = np.asarray(stimulus_level), self.get_parameters_estimate(estimate_type)
         sigmoid = self.configuration.make_sigmoid()
         return sigmoid.slope(stimulus_level, param['threshold'], param['width'], param['gamma'], param['lambda'])
 
-    def slope_at_proportion_correct(self, proportion_correct: np.ndarray, unscaled: bool = False):
+    def slope_at_proportion_correct(self, proportion_correct: np.ndarray, unscaled: bool = False,
+                                    estimate_type: Optional[EstimateType]=None):
         """ Slope of the psychometric function at a given performance level in proportion correct.
 
         Args:
@@ -158,9 +163,11 @@ class Result:
             unscaled: If the proportion correct you provide are for the unscaled
                       sigmoid or for the one scaled by lambda and gamma.
                       By default this function returns the one for the scaled sigmoid.
+            estimate_type: Type of estimate, either "MAP" or "mean".
+                If None, the value of `Result.estimate_type` is used instead.
         Returns:
             Slopes of the psychometric function at the stimulus levels which
             correspond to the given proportion correct.
         """
-        stimulus_levels = self.threshold(proportion_correct, unscaled, return_ci=False)
+        stimulus_levels = self.threshold(proportion_correct, unscaled, return_ci=False, estimate_type=estimate_type)
         return self.slope(stimulus_levels)
