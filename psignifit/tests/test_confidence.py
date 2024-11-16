@@ -52,8 +52,6 @@ def test_confidence_intervals(zerocentered_normal_mass, grid_values):
     assert intervals.shape == (len(grid_values), len(p_values), 2)
 
     with pytest.raises(ValueError):
-        confidence_intervals(zerocentered_normal_mass, grid_values, p_values, mode='stripes')
-    with pytest.raises(ValueError):
         confidence_intervals(zerocentered_normal_mass, grid_values, p_values, mode='foobar')
     with pytest.raises(ValueError):
         confidence_intervals(zerocentered_normal_mass * 3, grid_values, p_values, mode='project')

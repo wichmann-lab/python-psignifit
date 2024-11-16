@@ -82,13 +82,6 @@ config['confP'] = [.95, .9, .68, .5]
 # `CI_method` sets how the confidence intervals are computed in getConfRegion
 # possible variants are:
 #
-# 'stripes': Find a threshold with (1-alpha) above it
-#      This will disregard intervals of low posterior probability and then move
-#      in from the sides to adjust the exact CI size.
-#      This can handle bounds and asymmetric distributions slightly better, but
-#      will introduce slight jumps of the confidence interval when confp is
-#      adjusted depending on when the gridpoints get too small posterior
-#      probability.
 # 'project':
 #      Project the confidence region on each axis
 # 'percentiles': find alpha/2 and 1-alpha/2 percentiles (alpha = 1-confP)

@@ -39,9 +39,6 @@ def confidence_intervals(probability_mass: np.ndarray, grid_values: np.ndarray,
     CI_METHODS = {'project': grid_hdi, 'percentiles': percentile_intervals}
     if mode in CI_METHODS:
         calc_ci = CI_METHODS[mode]
-    elif mode == 'stripes':
-        raise ValueError('Confidence mode "stripes" is not supported anymore. "'
-                         f'"Use one of {list(CI_METHODS.keys())}.')
     else:
         raise ValueError(f'Expects mode as one of {list(CI_METHODS.keys())}, got {mode}')
 
