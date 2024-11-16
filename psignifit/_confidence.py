@@ -3,18 +3,18 @@
 Confidence intervals and region for parameters
 
 Two methods are implemented:
-      'project' -> project the confidence region down each axis
+  'project' -> project the confidence region down each axis
   'percentiles' -> find alpha/2 and 1-alpha/2 percentiles
                    (alpha = 1-confP)
 """
-from typing import Sequence
+from typing import Dict, Sequence
 
 import numpy as np
 from scipy import stats
 
 
 def confidence_intervals(probability_mass: np.ndarray, grid_values: np.ndarray,
-                         p_values: Sequence[float], mode: str) -> np.ndarray:
+                         p_values: Sequence[float], mode: str) -> Dict[str, np.ndarray]:
     """ Confidence intervals on probability grid.
 
     Supports two methods:
@@ -31,8 +31,8 @@ def confidence_intervals(probability_mass: np.ndarray, grid_values: np.ndarray,
         p_values: Probabilities of confidence in the intervals.
         mode: Either 'project' or 'percentiles'.
     Returns:
-        Start and end grid-values for the confidence interval
-        per dimension and p_value, shape (n_dims, n_p_values, 2)
+        A dictionary mapping p_values as a string to an array containing the start and end grid-values for the
+        confidence interval per dimension, shape (n_dims, 2).
     Raises:
         ValueError for unsupported mode or sum(probability_mass) != 1.
      """
@@ -44,9 +44,9 @@ def confidence_intervals(probability_mass: np.ndarray, grid_values: np.ndarray,
 
     if not np.isclose(probability_mass.sum(), 1):
         raise ValueError(f'Expects sum(probability_mass) to be 1., got {probability_mass.sum():.4f}')
-    intervals = np.empty((probability_mass.ndim, len(p_values), 2))
-    for p_ix, p_value in enumerate(p_values):
-        intervals[:, p_ix, :] = calc_ci(probability_mass, grid_values, p_value)
+    intervals = {}
+    for p_value in p_values:
+        intervals[str(p_value)] = calc_ci(probability_mass, grid_values, p_value)
 
     return intervals
 
