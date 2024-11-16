@@ -14,7 +14,7 @@ from scipy import stats
 
 
 def confidence_intervals(probability_mass: np.ndarray, grid_values: np.ndarray,
-                         p_values: Sequence[float], mode: str) -> Dict[str, np.ndarray]:
+                         p_values: Sequence[float], mode: str) -> Dict[str, list]:
     """ Confidence intervals on probability grid.
 
     Supports two methods:
@@ -31,7 +31,7 @@ def confidence_intervals(probability_mass: np.ndarray, grid_values: np.ndarray,
         p_values: Probabilities of confidence in the intervals.
         mode: Either 'project' or 'percentiles'.
     Returns:
-        A dictionary mapping p_values as a string to an array containing the start and end grid-values for the
+        A dictionary mapping p_values as a string to a list containing the start and end grid-values for the
         confidence interval per dimension, shape (n_dims, 2).
     Raises:
         ValueError for unsupported mode or sum(probability_mass) != 1.
@@ -46,7 +46,7 @@ def confidence_intervals(probability_mass: np.ndarray, grid_values: np.ndarray,
         raise ValueError(f'Expects sum(probability_mass) to be 1., got {probability_mass.sum():.4f}')
     intervals = {}
     for p_value in p_values:
-        intervals[str(p_value)] = calc_ci(probability_mass, grid_values, p_value)
+        intervals[str(p_value)] = calc_ci(probability_mass, grid_values, p_value).tolist()
 
     return intervals
 
