@@ -91,8 +91,9 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
 
     grid_values = [grid_value for _, grid_value in sorted(grid.items())]
     intervals = confidence_intervals(posteriors, grid_values, conf.confP, conf.CI_method)
-    intervals_dict = {param: interval_per_p.tolist()
-                      for param, interval_per_p in zip(sorted(grid.keys()), intervals)}
+    intervals_dict = {}
+    for idx, param in enumerate(sorted(grid.keys())):
+        intervals_dict[param] = {k: v[idx] for k, v in intervals.items()}
     marginals = marginalize_posterior(grid, posteriors)
 
     if conf.verbose:

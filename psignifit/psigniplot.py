@@ -69,11 +69,11 @@ def plot_psychometric_function(result: Result,  # noqa: C901, this function is t
         ax.axhline(y=1 - params['lambda'], linestyle=':', color=line_color)
         ax.axhline(y=params['gamma'], linestyle=':', color=line_color)
 
-        CI = np.asarray(result.confidence_intervals['threshold'])
+        CI_95 = result.confidence_intervals['threshold']['0.95']
         y = np.array([params['gamma'] + .5 * (1 - params['lambda'] - params['gamma'])] * 2)
-        ax.plot(CI[0, :], y, c=line_color)
-        ax.plot([CI[0, 0]] * 2, y + [-.01, .01], c=line_color)
-        ax.plot([CI[0, 1]] * 2, y + [-.01, .01], c=line_color)
+        ax.plot(CI_95, y, c=line_color)
+        ax.plot([CI_95[0]] * 2, y + [-.01, .01], c=line_color)
+        ax.plot([CI_95[1]] * 2, y + [-.01, .01], c=line_color)
 
     # AXIS SETTINGS
     plt.axis('tight')
@@ -231,8 +231,8 @@ def plot_marginal(result: Result,
     x = np.asarray(result.parameter_values[parameter])
     xmin, xmax = x.min(), x.max()
     if plot_estimate:
-        # takes first confidence interval from the list
-        CI= np.asarray(result.confidence_intervals[parameter][0])
+        # takes 95% confidence interval
+        CI = result.confidence_intervals[parameter]['0.95']
         ci_x = np.r_[CI[0], x[(x >= CI[0]) & (x <= CI[1])], CI[1]]
         ax.fill_between(ci_x, np.zeros_like(ci_x), np.interp(ci_x, x, marginal), color=line_color, alpha=0.5)
 
