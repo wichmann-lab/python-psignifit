@@ -62,20 +62,13 @@ config['grid_steps'] = {'lambda': 50}
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Confidence intervals
 # --------------------
-# The confidence level for the computed confidence intervals.
-# This may be set to any number between 0 and 1 excluding.
+# A tuple of confidence levels for the computed confidence intervals.
+# Each confidence level is specified as a number between 0 and 1, excluded.
+# Note that some plotting utilities rely on 0.95 being one of the confidence
+# levels, so you may want to include it in there.
 
-# for example to get 99% confidence intervals try
-config['confP'] = .99
-
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# You may specify a vector with N elements as well.
-# If you do the conf_intervals in the
-# result will be a 5x2xN array containing the values for the different
-# confidence levels in the 3rd dimension.
-
-# will return 4 confidence intervals for each parameter for example.
-config['confP'] = [.95, .9, .68, .5]
+# for example to get 95%, 99%, and 31% confidence intervals try
+config['confP'] = (0.95, 0.99, 0.31)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #
