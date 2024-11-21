@@ -150,15 +150,15 @@ print(result.confidence_intervals['threshold'])
 
 This is a list of lists. Each element in the list contain the lower and
 upper bound for the asked confidences. In this case the default returns
-a list of 3 for the 95%, 90% and 68% confidence interval (in that
-order). So to obtain the 95% confidence interval, you do
+a the 95%, 90% and 68% confidence intervals.
+To obtain the 95% confidence interval, you do
 
 ```{code-cell} ipython3
 ---
 jupyter:
   outputs_hidden: False
 ---
-print(result.confidence_intervals['threshold'][0])
+print(result.confidence_intervals['threshold']['95 %'])
 ```
 
 
