@@ -11,18 +11,16 @@ kernelspec:
   name: python3
 ---
 
-```{warning}
-This documentation page is still work in progress! Some information might be outdated.
-```
-
 # Result Object
 
-Which information is contained in the result of Psignifit
+Here we explain what is stored in the result object returned by Psignifit
 
 ```{code-cell} ipython3
 import numpy as np
+import matplotlib.pyplot as plt
 
 import psignifit as ps
+from psignifit import psigniplot
 
 # to have some data we use the data from demo_001
 data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
@@ -34,14 +32,14 @@ data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
                  [0.0100, 90.0000, 90.0000]])
 
 # Run psignifit
-res = ps.psignifit(data, sigmoid_name='norm', experiment_type='2AFC')
+res = ps.psignifit(data, sigmoid='norm', experiment_type='2AFC')
 ```
 
-now we can have a look at the res dictionary and all its fields.
+Now we can have a look at the res dictionary and all its fields.
 
+## Parameter estimates
 The most important result are the fitted parameters of the psychometric
 function. They can be found in a dictionary format.
-
 
 ```{code-cell} ipython3
 print(res.parameter_estimate)
@@ -49,52 +47,73 @@ print(res.parameter_estimate)
 
 For each of these parameters, also the confidence interval is contained
 in the results as a dictionary.
-
+For example for the threshold the confidence intervals are
 
 ```{code-cell} ipython3
-# TODO: Uncomment if confidence intervals are implemented
-# print(res.confidence_intervals)
+print(res.confidence_intervals['threshold'])
 ```
 
-In addition, the result contains the complete configuration which
-was used to fit.
+and for the width parameter
 
+```{code-cell} ipython3
+print(res.confidence_intervals['width'])
+```
+
+## Options
+In addition, the result contains the complete set of options passed. We called this 'configuration'
 
 ```{code-cell} ipython3
 print(res.configuration)
 ```
 
-Save, load, and repeat
-----------=-----------
-The results can be saved as a json file.
+Because the result object contains also the options passed, it is easy to do similar fits with the same options.
 
+```{code-cell} ipython3
+# copy the data and introduce a shift in all stimulus values
+otherdata = np.copy(data)
+otherdata[:, 0] = otherdata[:, 0] + 0.01 
+
+# fit with exact same options
+other_res = ps.psignifit(otherdata, res.configuration)
+
+# the difference in threshold should return the introduced shift
+print(other_res.parameter_estimate['threshold'] - res.parameter_estimate['threshold'])
+```
+
+```{code-cell} ipython3
+fig, axes = plt.subplots(1, 1)
+psigniplot.plot_psychometric_function(res, ax=axes)
+psigniplot.plot_psychometric_function(other_res, ax=axes)
+plt.show()
+```
+
+## Saving to JSON
+
+This result object is by default serializable, that means that it can be saved to a JSON file
 
 ```{code-cell} ipython3
 file_name = 'psignifit-result.json'
 res.save_json(file_name)
 ```
 
-This file can be loaded to get a result object again.
-
+The file contains all data, information about the fit, and the fitted parameters. 
+It can be loaded again to be used at a later time, for example for plotting
 
 ```{code-cell} ipython3
 loaded_res = ps.Result.load_json(file_name)
-assert res == loaded_res, "The original and loaded result should be equal."
+print(loaded_res.parameter_estimate)
 ```
-
-Because the result object contains the configuration,
-it is easy to restart the experiment with the same configuration.
-
 
 ```{code-cell} ipython3
-restarted_res = ps.psignifit(data, res.configuration)
+# plotting from loaded file
+psigniplot.plot_psychometric_function(loaded_res)
 ```
 
-## Advanced fields
+## Debug mode
 
-The result also contains weights and posterior probability
-at a whole grid of possible parameter combinations.
-These were generated during fitting the parameters and calculating
-the confidence intervals.
+If needed, psignifit can also return the whole grid of posterior probabilities by passing the option `debug=True`. In this mode also the prior definitions as lambda functions are stored. Because of this, the result object is not serializable anymore and cannot be saved to JSON.
+Some diagnostic plots require the debug mode, however this is not default.
 
-They are useful for some advanced plots and analysis.
+```{code-cell} ipython3
+
+```
