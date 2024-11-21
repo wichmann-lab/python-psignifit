@@ -16,7 +16,6 @@ parts:
     - file: examples/demo_005
     - file: examples/demo_006
     - file: examples/plot_all_sigmoids
-    - file: examples/parameter_recovery_demo
   
   - caption: User guides
     chapters:
