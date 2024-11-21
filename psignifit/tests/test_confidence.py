@@ -47,12 +47,13 @@ def test_confidence_intervals(zerocentered_normal_mass, grid_values):
     p_values = [0.05, 0.5, 0.95]
 
     intervals = confidence_intervals(zerocentered_normal_mass, grid_values, p_values, mode='project')
-    assert intervals.shape == (len(grid_values), len(p_values), 2)
-    intervals = confidence_intervals(zerocentered_normal_mass, grid_values, p_values, mode='percentiles')
-    assert intervals.shape == (len(grid_values), len(p_values), 2)
+    assert list(intervals.keys()) == [str(p) for p in p_values]
+    assert all(len(interval) == len(grid_values) for interval in intervals.values())
 
-    with pytest.raises(ValueError):
-        confidence_intervals(zerocentered_normal_mass, grid_values, p_values, mode='stripes')
+    intervals = confidence_intervals(zerocentered_normal_mass, grid_values, p_values, mode='percentiles')
+    assert list(intervals.keys()) == [str(p) for p in p_values]
+    assert all(len(interval) == len(grid_values) for interval in intervals.values())
+
     with pytest.raises(ValueError):
         confidence_intervals(zerocentered_normal_mass, grid_values, p_values, mode='foobar')
     with pytest.raises(ValueError):
