@@ -6,11 +6,10 @@ parts:
   - caption: Getting started
     chapters:
     - file: install_guide
-    - file: getting_started 
+    - file: basic-usage 
     
-  - caption: Examples
+  - caption: Demos
     chapters:
-    - file: examples/demo_001
     - file: examples/demo_002
     - file: examples/demo_003
     - file: examples/demo_004
@@ -29,7 +28,7 @@ parts:
     - file: user_guides/Priors
     - file: user_guides/Result-Struct
      
-  - caption: HOW-TOs
+  - caption: How-To
     chapters:
     - file: how_to/How-to-Change-the-Threshold-Percent-Correct
     - file: how_to/How-to-Fix-Parameters

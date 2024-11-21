@@ -16,7 +16,7 @@ This documentation page is still work in progress! Some information might be out
 ```
 
 
-# 4. Priors
+# Priors
 
 This demo covers how we set the priors for different situations.
 This gives you effective control over which parameters of the

@@ -16,7 +16,7 @@ This documentation page is still work in progress! Some information might be out
 ```
 
 
-# 6. Additional Functionality
+# Additional Functionality
 
 This demo shows some convenience functions we added, which are not
 directly used for the final fitting of psychometric functions.

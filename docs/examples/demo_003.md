@@ -15,7 +15,7 @@ kernelspec:
 This documentation page is still work in progress! Some information might be outdated.
 ```
 
-# 3. Result Object
+# Result Object
 
 Which information is contained in the result of Psignifit
 
