@@ -148,9 +148,10 @@ jupyter:
 print(result.confidence_intervals['threshold'])
 ```
 
-This is a list of lists. Each element in the list contain the lower and
-upper bound for the asked confidences. In this case the default returns
-the 95%, 90% and 68% confidence intervals.
+Each element in this result contain the lower and
+upper bound for the asked confidences. 
+In this case it returns the intervals for the default confidences of 
+95%, 90% and 68%.
 To obtain the 95% confidence interval, you do
 
 ```{code-cell} ipython3
@@ -179,15 +180,14 @@ psigniplot.plot_psychometric_function(result)
 plt.show()
 ```
 
-See `this user guide <plot-functions>` to 
-learn more about the visualizations.
+
 
 
 ## Next steps
 
 We covered the basic steps in using *python-psignifit*. Please refer to
-the examples following this page to learn how to change the default
+the demo and examples on the left menu to learn how to change the default
 parameters and explore other possibilities.
 
-The `api_ref` are helpful resources to
+The [API reference](reference/api) contain helpful resources to
 dive deeper.
