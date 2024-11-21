@@ -150,7 +150,7 @@ print(result.confidence_intervals['threshold'])
 
 This is a list of lists. Each element in the list contain the lower and
 upper bound for the asked confidences. In this case the default returns
-a the 95%, 90% and 68% confidence intervals.
+the 95%, 90% and 68% confidence intervals.
 To obtain the 95% confidence interval, you do
 
 ```{code-cell} ipython3
@@ -158,14 +158,14 @@ To obtain the 95% confidence interval, you do
 jupyter:
   outputs_hidden: False
 ---
-print(result.confidence_intervals['threshold']['95 %'])
+print(result.confidence_intervals['threshold']['0.95'])
 ```
 
 
 ## Plotting the fitted function
 
-The toolbox comes with a whole collection of visulizations. We provide
-some basic plotting of the psychometric function. 
+The toolbox comes with a whole [collection of visualizations](examples/demo_005). 
+We show you here how to do some basic plotting of the psychometric function. 
 
 
 ```{code-cell} ipython3
