@@ -16,7 +16,7 @@ This documentation page is still work in progress! Some information might be out
 ```
 
 
-# 5. Plotting
+# Plotting
 
  Here the basic plot functions which come with the toolbox are explained.
  Most of the functions return the handle of the axis they plotted in

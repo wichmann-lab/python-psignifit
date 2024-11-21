@@ -6,17 +6,17 @@ parts:
   - caption: Getting started
     chapters:
     - file: install_guide
-    - file: getting_started 
+    - file: basic-usage 
     
-  - caption: Examples
+  - caption: Demos
     chapters:
-    - file: examples/demo_001
     - file: examples/demo_002
     - file: examples/demo_003
     - file: examples/demo_004
     - file: examples/demo_005
     - file: examples/demo_006
     - file: examples/plot_all_sigmoids
+    - file: examples/parameter_recovery_demo
   
   - caption: User guides
     chapters:
@@ -28,7 +28,7 @@ parts:
     - file: user_guides/Priors
     - file: user_guides/Result-Struct
      
-  - caption: HOW-TOs
+  - caption: How-To
     chapters:
     - file: how-to/How-to-Change-the-Threshold-Percent-Correct
     - file: how-to/How-to-Fix-Parameters

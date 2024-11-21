@@ -15,7 +15,7 @@ kernelspec:
 This documentation page is still work in progress! Some information might be outdated.
 ```
 
-# 2. More Options
+# Options
 
 Which options can one set?
 
