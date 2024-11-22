@@ -71,7 +71,7 @@ Because the result object contains also the options passed, it is easy to do sim
 ```{code-cell} ipython3
 # copy the data and introduce a shift in all stimulus values
 otherdata = np.copy(data)
-otherdata[:, 0] = otherdata[:, 0] + 0.01 
+otherdata[:, 0] = otherdata[:, 0] + 0.01
 
 # fit with exact same options
 other_res = ps.psignifit(otherdata, res.configuration)
@@ -96,7 +96,7 @@ file_name = 'psignifit-result.json'
 res.save_json(file_name)
 ```
 
-The file contains all data, information about the fit, and the fitted parameters. 
+The file contains all data, information about the fit, and the fitted parameters.
 It can be loaded again to be used at a later time, for example for plotting
 
 ```{code-cell} ipython3
@@ -113,7 +113,3 @@ psigniplot.plot_psychometric_function(loaded_res)
 
 If needed, psignifit can also return the whole grid of posterior probabilities by passing the option `debug=True`. In this mode also the prior definitions as lambda functions are stored. Because of this, the result object is not serializable anymore and cannot be saved to JSON.
 Some diagnostic plots require the debug mode, however this is not default.
-
-```{code-cell} ipython3
-
-```
