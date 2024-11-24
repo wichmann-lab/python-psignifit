@@ -87,9 +87,11 @@ The option `CI_method` sets how the confidence intervals are computed. The possi
 
 - 'project': project the confidence region from the multidimensional posterior grid on each axis.
 
-- 'percentiles': find $\alpha/2$ and $(1-\alpha/2)$ percentiles (with $\alpha$ = 1 - confP).
+- 'percentiles': find $\alpha/2$ and $(1-\alpha/2)$ percentiles (with $\alpha$ = 1 - confP). Default.
 
 ```{code-cell} ipython3
+options['CI_method'] = 'percentiles'
+# or
 options['CI_method'] = 'project'
 ```
 
@@ -120,7 +122,7 @@ For example, this would enable the usage of the interval from .1 to .9 as the wi
 You can set the priors manually passing them as a dictionary with the parameter name as key and the custom prior function
 as the value.  
 
-For details on how do change these refer to the [priors demo](priors).
+For details on how do change these refer to the [priors demo](examples/priors).
 
 
 The strength of the prior in favor of a binomial observer can be set with

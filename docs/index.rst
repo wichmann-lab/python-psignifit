@@ -25,7 +25,7 @@ Where to start?
 
 First, :ref:`install_guide` the toolbox.
 
-Then, check out the :ref:`getting_started` page. 
+Then, check out the "Basic Usage" page. 
 
 
 More information

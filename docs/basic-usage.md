@@ -87,18 +87,18 @@ free upper and lower asymptote and,
 `equal asymptote`, 
 which assumes that the upper and the lower asymptote are equal. 
 You find a more detailed description of the 
-[experiment types here](examples/demo_001).
+[experiment types here](examples/basic-options).
 
 You also might want to specify the sigmoid you want to use. 
 You do this by setting the paramter `sigmoid`. Default is 
 the cummulative Gauss (`sigmoid=gauss'). Another 
 common alternative is the logistic (`sigmoid='logistic')`.
 
-Refer to the [options demo](examples/demo_001) and the [sigmoids page](examples/plot_all_sigmoids)
+Refer to the [options demo](examples/basic-options) and the [sigmoids page](examples/plot_all_sigmoids)
 for all possible sigmoids implemented in psignifit.
 
 Advanced users can pass more arguments to fine-tune the fitting procedure,
-[as described here](examples/demo_002).
+[as described here](examples/advanced-options).
 
 
 ## Getting results from the fit
@@ -132,10 +132,6 @@ The parameters estimated by psignifit are:
 Then, to obtain the threhsold you run
 
 ```{code-cell} ipython3
----
-jupyter:
-  outputs_hidden: False
----
 print(result.parameter_estimate['threshold'])
 ```
 
@@ -145,10 +141,6 @@ Similarly, psignifit also returns the confidence intervals for
 each parameter. For example for the threshold 
 
 ```{code-cell} ipython3
----
-jupyter:
-  outputs_hidden: False
----
 print(result.confidence_intervals['threshold'])
 ```
 
@@ -156,29 +148,15 @@ Each element in this result contain the lower and
 upper bound for the asked confidences. 
 In this case it returns the intervals for the default confidences of 
 95%, 90% and 68%.
-To obtain the 95% confidence interval, you do
-
-```{code-cell} ipython3
----
-jupyter:
-  outputs_hidden: False
----
-print(result.confidence_intervals['threshold']['0.95'])
-```
 
 
 ## Plotting the fitted function
 
-The toolbox comes with a whole [collection of visualizations](examples/demo_005). 
+The toolbox comes with a whole [collection of visualizations](examples/plotting). 
 We show you here how to do some basic plotting of the psychometric function. 
 
 
 ```{code-cell} ipython3
----
-jupyter:
-  outputs_hidden: False
----
-
 plt.figure()
 psigniplot.plot_psychometric_function(result)
 plt.show()

@@ -11,7 +11,7 @@ kernelspec:
   name: python3
 ---
 
-# Result Object
+# Result object
 
 Here we explain what is stored in the result object returned by Psignifit
 
@@ -78,13 +78,6 @@ other_res = ps.psignifit(otherdata, res.configuration)
 
 # the difference in threshold should return the introduced shift
 print(other_res.parameter_estimate['threshold'] - res.parameter_estimate['threshold'])
-```
-
-```{code-cell} ipython3
-fig, axes = plt.subplots(1, 1)
-psigniplot.plot_psychometric_function(res, ax=axes)
-psigniplot.plot_psychometric_function(other_res, ax=axes)
-plt.show()
 ```
 
 ## Saving to JSON

@@ -96,5 +96,5 @@ options['sigmoid']    = 'rgumbel';
 You can find [all sigmoids supported by psignifit here](plot_all_sigmoids).
 
 If the standard sigmoids do not match your requirements, you may provide a reference to your own sigmoid, which has to be a subclass of `psignifit.sigmoids.Sigmoid`. 
-Consult the [API reference](reference/api) and the source code to learn how to set your own sigmoid.
+Consult the [API reference](../reference/api) and the source code to learn how to set your own sigmoid.
 

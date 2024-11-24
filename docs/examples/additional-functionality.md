@@ -276,33 +276,6 @@ In real datsets the biases we demonstrated can be combined. Nonetheless
 the plots of the marginals should allow a separation of the different
 biases.
 
-## plotsModelfit
-
-We offer you a function which creates the plots psignifit 2 created for
-checking the modelfit.
-It can be run with the following command follows:
-
-
-```{code-cell} ipython3
-ps.psigniplot.plotsModelfit(res)
-```
-
-This method will show you three plots, based on the deviance residuals,
-which are the normalized deviations from the fitted psychometric function:
-1) the psychometric function with the data around it as a first general
-check.
-2) deviance residuals against the stimulus level. This is a check whether
-the data systematicall lie above or below the psychometric function at a
-range of stimulus levels. The three lines are polinomials of first
-second and third order fitted to the points. If these dots deviate
-strongly and/or systematically from 0, this is worrysome. Such deviations
-indicate that the shape of the psychometric function fitted does not
-match the data.
-3) deviance residuals against the block order. This plot is meant as a help
-to detect, when performance changes over time. Assuming that your blocks
-somewhat reflect the order in which the data were collected, this shows
-you how the deviations from the psychometric function changed over time.
-Again strong and/or systematic deviations from 0 are a cause for worry.
 
 ## Quick and dirty mode
 
