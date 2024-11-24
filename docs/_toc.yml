@@ -10,19 +10,18 @@ parts:
     
   - caption: Demos
     chapters:
+    - file: examples/demo_001
+    - file: examples/plot_all_sigmoids
     - file: examples/demo_002
     - file: examples/demo_003
     - file: examples/demo_004
     - file: examples/demo_005
     - file: examples/demo_006
     - file: examples/parameter_recovery_demo
-    - file: examples/plot_all_sigmoids
   
   - caption: User guides
     chapters:
-    - file: user_guides/Experiment-Types
     - file: user_guides/Interval-Bias
-    - file: user_guides/Options-Dictionary
     - file: user_guides/Plot-Functions
     - file: user_guides/Pooling-Utility
     - file: user_guides/Priors

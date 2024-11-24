@@ -15,15 +15,14 @@ kernelspec:
 
 ## Supported sigmoids
 
-Out of the box psignifit supports the following sigmoid functions,
-chosen by the argument `sigmoid =...`:
+Out of the box psignifit supports the following sigmoid functions
 
 
 :::{list-table} Supported sigmoids
 :widths: auto
 :header-rows: 1
 
-*   -  `sigmoid_name = ...`
+*   -  `sigmoid= ...`
 	- Distribution
 *   - `norm`
     - Cumulative gauss distribution. The default.
@@ -79,7 +78,7 @@ def plot_sigmoid(sigmoid, name, x, threshold=M, width=WIDTH, axes=None):
     axes2.plot(x, slope, color='C1', linestyle='--', zorder=-5)
     axes2.set_yticks([])
     
-    axes.plot(x, y, color='C0')
+    axes.plot(x, y, color='C0', linewidth=2)
     axes.set_ylabel('value')
     axes.set_ylim(0, 1)
     axes.set(title=name)

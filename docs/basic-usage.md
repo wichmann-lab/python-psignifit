@@ -87,14 +87,18 @@ free upper and lower asymptote and,
 `equal asymptote`, 
 which assumes that the upper and the lower asymptote are equal. 
 You find a more detailed description of the 
-[experiment types here](experiment-types).
+[experiment types here](examples/demo_001).
 
 You also might want to specify the sigmoid you want to use. 
 You do this by setting the paramter `sigmoid`. Default is 
-the cummulative Gauss (`sigmoid=gauss').
+the cummulative Gauss (`sigmoid=gauss'). Another 
+common alternative is the logistic (`sigmoid='logistic')`.
+
+Refer to the [options demo](examples/demo_001) and the [sigmoids page](examples/plot_all_sigmoids)
+for all possible sigmoids implemented in psignifit.
 
 Advanced users can pass more arguments to fine-tune the fitting procedure,
-[as described here](options-dictionary) and use [different sigmoids](examples/plot_all_sigmoids)
+[as described here](examples/demo_002).
 
 
 ## Getting results from the fit
@@ -188,6 +192,3 @@ plt.show()
 We covered the basic steps in using *python-psignifit*. Please refer to
 the demo and examples on the left menu to learn how to change the default
 parameters and explore other possibilities.
-
-The [API reference](reference/api) contain helpful resources to
-dive deeper.
