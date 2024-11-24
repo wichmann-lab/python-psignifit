@@ -8,7 +8,7 @@ parts:
     - file: install_guide
     - file: basic-usage 
     
-  - caption: Demos
+  - caption: Usage guides
     chapters:
     - file: examples/basic-options
     - file: examples/plot_all_sigmoids
@@ -18,21 +18,19 @@ parts:
     - file: examples/priors
     - file: examples/additional-functionality
     - file: examples/parameter_recovery_demo
-  
-  - caption: User guides
-    chapters:
-    - file: user_guides/Interval-Bias
-    - file: user_guides/Pooling-Utility
-    - file: user_guides/Priors
-    - file: user_guides/Result-Struct
-     
-  - caption: How-To
+
+  - caption: Quick how-to
     chapters:
     - file: how_to/How-to-Change-the-Threshold-Percent-Correct
     - file: how_to/How-to-Fix-Parameters
     - file: how_to/How-to-Get-Standard-Parameters
     - file: how_to/How-to-Get-Thresholds-and-Slopes
-  
+      
+  - caption: Tools
+    chapters:
+    - file: user_guides/Interval-Bias
+    - file: user_guides/Pooling-Utility
+     
   - caption: Benchmarks
     chapters:
     - file: test_MATLAB_version
