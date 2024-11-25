@@ -31,11 +31,10 @@ N = TypeVar('N', float, np.ndarray)
 class Sigmoid:
     """ Base class for sigmoid implementation.
 
-    Handles logarithmic input and negative output
-    for the specific sigmoid implementations.
+    Handles negative output for the specific sigmoid implementations.
 
     Sigmoid classes should derive from this class and implement
-    the methods '_value', '_slope', and '_threshold'.
+    the methods '_value', '_slope', '_threshold', and `_standard_parameters`.
 
     The stimulus levels, threshold and width are parameters of method calls.
     They correspond to the object attributes PC and alpha in the following way:
@@ -134,6 +133,22 @@ class Sigmoid:
         result = self._inverse(prop_correct, threshold, width)
         return result
 
+    def standard_parameters(self, threshold: N, width: N) -> list:
+        """ Transforms parameters to a standard parametrization.
+
+        The standard parametrization depends on the sigmoid class used. For instance, for a Gaussian sigmoid
+        the returned list, `theta`, is going to contain the parameters `[mean, standard deviation]`.
+
+        For a description of the parameters returned, see the docstring of `_standard_parameters`.
+
+        Args:
+            threshold: Parameter value for threshold at PC
+            width: Parameter value for width of the sigmoid
+        Returns:
+            List of standard parameters for the sigmoid subclass.
+        """
+        return self._standard_parameters(threshold, width)
+
     def _value(self, stimulus_level: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
         raise NotImplementedError("This should be overwritten by an implementation.")
 
@@ -141,6 +156,9 @@ class Sigmoid:
         raise NotImplementedError("This should be overwritten by an implementation.")
 
     def _inverse(self, prop_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
+        raise NotImplementedError("This should be overwritten by an implementation.")
+
+    def _standard_parameters(self, threshold: N, width: N) -> list:
         raise NotImplementedError("This should be overwritten by an implementation.")
 
 
