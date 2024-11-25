@@ -19,6 +19,8 @@ norminv = scipy.stats.norm(loc=0, scale=1).ppf
 norminvg = scipy.stats.norm.ppf
 #   - Cumulative normal distribution function
 normcdf = scipy.stats.norm.cdf
+#   - Normal probability distribution function
+normpdf = scipy.stats.norm.pdf
 
 # T-Student with df=1
 t1cdf = scipy.stats.t(1).cdf
@@ -165,19 +167,22 @@ class Sigmoid:
 class Gaussian(Sigmoid):
     """ Sigmoid based on the Gaussian distribution's CDF. """
     def _value(self, stimulus_level, threshold, width):
-        C =(norminv(1 - self.alpha) - norminv(self.alpha))
-        return normcdf(stimulus_level, (threshold - norminvg(self._PC, 0,  width / C)),  width / C)
+        mean, std = self._standard_parameters(threshold=threshold, width=width)
+        return normcdf(stimulus_level, mean, std)
 
     def _slope(self, stimulus_level: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
-        C = norminv(1 - self.alpha) - norminv(self.alpha)
-        m = (threshold - norminvg(self._PC, 0, width / C))
-        normalized_stimulus_level = (stimulus_level - m) / width * C
-        normalized_slope = sp.stats.norm.pdf(normalized_stimulus_level)
-        return normalized_slope * C / width
+        mean, std = self._standard_parameters(threshold=threshold, width=width)
+        return normpdf(stimulus_level, loc=mean, scale=std)
 
     def _inverse(self, prop_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
+        mean, std = self._standard_parameters(threshold=threshold, width=width)
+        return norminvg(prop_correct, mean, std)
+
+    def _standard_parameters(self, threshold: N, width: N) -> list:
         C = norminv(1 - self.alpha) - norminv(self.alpha)
-        return norminvg(prop_correct, threshold - norminvg(self._PC, 0, width / C), width / C)
+        mean = threshold - norminvg(self._PC, 0, width / C)
+        std = width / C
+        return [mean, std]
 
 class Logistic(Sigmoid):
     """ Sigmoid based on the Logistic distribution's CDF. """

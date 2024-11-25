@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import stats
 import pytest
 
 from psignifit import sigmoids
@@ -101,3 +102,26 @@ def test_sigmoid_sanity_check(sigmoid_name):
     sigmoids.assert_sigmoid_sanity_checks(
         sigmoid, n_samples=10000, threshold=threshold, width=0.7,
     )
+
+
+def test_gaussian_standard_parameters():
+    PC = 0.4
+    alpha = 0.083
+
+    # Create a sigmoid with standard parameters
+    original_mean = 3.1
+    original_std = 1.34
+    original = stats.norm(loc=original_mean, scale=original_std)
+
+    # Measure width and threshold
+    x = np.linspace(0, 6, 10000)
+    psi = original.cdf(x)
+    threshold = x[np.argwhere(psi > PC)][0, 0]
+    width = original.ppf(1 - alpha) - original.ppf(alpha)
+
+    # Check that the sigmoid method returns the original parameters
+    sigmoid = sigmoids.sigmoid_by_name('norm', PC=PC, alpha=alpha)
+    mean, std = sigmoid.standard_parameters(threshold=threshold, width=width)
+
+    np.testing.assert_allclose(mean, original_mean, atol=1e-3)
+    np.testing.assert_allclose(std, original_std, atol=1e-3)
