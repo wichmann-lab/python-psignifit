@@ -6,129 +6,12 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.16.4
 kernelspec:
-  display_name: Python 3
+  display_name: Python 3 (ipykernel)
   language: python
   name: python3
 ---
 
-```{warning}
-This documentation page is still work in progress! Some information might be outdated.
-```
-
-
-# Additional Functionality
-
-This demo shows some convenience functions we added, which are not
-directly used for the final fitting of psychometric functions.
-
-```{code-cell} ipython3
-import numpy as np
-
-import psignifit as ps
-```
-
-We will need some fitted function for illustration. Thus we first fit our
-standard data from DEMO_001 again:
-
-
-```{code-cell} ipython3
-import psignifit.psigniplot
-
-data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
-                 [0.0020, 44.0000, 90.0000], [0.0025, 44.0000, 90.0000],
-                 [0.0030, 52.0000, 90.0000], [0.0035, 53.0000, 90.0000],
-                 [0.0040, 62.0000, 90.0000], [0.0045, 64.0000, 90.0000],
-                 [0.0050, 76.0000, 90.0000], [0.0060, 79.0000, 90.0000],
-                 [0.0070, 88.0000, 90.0000], [0.0080, 90.0000, 90.0000],
-                 [0.0100, 90.0000, 90.0000]])
-
-config = dict(sigmoid_name='norm', experiment_type='2AFC')
-res = ps.psignifit(data, **config)
-```
-
-## Obtaining Threshold Values
-
-For comparison to other estimation techniques we provide functions to
-calculate thresholds at any given proportion correct.
-
-Calculating the threshold of the function fit in result with pCorrect
-proportion correct. Unscaled toggles, whether you refer to the pCorrect
-obtained in the experiment (default), or to the proportion correct on the
-original function unscaled by guessing and lapse rate.
-
-For example: This call will find the value at which our function reaches
-90% correct:
-
-
-```{code-cell} ipython3
-ps.getThreshold(res, 0.9)  # which should be 0.0058
-```
-
-A usecase for the unscaled case might be to find the threshold for the
-middle of the psychometric function independent of the guessing and lapse
-rate:
-
-
-```{code-cell} ipython3
-ps.getThreshold(res, 0.5, 1)
-```
-
-which should be 0.0046, which is exactly the definition of the threshold
-we use in the fitting.
-
-The function also computes worst case credible intervals for the
-threshold.
-
-
-```{code-cell} ipython3
-[threshold, CI] = ps.getThreshold(res, 0.5, 1)
-```
-
-The credible intervals are for the confidence levels given for your
-function fit.
-The estimates calculated by this function are very conservative, when
-you move far away from the original threshold, as we simply assume the
-worst case for all other parameters instead of averaging over the values
-correctly.
-
-## Obtaining Slope Values
-
- We also provide two functions to calculate the slope of the psychometric
- function from the fits.
- These functions provide no credible intervals.
-
- getSlope(res,stimLevel), will calculate the slope at a given stimulus
- level.
-
-
-```{code-cell} ipython3
-# For example:
-ps.getSlope(res, 0.006)
-```
-
-getSlopePC(res,pCorrect,unscaled), will calculate the slope at a given
-proportion correct.
-
-
-```{code-cell} ipython3
-# For example:
-ps.getSlopePC(res, 0.6)
-```
-
-Will yield the slope at the value where the psychometric function reaches
-60% correct (at 0.0034). This slope is 89.0673.
-
-as for the getThreshold function, the unscaled option allows you to
-specify the proportion correct on the unscaled sigmoid instead.
-For example we can calculate the slope at the midpoint of the
-psychometric function using:
-
-
-```{code-cell} ipython3
-ps.getSlopePC(res, 0.5, 1)
-```
-
-## Bias Analysis
+# Bias analysis
 
 For 2AFC experiments it makes sense to check whether the observers are
 biased, i.e. whether they treat the two alternative answers differently.
@@ -149,6 +32,12 @@ For demonstration purposes we produce different pairs of datasets, which
 combine to our standard test dataset (data11 and data12, data21 and data22,
 and data31 and data32 are a pair each:
 
+```{code-cell} ipython3
+import numpy as np
+
+import psignifit as ps
+from psignifit import psigniplot
+```
 
 ```{code-cell} ipython3
 data11 = np.array([[0.0010, 22.0000, 45.0000], [0.0015, 27.0000, 45.0000],
@@ -202,10 +91,9 @@ data32 = np.array([[0.0010, 23.0000, 45.0000], [0.0015, 25.0000, 45.0000],
 
 now we can check whether our different pairs show biased behaviour:
 
-
 ```{code-cell} ipython3
 # We start with the first pair of data:
-psignifit.psigniplot.plot_bias_analysis(data11, data12, **config)
+psigniplot.plot_bias_analysis(data11, data12)
 ```
 
 This command will open a figure, which constains plots for the first
@@ -224,10 +112,9 @@ For our first example these plots all confirm the first impression
 obtained from the first plot. It seems neither of the parameters has
 changed much.
 
-
 ```{code-cell} ipython3
 # Next, we check our second split of data:
-psignifit.psigniplot.plot_bias_analysis(data21, data22, **config)
+psigniplot.plot_bias_analysis(data21, data22)
 ```
 
 In this case there seems to be very strong "finger bias", i.e. the
@@ -244,10 +131,9 @@ As this kind of bias leads to relatively undisturbed inference for
 threshold and width, the estimates from the original function might still
 be usable.
 
-
 ```{code-cell} ipython3
 # Now we have a look at our third splitting:
-psignifit.psigniplot.plot_bias_analysis(data31, data32, **config)
+psigniplot.plot_bias_analysis(data31, data32)
 ```
 
 In this case the guessing rate does not seem to differ between intervals,
@@ -276,27 +162,3 @@ In real datsets the biases we demonstrated can be combined. Nonetheless
 the plots of the marginals should allow a separation of the different
 biases.
 
-
-## Quick and dirty mode
-
-To fit functions fast, for example during experiments or to have a fast
-early look at your data
-
-
-```{code-cell} ipython3
-resFast = ps.psignifitFast(data, **config)
-```
-
-To reduce processing time this function changes three aspects:
-
-  1) It uses only a binomial model instead of the full beta-binomial model
-     sacrificing robustness against overdispersion
-  2) It reduces the number of gridpoints to evaluate the posterior
-  3) It limits the number of function evaluations for the final optimization
-     to find the MAP.
-
-Using this function will issue warnings and will not provide you with
-credible intervals as the grid we use here to evaluate the posterior
-is probably not dense enough for this type of inference and the
-beta-binomial model was deactivated. Otherwise the result struct has
-the same structure as for the full analysis.

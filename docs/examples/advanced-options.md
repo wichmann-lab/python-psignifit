@@ -122,7 +122,7 @@ For example, this would enable the usage of the interval from .1 to .9 as the wi
 You can set the priors manually passing them as a dictionary with the parameter name as key and the custom prior function
 as the value.  
 
-For details on how do change these refer to the [priors demo](examples/priors).
+For details on how do change these refer to the [priors demo](priors).
 
 
 The strength of the prior in favor of a binomial observer can be set with

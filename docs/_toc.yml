@@ -16,19 +16,18 @@ parts:
     - file: examples/results-object
     - file: examples/advanced-options
     - file: examples/priors
-    - file: examples/additional-functionality
     - file: examples/parameter_recovery_demo
 
   - caption: Quick how-to
     chapters:
-    - file: how_to/How-to-Change-the-Threshold-Percent-Correct
-    - file: how_to/How-to-Fix-Parameters
-    - file: how_to/How-to-Get-Standard-Parameters
     - file: how_to/How-to-Get-Thresholds-and-Slopes
-      
+    - file: how_to/How-to-Fix-Parameters
+    - file: how_to/How-to-Change-the-Threshold-Percent-Correct
+    - file: how_to/How-to-Get-Standard-Parameters
+    
   - caption: Tools
     chapters:
-    - file: user_guides/Interval-Bias
+    - file: examples/bias-analysis
     - file: user_guides/Pooling-Utility
      
   - caption: Benchmarks
