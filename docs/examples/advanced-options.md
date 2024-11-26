@@ -46,9 +46,9 @@ This option sets how you want to estimate your fit from the posterior.
 - 'MAP': maximum a posteriori computed from the posterior. Default.
 
 ```{code-cell} ipython3
-#options['estimate_type'] = 'MAP'
+options['estimate_type'] = 'MAP'
 # alternatively:
-#options['estimate_type'] = 'mean'
+options['estimate_type'] = 'mean'
 ```
 
 
@@ -102,7 +102,7 @@ Possible values are in the range from 0 to 1, default is 0.5. The default corres
 To set it to a different value, for example to 90 %, you'll do 
 
 ```{code-cell} ipython3
-#options['thresh_PC'] = .9
+options['thresh_PC'] = .9
 ```
 
 The definition of the `width` parameter of a psychometric function can be changed with the option `width_alpha`.
@@ -114,7 +114,7 @@ The definition of the `width` parameter of a psychometric function can be change
 For example, this would enable the usage of the interval from .1 to .9 as the width
 
 ```{code-cell} ipython3
-#options['width_alpha'] = .05
+options['width_alpha'] = .05
 ```
 
 ## Priors
