@@ -25,7 +25,7 @@ You can change this default by setting the option `threshPC` with the value
 of the *proportion correct* you want. For example,
 
 ```
-options['threshPC']   = 0.9
+options['thresh_PC']   = 0.9
 ```
 
 will set the threshold value at 0.9 on the unscaled sigmoid.
