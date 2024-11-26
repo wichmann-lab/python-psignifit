@@ -16,7 +16,6 @@ parts:
     - file: examples/results-object
     - file: examples/advanced-options
     - file: examples/priors
-    - file: examples/parameter_recovery_demo
 
   - caption: Quick how-to
     chapters:
@@ -25,10 +24,11 @@ parts:
     - file: how_to/How-to-Change-the-Threshold-Percent-Correct
     - file: how_to/How-to-Get-Standard-Parameters
     
-  - caption: Tools
+  - caption: Extras
     chapters:
     - file: examples/bias-analysis
     - file: user_guides/Pooling-Utility
+    - file: examples/parameter_recovery_demo
      
   - caption: Benchmarks
     chapters:
