@@ -18,7 +18,7 @@ class Sigmoid:
     Handles negative output for the specific sigmoid implementations.
 
     Sigmoid classes should derive from this class and implement
-    the methods `scipy_distr` and `_standard_parameters`.
+    the methods `_scipy_distr` and `_standard_parameters`.
 
     The stimulus levels, threshold and width are parameters of method calls.
     They correspond to the object attributes PC and alpha in the following way:
@@ -124,7 +124,7 @@ class Sigmoid:
         return result
 
     def standard_parameters(self, threshold: N, width: N) -> tuple:
-        """ Transforms parameters to a standard parametrization.
+        """ Transforms parameters threshold and width to a standard parametrization.
 
         The interpretation of the standard parameters, location and scale, depends on the sigmoid class used.
         For instance, for a Gaussian sigmoid, the location corresponds to the mean and the scale to the standard
