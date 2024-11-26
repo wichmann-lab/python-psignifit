@@ -18,7 +18,7 @@ class Sigmoid:
     Handles negative output for the specific sigmoid implementations.
 
     Sigmoid classes should derive from this class and implement
-    the methods '_value', '_slope', '_threshold', and `_standard_parameters`.
+    the methods `scipy_distr` and `_standard_parameters`.
 
     The stimulus levels, threshold and width are parameters of method calls.
     They correspond to the object attributes PC and alpha in the following way:
@@ -142,7 +142,7 @@ class Sigmoid:
 
     # --- Private interface
 
-    def _get_scipy_distr(self):
+    def _scipy_distr(self):
         """ Get the scipy.stats implementation of the underlying cdf.
 
         Returns
@@ -152,15 +152,15 @@ class Sigmoid:
         raise NotImplementedError("This should be overwritten by an implementation.")
 
     def _ppf(self, x, loc=0, scale=1):
-        distr, distr_kwargs = self._get_scipy_distr()
+        distr, distr_kwargs = self._scipy_distr()
         return distr.ppf(x, loc=loc, scale=scale, **distr_kwargs)
 
     def _pdf(self, x, loc=0, scale=1):
-        distr, distr_kwargs = self._get_scipy_distr()
+        distr, distr_kwargs = self._scipy_distr()
         return distr.pdf(x, loc=loc, scale=scale, **distr_kwargs)
 
     def _cdf(self, x, loc=0, scale=1):
-        distr, distr_kwargs = self._get_scipy_distr()
+        distr, distr_kwargs = self._scipy_distr()
         return distr.cdf(x, loc=loc, scale=scale, **distr_kwargs)
 
     def _standard_parameters(self, threshold: N, width: N) -> list:
@@ -170,7 +170,7 @@ class Sigmoid:
 class Gaussian(Sigmoid):
     """ Sigmoid based on the Gaussian distribution's CDF. """
 
-    def _get_scipy_distr(self):
+    def _scipy_distr(self):
         return scipy.stats.norm, {}
 
     def _standard_parameters(self, threshold: N, width: N) -> list:
@@ -182,7 +182,7 @@ class Gaussian(Sigmoid):
 class Logistic(Sigmoid):
     """ Sigmoid based on the Logistic distribution's CDF. """
 
-    def _get_scipy_distr(self):
+    def _scipy_distr(self):
         return scipy.stats.logistic, {}
 
     def _standard_parameters(self, threshold: N, width: N) -> list:
@@ -194,7 +194,7 @@ class Logistic(Sigmoid):
 class Gumbel(Sigmoid):
     """ Sigmoid based on the Gumbel distribution's CDF. """
 
-    def _get_scipy_distr(self):
+    def _scipy_distr(self):
         return scipy.stats.gumbel_l, {}
 
     def _standard_parameters(self, threshold: N, width: N) -> list:
@@ -206,7 +206,7 @@ class Gumbel(Sigmoid):
 class ReverseGumbel(Sigmoid):
     """ Sigmoid based on the reversed Gumbel distribution's CDF. """
 
-    def _get_scipy_distr(self):
+    def _scipy_distr(self):
         return scipy.stats.gumbel_r, {}
 
     def _standard_parameters(self, threshold: N, width: N) -> list:
@@ -218,7 +218,7 @@ class ReverseGumbel(Sigmoid):
 class Student(Sigmoid):
     """ Sigmoid based on the Student-t distribution's CDF. """
 
-    def _get_scipy_distr(self):
+    def _scipy_distr(self):
         return scipy.stats.t, {'df': 1}
 
     def _standard_parameters(self, threshold: N, width: N) -> list:
