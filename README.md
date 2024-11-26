@@ -12,7 +12,7 @@ Install python-psignifit with the latest python:
 pip install psignifit
 ```
 
-See [getting started](https://psignifit.readthedocs.io/en/latest/getting_started.html) documentation to get started.
+See [the documentation](https://psignifit.readthedocs.io/en/latest/) to get started.
 
 
 ## Contributors
