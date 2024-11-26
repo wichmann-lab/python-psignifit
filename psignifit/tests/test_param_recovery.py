@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 import pytest
 
@@ -264,7 +266,10 @@ def test_mean_vs_map_estimate(random_state):
         'experiment_type': 'yes/no',
         'fixed_parameters': {'lambda': 0.0232, 'gamma': 0.1},
     }
-    result = psignifit(data, **options)
+    # psignifit will complain because there are less than 3 trials per block
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        result = psignifit(data, **options)
 
     expected_MAP_dict = {
         'eta': 1e-08,
