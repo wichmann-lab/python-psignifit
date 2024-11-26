@@ -1,16 +1,8 @@
-:::: warning
-::: title
-Warning
-:::
+# Get standard parameters
 
-This documentation page is still work in progress! Some information
-might be outdated.
-::::
+The python version of psignifit does not yet contain the parameter
+conversion utility that the MATLAB version has,
+[as described here](https://github.com/wichmann-lab/psignifit/wiki/How-to-Get-Standard-Parameters).
 
-# How to: Get Standard Parameters
-
-The python clone does not yet contain the parameter conversion utility
-of the MATLAB version described
-[here](https://github.com/wichmann-lab/psignifit/wiki/How-to-Get-Standard-Parameters).
-
-If you want to contribute, feel free to implement this part!
+We are working in implenting this utility. Take a look at the [github issues](https://github.com/wichmann-lab/python-psignifit/issues) 
+to check out our progress.
