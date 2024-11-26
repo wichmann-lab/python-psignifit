@@ -104,24 +104,34 @@ def test_sigmoid_sanity_check(sigmoid_name):
     )
 
 
-def test_gaussian_standard_parameters():
+@pytest.mark.parametrize(
+    'subclass, distr, distr_kwargs',
+    [
+        (sigmoids.Gaussian, stats.norm, {}),
+        (sigmoids.Logistic, stats.logistic, {}),
+        (sigmoids.Gumbel, stats.gumbel_l, {}),
+        (sigmoids.ReverseGumbel, stats.gumbel_r, {}),
+        (sigmoids.Student, stats.t, {'df': 1}),
+    ]
+)
+def test_standard_parameters(subclass, distr, distr_kwargs):
     PC = 0.4
     alpha = 0.083
 
-    # Create a sigmoid with standard parameters
-    original_mean = 3.1
-    original_std = 1.34
-    original = stats.norm(loc=original_mean, scale=original_std)
+    # Create a sigmoid from standard parameters
+    original_loc = 3.1
+    original_scale = 1.34
+    original_distr = distr(loc=original_loc, scale=original_scale, **distr_kwargs)
 
     # Measure width and threshold
     x = np.linspace(0, 6, 10000)
-    psi = original.cdf(x)
+    psi = original_distr.cdf(x)
     threshold = x[np.argwhere(psi > PC)][0, 0]
-    width = original.ppf(1 - alpha) - original.ppf(alpha)
+    width = original_distr.ppf(1 - alpha) - original_distr.ppf(alpha)
 
     # Check that the sigmoid method returns the original parameters
-    sigmoid = sigmoids.sigmoid_by_name('norm', PC=PC, alpha=alpha)
-    mean, std = sigmoid.standard_parameters(threshold=threshold, width=width)
+    sigmoid = subclass(PC=PC, alpha=alpha)
+    loc, scale = sigmoid.standard_parameters(threshold=threshold, width=width)
 
-    np.testing.assert_allclose(mean, original_mean, atol=1e-3)
-    np.testing.assert_allclose(std, original_std, atol=1e-3)
+    np.testing.assert_allclose(loc, original_loc, atol=1e-3)
+    np.testing.assert_allclose(scale, original_scale, atol=1e-3)
