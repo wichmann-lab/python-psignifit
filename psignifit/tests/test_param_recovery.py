@@ -214,15 +214,15 @@ def test_parameter_recovery_mean_estimate(random_state):
     }
     result = psignifit(data, **options)
 
-    expected_MAP_dict = {
+    expected_mean_dict = {
         'eta': eta,
         'gamma': gamma,
          'lambda': lambda_,
          'threshold': threshold,
          'width': width,
     }
-    for p in expected_MAP_dict.keys():
-        assert np.isclose(result.parameters_estimate_MAP[p], expected_MAP_dict[p], atol=0.05)
+    for p in expected_mean_dict.keys():
+        assert np.isclose(result.parameters_estimate_mean[p], expected_mean_dict[p], atol=0.05)
 
 
 @fp_error_handler(over='ignore', invalid='ignore')
@@ -231,7 +231,7 @@ def test_mean_vs_map_estimate(random_state):
     # we generate data from a mixture of three sigmoids with different width, with
     # only a few trials. The posterior over width is broad and asymmetrical, so the
     # MAP and mean estimate are not identical.
-    # The expected values of the parameters where computed independently in a notebook.
+    # The expected values of the parameters were computed independently in a notebook.
 
     widths = [1.1, 3.1, 6.3]
     stim_range = [0.001, 0.001 + 10 * 1.1]
@@ -283,5 +283,5 @@ def test_mean_vs_map_estimate(random_state):
         'threshold': 5.429846600944022,
         'width': 4.027280086833293,
     }
-    for p in expected_MAP_dict.keys():
+    for p in expected_mean_dict.keys():
         assert np.isclose(result.parameters_estimate_mean[p], expected_mean_dict[p])
