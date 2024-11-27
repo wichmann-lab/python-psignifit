@@ -1,12 +1,20 @@
 import numpy as np
 
 from psignifit import psignifit
+from psignifit._result import Result
+
 from .data import DATA
 
 
 def test_psignifit_runs():
-    # this should not error
-    psignifit(DATA, sigmoid='norm', experiment_type='2AFC')
+    result = psignifit(DATA, sigmoid='norm', experiment_type='2AFC')
+    assert isinstance(result, Result)
+    assert len(result.debug) == 0
+
+
+def test_psignifit_debug_info():
+    result = psignifit(DATA, sigmoid='norm', experiment_type='2AFC', debug=True)
+    assert len(result.debug) > 0
 
 
 def test_psignifit_fixed_fit():
@@ -17,7 +25,7 @@ def test_psignifit_fixed_fit():
                   'eta': 0.00011599137494786461}
 
     results = psignifit(DATA, sigmoid='norm', experiment_type='2AFC')
-    parm = results.parameter_estimate
+    parm = results.get_parameters_estimate(estimate_type='MAP')
 
     for p in parm:
         np.testing.assert_allclose(parm[p], parm_heiko[p], rtol=1e-4, atol=1e-4)

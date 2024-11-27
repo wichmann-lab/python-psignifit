@@ -8,7 +8,7 @@ import numpy as np
 import scipy.stats
 
 from . import psignifit
-from ._typing import ExperimentType
+from ._typing import EstimateType, ExperimentType
 from ._result import Result
 
 
@@ -21,13 +21,14 @@ def plot_psychometric_function(result: Result,  # noqa: C901, this function is t
                                line_width: float = 2,
                                extrapolate_stimulus: float = 0.2,
                                x_label='Stimulus Level',
-                               y_label='Proportion Correct'):
+                               y_label='Proportion Correct',
+                               estimate_type: EstimateType = None):
     """ Plot psychometric function fit together with the data.
     """
     if ax is None:
         ax = plt.gca()
 
-    params = result.parameter_estimate
+    params = result.get_parameters_estimate(estimate_type=estimate_type)
     data = np.asarray(result.data)
     config = result.configuration
 
@@ -35,7 +36,7 @@ def plot_psychometric_function(result: Result,  # noqa: C901, this function is t
         params['gamma'] = params['lambda']
     if len(data) == 0:
         return
-    data_size = 10000. / np.sum(data[:, 2])
+    data_size = min(20, 10000. / np.sum(data[:, 2]))
 
     if ExperimentType.N_AFC == ExperimentType(config.experiment_type):
         ymin = 1. / config.experiment_choices
@@ -84,22 +85,28 @@ def plot_psychometric_function(result: Result,  # noqa: C901, this function is t
     return ax
 
 
-def plot_stimulus_residuals(result: Result, ax: matplotlib.axes.Axes = None) -> matplotlib.axes.Axes:
+def plot_stimulus_residuals(result: Result, ax: matplotlib.axes.Axes = None,
+                            estimate_type: EstimateType = None) -> matplotlib.axes.Axes:
     if ax is None:
         ax = plt.gca()
-    return _plot_residuals(result.data[:, 0], 'Stimulus Level', result, ax)
+    return _plot_residuals(result.data[:, 0], 'Stimulus Level', result, ax, estimate_type=estimate_type)
 
 
-def plot_block_residuals(result: Result, ax: matplotlib.axes.Axes = None) -> matplotlib.axes.Axes:
+def plot_block_residuals(result: Result, ax: matplotlib.axes.Axes = None,
+                         estimate_type: EstimateType = None) -> matplotlib.axes.Axes:
     if ax is None:
         ax = plt.gca()
-    return _plot_residuals(result.data[:, 0], 'Block Number', result, ax)
+    return _plot_residuals(result.data[:, 0], 'Block Number', result, ax, estimate_type=estimate_type)
 
 
-def _plot_residuals(x_values: np.ndarray, x_label: str, result: Result, ax: matplotlib.axes.Axes = None):
+def _plot_residuals(x_values: np.ndarray,
+                    x_label: str,
+                    result: Result,
+                    ax: matplotlib.axes.Axes = None,
+                    estimate_type: EstimateType = None):
     if ax is None:
         ax = plt.gca()
-    params = result.parameter_estimate
+    params = result.get_parameters_estimate(estimate_type=estimate_type)
     data = result.data
     sigmoid = result.configuration.make_sigmoid()
 
@@ -124,7 +131,7 @@ def _plot_residuals(x_values: np.ndarray, x_label: str, result: Result, ax: matp
     return ax
 
 
-def plot_modelfit(result: Result) -> matplotlib.figure.Figure:
+def plot_modelfit(result: Result, estimate_type: EstimateType = None) -> matplotlib.figure.Figure:
     """ Plot utilities to judge model fit.
 
     Plots some standard plots, meant to help you judge whether there are
@@ -147,15 +154,16 @@ def plot_modelfit(result: Result) -> matplotlib.figure.Figure:
     fig = plt.figure(figsize=(15, 5))
 
     ax = plt.subplot(1, 3, 1)
-    plot_psychometric_function(result, ax, plot_data=True, plot_parameter=False, extrapolate_stimulus=0)
+    plot_psychometric_function(result, ax, plot_data=True, plot_parameter=False, extrapolate_stimulus=0,
+                               estimate_type=estimate_type)
     ax.set_title('Psychometric Function')
 
     ax = plt.subplot(1, 3, 2)
-    plot_stimulus_residuals(result, ax)
+    plot_stimulus_residuals(result, ax, estimate_type=estimate_type)
     ax.set_title('Shape Check')
 
     ax = plt.subplot(1, 3, 3)
-    plot_block_residuals(result, ax)
+    plot_block_residuals(result, ax, estimate_type=estimate_type)
     ax.set_title('Time Dependence?')
 
     fig.tight_layout()
@@ -163,7 +171,7 @@ def plot_modelfit(result: Result) -> matplotlib.figure.Figure:
 
 
 def plot_bayes(result: Result) -> matplotlib.figure.Figure:
-    """ Plot all posteriors
+    """ Plot all posteriors.
 
     Plots 2D marginals for all combinations of parameters.
     """
@@ -210,7 +218,8 @@ def plot_marginal(result: Result,
                   y_label: str ='Marginal Density',
                   plot_prior: bool = True,
                   prior_color: Union[str, List[float], np.ndarray] = '#B2B2B2',  # light gray
-                  plot_estimate: bool = True):
+                  plot_estimate: bool = True,
+                  estimate_type: EstimateType = None):
     """ Plots the marginal for a single dimension.
 
     Args:
@@ -236,7 +245,8 @@ def plot_marginal(result: Result,
         ci_x = np.r_[CI[0], x[(x >= CI[0]) & (x <= CI[1])], CI[1]]
         ax.fill_between(ci_x, np.zeros_like(ci_x), np.interp(ci_x, x, marginal), color=line_color, alpha=0.5)
 
-        param_value = result.parameter_estimate[parameter]
+        estimate = result.get_parameters_estimate(estimate_type=estimate_type)
+        param_value = estimate[parameter]
         ax.plot([param_value] * 2, [0, np.interp(param_value, x, marginal)], color='#000000')
 
     if plot_prior and result.debug!={}:
@@ -277,7 +287,8 @@ def _parameter_label(parameter):
 def plot_prior(result: Result,
                line_color: Union[str, List[float], np.ndarray] = '#0069AA',  # blue
                line_width: float = 2,
-               marker_size: float = 30):
+               marker_size: float = 30,
+               estimate_type: EstimateType = None):
     """ Plot the priors for the threshold, width and lambda parameters.
 
     The upper panels show the priors. The lower panels show a set of psychometric
@@ -295,7 +306,7 @@ def plot_prior(result: Result,
 
     data = result.data
     bounds = result.debug['bounds']
-    params_map_estimate = result.parameter_estimate
+    estimate = result.get_parameters_estimate(estimate_type=estimate_type)
     sigmoid = result.configuration.make_sigmoid()
 
     sigmoid_x = np.linspace(bounds['threshold'][0], bounds['threshold'][1], 1000)
@@ -306,7 +317,7 @@ def plot_prior(result: Result,
               'lambda': '\u03BB'}
 
     parameter_keys = ['threshold', 'width', 'lambda']
-    sigmoid_params = {param: params_map_estimate[param] for param in parameter_keys}
+    sigmoid_params = {param: estimate[param] for param in parameter_keys}
     for i, param in enumerate(parameter_keys):
 
         prior_x, prior_val = _get_prior_values(result, param)
@@ -317,7 +328,7 @@ def plot_prior(result: Result,
         q25_index = np.argmax(prior_cdf > 0.25)
         q75_index = np.argmax(prior_cdf > 0.75)
 
-        x_percentiles = [params_map_estimate[param],
+        x_percentiles = [estimate[param],
                          min(prior_x),
                          prior_x[q25_index],
                          prior_x[q75_index],
@@ -336,7 +347,7 @@ def plot_prior(result: Result,
             this_sigmoid_params = dict(sigmoid_params)
             this_sigmoid_params[param] = param_value
             y = sigmoid(sigmoid_x, this_sigmoid_params['threshold'], this_sigmoid_params['width'])
-            y = (1 - params_map_estimate['gamma'] - this_sigmoid_params['lambda']) * y + params_map_estimate['gamma']
+            y = (1 - estimate['gamma'] - this_sigmoid_params['lambda']) * y + estimate['gamma']
             plt.plot(sigmoid_x, y, linewidth=line_width, color=color)
 
         plt.scatter(data[:, 0], np.zeros(data[:, 0].shape), s=marker_size*.75, c='k', clip_on=False)
@@ -358,7 +369,8 @@ def plot_2D_margin(result: Result,
     if result.debug=={}:
         raise ValueError("Expects priors and marginals saved. Try running psignifit(....., debug=True).")
 
-    parameter_indices = {param: i for i, param in enumerate(sorted(result.parameter_estimate.keys()))}
+    parameters_keys = result.parameters_estimate_MAP.keys()
+    parameter_indices = {param: i for i, param in enumerate(sorted(parameters_keys))}
     other_param_ix = tuple(i for param, i in parameter_indices.items()
                            if param != first_param and param != second_param)
     marginal_2d = np.sum(result.debug['posteriors'], axis=other_param_ix)
@@ -374,7 +386,8 @@ def plot_2D_margin(result: Result,
     ax.set_ylabel(_parameter_label(first_param))
 
 
-def plot_bias_analysis(data: np.ndarray, compare_data: np.ndarray, **kwargs) -> None:
+def plot_bias_analysis(data: np.ndarray, compare_data: np.ndarray,
+                       estimate_type: EstimateType = None, **kwargs) -> None:
     """ Analyse and plot 2-AFC dataset bias.
 
     This analysis is used to see whether two 2AFC datasets have a bias and
@@ -413,16 +426,19 @@ def plot_bias_analysis(data: np.ndarray, compare_data: np.ndarray, **kwargs) -> 
     plt.figure()
     ax = plt.axes([0.15, 4.35 / 6, 0.75, 1.5 / 6])
 
-    plot_psychometric_function(result_combined, ax=ax)
-    plot_psychometric_function(result_data, ax=ax, line_color=[1, 0, 0], data_color=[1, 0, 0])
-    plot_psychometric_function(result_compare_data, ax=ax, line_color=[0, 0, 1], data_color=[0, 0, 1])
+    plot_psychometric_function(result_combined, ax=ax, estimate_type=estimate_type)
+    plot_psychometric_function(result_data, ax=ax, line_color=[1, 0, 0], data_color=[1, 0, 0],
+                               estimate_type=estimate_type)
+    plot_psychometric_function(result_compare_data, ax=ax, line_color=[0, 0, 1], data_color=[0, 0, 1],
+                               estimate_type=estimate_type)
     plt.ylim([0, 1])
 
     for param in ['threshold', 'width', 'lambda', 'gamma']:
         ax = plt.axes([0.15, 3.35 / 6, 0.75, 0.5 / 6])
-        plot_marginal(result_combined, param, ax=ax, plot_prior=False, line_color=[0, 0, 0])
+        plot_marginal(result_combined, param, ax=ax, plot_prior=False, line_color=[0, 0, 0],
+                      estimate_type=estimate_type)
 
-        plot_marginal(result_data, param, ax=ax, line_color=[1, 0, 0])
-        plot_marginal(result_compare_data, param, ax=ax, line_color=[0, 0, 1])
+        plot_marginal(result_data, param, ax=ax, line_color=[1, 0, 0], estimate_type=estimate_type)
+        plot_marginal(result_compare_data, param, ax=ax, line_color=[0, 0, 1], estimate_type=estimate_type)
         ax.relim()
         ax.autoscale_view()

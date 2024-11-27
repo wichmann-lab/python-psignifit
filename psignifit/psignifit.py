@@ -86,8 +86,10 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
     priors = setup_priors(custom_priors=conf.priors, bounds=bounds,
                           stimulus_range=stimulus_range, width_min=width_min, width_alpha=conf.width_alpha,
                           beta_prior=conf.beta_prior, threshold_prop_correct=conf.thresh_PC)
-    fit_dict, posteriors, grid = _fit_parameters(data, bounds, priors, sigmoid, conf.steps_moving_bounds,
-                                                 conf.max_bound_value, conf.grid_steps)
+    estimate_MAP_dict, estimate_mean_dict, posteriors, grid = _fit_parameters(
+        data, bounds, priors, sigmoid,
+        conf.steps_moving_bounds, conf.max_bound_value, conf.grid_steps,
+    )
 
     grid_values = [grid_value for _, grid_value in sorted(grid.items())]
     intervals = confidence_intervals(posteriors, grid_values, conf.confP, conf.CI_method)
@@ -100,7 +102,8 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
         _warn_marginal_sanity_checks(marginals)
 
     if conf.experiment_type == 'equal asymptote':
-        fit_dict['gamma'] = fit_dict['lambda'].copy()
+        estimate_MAP_dict['gamma'] = estimate_MAP_dict['lambda'].copy()
+        estimate_mean_dict['gamma'] = estimate_mean_dict['lambda'].copy()
         grid['gamma'] = grid['lambda'].copy()
         priors['gamma'] = priors['lambda']
         marginals['gamma'] = marginals['lambda'].copy()
@@ -113,7 +116,8 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
         debug_dict['priors'] = priors
         debug_dict['bounds'] = bounds
 
-    return Result(parameter_estimate=fit_dict,
+    return Result(parameters_estimate_MAP=estimate_MAP_dict,
+                  parameters_estimate_mean=estimate_mean_dict,
                   configuration=conf,
                   confidence_intervals=intervals_dict,
                   parameter_values=grid,
@@ -235,11 +239,20 @@ def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
     grid = parameter_grid(tighter_bounds, grid_steps)
     posteriors, grid_max = posterior_grid(data, sigmoid=sigmoid, priors=priors, grid=grid)
 
+    # Estimate parameters as the mean of the posterior
+    estimate_mean_dict = {}
+    params_values = [grid[p] for p in sorted(grid.keys())]
+    params_grid = np.meshgrid(*params_values, indexing='ij')
+    for idx, p in enumerate(sorted(grid.keys())):
+        estimate_mean_dict[p] = (params_grid[idx] * posteriors).sum()
+
+    # Estimate parameters as the mode of the posterior (MAP)
     fixed_param = {}
     for parm_name, parm_values in grid.items():
         if len(parm_values) == 1:
             fixed_param[parm_name] = parm_values[0]
     # Compute MAP estimate of parameters on the joint posterior
-    fit_dict = maximize_posterior(data, param_init=grid_max, param_fixed=fixed_param, sigmoid=sigmoid, priors=priors)
+    estimate_MAP_dict = maximize_posterior(data, param_init=grid_max, param_fixed=fixed_param,
+                                           sigmoid=sigmoid, priors=priors)
 
-    return fit_dict, posteriors, grid
+    return estimate_MAP_dict, estimate_mean_dict, posteriors, grid
