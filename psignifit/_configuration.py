@@ -41,12 +41,8 @@ class Configuration:
     estimate_type: EstimateType = 'MAP'
     experiment_type: str = ExperimentType.YES_NO.value
     experiment_choices: Optional[int] = None
-    fast_optim: bool = False
     fixed_parameters: Optional[Dict[str, float]] = None
-    grid_set_type: str = 'cumDist'
-    instant_plot: bool = False
     max_bound_value: float = 1e-05
-    move_bounds: bool = True
     pool_max_blocks: int = 25
     priors: Optional[Dict[str, Prior]] = dataclasses.field(default=None, hash=False)
     sigmoid: Union[str, sigmoids.Sigmoid] = 'norm'
