@@ -129,7 +129,7 @@ The strength of the prior in favor of a binomial observer can be set with
 the `beta_prior` option. Larger values correspond to a stronger prior. 
 The default value is 10; we choose this value after
 a rather large number of simulations. Refer to 
-[Schütt & Wichmann (2015)](http://www.sciencedirect.com/science/article/pii/S0042698916000390) 
+[Schütt & Wichmann (2016)](http://www.sciencedirect.com/science/article/pii/S0042698916000390) 
 to learn more about this.
 
 ```{code-cell} ipython3
@@ -142,7 +142,7 @@ options['beta_prior'] = 15
 ```{warning}
 By changing the default bounds you might artificially bias the estimation procedure. 
 The defaults were choosen after extensive simulations; these are reported in 
-[Schütt & Wichmann (2015)](http://www.sciencedirect.com/science/article/pii/S0042698916000390). 
+[Schütt & Wichmann (2016)](http://www.sciencedirect.com/science/article/pii/S0042698916000390). 
 Change the defaults if you know what you are doing!
 ```
 
