@@ -21,7 +21,7 @@ class Sigmoid:
     and `_standard_parameters`.
 
     In many cases, a sigmoid corresponds to the CDF of a probability distribution. This is the case
-    for all the sigmoids included in the `psignifit`. If the probability distribution
+    for all the sigmoids included in `psignifit`. If the probability distribution
     is one of the distributions defined in `scipy.stats`, it is possible to define a `Sigmoid` subclass
     by implementing only the methods `_scipy_distr` and `_standard_parameters`. The methods
     '_value', '_slope', '_threshold' will be automatically defined in such a case.
