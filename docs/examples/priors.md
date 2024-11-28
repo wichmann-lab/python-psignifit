@@ -6,7 +6,7 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.16.4
 kernelspec:
-  display_name: Python 3
+  display_name: Python 3 (ipykernel)
   language: python
   name: python3
 ---
@@ -36,18 +36,17 @@ the data and with decreasing probability up to half the range above or
 below the measured data.
 For the width we assume that it is somewhere between two times the
 minimal distance of two measured stimulus levels, and the range of the
-data or with decreasing probability up two 3 times the range of the data.
+data or with decreasing probability up to 3 times the range of the data.
 
 ```{code-cell} ipython3
 import matplotlib.pyplot as plt
 import numpy as np
 
 import psignifit as ps
+from psignifit import psigniplot
 ```
 
-To illustrate this we plot the priors from our original example from
-demo_001:
-
+To illustrate this we plot the priors from our original example from the [basic usage](../basic-usage) page.
 
 ```{code-cell} ipython3
 data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
@@ -59,22 +58,21 @@ data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
                  [0.0100, 90.0000, 90.0000]])
 
 
-res = ps.psignifit(data, sigmoid_name='norm', experiment_type='2AFC')
+res = ps.psignifit(data, sigmoid='norm', experiment_type='2AFC', debug=True)
 
-ps.psigniplot.plot_prior(res)
+# notice that we need to pass 'debug=True'
+psigniplot.plot_prior(res)
 ```
 
 You should check that the assumptions we make for the heuristic to work
 are actually true in the case of your data.
 e.g. check, whether one of the following statements holds:
-(1) You understand what our priors mean exactly and judge them to be
-appropriate.
-(2) You are sure you recorded a trial well above and a trial well below
-threshold.
-(3) Your posterior concentrates on an area for which the prior was
-constant.
 
-## adjusting the realistic range
+- You understand what our priors mean exactly and judge them to be appropriate.
+- You are sure you recorded a trial well above and a trial well below threshold.
+- Your posterior concentrates on an area for which the prior was constant.
+
+## Adjusting the realistic range
 
 There are situations for which the assumptions for our standard prior
 do not hold. For example when adaptive methods are used or you fit
@@ -88,7 +86,6 @@ This samples considerably above threshold. In this case the true
 threshold and width were 1.
 Thus the assumption that we know that the threshold is in the range of
 the data is clearly violated.
-
 
 ```{code-cell} ipython3
 data = np.array([[1.5000, 3.0000, 3.0000], [1.3500, 3.0000, 3.0000],
@@ -104,11 +101,11 @@ data = np.array([[1.5000, 3.0000, 3.0000], [1.3500, 3.0000, 3.0000],
 
 # We fit this assuming the same lapse rate for yes and for no.
 # By default this uses a cumulative normal fit, which is fine for now.
-res = ps.psignifit(data, experiment_type='equal asymptote')
+res = ps.psignifit(data, experiment_type='equal asymptote', debug=True)
 
 # We first have a look at the fitted function
 plt.figure()
-ps.psigniplot.plot_psych(res)
+psigniplot.plot_psychometric_function(res)
 ```
 
 You should notice that the proportion correct is larger than 50 and we did
@@ -122,41 +119,39 @@ easily fail.
 You can see how the prior influences the result by looking at the
 marginal plot for the threshold as well:
 
-
 ```{code-cell} ipython3
-ps.psigniplot.plot_marginal(res, 0)
+psigniplot.plot_marginal(res, 'threshold')
 ```
 
-note that the dashed grey line, which marks the prior goes down where
+Note that the dashed grey line, which marks the prior goes down where
 there is still posterior probability. This shows that the prior has an
 influence on the outcome.
 
-To "heal" this psignifit allows you to pass another range, for which you
+To "heal" this, psignifit allows you to pass another range, for which you
 believe in the assumptions of our prior. The prior will be set as for the
 true data range, but for the provided range.
 For our example dataset we might give a generous range and assume the
 possible range is .5 to 1.5
 
-
 ```{code-cell} ipython3
-res_range = ps.psignifit(data, stimulus_range=[.5, 1.5], experiment_type='equal asymptote')
+res_range = ps.psignifit(data, stimulus_range=[.5, 1.5], experiment_type='equal asymptote', debug=True)
 
 # We can now have a look how the prior changed:
-ps.psigniplot.plotPrior(res_range)
+psigniplot.plot_prior(res_range)
 
 # By having a look at the marginal plot we can see that there is no area
 # where the prior dominates the posterior anymore. Thus our result for the
 # threshold is now dominated by the data everywhere.
 
 plt.figure()
-ps.psigniplot.plotMarginal(res_range, 0)
+psigniplot.plot_marginal(res_range, 'threshold')
 
 # Finally we can also compare our new fitted psychometric function,
 # to see that even the point estimate for the psychometric function was
 # influenced by the prior here:
 plt.figure()
-ps.psigniplot.plotPsych(res_range)
-ps.psigniplot.plotPsych(res)
+psigniplot.plot_psychometric_function(res_range)
+psigniplot.plot_psychometric_function(res)
 ```
 
 The prior on the betabinomial variance- adjusting how conservative to be
@@ -180,7 +175,6 @@ which will grow or shrink.
 For an example we will fit the data from above once much more
 conservative, once more progressively:
 
-
 ```{code-cell} ipython3
 # first again with standard settings:
 data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
@@ -192,30 +186,39 @@ data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
                  [0.0100, 90.0000, 90.0000]])
 
 res = ps.psignifit(data, experiment_type='2AFC')
+```
 
-# first lets have a look at the results with the standard prior strength:
-print('Fit:', res['Fit'])
-print('confidence Intervals:', res['conf_Intervals'])
+First lets have a look at the results with the standard prior strength:
 
-# now we recalculate with the smallest most conservative prior:
+```{code-cell} ipython3
+print('Fit:', res.parameter_estimate)
+print('confidence Intervals:', res.confidence_intervals)
+```
+
+Now we recalculate with the smallest most conservative prior:
+
+```{code-cell} ipython3
 res1 = ps.psignifit(data, beta_prior=1, experiment_type='2AFC')
+```
 
-# and with a very strong prior of 200
+and with a very strong prior of 200
+
+```{code-cell} ipython3
 res200 = ps.psignifit(data, beta_prior=200, experiment_type='2AFC')
 ```
 
 First see that the only parameter whose fit changes by this is the
 beta-variance parameter eta (the 5th)
 
-
 ```{code-cell} ipython3
 print('Fit with beta prior = 1: ', res1.parameter_estimate)
 print('Fit with beta prior = 200: ', res200.parameter_estimate)
+```
 
-# Now we have a look at the confidence intervals
-# TODO: uncomment once confidence intervals are implemented
-# print('confidence Intervals for beta prior = 1: ', res1.confidence_intervals)
-# print('confidence Intervals for beta prior = 200: ', res200.confidence_intervals)
+Now we have a look at the confidence intervals
+```{code-cell} ipython3
+print('confidence Intervals for beta prior = 1: ', res1.confidence_intervals)
+print('confidence Intervals for beta prior = 200: ', res200.confidence_intervals)
 ```
 
 They also do not change dramatically, but they are smaller for the 200
@@ -240,11 +243,9 @@ handles.
 
 For our example this works as follows:
 
-
 ```{code-cell} ipython3
 def prior_lambda(x):
     return ((x >= 0) * (x <= .1)).astype('float')
-
 
 custom_priors = {'lambda': prior_lambda}
 ```
@@ -253,15 +254,14 @@ Note that we did not normalize this prior. This is internally done by
 psignifit.
 
 If you are not familiar with function handles and anonymous functions
-in Python3 you can find an introduction to them here:
-http://www.programiz.com/python-programming/anonymous-function
+in Python3 you can find an [
+introduction to them here](http://www.programiz.com/python-programming/anonymous-function).
 
 Most of the times you then have to adjust the bounds of integration as
 well. This confines the region psignifit operates on. All values outside
 the bounds implicitly have prior probability 0!
 For our example we set all bounds to NaN, which means they are set
 automatically and state only the bounds for lambda.
-
 
 ```{code-cell} ipython3
 zero_bounds = {
@@ -282,11 +282,14 @@ analysis stronger than the standard priors do.
 With these commands you have set the priors manually: Have a look at
 them:
 
-
 ```{code-cell} ipython3
 plt.figure()
 ps.psigniplot.plot_prior(res)
 
 plt.figure()
 ps.psigniplot.plot_psych(res)
+```
+
+```{code-cell} ipython3
+
 ```

@@ -1,26 +1,33 @@
-:::: warning
-::: title
-Warning
-:::
+---
+jupytext:
+  text_representation:
+    extension: .md
+    format_name: myst
+    format_version: 0.13
+    jupytext_version: 1.16.4
+kernelspec:
+  display_name: Python 3 (ipykernel)
+  language: python
+  name: python3
+---
 
-This documentation page is still work in progress! Some information
-might be outdated.
-::::
+# Change the threshold percentage correct 
 
-# How to: Change the Threshold Percent Correct 
+```{warning}
+This documentation page is still work in progress! Some information might be outdated.
+```
 
-Psignifit usually defines the threshold as the point where the unscaled
-sigmoid is 0.5, i.e. half-way up its range. Sometimes one wants to
-calculate thresholds for another percent correct level. To do so
-psignifit has an entry of the options struct:
+*Psignifit* defines the threshold as the point where the unscaled
+sigmoid is 0.5, i.e. half-way up its range. 
+Sometimes one wants to calculate thresholds for another percent correct level. 
 
-Changing the percent correct defining the threshold works as it does in
-MATLAB, see
-[here](https://github.com/wichmann-lab/psignifit/wiki/How-to-Change-the-Threshold-Percent-Correct).
+You can change this default by setting the option `threshPC` with the value
+of the *proportion correct* you want. For example,
 
-The only difference is that a dictionary in python is accessed slightly
-different from a struct in MATLAB. Instead of the code displayed for
-MATLAB you should use commands of the following syntax to change fields
-in the options:
+```
+options['thresh_PC']   = 0.9
+```
 
-    options['threshPC']   = 0.9
+will set the threshold value at 0.9 on the unscaled sigmoid.
+
+

@@ -8,33 +8,28 @@ parts:
     - file: install_guide
     - file: basic-usage 
     
-  - caption: Demos
+  - caption: Usage guides
     chapters:
-    - file: examples/demo_002
-    - file: examples/demo_003
-    - file: examples/demo_004
-    - file: examples/demo_005
-    - file: examples/demo_006
-    - file: examples/parameter_recovery_demo
+    - file: examples/basic-options
     - file: examples/plot_all_sigmoids
-  
-  - caption: User guides
+    - file: examples/plotting
+    - file: examples/results-object
+    - file: examples/advanced-options
+    - file: examples/priors
+
+  - caption: Quick how-to
     chapters:
-    - file: user_guides/Experiment-Types
-    - file: user_guides/Interval-Bias
-    - file: user_guides/Options-Dictionary
-    - file: user_guides/Plot-Functions
-    - file: user_guides/Pooling-Utility
-    - file: user_guides/Priors
-    - file: user_guides/Result-Struct
-     
-  - caption: How-To
-    chapters:
-    - file: how_to/How-to-Change-the-Threshold-Percent-Correct
-    - file: how_to/How-to-Fix-Parameters
-    - file: how_to/How-to-Get-Standard-Parameters
     - file: how_to/How-to-Get-Thresholds-and-Slopes
-  
+    - file: how_to/How-to-Fix-Parameters
+    - file: how_to/How-to-Change-the-Threshold-Percent-Correct
+    - file: how_to/How-to-Get-Standard-Parameters
+    
+  - caption: Extras
+    chapters:
+    - file: examples/bias-analysis
+    - file: user_guides/Pooling-Utility
+    - file: examples/parameter_recovery_demo
+     
   - caption: Benchmarks
     chapters:
     - file: test_MATLAB_version
