@@ -91,8 +91,8 @@ You find a more detailed description of the
 
 You also might want to specify the sigmoid you want to use. 
 You do this by setting the paramter `sigmoid`. Default is 
-the cummulative Gauss (`sigmoid=gauss'). Another 
-common alternative is the logistic (`sigmoid='logistic')`.
+the cummulative Gauss (`sigmoid="gauss"`). Another 
+common alternative is the logistic (`sigmoid="logistic")`.
 
 Refer to the [options demo](examples/basic-options) and the [sigmoids page](examples/plot_all_sigmoids)
 for all possible sigmoids implemented in psignifit.
@@ -112,10 +112,10 @@ and the confidence intervals:
 jupyter:
   outputs_hidden: False
 ---
-print(result.parameter_estimate)
+print(result.get_parameters_estimate())
 ```
 
-This is a python dictionary containing the estimated parameters.
+This returns a python dictionary containing the estimated parameters.
 The parameters estimated by psignifit are:
 
 1.  *threshold*, the stimulus value of equal-odds
@@ -132,7 +132,7 @@ The parameters estimated by psignifit are:
 Then, to obtain the threhsold you run
 
 ```{code-cell} ipython3
-print(result.parameter_estimate['threshold'])
+print(result.get_parameters_estimate()['threshold'])
 ```
 
 
@@ -149,6 +149,10 @@ upper bound for the asked confidences.
 In this case it returns the intervals for the default confidences of 
 95%, 90% and 68%.
 
+To get only the 95% threshold, you run 
+```{code-cell} ipython3
+print(result.confidence_intervals['threshold']['0.95'])
+```
 
 ## Plotting the fitted function
 

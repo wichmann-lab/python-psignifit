@@ -191,7 +191,7 @@ res = ps.psignifit(data, experiment_type='2AFC')
 First lets have a look at the results with the standard prior strength:
 
 ```{code-cell} ipython3
-print('Fit:', res.parameter_estimate)
+print('Fit:', res.get_parameters_estimate())
 print('confidence Intervals:', res.confidence_intervals)
 ```
 
@@ -211,8 +211,8 @@ First see that the only parameter whose fit changes by this is the
 beta-variance parameter eta (the 5th)
 
 ```{code-cell} ipython3
-print('Fit with beta prior = 1: ', res1.parameter_estimate)
-print('Fit with beta prior = 200: ', res200.parameter_estimate)
+print('Fit with beta prior = 1: ', res1.get_parameters_estimate())
+print('Fit with beta prior = 200: ', res200.get_parameters_estimate())
 ```
 
 Now we have a look at the confidence intervals

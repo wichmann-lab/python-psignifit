@@ -70,7 +70,7 @@ res.threshold(0.5, unscaled=True)
 which should be 0.0046, which is exactly the definition of the threshold we use in the fitting.
 
 ```{code-cell} ipython3
-res.parameter_estimate['threshold']
+res.get_parameters_estimate()['threshold']
 ```
 
 The function also returns worst-case credible intervals for the

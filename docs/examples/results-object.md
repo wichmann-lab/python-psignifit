@@ -42,7 +42,7 @@ The most important result are the fitted parameters of the psychometric
 function. They can be found in a dictionary format.
 
 ```{code-cell} ipython3
-print(res.parameter_estimate)
+print(res.get_parameters_estimate())
 ```
 
 For each of these parameters, also the confidence interval is contained
@@ -77,7 +77,7 @@ otherdata[:, 0] = otherdata[:, 0] + 0.01
 other_res = ps.psignifit(otherdata, res.configuration)
 
 # the difference in threshold should return the introduced shift
-print(other_res.parameter_estimate['threshold'] - res.parameter_estimate['threshold'])
+print(other_res.get_parameters_estimate()['threshold'] - res.get_parameters_estimate()['threshold'])
 ```
 
 ## Saving to JSON
@@ -94,7 +94,7 @@ It can be loaded again to be used at a later time, for example for plotting
 
 ```{code-cell} ipython3
 loaded_res = ps.Result.load_json(file_name)
-print(loaded_res.parameter_estimate)
+print(loaded_res.get_parameters_estimate())
 ```
 
 ```{code-cell} ipython3

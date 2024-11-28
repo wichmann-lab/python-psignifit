@@ -142,7 +142,7 @@ res = psignifit.psignifit(data, **options)
 
 +++ {"nteract": {"transient": {"deleting": false}}}
 
-Lastly, we can ensure that the values in our `res.parameter_estimate` dictionary are equal to the values that we used to simulate them
+Lastly, we can ensure that the values in our `res.get_parameters_estimate()` dictionary are equal to the values that we used to simulate them
 
 ```{code-cell} ipython3
 ---
@@ -150,7 +150,7 @@ nteract:
   transient:
     deleting: false
 ---
-assert np.isclose(res.parameter_estimate['lambda'], lambda_, atol=1e-2)
+assert np.isclose(res.get_parameters_estimate()['lambda'], lambda_, atol=1e-2)
 ```
 
 ```{code-cell} ipython3
@@ -159,7 +159,7 @@ nteract:
   transient:
     deleting: false
 ---
-assert np.isclose(res.parameter_estimate['gamma'], gamma, atol=1e-2)
+assert np.isclose(res.get_parameters_estimate()['gamma'], gamma, atol=1e-2)
 ```
 
 ```{code-cell} ipython3
@@ -168,9 +168,9 @@ nteract:
   transient:
     deleting: false
 ---
-assert np.isclose(res.parameter_estimate['eta'], 0, atol=1e-2)
-assert np.isclose(res.parameter_estimate['threshold'], threshold, atol=1e-2)
-assert np.isclose(res.parameter_estimate['width'], width, atol=1e-2)
+assert np.isclose(res.get_parameters_estimate()['eta'], 0, atol=1e-2)
+assert np.isclose(res.get_parameters_estimate()['threshold'], threshold, atol=1e-2)
+assert np.isclose(res.get_parameters_estimate()['width'], width, atol=1e-2)
 ```
 
 ```{code-cell} ipython3
@@ -233,7 +233,6 @@ options = {}
 options['sigmoid'] = sigmoid 
 options['experiment_type'] = 'yes/no'
 options['fixed_parameters'] = {}
-options["stimulus_range"] = stim_range
 ```
 
 ```{code-cell} ipython3
@@ -260,4 +259,3 @@ nteract:
 ---
 psigniplot.plot_psychometric_function(res)
 ```
-
