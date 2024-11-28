@@ -5,24 +5,8 @@ If you add a new sigmoid type, add it to the CLASS_BY_NAME constant
 from typing import Optional, TypeVar
 
 import numpy as np
-import scipy as sp
 import scipy.stats
 
-# Alias common distribution to be reused all over the place.
-
-# - Normal distribution:
-#   - This one is useful when we want mean=0, std=1
-#     Percent point function -> inverse of cumulative normal distribution function
-#     returns percentiles
-norminv = scipy.stats.norm(loc=0, scale=1).ppf
-#   - also instantiate a generic version
-norminvg = scipy.stats.norm.ppf
-#   - Cumulative normal distribution function
-normcdf = scipy.stats.norm.cdf
-
-# T-Student with df=1
-t1cdf = scipy.stats.t(1).cdf
-t1icdf = scipy.stats.t(1).ppf
 
 # sigmoid can be calculated on single floats, or on numpy arrays of floats
 N = TypeVar('N', float, np.ndarray)
@@ -31,11 +15,16 @@ N = TypeVar('N', float, np.ndarray)
 class Sigmoid:
     """ Base class for sigmoid implementation.
 
-    Handles logarithmic input and negative output
-    for the specific sigmoid implementations.
+    Handles negative output for the specific sigmoid implementations.
 
-    Sigmoid classes should derive from this class and implement
-    the methods '_value', '_slope', and '_threshold'.
+    Sigmoid classes should derive from this class and implement the methods '_value', '_slope', '_threshold',
+    and `_standard_parameters`.
+
+    In many cases, a sigmoid corresponds to the CDF of a probability distribution. This is the case
+    for all the sigmoids included in `psignifit`. If the probability distribution
+    is one of the distributions defined in `scipy.stats`, it is possible to define a `Sigmoid` subclass
+    by implementing only the methods `_scipy_distr` and `_standard_parameters`. The methods
+    '_value', '_slope', '_threshold' will be automatically defined in such a case.
 
     The stimulus levels, threshold and width are parameters of method calls.
     They correspond to the object attributes PC and alpha in the following way:
@@ -73,14 +62,13 @@ class Sigmoid:
         """ Calculate the sigmoid value at specified stimulus levels.
 
         Args:
-            prop_correct: Proportion correct at the threshold to calculate.
+            stimulus_level: Stimulus level value at which to calculate the slope
             threshold: Parameter value for threshold at PC
             width: Parameter value for width of the sigmoid
-            gamma: Parameter value for the lower offset of the sigmoid
-            lambd: Parameter value for the upper offset of the sigmoid
         Returns:
             Proportion correct at the stimulus values.
         """
+
         value = self._value(stimulus_level, threshold, width)
 
         if self.negative:
@@ -92,7 +80,7 @@ class Sigmoid:
         """ Calculate the slope at specified stimulus levels.
 
         Args:
-            prop_correct: Proportion correct at the threshold to calculate.
+            stimulus_level: Stimulus level value at which to calculate the slope
             threshold: Parameter value for threshold at PC
             width: Parameter value for width of the sigmoid
             gamma: Parameter value for the lower offset of the sigmoid
@@ -101,7 +89,8 @@ class Sigmoid:
             Slope at the stimulus values.
         """
 
-        slope = (1 - gamma - lambd) * self._slope(stimulus_level, threshold, width)
+        raw_slope = self._slope(stimulus_level, threshold, width)
+        slope = (1 - gamma - lambd) * raw_slope
 
         if self.negative:
             return -slope
@@ -132,97 +121,178 @@ class Sigmoid:
             prop_correct = 1 - prop_correct
 
         result = self._inverse(prop_correct, threshold, width)
+
         return result
 
-    def _value(self, stimulus_level: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
+    def standard_parameters(self, threshold: N, width: N) -> tuple:
+        """ Transforms parameters threshold and width to a standard parametrization.
+
+        The interpretation of the standard parameters, location and scale, depends on the sigmoid class used.
+        For instance, for a Gaussian sigmoid, the location corresponds to the mean and the scale to the standard
+        deviation of the distribution.
+
+        For negative slope sigmoids, we return the same parameters as for the positive ones.
+
+        Args:
+            threshold: Threshold value at PC
+            width: Width of the sigmoid
+        Returns:
+            Standard parameters (loc, scale) for the sigmoid subclass.
+        """
+        return self._standard_parameters(threshold, width)
+
+    # --- Private interface
+
+    def _value(self, stimulus_level: N, threshold: N, width: N) -> N:
+        """ Compute the sigmoid value at specified stimulus levels.
+
+        This method can be overwritten by subclasses to define new sigmoids. The base implementation uses the
+        CDF of a continuous distribution function defined in `scipy.stats` and returned by `_scipy_distr`.
+
+        Args:
+            stimulus_level: Stimulus level values at which to calculate the sigmoid value
+            threshold: Threshold value at PC
+            width: Width of the sigmoid
+        Returns:
+            Proportion correct at the stimulus values.
+        """
+        loc, scale = self._standard_parameters(threshold=threshold, width=width)
+        value = self._cdf(stimulus_level, loc=loc, scale=scale)
+        return value
+
+    def _slope(self, stimulus_level: N, threshold: N, width: N) -> N:
+        """ Compute the slope of the sigmoid at a given stimulus level.
+
+        This method can be overwritten by subclasses to define new sigmoids. The base implementation uses the
+        PDF of a continuous distribution function defined in `scipy.stats` and returned by `_scipy_distr`.
+
+        Args:
+            stimulus_level: Stimulus level value at which to calculate the slope
+            threshold: Threshold value at PC
+            width: Width of the sigmoid
+        Returns:
+            Slope at the stimulus level value
+        """
+        loc, scale = self._standard_parameters(threshold=threshold, width=width)
+        raw_slope = self._pdf(stimulus_level, loc=loc, scale=scale)
+        return raw_slope
+
+    def _inverse(self, prop_correct: N, threshold: N, width: N) -> N:
+        """ Compute the stimulus value at different proportion correct values.
+
+        This method can be overwritten by subclasses to define new sigmoids. The base implementation uses the
+        PPF of a continuous distribution function defined in `scipy.stats` and returned by `_scipy_distr`.
+
+        Args:
+            prop_correct: Proportion correct values at which to calculate the stimulus level values.
+            threshold: Threshold value at PC
+            width: Width of the sigmoid
+        Returns:
+            Stimulus values corresponding to the proportion correct values.
+        """
+        loc, scale = self._standard_parameters(threshold=threshold, width=width)
+        result = self._ppf(prop_correct, loc=loc, scale=scale)
+        return result
+
+    def _standard_parameters(self, threshold: N, width: N) -> list:
+        """ Transforms parameters threshold and width to a standard parametrization.
+
+        This method must be overwritten by subclasses to define new sigmoids.
+
+        The interpretation of the standard parameters, location and scale, depends on the sigmoid class used.
+        For instance, for a Gaussian sigmoid, the location corresponds to the mean and the scale to the standard
+        deviation of the distribution.
+
+        For negative slope sigmoids, we return the same parameters as for the positive ones.
+
+        Args:
+            threshold: Threshold value at PC
+            width: Width of the sigmoid
+        Returns:
+            Standard parameters (loc, scale) for the sigmoid subclass.
+        """
         raise NotImplementedError("This should be overwritten by an implementation.")
 
-    def _slope(self, stimulus_level: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
+    def _scipy_distr(self):
+        """ Get the scipy.stats implementation of the underlying cdf.
+
+        Returns
+            scipy_distr: scipy.stats implementation of the distribution
+            distr_kwarg: A dictionary of extra keyword arguments needed to initialize the scipy.stats distribution
+        """
         raise NotImplementedError("This should be overwritten by an implementation.")
 
-    def _inverse(self, prop_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
-        raise NotImplementedError("This should be overwritten by an implementation.")
+    def _ppf(self, x, loc=0, scale=1):
+        distr, distr_kwargs = self._scipy_distr()
+        return distr.ppf(x, loc=loc, scale=scale, **distr_kwargs)
+
+    def _pdf(self, x, loc=0, scale=1):
+        distr, distr_kwargs = self._scipy_distr()
+        return distr.pdf(x, loc=loc, scale=scale, **distr_kwargs)
+
+    def _cdf(self, x, loc=0, scale=1):
+        distr, distr_kwargs = self._scipy_distr()
+        return distr.cdf(x, loc=loc, scale=scale, **distr_kwargs)
 
 
 class Gaussian(Sigmoid):
     """ Sigmoid based on the Gaussian distribution's CDF. """
-    def _value(self, stimulus_level, threshold, width):
-        C =(norminv(1 - self.alpha) - norminv(self.alpha))
-        return normcdf(stimulus_level, (threshold - norminvg(self._PC, 0,  width / C)),  width / C)
 
-    def _slope(self, stimulus_level: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
-        C = norminv(1 - self.alpha) - norminv(self.alpha)
-        m = (threshold - norminvg(self._PC, 0, width / C))
-        normalized_stimulus_level = (stimulus_level - m) / width * C
-        normalized_slope = sp.stats.norm.pdf(normalized_stimulus_level)
-        return normalized_slope * C / width
+    def _scipy_distr(self):
+        return scipy.stats.norm, {}
 
-    def _inverse(self, prop_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
-        C = norminv(1 - self.alpha) - norminv(self.alpha)
-        return norminvg(prop_correct, threshold - norminvg(self._PC, 0, width / C), width / C)
+    def _standard_parameters(self, threshold: N, width: N) -> list:
+        scale = width / (self._ppf(1 - self.alpha) - self._ppf(self.alpha))
+        loc = threshold - self._ppf(self._PC, 0, scale)
+        return [loc, scale]
+
 
 class Logistic(Sigmoid):
     """ Sigmoid based on the Logistic distribution's CDF. """
-    def _value(self, stimulus_level, threshold, width):
-        return 1 / (1 + np.exp(-2 * np.log(1 / self.alpha - 1) / width * (stimulus_level - threshold)
-                               + np.log(1 / self._PC - 1)))
 
-    def _slope(self, stimulus_level: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
-        C = 2 * np.log(1 / self.alpha - 1) / width
-        unscaled_slope = np.exp(-C * (stimulus_level - threshold) + np.log(1 / self._PC - 1))
-        return C * unscaled_slope / (1 + unscaled_slope)**2
+    def _scipy_distr(self):
+        return scipy.stats.logistic, {}
 
-    def _inverse(self, prop_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
-        return (threshold - width * (np.log(1 / prop_correct - 1) - np.log(1 / self._PC - 1)) / 2
-                / np.log(1 / self.alpha - 1))
+    def _standard_parameters(self, threshold: N, width: N) -> list:
+        scale = width / (2 * np.log(1 / self.alpha - 1))
+        loc = threshold - self._ppf(self._PC, loc=0, scale=scale)
+        return [loc, scale]
 
 
 class Gumbel(Sigmoid):
     """ Sigmoid based on the Gumbel distribution's CDF. """
-    def _value(self, stimulus_level, threshold, width):
-        C = np.log(-np.log(self.alpha)) - np.log(-np.log(1 - self.alpha))
-        return 1 - np.exp(-np.exp(C / width * (stimulus_level - threshold) + np.log(-np.log(1 - self._PC))))
 
-    def _slope(self, stimulus_level: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
-        C = np.log(-np.log(self.alpha)) - np.log(-np.log(1 - self.alpha))
-        unscaled_stimulus_level = np.exp(C / width * (stimulus_level - threshold) + np.log(-np.log(1 - self._PC)))
-        return C / width * np.exp(-unscaled_stimulus_level) * unscaled_stimulus_level
+    def _scipy_distr(self):
+        return scipy.stats.gumbel_l, {}
 
-    def _inverse(self, prop_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
-        C = np.log(-np.log(self.alpha)) - np.log(-np.log(1 - self.alpha))
-        return threshold + (np.log(-np.log(1 - prop_correct)) - np.log(-np.log(1 - self._PC))) * width / C
+    def _standard_parameters(self, threshold: N, width: N) -> list:
+        scale = width / (np.log(-np.log(self.alpha)) - np.log(-np.log(1-self.alpha)))
+        loc = threshold - self._ppf(self._PC, loc=0, scale=scale)
+        return [loc, scale]
 
 
 class ReverseGumbel(Sigmoid):
     """ Sigmoid based on the reversed Gumbel distribution's CDF. """
-    def _value(self, stimulus_level, threshold, width):
-        C = np.log(-np.log(1 - self.alpha)) - np.log(-np.log(self.alpha))
-        return np.exp(-np.exp(C / width * (stimulus_level - threshold) + np.log(-np.log(self._PC))))
 
-    def _slope(self, stimulus_level: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
-        C = np.log(-np.log(1 - self.alpha)) - np.log(-np.log(self.alpha))
-        unscaled_stimulus_level = np.exp(C / width * (stimulus_level - threshold) + np.log(-np.log(self._PC)))
-        return -C / width * np.exp(-unscaled_stimulus_level) * unscaled_stimulus_level
+    def _scipy_distr(self):
+        return scipy.stats.gumbel_r, {}
 
-    def _inverse(self, prop_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
-        C = np.log(-np.log(1 - self.alpha)) - np.log(-np.log(self.alpha))
-        return threshold + (np.log(-np.log(prop_correct)) - np.log(-np.log(self._PC))) * width / C
+    def _standard_parameters(self, threshold: N, width: N) -> list:
+        scale = width / (np.log(-np.log(self.alpha)) - np.log(-np.log(1-self.alpha)))
+        loc = threshold - self._ppf(self._PC, loc=0, scale=scale)
+        return [loc, scale]
 
 
 class Student(Sigmoid):
     """ Sigmoid based on the Student-t distribution's CDF. """
-    def _value(self, stimulus_level, threshold, width):
-        C = (t1icdf(1 - self.alpha) - t1icdf(self.alpha))
-        return t1cdf(C * (stimulus_level - threshold) / width + t1icdf(self._PC))
 
-    def _slope(self, stimulus_level: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
-        C = (t1icdf(1 - self.alpha) - t1icdf(self.alpha))
-        stimLevel = (stimulus_level - threshold) * C / width + t1icdf(self._PC)
-        return C / width * sp.stats.t.pdf(stimLevel, df=1)
+    def _scipy_distr(self):
+        return scipy.stats.t, {'df': 1}
 
-    def _inverse(self, prop_correct: np.ndarray, threshold: np.ndarray, width: np.ndarray) -> np.ndarray:
-        C = (t1icdf(1 - self.alpha) - t1icdf(self.alpha))
-        return (t1icdf(prop_correct) - t1icdf(self._PC)) * width / C + threshold
+    def _standard_parameters(self, threshold: N, width: N) -> list:
+        scale = width / (self._ppf(1 - self.alpha) - self._ppf(self.alpha))
+        loc = threshold - self._ppf(self._PC, loc=0, scale=scale)
+        return [loc, scale]
 
 
 class Weibull(Gumbel):

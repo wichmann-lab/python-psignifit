@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import stats
 import pytest
 
 from psignifit import sigmoids
@@ -101,3 +102,36 @@ def test_sigmoid_sanity_check(sigmoid_name):
     sigmoids.assert_sigmoid_sanity_checks(
         sigmoid, n_samples=10000, threshold=threshold, width=0.7,
     )
+
+
+@pytest.mark.parametrize(
+    'subclass, distr, distr_kwargs',
+    [
+        (sigmoids.Gaussian, stats.norm, {}),
+        (sigmoids.Logistic, stats.logistic, {}),
+        (sigmoids.Gumbel, stats.gumbel_l, {}),
+        (sigmoids.ReverseGumbel, stats.gumbel_r, {}),
+        (sigmoids.Student, stats.t, {'df': 1}),
+    ]
+)
+def test_standard_parameters(subclass, distr, distr_kwargs):
+    PC = 0.4
+    alpha = 0.083
+
+    # Create a sigmoid from standard parameters
+    original_loc = 3.1
+    original_scale = 1.34
+    original_distr = distr(loc=original_loc, scale=original_scale, **distr_kwargs)
+
+    # Measure width and threshold
+    x = np.linspace(0, 6, 10000)
+    psi = original_distr.cdf(x)
+    threshold = x[np.argwhere(psi > PC)][0, 0]
+    width = original_distr.ppf(1 - alpha) - original_distr.ppf(alpha)
+
+    # Check that the sigmoid method returns the original parameters
+    sigmoid = subclass(PC=PC, alpha=alpha)
+    loc, scale = sigmoid.standard_parameters(threshold=threshold, width=width)
+
+    np.testing.assert_allclose(loc, original_loc, atol=1e-3)
+    np.testing.assert_allclose(scale, original_scale, atol=1e-3)
