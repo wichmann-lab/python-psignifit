@@ -170,3 +170,25 @@ class Result:
         """
         stimulus_levels = self.threshold(proportion_correct, unscaled, return_ci=False, estimate_type=estimate_type)
         return self.slope(stimulus_levels)
+
+    def standard_parameters_estimate(self, estimate_type: Optional[EstimateType]=None):
+        """ Get the parameters of the psychometric function in the standard format.
+
+        `psignifit` uses the same intuitive parametrization, threshold and width, for all
+        sigmoid types. However, each different type of sigmoid has its own standard parametrization.
+
+        The interpretation of the standard parameters, location and scale, depends on the sigmoid class used.
+        For instance, for a Gaussian sigmoid, the location corresponds to the mean and the scale to the standard
+        deviation of the distribution.
+
+        For negative slope sigmoids, we return the same parameters as for the positive ones.
+
+        Args:
+            proportion_correct: proportion correct at the threshold you want to calculate
+        Returns:
+            Standard parameters (loc, scale) for the sigmoid subclass.
+        """
+        sigmoid = self.configuration.make_sigmoid()
+        estimate = self.get_parameters_estimate(estimate_type)
+        loc, scale = sigmoid.standard_parameters(estimate['threshold'], estimate['width'])
+        return loc, scale

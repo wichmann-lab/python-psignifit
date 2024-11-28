@@ -185,3 +185,32 @@ def test_estimate_type_default(result):
     result.estimate_type = 'mean'
     estimate = result.get_parameters_estimate()
     assert _close_numpy_dict(estimate, result.parameters_estimate_mean)
+
+
+def test_standard_parameters_estimate():
+    width = 2.1
+    threshold = 0.87
+    parameter_estimate = {
+        'threshold': threshold,
+        'width': width,
+        'lambda': 0.0,
+        'gamma': 0.0,
+        'eta': 0.0,
+    }
+    confidence_intervals = {
+        'threshold': [[threshold, threshold]],
+        'width': [[width, width]],
+        'lambda': [[0.05, 0.2]],
+        'gamma': [[0.1, 0.3]],
+        'eta': [[0.0, 0.0]]
+    }
+    result = _build_result(parameter_estimate, parameter_estimate, confidence_intervals)
+
+    # For a Gaussian sigmoid with alpha=0.05, PC=0.5
+    expected_loc = threshold
+    # 1.644853626951472 is the normal PPF at alpha=0.95
+    expected_scale = width / (2 * 1.644853626951472)
+
+    loc, scale = result.standard_parameters_estimate()
+    np.testing.assert_allclose(loc, expected_loc)
+    np.testing.assert_allclose(scale, expected_scale)
