@@ -76,12 +76,12 @@ def test_set_wrong_sigmoid():
 
 def test_set_stimulus_range_wrong_type():
     with pytest.raises(PsignifitException):
-        Configuration(stimulus_range=10)
+        Configuration(_stimulus_range=10)
 
 
 def test_set_stimulus_range_wrong_length():
     with pytest.raises(PsignifitException):
-        Configuration(stimulus_range=(1, 2, 3))
+        Configuration(_stimulus_range=(1, 2, 3))
 
 
 def test_set_width_alpha_wrong_type():
@@ -107,7 +107,6 @@ def test_set_wrong_CI_method():
 
 def test_warning_for_2afc_and_wrong_gamma():
     sigmoid = "norm"
-    stim_range = [0.001, 0.2]
     lambda_ = 0.0232
     gamma = 0.1
 
@@ -116,14 +115,12 @@ def test_warning_for_2afc_and_wrong_gamma():
     options['experiment_type'] = '2AFC'
     options['fixed_parameters'] = {'lambda': lambda_,
                                    'gamma': gamma}
-    options["stimulus_range"] = stim_range
 
     with pytest.warns(UserWarning, match='gamma was fixed'):
         Configuration(**options)
 
 def test_warning_for_equal_asymptote_fixing_lambda_and_gamma():
     sigmoid = "norm"
-    stim_range = [0.001, 0.2]
     lambda_ = 0.2
     gamma = 0.1
 
@@ -132,7 +129,6 @@ def test_warning_for_equal_asymptote_fixing_lambda_and_gamma():
     options['experiment_type'] = 'equal asymptote'
     options['fixed_parameters'] = {'lambda': lambda_,
                                    'gamma': gamma}
-    options["stimulus_range"] = stim_range
 
     with pytest.raises(PsignifitException, match='were fixed to different values'):
         Configuration(**options)
