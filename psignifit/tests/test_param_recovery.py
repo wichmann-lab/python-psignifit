@@ -29,7 +29,6 @@ def test_parameter_recovery_2afc(sigmoid):
     options['sigmoid'] = sigmoid  # choose a cumulative Gauss as the sigmoid
     options['experiment_type'] = '2AFC'
     options['fixed_parameters'] = {'lambda': lambda_}
-    options["stimulus_range"] = stim_range
 
     res = psignifit(data, **options)
 
@@ -64,7 +63,6 @@ def test_parameter_recovery_2afc_eta(random_state, eta):
     options['sigmoid'] = sigmoid  # choose a cumulative Gauss as the sigmoid
     options['experiment_type'] = '2AFC'
     options['fixed_parameters'] = {'lambda': lambda_}
-    options["stimulus_range"] = stim_range
 
     res = psignifit(data, **options)
 
@@ -108,7 +106,6 @@ def test_parameter_recovery_fixed_params(fixed_param):
     options = {}
     options['sigmoid'] = sigmoid  # choose a cumulative Gauss as the sigmoid
     options['experiment_type'] = 'yes/no'
-    options["stimulus_range"] = stim_range
     options['fixed_parameters'] = {}
     # we fix it to a slightly off value, so we can check if stays fixed
     options['fixed_parameters'][fixed_param] = sim_params[fixed_param]
@@ -144,7 +141,6 @@ def test_parameter_recovery_YN(sigmoid):
     options['sigmoid'] = sigmoid  # choose a cumulative Gauss as the sigmoid
     options['experiment_type'] = 'yes/no'
     options['fixed_parameters'] = {'lambda': lambda_}
-    options["stimulus_range"] = stim_range
 
     res = psignifit(data, **options)
 
@@ -177,7 +173,6 @@ def test_parameter_recovery_eq_asymptote(sigmoid):
     options['sigmoid'] = sigmoid  # choose a cumulative Gauss as the sigmoid
     options['experiment_type'] = 'equal asymptote'
     options['fixed_parameters'] = {}
-    options["stimulus_range"] = stim_range
 
     res = psignifit(data, **options)
 
