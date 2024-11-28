@@ -9,12 +9,19 @@ from psignifit import Result
 
 @pytest.fixture
 def result():
-    parameter_estimate = {
+    parameter_estimate_MAP = {
         'threshold': 0.005,
         'width': 0.005,
         'lambda': 0.0123,
         'gamma': 0.021,
         'eta': 0.0001
+    }
+    parameter_estimate_mean = {
+        'threshold': 0.002,
+        'width': 0.002,
+        'lambda': 0.013,
+        'gamma': 0.024,
+        'eta': 0.001
     }
     confidence_intervals = {
         'threshold': [[0.001, 0.005], [0.005, 0.01], [0.1, 0.2]],
@@ -23,14 +30,15 @@ def result():
         'gamma': [[0.001, 0.005], [0.005, 0.01], [0.1, 0.2]],
         'eta': [[0.001, 0.005], [0.005, 0.01], [0.1, 0.2]]
     }
-    return _build_result(parameter_estimate, confidence_intervals)
+    return _build_result(parameter_estimate_MAP, parameter_estimate_mean, confidence_intervals)
 
 
-def _build_result(parameter_estimate, confidence_intervals):
+def _build_result(parameter_estimate_MAP, parameter_estimate_mean, confidence_intervals):
     # We don't care about most of the input parameters of the Result object, fill them with junk
     result = Result(
         configuration=Configuration(),
-        parameter_estimate=parameter_estimate,
+        parameters_estimate_MAP=parameter_estimate_MAP,
+        parameters_estimate_mean=parameter_estimate_mean,
         confidence_intervals=confidence_intervals,
         data=np.random.rand(5, 3).tolist(),
         parameter_values={
@@ -73,11 +81,11 @@ def test_from_to_result_dict(result):
 
 def test_threshold_raises_error_when_outside_valid_range(result):
     # proportion correct lower than gamma
-    proportion_correct = np.array([result.parameter_estimate['gamma'] / 2.0])
+    proportion_correct = np.array([result.parameters_estimate_MAP['gamma'] / 2.0])
     with pytest.raises(ValueError):
         result.threshold(proportion_correct)
     # proportion correct higher than gamma
-    proportion_correct = np.array([result.parameter_estimate['lambda'] + 1e-4])
+    proportion_correct = np.array([result.parameters_estimate_MAP['lambda'] + 1e-4])
     with pytest.raises(ValueError):
         result.threshold(proportion_correct)
 
@@ -110,7 +118,7 @@ def test_threshold_value():
         'gamma': [[0.1, 0.3]],
         'eta': [[0.0, 0.0]]
     }
-    result = _build_result(parameter_estimate, confidence_intervals)
+    result = _build_result(parameter_estimate, parameter_estimate, confidence_intervals)
 
     # The threshold at the middle of the gamma-to-(1-lambda) range must be 0.5 for a Gaussian
     thr, thr_ci = result.threshold(
@@ -147,7 +155,7 @@ def test_save_load_result_json(result, tmp_path):
     assert result_file.exists()
     other = Result.load_json(result_file)
 
-    assert result.parameter_estimate == other.parameter_estimate
+    assert result.parameters_estimate_MAP == other.parameters_estimate_MAP
     assert result.configuration == other.configuration
     assert result.confidence_intervals == other.confidence_intervals
     assert np.all(np.isclose(result.data, other.data))
@@ -156,3 +164,24 @@ def test_save_load_result_json(result, tmp_path):
     assert _close_numpy_dict(result.prior_values, other.prior_values)
     assert _close_numpy_dict(
         result.marginal_posterior_values, other.marginal_posterior_values)
+
+
+def test_get_parameter_estimate(result):
+    estimate = result.get_parameters_estimate(estimate_type='MAP')
+    assert _close_numpy_dict(estimate, result.parameters_estimate_MAP)
+
+    estimate = result.get_parameters_estimate(estimate_type='mean')
+    assert _close_numpy_dict(estimate, result.parameters_estimate_mean)
+
+    with pytest.raises(ValueError):
+        result.get_parameters_estimate(estimate_type='foo')
+
+
+def test_estimate_type_default(result):
+    result.estimate_type = 'MAP'
+    estimate = result.get_parameters_estimate()
+    assert _close_numpy_dict(estimate, result.parameters_estimate_MAP)
+
+    result.estimate_type = 'mean'
+    estimate = result.get_parameters_estimate()
+    assert _close_numpy_dict(estimate, result.parameters_estimate_mean)
