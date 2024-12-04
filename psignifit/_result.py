@@ -126,18 +126,21 @@ class Result:
         if not return_ci:
             return new_threshold
 
-        param_cis = [self.confidence_intervals[param] for param in ('threshold', 'width', 'lambda', 'gamma')]
-        if unscaled:  # set asymptotes to 0
-            param_cis[2] = np.zeros_like(param_cis[2])
-            param_cis[3] = np.zeros_like(param_cis[3])
-
-        new_ci = []
-        for (thres_ci, width_ci, lambd_ci, gamma_ci) in zip(*param_cis):
+        new_threshold_ci = {}
+        for coverage_key in self.confidence_intervals['threshold'].keys():
+            thres_ci = self.confidence_intervals['threshold'][coverage_key]
+            width_ci = self.confidence_intervals['width'][coverage_key]
+            if unscaled:
+                gamma_ci = np.array([0.0, 0.0])
+                lambd_ci = np.array([0.0, 0.0])
+            else:
+                gamma_ci = self.confidence_intervals['gamma'][coverage_key]
+                lambd_ci = self.confidence_intervals['lambda'][coverage_key]
             ci_min = sigmoid.inverse(proportion_correct, thres_ci[0], width_ci[0], gamma_ci[0], lambd_ci[0])
             ci_max = sigmoid.inverse(proportion_correct, thres_ci[1], width_ci[1], gamma_ci[1], lambd_ci[1])
-            new_ci.append([ci_min, ci_max])
+            new_threshold_ci[coverage_key] = [ci_min, ci_max]
 
-        return new_threshold, new_ci
+        return new_threshold, new_threshold_ci
 
     def slope(self, stimulus_level: np.ndarray, estimate_type: Optional[EstimateType]=None) -> np.ndarray:
         """ Slope of the psychometric function at a given stimulus levels.

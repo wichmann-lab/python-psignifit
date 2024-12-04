@@ -3,32 +3,31 @@ import dataclasses
 import numpy as np
 import pytest
 
-from psignifit import Configuration
-from psignifit import Result
+from psignifit import Configuration, Result, psignifit
 
 
 @pytest.fixture
 def result():
     parameter_estimate_MAP = {
-        'threshold': 0.005,
+        'threshold': 1.005,
         'width': 0.005,
         'lambda': 0.0123,
         'gamma': 0.021,
         'eta': 0.0001
     }
     parameter_estimate_mean = {
-        'threshold': 0.002,
+        'threshold': 1.002,
         'width': 0.002,
         'lambda': 0.013,
         'gamma': 0.024,
         'eta': 0.001
     }
     confidence_intervals = {
-        'threshold': [[0.001, 0.005], [0.005, 0.01], [0.1, 0.2]],
-        'width': [[0.001, 0.005], [0.005, 0.01], [0.1, 0.2]],
-        'lambda': [[0.001, 0.005], [0.005, 0.01], [0.1, 0.2]],
-        'gamma': [[0.001, 0.005], [0.005, 0.01], [0.1, 0.2]],
-        'eta': [[0.001, 0.005], [0.005, 0.01], [0.1, 0.2]]
+        'threshold': {'0.95': [1.001, 1.005], '0.9': [1.005, 1.01]},
+        'width': {'0.95': [0.001, 0.005], '0.9': [0.005, 0.01]},
+        'lambda': {'0.95': [0.03, 0.08], '0.9': [0.1, 0.2]},
+        'gamma': {'0.95': [0.03, 0.08], '0.9': [0.05, 0.2]},
+        'eta': {'0.95': [0.001, 0.005], '0.9': [0.005, 0.01]},
     }
     return _build_result(parameter_estimate_MAP, parameter_estimate_mean, confidence_intervals)
 
@@ -92,11 +91,61 @@ def test_threshold_raises_error_when_outside_valid_range(result):
 
 def test_threshold_slope(result):
     proportion_correct = np.linspace(0.2, 0.5, num=1000)
-    stimulus_levels, confidence_intervals = result.threshold(proportion_correct)
+    stimulus_levels = result.threshold(proportion_correct, return_ci=False)
     np.testing.assert_allclose(
         result.slope(stimulus_levels),
         result.slope_at_proportion_correct(proportion_correct)
     )
+
+
+def test_threshold_slope_ci_scaled(result):
+    proportion_correct = [0.4, 0.5, 0.7]
+    _, threshold_cis = result.threshold(proportion_correct, return_ci=True, unscaled=False)
+
+    expected = {
+        '0.95': [[1.000918, 1.001, 1.001171], [1.00454 , 1.005, 1.005969]],
+        '0.9': [[1.004661, 1.005112, 1.006097], [1.008691, 1.01, 1.012941]],
+    }
+    assert list(threshold_cis.keys()) == ['0.95', '0.9']
+    for coverage_key, cis in threshold_cis.items():
+        # one CI per proportion_correct
+        assert threshold_cis[coverage_key][0].shape[0] == len(proportion_correct)
+        assert threshold_cis[coverage_key][1].shape[0] == len(proportion_correct)
+        np.testing.assert_allclose(
+            threshold_cis[coverage_key][0],
+            expected[coverage_key][0],
+            atol=1e-6
+        )
+        np.testing.assert_allclose(
+            threshold_cis[coverage_key][1],
+            expected[coverage_key][1],
+            atol=1e-6
+        )
+
+
+def test_threshold_slope_ci_unscaled(result):
+    proportion_correct = [0.4, 0.5, 0.7]
+    _, threshold_cis = result.threshold(proportion_correct, return_ci=True, unscaled=True)
+
+    expected = {
+        '0.95': [[1.000923, 1.001, 1.001159], [1.004615, 1.005, 1.005797]],
+        '0.9': [[1.004615, 1.005, 1.005797], [1.00923, 1.01, 1.011594]],
+    }
+    assert list(threshold_cis.keys()) == ['0.95', '0.9']
+    for coverage_key, cis in threshold_cis.items():
+        # one CI per proportion_correct
+        assert threshold_cis[coverage_key][0].shape[0] == len(proportion_correct)
+        assert threshold_cis[coverage_key][1].shape[0] == len(proportion_correct)
+        np.testing.assert_allclose(
+            threshold_cis[coverage_key][0],
+            expected[coverage_key][0],
+            atol=1e-6
+        )
+        np.testing.assert_allclose(
+            threshold_cis[coverage_key][1],
+            expected[coverage_key][1],
+            atol=1e-6
+        )
 
 
 def test_threshold_value():
@@ -112,11 +161,11 @@ def test_threshold_value():
         'eta': 0.0,
     }
     confidence_intervals = {
-        'threshold': [[0.5, 0.5]],
-        'width': [[width, width]],
-        'lambda': [[0.05, 0.2]],
-        'gamma': [[0.1, 0.3]],
-        'eta': [[0.0, 0.0]]
+        'threshold': {'0.95': [0.5, 0.5]},
+        'width': {'0.95': [width, width]},
+        'lambda': {'0.95': [0.05, 0.2]},
+        'gamma': {'0.95': [0.1, 0.3]},
+        'eta': {'0.95': [0.0, 0.0]},
     }
     result = _build_result(parameter_estimate, parameter_estimate, confidence_intervals)
 
@@ -143,8 +192,8 @@ def test_threshold_value():
     )
     expected_thr = np.array([0.654833])  # Computed by hand
     np.testing.assert_allclose(thr, expected_thr, atol=1e-4)
-    expected_thr_ci = [[[0.648115], [0.730251]]]  # Computed by hand
-    np.testing.assert_allclose(thr_ci, expected_thr_ci, atol=1e-4)
+    expected_thr_ci = {'0.95': [[0.648115], [0.730251]]}  # Computed by hand
+    np.testing.assert_allclose(thr_ci['0.95'], expected_thr_ci['0.95'], atol=1e-4)
 
 
 def _close_numpy_dict(first, second):
@@ -204,13 +253,7 @@ def test_standard_parameters_estimate():
         'gamma': 0.0,
         'eta': 0.0,
     }
-    confidence_intervals = {
-        'threshold': [[threshold, threshold]],
-        'width': [[width, width]],
-        'lambda': [[0.05, 0.2]],
-        'gamma': [[0.1, 0.3]],
-        'eta': [[0.0, 0.0]]
-    }
+    confidence_intervals = {}
     result = _build_result(parameter_estimate, parameter_estimate, confidence_intervals)
 
     # For a Gaussian sigmoid with alpha=0.05, PC=0.5
@@ -221,3 +264,26 @@ def test_standard_parameters_estimate():
     loc, scale = result.standard_parameters_estimate()
     np.testing.assert_allclose(loc, expected_loc)
     np.testing.assert_allclose(scale, expected_scale)
+
+
+def test_threshold_bug_172():
+    # Reproduce bug in issue #172
+
+    data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
+                     [0.0020, 44.0000, 90.0000], [0.0025, 44.0000, 90.0000],
+                     [0.0030, 52.0000, 90.0000], [0.0035, 53.0000, 90.0000],
+                     [0.0040, 62.0000, 90.0000], [0.0045, 64.0000, 90.0000],
+                     [0.0050, 76.0000, 90.0000], [0.0060, 79.0000, 90.0000],
+                     [0.0070, 88.0000, 90.0000], [0.0080, 90.0000, 90.0000],
+                     [0.0100, 90.0000, 90.0000]])
+
+    options = {
+        'sigmoid': 'norm',
+        'experiment_type': '2AFC'
+    }
+
+    result = psignifit(data, **options)
+    threshold = result.threshold(0.9, return_ci=False)  # which should be 0.0058
+
+    expected_threshold = 0.0058
+    np.testing.assert_allclose(threshold, expected_threshold, atol=1e-4)
