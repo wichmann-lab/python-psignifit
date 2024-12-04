@@ -202,6 +202,11 @@ def _close_numpy_dict(first, second):
         return False
     return np.all([np.all(np.isclose(first[key], second[key])) for key in first])
 
+def _equal_numpy_dict(first, second):
+    """ Test if two dicts of numpy arrays are equal"""
+    if first.keys() != second.keys():
+        return False
+    return np.all([np.all(first[key] == second[key]) for key in first])
 
 def test_save_load_result_json(result, tmp_path):
     result_file = tmp_path / 'result.json'

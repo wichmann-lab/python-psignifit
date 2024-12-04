@@ -89,6 +89,8 @@ class Result:
 
         return estimate
 
+    parameter_estimate = property(get_parameter_estimate)
+
     def threshold(self, proportion_correct: np.ndarray, unscaled: bool = False, return_ci: bool = True,
                   estimate_type: Optional[EstimateType]=None) -> Union[np.ndarray, List[Tuple[np.ndarray, np.ndarray]]]:
         """ Threshold stimulus value and confidence interval for a different proportion correct cutoff.
