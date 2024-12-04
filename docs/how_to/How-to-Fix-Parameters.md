@@ -51,6 +51,6 @@ res = ps.psignifit(data, **options)
 We print the parameter estimates to check that lambda was indeed fixed
 
 ```{code-cell} ipython3
-print(res.get_parameters_estimate())
+print(res.parameter_estimate)
 ```
 
