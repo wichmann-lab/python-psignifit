@@ -234,11 +234,11 @@ def test_get_parameter_estimate(result):
 
 
 def test_estimate_type_default(result):
-    result.estimate_type = 'MAP'
+    result.configuration.estimate_type = 'MAP'
     estimate = result.get_parameter_estimate()
     assert _close_numpy_dict(estimate, result.parameter_estimate_MAP)
 
-    result.estimate_type = 'mean'
+    result.configuration.estimate_type = 'mean'
     estimate = result.get_parameter_estimate()
     assert _close_numpy_dict(estimate, result.parameter_estimate_mean)
 
