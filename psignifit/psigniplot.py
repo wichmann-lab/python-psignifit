@@ -28,7 +28,7 @@ def plot_psychometric_function(result: Result,  # noqa: C901, this function is t
     if ax is None:
         ax = plt.gca()
 
-    params = result.get_parameters_estimate(estimate_type=estimate_type)
+    params = result.get_parameter_estimate(estimate_type=estimate_type)
     data = np.asarray(result.data)
     config = result.configuration
 
@@ -106,7 +106,7 @@ def _plot_residuals(x_values: np.ndarray,
                     estimate_type: EstimateType = None):
     if ax is None:
         ax = plt.gca()
-    params = result.get_parameters_estimate(estimate_type=estimate_type)
+    params = result.get_parameter_estimate(estimate_type=estimate_type)
     data = result.data
     sigmoid = result.configuration.make_sigmoid()
 
@@ -245,7 +245,7 @@ def plot_marginal(result: Result,
         ci_x = np.r_[CI[0], x[(x >= CI[0]) & (x <= CI[1])], CI[1]]
         ax.fill_between(ci_x, np.zeros_like(ci_x), np.interp(ci_x, x, marginal), color=line_color, alpha=0.5)
 
-        estimate = result.get_parameters_estimate(estimate_type=estimate_type)
+        estimate = result.get_parameter_estimate(estimate_type=estimate_type)
         param_value = estimate[parameter]
         ax.plot([param_value] * 2, [0, np.interp(param_value, x, marginal)], color='#000000')
 
@@ -306,7 +306,7 @@ def plot_prior(result: Result,
 
     data = result.data
     bounds = result.debug['bounds']
-    estimate = result.get_parameters_estimate(estimate_type=estimate_type)
+    estimate = result.get_parameter_estimate(estimate_type=estimate_type)
     sigmoid = result.configuration.make_sigmoid()
 
     sigmoid_x = np.linspace(bounds['threshold'][0], bounds['threshold'][1], 1000)
@@ -369,8 +369,8 @@ def plot_2D_margin(result: Result,
     if result.debug=={}:
         raise ValueError("Expects priors and marginals saved. Try running psignifit(....., debug=True).")
 
-    parameters_keys = result.parameters_estimate_MAP.keys()
-    parameter_indices = {param: i for i, param in enumerate(sorted(parameters_keys))}
+    parameter_keys = result.parameter_estimate_MAP.keys()
+    parameter_indices = {param: i for i, param in enumerate(sorted(parameter_keys))}
     other_param_ix = tuple(i for param, i in parameter_indices.items()
                            if param != first_param and param != second_param)
     marginal_2d = np.sum(result.debug['posteriors'], axis=other_param_ix)

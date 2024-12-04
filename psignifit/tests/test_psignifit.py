@@ -25,7 +25,7 @@ def test_psignifit_fixed_fit():
                   'eta': 0.00011599137494786461}
 
     results = psignifit(DATA, sigmoid='norm', experiment_type='2AFC')
-    parm = results.get_parameters_estimate(estimate_type='MAP')
+    parm = results.get_parameter_estimate(estimate_type='MAP')
 
     for p in parm:
         np.testing.assert_allclose(parm[p], parm_heiko[p], rtol=1e-4, atol=1e-4)

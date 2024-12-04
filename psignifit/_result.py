@@ -19,8 +19,8 @@ class NumpyEncoder(json.JSONEncoder):
 
 @dataclasses.dataclass
 class Result:
-    parameters_estimate_MAP: Dict[str, float]
-    parameters_estimate_mean: Dict[str, float]
+    parameter_estimate_MAP: Dict[str, float]
+    parameter_estimate_mean: Dict[str, float]
     configuration: Configuration
     confidence_intervals: Dict[str, List[Tuple[float, float]]]
     data: NDArray[float]
@@ -68,7 +68,7 @@ class Result:
         result_dict['data'] = np.asarray(result_dict['data'])
         return cls.from_dict(result_dict)
 
-    def get_parameters_estimate(self, estimate_type: Optional[EstimateType]=None):
+    def get_parameter_estimate(self, estimate_type: Optional[EstimateType]=None):
         """ Get the estimate of the parameters by type.
 
         Args:
@@ -81,9 +81,9 @@ class Result:
             estimate_type = self.configuration.estimate_type
 
         if estimate_type == 'MAP':
-            estimate = self.parameters_estimate_MAP
+            estimate = self.parameter_estimate_MAP
         elif estimate_type == 'mean':
-            estimate = self.parameters_estimate_mean
+            estimate = self.parameter_estimate_mean
         else:
             raise ValueError("`estimate_type` must be either 'MAP' or 'mean'")
 
@@ -116,7 +116,7 @@ class Result:
         proportion_correct = np.asarray(proportion_correct)
         sigmoid = self.configuration.make_sigmoid()
 
-        estimate = self.get_parameters_estimate(estimate_type)
+        estimate = self.get_parameter_estimate(estimate_type)
         if unscaled:  # set asymptotes to 0 for everything.
             lambd, gamma = 0, 0
         else:
@@ -152,7 +152,7 @@ class Result:
         Returns:
             Slopes of the psychometric function at the stimulus levels.
         """
-        stimulus_level, param = np.asarray(stimulus_level), self.get_parameters_estimate(estimate_type)
+        stimulus_level, param = np.asarray(stimulus_level), self.get_parameter_estimate(estimate_type)
         sigmoid = self.configuration.make_sigmoid()
         return sigmoid.slope(stimulus_level, param['threshold'], param['width'], param['gamma'], param['lambda'])
 
@@ -174,7 +174,7 @@ class Result:
         stimulus_levels = self.threshold(proportion_correct, unscaled, return_ci=False, estimate_type=estimate_type)
         return self.slope(stimulus_levels)
 
-    def standard_parameters_estimate(self, estimate_type: Optional[EstimateType]=None):
+    def standard_parameter_estimate(self, estimate_type: Optional[EstimateType]=None):
         """ Get the parameters of the psychometric function in the standard format.
 
         `psignifit` uses the same intuitive parametrization, threshold and width, for all
@@ -192,6 +192,6 @@ class Result:
             Standard parameters (loc, scale) for the sigmoid subclass.
         """
         sigmoid = self.configuration.make_sigmoid()
-        estimate = self.get_parameters_estimate(estimate_type)
+        estimate = self.get_parameter_estimate(estimate_type)
         loc, scale = sigmoid.standard_parameters(estimate['threshold'], estimate['width'])
         return loc, scale
