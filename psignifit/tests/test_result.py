@@ -121,12 +121,19 @@ def test_threshold_value():
     result = _build_result(parameter_estimate, parameter_estimate, confidence_intervals)
 
     # The threshold at the middle of the gamma-to-(1-lambda) range must be 0.5 for a Gaussian
-    thr, thr_ci = result.threshold(
+    thr = result.threshold(
         proportion_correct=np.array([(1 - lambda_ - gamma) / 2.0 + gamma]),
-        unscaled=False, return_ci=True,
+        unscaled=False, return_ci=False,
     )
+    expected_thr = np.array(0.5)  # by construction
+    np.testing.assert_allclose(thr, expected_thr)
 
-    expected_thr = np.array(0.5)
+    # ... except when unscaled is True
+    thr = result.threshold(
+        proportion_correct=np.array([(1 - lambda_ - gamma) / 2.0 + gamma]),
+        unscaled=True, return_ci=False,
+    )
+    expected_thr = np.array([0.5343785])  # computed by hand
     np.testing.assert_allclose(thr, expected_thr)
 
     # Compare to results computed by hand
