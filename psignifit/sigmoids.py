@@ -242,7 +242,10 @@ class Gaussian(Sigmoid):
         return scipy.stats.norm, {}
 
     def _standard_parameters(self, threshold: N, width: N) -> list:
-        scale = width / (self._ppf(1 - self.alpha) - self._ppf(self.alpha))
+        if self.alpha == 0.0:
+            scale = width
+        else:
+            scale = width / (self._ppf(1 - self.alpha) - self._ppf(self.alpha))
         loc = threshold - self._ppf(self._PC, 0, scale)
         return [loc, scale]
 
@@ -254,7 +257,10 @@ class Logistic(Sigmoid):
         return scipy.stats.logistic, {}
 
     def _standard_parameters(self, threshold: N, width: N) -> list:
-        scale = width / (2 * np.log(1 / self.alpha - 1))
+        if self.alpha == 0.0:
+            scale = width
+        else:
+            scale = width / (2 * np.log(1 / self.alpha - 1))
         loc = threshold - self._ppf(self._PC, loc=0, scale=scale)
         return [loc, scale]
 
@@ -266,7 +272,10 @@ class Gumbel(Sigmoid):
         return scipy.stats.gumbel_l, {}
 
     def _standard_parameters(self, threshold: N, width: N) -> list:
-        scale = width / (np.log(-np.log(self.alpha)) - np.log(-np.log(1-self.alpha)))
+        if self.alpha == 0.0:
+            scale = width
+        else:
+            scale = width / (np.log(-np.log(self.alpha)) - np.log(-np.log(1-self.alpha)))
         loc = threshold - self._ppf(self._PC, loc=0, scale=scale)
         return [loc, scale]
 
@@ -278,7 +287,10 @@ class ReverseGumbel(Sigmoid):
         return scipy.stats.gumbel_r, {}
 
     def _standard_parameters(self, threshold: N, width: N) -> list:
-        scale = width / (np.log(-np.log(self.alpha)) - np.log(-np.log(1-self.alpha)))
+        if self.alpha == 0.0:
+            scale = width
+        else:
+            scale = width / (np.log(-np.log(self.alpha)) - np.log(-np.log(1-self.alpha)))
         loc = threshold - self._ppf(self._PC, loc=0, scale=scale)
         return [loc, scale]
 
@@ -290,7 +302,10 @@ class Student(Sigmoid):
         return scipy.stats.t, {'df': 1}
 
     def _standard_parameters(self, threshold: N, width: N) -> list:
-        scale = width / (self._ppf(1 - self.alpha) - self._ppf(self.alpha))
+        if self.alpha == 0.0:
+            scale = width
+        else:
+            scale = width / (self._ppf(1 - self.alpha) - self._ppf(self.alpha))
         loc = threshold - self._ppf(self._PC, loc=0, scale=scale)
         return [loc, scale]
 
