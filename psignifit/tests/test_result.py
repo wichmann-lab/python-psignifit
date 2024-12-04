@@ -237,6 +237,10 @@ def test_get_parameter_estimate(result):
     with pytest.raises(ValueError):
         result.get_parameter_estimate(estimate_type='foo')
 
+def test_parameter_estimate_property(result):
+    estimate = result.parameter_estimate
+    assert _equal_numpy_dict(estimate, result.parameter_estimate_MAP)
+    assert not _equal_numpy_dict(estimate, result.parameter_estimate_mean)
 
 def test_estimate_type_default(result):
     result.configuration.estimate_type = 'MAP'
