@@ -239,8 +239,14 @@ def test_get_parameter_estimate(result):
 
 def test_parameter_estimate_property(result):
     estimate = result.parameter_estimate
+    # verify that we get the parameter estimate MAP by default
     assert _equal_numpy_dict(estimate, result.parameter_estimate_MAP)
     assert not _equal_numpy_dict(estimate, result.parameter_estimate_mean)
+    # verify that we get the mean parameter estimate if we change the estimate type
+    result.configuration.estimate_type = 'mean'
+    estimate = result.parameter_estimate
+    assert not _equal_numpy_dict(estimate, result.parameter_estimate_MAP)
+    assert _equal_numpy_dict(estimate, result.parameter_estimate_mean)
 
 def test_estimate_type_default(result):
     result.configuration.estimate_type = 'MAP'
