@@ -32,11 +32,11 @@ def test_parameter_recovery_2afc(sigmoid):
 
     res = psignifit(data, **options)
 
-    assert np.isclose(res.parameters_estimate_MAP['lambda'], lambda_)
-    assert np.isclose(res.parameters_estimate_MAP['gamma'], gamma)
-    assert np.isclose(res.parameters_estimate_MAP['eta'], 0, atol=1e-4)
-    assert np.isclose(res.parameters_estimate_MAP['threshold'], threshold, atol=1e-4)
-    assert np.isclose(res.parameters_estimate_MAP['width'], width, atol=1e-4)
+    assert np.isclose(res.parameter_estimate_MAP['lambda'], lambda_)
+    assert np.isclose(res.parameter_estimate_MAP['gamma'], gamma)
+    assert np.isclose(res.parameter_estimate_MAP['eta'], 0, atol=1e-4)
+    assert np.isclose(res.parameter_estimate_MAP['threshold'], threshold, atol=1e-4)
+    assert np.isclose(res.parameter_estimate_MAP['width'], width, atol=1e-4)
 
 
 @pytest.mark.parametrize("eta", [0.1, 0.2, 0.3])
@@ -66,11 +66,11 @@ def test_parameter_recovery_2afc_eta(random_state, eta):
 
     res = psignifit(data, **options)
 
-    assert np.isclose(res.parameters_estimate_MAP['lambda'], lambda_)
-    assert np.isclose(res.parameters_estimate_MAP['gamma'], gamma)
-    assert np.isclose(res.parameters_estimate_MAP['eta'], eta, atol=0.05)
-    assert np.isclose(res.parameters_estimate_MAP['threshold'], threshold, atol=0.01)
-    assert np.isclose(res.parameters_estimate_MAP['width'], width, atol=0.05)
+    assert np.isclose(res.parameter_estimate_MAP['lambda'], lambda_)
+    assert np.isclose(res.parameter_estimate_MAP['gamma'], gamma)
+    assert np.isclose(res.parameter_estimate_MAP['eta'], eta, atol=0.05)
+    assert np.isclose(res.parameter_estimate_MAP['threshold'], threshold, atol=0.01)
+    assert np.isclose(res.parameter_estimate_MAP['width'], width, atol=0.05)
 
 
 # threshold and width can not be fixed.
@@ -112,11 +112,11 @@ def test_parameter_recovery_fixed_params(fixed_param):
 
     res = psignifit(data, **options)
     # check fixed params are not touched
-    assert res.parameters_estimate_MAP[fixed_param] == sim_params[fixed_param]
+    assert res.parameter_estimate_MAP[fixed_param] == sim_params[fixed_param]
 
     for p in ['lambda', 'gamma', 'threshold', 'width', 'eta']:
         # check all other params are estimated correctly
-        assert np.isclose(res.parameters_estimate_MAP[p], sim_params[p], rtol=1e-4, atol=1 / 40), f"failed for parameter {p} for estimation with fixed: {fixed_param}."
+        assert np.isclose(res.parameter_estimate_MAP[p], sim_params[p], rtol=1e-4, atol=1 / 40), f"failed for parameter {p} for estimation with fixed: {fixed_param}."
 
 
 @pytest.mark.parametrize("sigmoid", list(ALL_SIGMOID_NAMES))
@@ -144,11 +144,11 @@ def test_parameter_recovery_YN(sigmoid):
 
     res = psignifit(data, **options)
 
-    assert np.isclose(res.parameters_estimate_MAP['lambda'], lambda_, atol=1e-4)
-    assert np.isclose(res.parameters_estimate_MAP['gamma'], gamma, atol=1e-4)
-    assert np.isclose(res.parameters_estimate_MAP['eta'], 0, atol=1e-4)
-    assert np.isclose(res.parameters_estimate_MAP['threshold'], threshold, atol=1e-4)
-    assert np.isclose(res.parameters_estimate_MAP['width'], width, atol=1e-4)
+    assert np.isclose(res.parameter_estimate_MAP['lambda'], lambda_, atol=1e-4)
+    assert np.isclose(res.parameter_estimate_MAP['gamma'], gamma, atol=1e-4)
+    assert np.isclose(res.parameter_estimate_MAP['eta'], 0, atol=1e-4)
+    assert np.isclose(res.parameter_estimate_MAP['threshold'], threshold, atol=1e-4)
+    assert np.isclose(res.parameter_estimate_MAP['width'], width, atol=1e-4)
 
 
 @pytest.mark.parametrize("sigmoid", list(ALL_SIGMOID_NAMES))
@@ -176,11 +176,11 @@ def test_parameter_recovery_eq_asymptote(sigmoid):
 
     res = psignifit(data, **options)
 
-    assert np.isclose(res.parameters_estimate_MAP['lambda'], lambda_, atol=1e-4)
-    assert np.isclose(res.parameters_estimate_MAP['gamma'], gamma, atol=1e-4)
-    assert np.isclose(res.parameters_estimate_MAP['eta'], 0, atol=1e-4)
-    assert np.isclose(res.parameters_estimate_MAP['threshold'], threshold, atol=1e-4)
-    assert np.isclose(res.parameters_estimate_MAP['width'], width, atol=1e-4)
+    assert np.isclose(res.parameter_estimate_MAP['lambda'], lambda_, atol=1e-4)
+    assert np.isclose(res.parameter_estimate_MAP['gamma'], gamma, atol=1e-4)
+    assert np.isclose(res.parameter_estimate_MAP['eta'], 0, atol=1e-4)
+    assert np.isclose(res.parameter_estimate_MAP['threshold'], threshold, atol=1e-4)
+    assert np.isclose(res.parameter_estimate_MAP['width'], width, atol=1e-4)
 
 
 @fp_error_handler(over='ignore', invalid='ignore')
@@ -219,7 +219,7 @@ def test_parameter_recovery_mean_estimate(random_state):
          'width': width,
     }
     for p in expected_mean_dict.keys():
-        assert np.isclose(result.parameters_estimate_mean[p], expected_mean_dict[p], atol=0.05)
+        assert np.isclose(result.parameter_estimate_mean[p], expected_mean_dict[p], atol=0.05)
 
 
 @fp_error_handler(over='ignore', invalid='ignore')
@@ -274,7 +274,7 @@ def test_mean_vs_map_estimate(random_state):
          'width': 3.679911898980962,
     }
     for p in expected_MAP_dict.keys():
-        assert np.isclose(result.parameters_estimate_MAP[p], expected_MAP_dict[p])
+        assert np.isclose(result.parameter_estimate_MAP[p], expected_MAP_dict[p])
 
     expected_mean_dict = {
         'eta': 0.07274831038039509,
@@ -284,4 +284,4 @@ def test_mean_vs_map_estimate(random_state):
         'width': 4.027280086833293,
     }
     for p in expected_mean_dict.keys():
-        assert np.isclose(result.parameters_estimate_mean[p], expected_mean_dict[p])
+        assert np.isclose(result.parameter_estimate_mean[p], expected_mean_dict[p])

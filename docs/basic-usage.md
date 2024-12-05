@@ -112,7 +112,7 @@ and the confidence intervals:
 jupyter:
   outputs_hidden: False
 ---
-print(result.get_parameters_estimate())
+print(result.parameter_estimate)
 ```
 
 This returns a python dictionary containing the estimated parameters.
@@ -132,7 +132,7 @@ The parameters estimated by psignifit are:
 Then, to obtain the threhsold you run
 
 ```{code-cell} ipython3
-print(result.get_parameters_estimate()['threshold'])
+print(result.parameter_estimate['threshold'])
 ```
 
 
