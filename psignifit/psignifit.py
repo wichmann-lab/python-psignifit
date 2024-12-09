@@ -44,8 +44,7 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
     Args:
         data: Trials as described above.
         conf: Optional configuration object.
-        debug: If true, posterior matrix and prior functions will be returned to result object.
-               In this mode the result object cannot be serialized.
+        debug: If true, posterior matrix and prior functions will be returned to result object. In this mode the result object cannot be serialized.
         kwargs: Configurations as function parameters.
     """
     if conf is None:

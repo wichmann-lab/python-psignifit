@@ -8,6 +8,7 @@ copyright: "2024. Licence: GPLv2"  # Copyright year to be placed in the footer
 
 execute:
   execute_notebooks: force
+  exclude_patterns: ['examples/priors.md']
 
 #only_build_toc_files        : true
 
@@ -40,8 +41,11 @@ sphinx:
     - sphinx.ext.autosummary        # generate summary tables of functions in modules
     - sphinx.ext.viewcode           # add links to source code in API reference  
     - sphinx.ext.autodoc
+    - sphinx.ext.napoleon
     
   config:
+    suppress_warnings : ["etoc.toctree"] # Workaround for: https://github.com/executablebooks/sphinx-external-toc/issues/36
+                                         # and: https://github.com/executablebooks/sphinx-external-toc/issues/79
     autodoc_default_options: {
      "members": True,                # Include module/class members.
      "member-order": 'bysource',     # Order members as in source file.
