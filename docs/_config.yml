@@ -8,6 +8,7 @@ copyright: "2024. Licence: GPLv2"  # Copyright year to be placed in the footer
 
 execute:
   execute_notebooks: force
+  exclude_patterns: ['examples/priors.md']
 
 #only_build_toc_files        : true
 
