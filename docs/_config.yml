@@ -40,6 +40,7 @@ sphinx:
     - sphinx.ext.autosummary        # generate summary tables of functions in modules
     - sphinx.ext.viewcode           # add links to source code in API reference  
     - sphinx.ext.autodoc
+    - sphinx.ext.napoleon
     
   config:
     suppress_warnings : ["etoc.toctree"] # Workaround for: https://github.com/executablebooks/sphinx-external-toc/issues/36
