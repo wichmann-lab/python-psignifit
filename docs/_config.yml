@@ -42,6 +42,8 @@ sphinx:
     - sphinx.ext.autodoc
     
   config:
+    suppress_warnings : ["etoc.toctree"] # Workaround for: https://github.com/executablebooks/sphinx-external-toc/issues/36
+                                         # and: https://github.com/executablebooks/sphinx-external-toc/issues/79
     autodoc_default_options: {
      "members": True,                # Include module/class members.
      "member-order": 'bysource',     # Order members as in source file.
