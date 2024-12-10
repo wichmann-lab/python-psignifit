@@ -219,6 +219,7 @@ def plot_marginal(result: Result,
                   plot_prior: bool = True,
                   prior_color: Union[str, List[float], np.ndarray] = '#B2B2B2',  # light gray
                   plot_estimate: bool = True,
+                  plot_ci: bool = True,
                   estimate_type: EstimateType = None):
     """ Plots the marginal for a single dimension.
 
@@ -240,10 +241,11 @@ def plot_marginal(result: Result,
     x = np.asarray(result.parameter_values[parameter])
     xmin, xmax = x.min(), x.max()
     if plot_estimate:
-        # takes 95% confidence interval
-        CI = result.confidence_intervals[parameter]['0.95']
-        ci_x = np.r_[CI[0], x[(x >= CI[0]) & (x <= CI[1])], CI[1]]
-        ax.fill_between(ci_x, np.zeros_like(ci_x), np.interp(ci_x, x, marginal), color=line_color, alpha=0.5)
+        if plot_ci:
+            # takes 95% confidence interval
+            CI = result.confidence_intervals[parameter]['0.95']
+            ci_x = np.r_[CI[0], x[(x >= CI[0]) & (x <= CI[1])], CI[1]]
+            ax.fill_between(ci_x, np.zeros_like(ci_x), np.interp(ci_x, x, marginal), color=line_color, alpha=0.5)
 
         estimate = result.get_parameter_estimate(estimate_type=estimate_type)
         param_value = estimate[parameter]
@@ -417,28 +419,46 @@ def plot_bias_analysis(data: np.ndarray, compare_data: np.ndarray,
                                        'gamma': 20,
                                        'eta': 1},
                   priors={'gamma': lambda x: scipy.stats.beta.pdf(x, 2, 2)},
+                  pool_max_blocks=30,
                   debug=True,
                   **kwargs)
     result_combined = psignifit(np.r_[data, compare_data], **config)
     result_data = psignifit(data, **config)
     result_compare_data = psignifit(compare_data, **config)
 
-    plt.figure()
-    ax = plt.axes([0.15, 4.35 / 6, 0.75, 1.5 / 6])
-
-    plot_psychometric_function(result_combined, ax=ax, estimate_type=estimate_type)
-    plot_psychometric_function(result_data, ax=ax, line_color=[1, 0, 0], data_color=[1, 0, 0],
+    fig = plt.figure(constrained_layout=True, figsize=(5, 15))
+    gs = fig.add_gridspec(6, 1)
+    
+    ax1 = fig.add_subplot(gs[0:2, 0])
+    plot_psychometric_function(result_combined, ax=ax1, estimate_type=estimate_type)
+    plot_psychometric_function(result_data, ax=ax1, line_color=[1, 0, 0], data_color=[1, 0, 0],
                                estimate_type=estimate_type)
-    plot_psychometric_function(result_compare_data, ax=ax, line_color=[0, 0, 1], data_color=[0, 0, 1],
+    plot_psychometric_function(result_compare_data, ax=ax1, line_color=[0, 0, 1], data_color=[0, 0, 1],
                                estimate_type=estimate_type)
-    plt.ylim([0, 1])
+    ax1.set_ylim((0, 1))
+    ax2 = fig.add_subplot(gs[2, 0])
+    ax3 = fig.add_subplot(gs[3, 0])
+    ax4 = fig.add_subplot(gs[4, 0])
+    ax5 = fig.add_subplot(gs[5, 0])
+    
+    axesmarginals = [ax2, ax3, ax4, ax5]
+    
+    for param, ax in zip(['threshold', 'width', 'lambda', 'gamma'], axesmarginals):
 
-    for param in ['threshold', 'width', 'lambda', 'gamma']:
-        ax = plt.axes([0.15, 3.35 / 6, 0.75, 0.5 / 6])
-        plot_marginal(result_combined, param, ax=ax, plot_prior=False, line_color=[0, 0, 0],
-                      estimate_type=estimate_type)
+        plot_marginal(result_combined, param, ax=ax, plot_prior=False, 
+                      line_color=[0, 0, 0], estimate_type=estimate_type,
+                      plot_ci=False)
+        
+        plot_marginal(result_data, param, ax=ax, plot_prior=False,
+                      line_color=[1, 0, 0], estimate_type=estimate_type, 
+                      plot_ci=False)
+        
+        
+        plot_marginal(result_compare_data, param, ax=ax, plot_prior=False,
+                      line_color=[0, 0, 1], estimate_type=estimate_type,
+                      plot_ci=False)
+     
+    for ax in axesmarginals:
+        ax.autoscale()
+     
 
-        plot_marginal(result_data, param, ax=ax, line_color=[1, 0, 0], estimate_type=estimate_type)
-        plot_marginal(result_compare_data, param, ax=ax, line_color=[0, 0, 1], estimate_type=estimate_type)
-        ax.relim()
-        ax.autoscale_view()
