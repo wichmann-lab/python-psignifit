@@ -35,4 +35,4 @@ jobs:
 
       - name: Build My Book
         shell: bash -l {0}
-        run: jupyter-book build docs/
+        run: jupyter-book build --warningiserror docs/
