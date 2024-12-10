@@ -11,26 +11,27 @@ kernelspec:
   name: python3
 ---
 
-# Bias analysis
+# Interval bias analysis
 
 For 2AFC experiments it makes sense to check whether the observers are
 biased, i.e. whether they treat the two alternative answers differently.
 To facilitate such checks we provide a function
-biasAna(data1,data2,options), which we demonstrate in this section.
+`plot_bias_analysis`, which we demonstrate in this section.
 
 In the background this function calculates fits with changed priors
 on the guessing and lapse rate, to leave the guessing rate free with only
 a weak prior (beta(2,2)) to be near 0.5. To allow this in the fitting we
-have to constrain the lapse rate to the range [0,0.1] leaving the range
-[0,0.9] for the guessing rate.
+have to constrain the lapse rate to the range [0, 0.1] leaving the range
+[0, 0.9] for the guessing rate.
 
 To use the function we first have to separate our dataset to produce two
-separate datasets for the two alternatives (i.e. for signal in first
-interval vs. signal in second interval; signal left vs signal right, etc.)
+separate datasets for the two alternatives (i.e. for signal in the first
+interval vs. signal in the second interval; signal left vs signal right, etc.)
 
-For demonstration purposes we produce different pairs of datasets, which
-combine to our standard test dataset (data11 and data12, data21 and data22,
-and data31 and data32 are a pair each:
+For demonstration purposes we produced different pairs of datasets, which 
+combine to our standard test dataset (see Basic Usage). 
+In the demo `data11` and `data12`, `data21` and `data22`, and `data31` and 
+`data32` are a pair each. We can explore whether our different pairs show biased behaviour.
 
 ```{code-cell} ipython3
 import numpy as np
@@ -89,16 +90,16 @@ data32 = np.array([[0.0010, 23.0000, 45.0000], [0.0015, 25.0000, 45.0000],
                    [0.0100, 48.0000, 48.0000]])
 ```
 
-now we can check whether our different pairs show biased behaviour:
+----
 
-```{code-cell} ipython3
-# We start with the first pair of data:
-psigniplot.plot_bias_analysis(data11, data12)
-```
-
+We start with the first pair of data. 
 This command will open a figure, which constains plots for the first
 dataset alone (red), for the second dataset alone (blue) and for the
 combined dataset (black).
+
+```{code-cell} ipython3
+psigniplot.plot_bias_analysis(data11, data12)
+```
 
 The top plot show the three psychometric functions, which for the first
 split of the data lie neatly on top of each other, suggesting already
@@ -112,14 +113,17 @@ For our first example these plots all confirm the first impression
 obtained from the first plot. It seems neither of the parameters has
 changed much.
 
+----
+
+Next, we check our second split of data
+
 ```{code-cell} ipython3
-# Next, we check our second split of data:
 psigniplot.plot_bias_analysis(data21, data22)
 ```
 
 In this case there seems to be very strong "finger bias", i.e. the
 observer is much better at guessing in one than in the other part of the
-data. This can happen, when observer do not guess the two intervals
+data. This can happen when observer do not guess the two intervals
 with equal probability.
 
 This bias can be seen directly in the fitted psychometric functions, but
@@ -131,8 +135,11 @@ As this kind of bias leads to relatively undisturbed inference for
 threshold and width, the estimates from the original function might still
 be usable.
 
+----
+
+Now we have a look at our third split
+
 ```{code-cell} ipython3
-# Now we have a look at our third splitting:
 psigniplot.plot_bias_analysis(data31, data32)
 ```
 
@@ -152,13 +159,13 @@ the two functions in the two intervals, contaminating this measure as
 well.
 
 
-In summary: Use these plots to find if the psychometric functions for the
-two alternatives in 2AFC differ. This should allow you to find the
-relatively harmless biases in the guessing of observers and the much more
-harmful biases in true performance.
-This is especially important as all biases we demonstrated here cannot be
-detected by looking at the combined psychometric function only.
-In real datsets the biases we demonstrated can be combined. Nonetheless
-the plots of the marginals should allow a separation of the different
-biases.
+## Summary
 
+Use these plots to find if the psychometric functions for the two 
+alternatives in 2IFC or 2AFC differ. This allows to find the relatively
+harmless biases in the guessing of observers and the much difficult 
+to interpret and deal with "true performance" biases.
+
+This is especially important as all biases we demonstrated here 
+cannot be detected by looking at the combined psychometric function alone. 
+The combined function is the same for all three examples shown here!
