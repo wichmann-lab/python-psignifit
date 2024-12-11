@@ -63,3 +63,5 @@ target/
 #Ipython Notebook
 .ipynb_checkpoints
 
+#example json file generated on docs compilation
+docs/examples/psignifit-result.json
