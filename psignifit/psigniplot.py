@@ -56,8 +56,13 @@ def plot_psychometric_function(result: Result,  # noqa: C901, this function is t
     x = np.linspace(x_data.min(), x_data.max(), num=1000)
     x_low = np.linspace(x[0] - extrapolate_stimulus * (x[-1] - x[0]), x[0], num=100)
     x_high = np.linspace(x[-1], x[-1] + extrapolate_stimulus * (x[-1] - x[0]), num=100)
-    y = sigmoid(np.r_[x_low, x, x_high], params['threshold'], params['width'])
-    y = (1 - params['gamma'] - params['lambda']) * y + params['gamma']
+    y = sigmoid(
+        np.r_[x_low, x, x_high],
+        threshold=params['threshold'],
+        width=params['width'],
+        gamma=params['gamma'],
+        lambd=params['lambda'],
+    )
     ax.plot(x, y[len(x_low):-len(x_high)], c=line_color, lw=line_width, clip_on=False)
     ax.plot(x_low, y[:len(x_low)], '--', c=line_color, lw=line_width, clip_on=False)
     ax.plot(x_high, y[-len(x_high):], '--', c=line_color, lw=line_width, clip_on=False)
@@ -110,8 +115,13 @@ def _plot_residuals(x_values: np.ndarray,
     data = result.data
     sigmoid = result.configuration.make_sigmoid()
 
-    std_model = params['gamma'] + (1 - params['lambda'] - params['gamma']) * sigmoid(
-        data[:, 0], params['threshold'], params['width'])
+    std_model = sigmoid(
+        data[:, 0],
+        threshold=params['threshold'],
+        width=params['width'],
+        gamma=params['gamma'],
+        lambd=params['lambda'],
+    )
     deviance = data[:, 1] / data[:, 2] - std_model
     std_model = np.sqrt(std_model * (1 - std_model))
     deviance = deviance / std_model
@@ -348,8 +358,13 @@ def plot_prior(result: Result,
         for param_value, color in zip(x_percentiles, colors):
             this_sigmoid_params = dict(sigmoid_params)
             this_sigmoid_params[param] = param_value
-            y = sigmoid(sigmoid_x, this_sigmoid_params['threshold'], this_sigmoid_params['width'])
-            y = (1 - estimate['gamma'] - this_sigmoid_params['lambda']) * y + estimate['gamma']
+            y = sigmoid(
+                sigmoid_x,
+                threshold=this_sigmoid_params['threshold'],
+                width=this_sigmoid_params['width'],
+                gamma=this_sigmoid_params['gamma'],
+                lambd=this_sigmoid_params['lambda'],
+            )
             plt.plot(sigmoid_x, y, linewidth=line_width, color=color)
 
         plt.scatter(data[:, 0], np.zeros(data[:, 0].shape), s=marker_size*.75, c='k', clip_on=False)
@@ -428,7 +443,7 @@ def plot_bias_analysis(data: np.ndarray, compare_data: np.ndarray,
 
     fig = plt.figure(constrained_layout=True, figsize=(5, 15))
     gs = fig.add_gridspec(6, 1)
-    
+
     ax1 = fig.add_subplot(gs[0:2, 0])
     plot_psychometric_function(result_combined, ax=ax1, estimate_type=estimate_type)
     plot_psychometric_function(result_data, ax=ax1, line_color=[1, 0, 0], data_color=[1, 0, 0],
@@ -440,25 +455,25 @@ def plot_bias_analysis(data: np.ndarray, compare_data: np.ndarray,
     ax3 = fig.add_subplot(gs[3, 0])
     ax4 = fig.add_subplot(gs[4, 0])
     ax5 = fig.add_subplot(gs[5, 0])
-    
+
     axesmarginals = [ax2, ax3, ax4, ax5]
-    
+
     for param, ax in zip(['threshold', 'width', 'lambda', 'gamma'], axesmarginals):
 
-        plot_marginal(result_combined, param, ax=ax, plot_prior=False, 
+        plot_marginal(result_combined, param, ax=ax, plot_prior=False,
                       line_color=[0, 0, 0], estimate_type=estimate_type,
                       plot_ci=False)
-        
+
         plot_marginal(result_data, param, ax=ax, plot_prior=False,
-                      line_color=[1, 0, 0], estimate_type=estimate_type, 
+                      line_color=[1, 0, 0], estimate_type=estimate_type,
                       plot_ci=False)
-        
-        
+
+
         plot_marginal(result_compare_data, param, ax=ax, plot_prior=False,
                       line_color=[0, 0, 1], estimate_type=estimate_type,
                       plot_ci=False)
-     
+
     for ax in axesmarginals:
         ax.autoscale()
-     
+
 
