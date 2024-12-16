@@ -72,11 +72,12 @@ class Sigmoid:
         """
 
         value = self._value(stimulus_level, threshold, width)
+        value = gamma + (1.0 - lambd - gamma) * value
 
         if self.negative:
-            return 1 - value
-        else:
-            return value
+            value = 1 - value
+
+        return value
 
     def slope(self, stimulus_level: N, threshold: N, width: N, gamma: N = 0, lambd: N = 0) -> N:
         """ Calculate the slope at specified stimulus levels.

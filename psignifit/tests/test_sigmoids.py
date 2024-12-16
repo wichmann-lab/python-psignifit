@@ -45,7 +45,9 @@ def test_sigmoid_by_name(sigmoid_name):
 def test_sigmoid_values(subclass, expected_y):
     sigmoid = subclass(PC=0.6, alpha=0.1)
     x = np.array([9.5, 10.0, 11.5])
-    y = sigmoid(x, threshold=10, width=3)
+    y = sigmoid(x, threshold=10, width=3, gamma=0.08, lambd=0.12)
+    # Rescale expected_y to take into account gamma and lambda
+    expected_y = 0.08 + expected_y * 0.8
     np.testing.assert_allclose(y, expected_y, atol=1e-6)
 
 
