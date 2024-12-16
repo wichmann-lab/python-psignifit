@@ -362,7 +362,7 @@ def plot_prior(result: Result,
                 sigmoid_x,
                 threshold=this_sigmoid_params['threshold'],
                 width=this_sigmoid_params['width'],
-                gamma=this_sigmoid_params['gamma'],
+                gamma=estimate['gamma'],
                 lambd=this_sigmoid_params['lambda'],
             )
             plt.plot(sigmoid_x, y, linewidth=line_width, color=color)
