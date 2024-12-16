@@ -65,8 +65,8 @@ class Sigmoid:
             stimulus_level: Stimulus level value
             threshold: Threshold at `PC`
             width: Width of the sigmoid
-            gamma: Guess rate (lower offset of the sigmoid)
-            lambd: Lapse rate (upper offset of the sigmoid)
+            gamma: Guess rate (lower asymptote of the sigmoid)
+            lambd: Lapse rate (upper asymptote of the sigmoid)
         Returns:
             Proportion correct at the stimulus values.
         """
@@ -86,8 +86,8 @@ class Sigmoid:
             stimulus_level: Stimulus level value at which to calculate the slope
             threshold: Threshold at `PC`
             width: Width of the sigmoid
-            gamma: Guess rate (lower offset of the sigmoid)
-            lambd: Lapse rate (upper offset of the sigmoid)
+            gamma: Guess rate (lower asymptote of the sigmoid)
+            lambd: Lapse rate (upper asymptote of the sigmoid)
         Returns:
             Slope at the stimulus values.
         """
@@ -110,8 +110,8 @@ class Sigmoid:
             prop_correct: Proportion correct at the threshold to calculate.
             threshold: Threshold at `PC`
             width: Width of the sigmoid
-            gamma: Guess rate (lower offset of the sigmoid)
-            lambd: Lapse rate (upper offset of the sigmoid)
+            gamma: Guess rate (lower asymptote of the sigmoid)
+            lambd: Lapse rate (upper asymptote of the sigmoid)
         Returns:
             Threshold at the proportion correct values.
         """
