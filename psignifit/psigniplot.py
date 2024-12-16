@@ -329,8 +329,9 @@ def plot_prior(result: Result,
         prior_cdf = np.cumsum(prior_val * prior_w)
         q25_index = np.argmax(prior_cdf > 0.25)
         q75_index = np.argmax(prior_cdf > 0.75)
+        prior_mean = np.sum(prior_x * prior_val)/np.sum(prior_val)  # ? copied from MATLAB
 
-        x_percentiles = [estimate[param],
+        x_percentiles = [prior_mean,
                          min(prior_x),
                          prior_x[q25_index],
                          prior_x[q75_index],
