@@ -81,8 +81,7 @@ def psychometric(stimulus_level, threshold, width, gamma, lambda_, sigmoid_name)
     # pc = 0.5
     # alpha = 0.05
     sigmoid = sigmoid_by_name(sigmoid_name)
-    sigmoid_values = sigmoid(stimulus_level, threshold=threshold, width=width)
-    psi = gamma + (1.0 - lambda_ - gamma) * sigmoid_values
+    psi = sigmoid(stimulus_level, threshold=threshold, width=width, gamma=gamma, lambd=lambda_)
     return psi
 
 

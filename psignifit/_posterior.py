@@ -146,7 +146,6 @@ def log_posterior(data: np.ndarray, sigmoid: Sigmoid, priors: Dict[str, Prior], 
 
     if gamma is None:
         gamma = lambd
-    scale = 1 - gamma - lambd
 
     pbin = 0
     p = 0
@@ -159,7 +158,7 @@ def log_posterior(data: np.ndarray, sigmoid: Sigmoid, priors: Dict[str, Prior], 
         if trials == 0:
             continue
 
-        psi = sigmoid(level, thres, width) * scale + gamma
+        psi = sigmoid(level, thres, width, gamma=gamma, lambd=lambd)
 
         # Separate cases to avoid warnings problems with np.log(...)
         # for correct_trials == 0 or (trials - correct_trials) == 0
