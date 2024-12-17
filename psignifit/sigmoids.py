@@ -61,6 +61,8 @@ class Sigmoid:
     def __call__(self, stimulus_level: N, threshold: N, width: N, gamma: N = 0, lambd: N = 0) -> N:
         """ Calculate the sigmoid value at specified stimulus levels.
 
+        See Eq 1 in Schuett, Harmeling, Macke and Wichmann (2016).
+
         Args:
             stimulus_level: Stimulus level value
             threshold: Threshold at `PC`
