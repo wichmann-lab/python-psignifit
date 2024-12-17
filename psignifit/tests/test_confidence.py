@@ -44,20 +44,20 @@ def grid_values():
 
 
 def test_confidence_intervals(zerocentered_normal_mass, grid_values):
-    p_values = [0.05, 0.5, 0.95]
+    confidence_levels = [0.05, 0.5, 0.95]
 
-    intervals = confidence_intervals(zerocentered_normal_mass, grid_values, p_values, mode='project')
-    assert list(intervals.keys()) == [str(p) for p in p_values]
+    intervals = confidence_intervals(zerocentered_normal_mass, grid_values, confidence_levels, mode='project')
+    assert list(intervals.keys()) == [str(p) for p in confidence_levels]
     assert all(len(interval) == len(grid_values) for interval in intervals.values())
 
-    intervals = confidence_intervals(zerocentered_normal_mass, grid_values, p_values, mode='percentiles')
-    assert list(intervals.keys()) == [str(p) for p in p_values]
+    intervals = confidence_intervals(zerocentered_normal_mass, grid_values, confidence_levels, mode='percentiles')
+    assert list(intervals.keys()) == [str(p) for p in confidence_levels]
     assert all(len(interval) == len(grid_values) for interval in intervals.values())
 
     with pytest.raises(ValueError):
-        confidence_intervals(zerocentered_normal_mass, grid_values, p_values, mode='foobar')
+        confidence_intervals(zerocentered_normal_mass, grid_values, confidence_levels, mode='foobar')
     with pytest.raises(ValueError):
-        confidence_intervals(zerocentered_normal_mass * 3, grid_values, p_values, mode='project')
+        confidence_intervals(zerocentered_normal_mass * 3, grid_values, confidence_levels, mode='project')
 
 
 def test_grid_hdi(zerocentered_normal_mass, grid_values):
