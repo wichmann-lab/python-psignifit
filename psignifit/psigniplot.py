@@ -377,13 +377,41 @@ def plot_2D_margin(result: Result,
     other_param_ix = tuple(i for param, i in parameter_indices.items()
                            if param != first_param and param != second_param)
     marginal_2d = np.sum(result.debug['posteriors'], axis=other_param_ix)
+    extent = [result.parameter_values[second_param][0], result.parameter_values[second_param][-1],
+              result.parameter_values[first_param][-1], result.parameter_values[first_param][0]]
+
     if len(np.squeeze(marginal_2d).shape) != 2 or np.any(np.array(marginal_2d.shape) == 1):
-        raise ValueError('The marginal is not two-dimensional. Were the parameters fixed during optimization? If so, then change the arguments to parametes that were unfixed, or use plot_marginal() to obtain a 1D marginal for a parameter.')
+        len_first = len(result.parameter_values[first_param])
+        len_second = len(result.parameter_values[second_param])
+
+        # if first_param is singleton, we copy the marginal into a matrix
+        if len_first == 1 and len_second != 1:
+            marginal_2d = np.broadcast_to(marginal_2d,
+                                          (len(result.parameter_values[second_param]),
+                                           len(result.parameter_values[second_param]))
+                                          )
+            extent[2] = 1  # replace range for a mockup range between 0 and 1
+            extent[3] = 0
+
+        # if second param is singleton
+        elif len_first != 1 and len_second == 1:
+            marginal_2d = np.broadcast_to(marginal_2d,
+                                          (len(result.parameter_values[first_param]),
+                                           len(result.parameter_values[first_param]))
+                                          )
+            extent[0] = 0
+            extent[1] = 1
+
+        # if both params are singletons, we return a matrix full of ones
+        elif len_first == 1 and len_second == 1:
+            marginal_2d = np.ones((len(result.parameter_values[first_param]),
+                                   len(result.parameter_values[second_param]))
+                                  )
+            extent = [0, 1, 1, 0]
 
     if parameter_indices[first_param] > parameter_indices[second_param]:
         marginal_2d = np.transpose(marginal_2d)
-    extent = [result.parameter_values[second_param][0], result.parameter_values[second_param][-1],
-              result.parameter_values[first_param][-1], result.parameter_values[first_param][0]]
+
     ax.imshow(marginal_2d, extent=extent, cmap='Reds_r',  aspect='auto')
     ax.set_xlabel(_parameter_label(second_param))
     ax.set_ylabel(_parameter_label(first_param))
