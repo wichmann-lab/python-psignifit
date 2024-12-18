@@ -8,8 +8,8 @@ implemented in MATLAB. This code was tested against the MATLAB version and yield
 results up to numerical accuracy of the optimization algorithms for all
 fits and credible intervals. 
 
-In addition, this python implementation contains extensive [tests](https://github.com/wichmann-lab/python-psignifit/tree/main/psignifit/tests), 
-including [parameter recovery tests](https://github.com/wichmann-lab/python-psignifit/blob/main/psignifit/tests/test_param_recovery.py),
+In addition, this python implementation contains extensive [tests](https://github.com/wichmann-lab/python-psignifit/tree/main/tests), 
+including [parameter recovery tests](https://github.com/wichmann-lab/python-psignifit/blob/main/tests/test_param_recovery.py),
 which ensure that the fitting procedure is correctly implemented.
 This is important, as psignifit external dependencies (`scipy`, `numpy`)
 might change in the future. 
