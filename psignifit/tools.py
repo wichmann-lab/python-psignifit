@@ -51,46 +51,19 @@ def pool_blocks(data: np.ndarray, max_tol=0, max_gap=np.inf, max_length=np.inf):
     return np.array(pool)
 
 
-def psychometric(stimulus_level, threshold, width, gamma, lambda_, sigmoid_name):
-    """ Psychometric function aka proportion correct function.
+def psychometric_with_eta(stimulus_level, threshold, width, gamma, lambda_,
+                          sigmoid_name, eta, random_state=None):
+    """ Psychometric function with overdispersion.
+
 
     This is a convenience function used mostly for testing and demos, to make the intent of creating a psychometric
     function more explicit. The implementation simply combines creating a `Sigmoid` object using the sigmoid name,
     and calling the object to generate the proportion correct values corresponding to `stimulus_level`.
 
-    Parameters:
-        stimulus_level: array
-          Values of the stimulus value
-        threshold: float
-            Threshold of the psychometric function
-        width: float
-            Width of the psychometric function
-        gamma: float
-            Guess rate
-        lambda_: float
-            Lapse rate
-        sigmoid_name: callable
-            Name of sigmoid function to use. See `psignifit.sigmoids.ALL_SIGMOID_NAMES` for the list of available
-            sigmoids.
 
-    Returns:
-        psi: array
-            Proportion correct values for each stimulus level
-
-    """
-    sigmoid = sigmoid_by_name(sigmoid_name)
-    psi = sigmoid(stimulus_level, threshold=threshold, width=width, gamma=gamma, lambd=lambda_)
-    return psi
-
-
-def psychometric_with_eta(stimulus_level, threshold, width, gamma, lambda_,
-                          sigmoid_name, eta, random_state=None):
-    """ Psychometric function with overdispersion.
-
-    This is a convenience function used mostly for testing and demos. Just like the function `psychometric`, it
-    computes proportion correct values for a given psychometric function type, specified by name. In addition,
-    it adds some additional noise to the data, so that its variance is compatible with the overdispersion
-    parameter `eta`.
+    This is a convenience function used mostly for testing and demos. It first computes proportion correct values
+    for a  given psychometric function type, specified by name, and then adds some additional noise to the data,
+    so that its variance is compatible with the overdispersion parameter `eta`.
 
     See Section 2.2 in Schuett, Harmeling, Macke and Wichmann (2016).
 
@@ -123,11 +96,14 @@ def psychometric_with_eta(stimulus_level, threshold, width, gamma, lambda_,
     if random_state is None:
         random_state = np.random.default_rng()
 
-    psi = psychometric(stimulus_level, threshold, width, gamma, lambda_, sigmoid_name)
+    sigmoid = sigmoid_by_name(sigmoid_name)
+    psi = sigmoid(stimulus_level, threshold=threshold, width=width, gamma=gamma, lambd=lambda_)
+
     new_psi = []
     for p in psi:
         a = ((1/eta**2) - 1) * p
         b = ((1/eta**2) - 1) * (1 - p)
         noised_p = stats.beta.rvs(a=a, b=b, size=1, random_state=random_state)
         new_psi.append(noised_p)
+
     return np.array(new_psi).squeeze()

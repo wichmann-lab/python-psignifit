@@ -38,6 +38,7 @@ import matplotlib.pyplot as plt
 
 import psignifit
 from psignifit import psigniplot
+from psignifit.sigmoids import sigmoid_by_name
 ```
 
 +++ {"nteract": {"transient": {"deleting": false}}}
@@ -57,7 +58,8 @@ threshold = stim_range[1]/3
 lambda_ = 0.05
 gamma = 0.01
 
-sigmoid = "norm"
+sigmoid_name = "norm"
+sigmoid = sigmoid_by_name(sigmoid_name)
 
 # 
 nsteps = 20
@@ -68,7 +70,8 @@ stimulus_level = np.linspace(stim_range[0], stim_range[1], nsteps)
 
 +++ {"nteract": {"transient": {"deleting": false}}}
 
-Using the `tools.psychometric` we can simulate percent correct values for each stimulus level, without introducing additional variability.
+Using the sigmoid object, we can simulate percent correct values for each stimulus level, without introducing
+additional variability.
 
 ```{code-cell} ipython3
 ---
@@ -76,7 +79,7 @@ nteract:
   transient:
     deleting: false
 ---
-perccorr = psignifit.tools.psychometric(stimulus_level, threshold, width, gamma, lambda_, sigmoid)
+perccorr = sigmoid(stimulus_level, threshold, width, gamma, lambda_)
 ```
 
 +++ {"nteract": {"transient": {"deleting": false}}}
@@ -196,7 +199,7 @@ nteract:
     deleting: false
 ---
 eta = 0.2 # this parameter decides how overdispersed the data is
-perccorr = psignifit.tools.psychometric_with_eta(stimulus_level, threshold, width, gamma, lambda_, sigmoid, eta)
+perccorr = psignifit.tools.psychometric_with_eta(stimulus_level, threshold, width, gamma, lambda_, sigmoid_name, eta)
 
 ntrials = np.ones(nsteps) * num_trials
 hits = (perccorr * ntrials).astype(int)
