@@ -58,33 +58,38 @@ class Sigmoid:
                 and o.alpha == self.alpha
                 and o.negative == self.negative)
 
-    def __call__(self, stimulus_level: N, threshold: N, width: N) -> N:
+    def __call__(self, stimulus_level: N, threshold: N, width: N, gamma: N = 0, lambd: N = 0) -> N:
         """ Calculate the sigmoid value at specified stimulus levels.
 
+        See Eq 1 in Schuett, Harmeling, Macke and Wichmann (2016).
+
         Args:
-            stimulus_level: Stimulus level value at which to calculate the slope
-            threshold: Parameter value for threshold at PC
-            width: Parameter value for width of the sigmoid
+            stimulus_level: Stimulus level value
+            threshold: Threshold at `PC`
+            width: Width of the sigmoid
+            gamma: Guess rate (lower asymptote of the sigmoid)
+            lambd: Lapse rate (upper asymptote of the sigmoid)
         Returns:
             Proportion correct at the stimulus values.
         """
 
         value = self._value(stimulus_level, threshold, width)
+        value = gamma + (1.0 - lambd - gamma) * value
 
         if self.negative:
-            return 1 - value
-        else:
-            return value
+            value = 1 - value
+
+        return value
 
     def slope(self, stimulus_level: N, threshold: N, width: N, gamma: N = 0, lambd: N = 0) -> N:
         """ Calculate the slope at specified stimulus levels.
 
         Args:
             stimulus_level: Stimulus level value at which to calculate the slope
-            threshold: Parameter value for threshold at PC
-            width: Parameter value for width of the sigmoid
-            gamma: Parameter value for the lower offset of the sigmoid
-            lambd: Parameter value for the upper offset of the sigmoid
+            threshold: Threshold at `PC`
+            width: Width of the sigmoid
+            gamma: Guess rate (lower asymptote of the sigmoid)
+            lambd: Lapse rate (upper asymptote of the sigmoid)
         Returns:
             Slope at the stimulus values.
         """
@@ -105,10 +110,10 @@ class Sigmoid:
 
         Args:
             prop_correct: Proportion correct at the threshold to calculate.
-            threshold: Parameter value for threshold at PC
-            width: Parameter value for width of the sigmoid
-            gamma: Parameter value for the lower offset of the sigmoid
-            lambd: Parameter value for the upper offset of the sigmoid
+            threshold: Threshold at `PC`
+            width: Width of the sigmoid
+            gamma: Guess rate (lower asymptote of the sigmoid)
+            lambd: Lapse rate (upper asymptote of the sigmoid)
         Returns:
             Threshold at the proportion correct values.
         """
@@ -151,7 +156,7 @@ class Sigmoid:
 
         Args:
             stimulus_level: Stimulus level values at which to calculate the sigmoid value
-            threshold: Threshold value at PC
+            threshold: Threshold at `PC`
             width: Width of the sigmoid
         Returns:
             Proportion correct at the stimulus values.
@@ -168,7 +173,7 @@ class Sigmoid:
 
         Args:
             stimulus_level: Stimulus level value at which to calculate the slope
-            threshold: Threshold value at PC
+            threshold: Threshold at `PC`
             width: Width of the sigmoid
         Returns:
             Slope at the stimulus level value
@@ -185,7 +190,7 @@ class Sigmoid:
 
         Args:
             prop_correct: Proportion correct values at which to calculate the stimulus level values.
-            threshold: Threshold value at PC
+            threshold: Threshold at `PC`
             width: Width of the sigmoid
         Returns:
             Stimulus values corresponding to the proportion correct values.
@@ -206,7 +211,7 @@ class Sigmoid:
         For negative slope sigmoids, we return the same parameters as for the positive ones.
 
         Args:
-            threshold: Threshold value at PC
+            threshold: Threshold at `PC`
             width: Width of the sigmoid
         Returns:
             Standard parameters (loc, scale) for the sigmoid subclass.
@@ -376,8 +381,8 @@ def assert_sigmoid_sanity_checks(sigmoid, n_samples: int, threshold: float, widt
 
     Args:
          n_samples: Number of stimulus levels between 0 (exclusive) and 1 for tests
-         threshold: Parameter value for threshold at PC
-         width: Width of the sigmoid
+            threshold: Threshold at `PC`
+            width: Width of the sigmoid
     Raises:
           AssertionError if a sanity check fails.
     """

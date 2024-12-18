@@ -14,24 +14,26 @@ from scipy import stats
 
 
 def confidence_intervals(probability_mass: np.ndarray, grid_values: np.ndarray,
-                         p_values: Sequence[float], mode: str) -> Dict[str, list]:
+                         confidence_levels: Sequence[float], mode: str) -> Dict[str, list]:
     """ Confidence intervals on probability grid.
 
     Supports two methods:
 
         - 'project', projects the confidence region down each axis.
           Implemented using :func:`grid_hdi`.
-        - 'percentiles', finds alpha/2 and 1-alpha/2 percentiles (alpha = 1-p_value).
+        - 'percentiles', finds alpha/2 and 1-alpha/2 percentiles (alpha = 1 - confidence_level).
           Implemented using :func:`percentile_intervals`.
 
     Args:
         probability_mass: Probability mass at each grid point, shape (n_points, n_points, ...)
         grid_values: Parameter values along grid axis in the same order as zerocentered_normal_mass dimensions,
                      shape (n_dims, n_points)
-        p_values: Probabilities of confidence in the intervals.
+        confidence_levels: Fraction of the posterior to be included in the corresponding confidence interval. For
+            example, a confidence level of 0.92 will return a confidence interval containing 92% of the probability
+            mass in the posterior
         mode: Either 'project' or 'percentiles'.
     Returns:
-        A dictionary mapping p_values as a string to a list containing the start and end grid-values for the
+        A dictionary mapping confidence_levels as a string to a list containing the start and end grid-values for the
         confidence interval per dimension, shape (n_dims, 2).
     Raises:
         ValueError for unsupported mode or sum(probability_mass) != 1.
@@ -45,8 +47,8 @@ def confidence_intervals(probability_mass: np.ndarray, grid_values: np.ndarray,
     if not np.isclose(probability_mass.sum(), 1):
         raise ValueError(f'Expects sum(probability_mass) to be 1., got {probability_mass.sum():.4f}')
     intervals = {}
-    for p_value in p_values:
-        intervals[str(p_value)] = calc_ci(probability_mass, grid_values, p_value).tolist()
+    for level in confidence_levels:
+        intervals[str(level)] = calc_ci(probability_mass, grid_values, level).tolist()
 
     return intervals
 
@@ -67,7 +69,7 @@ def grid_hdi(probability_mass: np.ndarray, grid_values: np.ndarray, credible_mas
         grid_values: Parameter values along grid axis, shape (n_dims, n_points)
         credible_mass: Minimal mass in highest density region
     Returns:
-        Grid value at interval per dimension, shape (n_dims, 2)
+        Start and end grid-values for the confidence interval per dimension, shape (n_dims, 2)
 
     .. _stats.stackexchange: https://stats.stackexchange.com/questions/148439/what-is-a-highest-density-region-hdr
     """
@@ -87,21 +89,21 @@ def grid_hdi(probability_mass: np.ndarray, grid_values: np.ndarray, credible_mas
     return intervals
 
 
-def percentile_intervals(probability_mass: np.ndarray, grid_values: np.ndarray, p_value: float):
+def percentile_intervals(probability_mass: np.ndarray, grid_values: np.ndarray, confidence_level: float):
     """ Percentile intervals on a grid.
 
-    Find alpha/2 and 1-alpha/2 percentiles on marginal probability mass (alpha = 1 - p_value).
+    Find alpha/2 and 1-alpha/2 percentiles on marginal probability mass (alpha = 1 - confidence_level).
 
     Args:
         probability_mass: Probability mass at each grid point, shape (n_points, n_points, ...)
         grid_values: Parameter values along grid axis, shape (n_dims, n_points)
-        p_value: Probability mass within the returned confidence bounds.
+        confidence_level: Probability mass within the returned confidence bounds.
     Returns:
-        Grid value at interval per dimension, shape (n_dims, 2)
+        Start and end grid-values for the confidence interval per dimension, shape (n_dims, 2)
     """
     mass_margins = stats.contingency.margins(probability_mass)
     intervals = np.empty((len(mass_margins), 2))
-    alpha = 1 - p_value
+    alpha = 1 - confidence_level
     for d, mass in enumerate(mass_margins):
         intervals[d, :] = np.interp([alpha / 2, 1 - alpha / 2], mass.cumsum(), grid_values[d])
     return intervals
