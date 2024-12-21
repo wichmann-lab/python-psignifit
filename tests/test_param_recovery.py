@@ -4,13 +4,14 @@ import numpy as np
 import pytest
 
 from psignifit import psignifit
-from psignifit.sigmoids import ALL_SIGMOID_NAMES
-from psignifit.tools import psychometric, psychometric_with_eta
+from psignifit.sigmoids import ALL_SIGMOID_NAMES, Gaussian, sigmoid_by_name
+from psignifit.tools import psychometric_with_eta
 from psignifit._utils import fp_error_handler
 
-@pytest.mark.parametrize("sigmoid", list(ALL_SIGMOID_NAMES))
+
+@pytest.mark.parametrize("sigmoid_name", list(ALL_SIGMOID_NAMES))
 @fp_error_handler(over='ignore', invalid='ignore')
-def test_parameter_recovery_2afc(sigmoid):
+def test_parameter_recovery_2afc(sigmoid_name):
     width = 0.3
     stim_range = [0.01, 0.01 + width * 1.1]
     threshold = stim_range[1] / 2.5
@@ -20,7 +21,9 @@ def test_parameter_recovery_2afc(sigmoid):
     nsteps = 10
     stimulus_level = np.linspace(stim_range[0], stim_range[1], nsteps)
 
-    perccorr = psychometric(stimulus_level, threshold, width, gamma, lambda_, sigmoid)
+    sigmoid = sigmoid_by_name(sigmoid_name)
+    perccorr = sigmoid(stimulus_level, threshold=threshold, width=width, gamma=gamma, lambd=lambda_)
+
     ntrials = np.ones(nsteps) * 9000000
     hits = (perccorr * ntrials).astype(int)
     data = np.dstack([stimulus_level, hits, ntrials]).squeeze()
@@ -77,7 +80,7 @@ def test_parameter_recovery_2afc_eta(random_state, eta):
 @pytest.mark.parametrize("fixed_param",  ['lambda', 'gamma', 'eta', 'threshold', 'width'])
 @fp_error_handler(over='ignore', invalid='ignore')
 def test_parameter_recovery_fixed_params(fixed_param):
-    sigmoid = "norm"
+    sigmoid = Gaussian()
     width = 0.2000000000123
     stim_range = [0.001, 0.001 + width * 1.5]
     nsteps = 10
@@ -92,12 +95,13 @@ def test_parameter_recovery_fixed_params(fixed_param):
         "stimulus_level": np.linspace(stim_range[0], stim_range[1], nsteps)
     }
 
-    perccorr = psychometric(sim_params["stimulus_level"],
-                            sim_params["threshold"],
-                            sim_params["width"],
-                            sim_params["gamma"],
-                            sim_params["lambda"],
-                            sigmoid)
+    perccorr = sigmoid(
+        sim_params["stimulus_level"],
+        threshold=sim_params["threshold"],
+        width=sim_params["width"],
+        gamma=sim_params["gamma"],
+        lambd=sim_params["lambda"],
+    )
 
     ntrials = np.ones(nsteps) * 9000000
     hits = (perccorr * ntrials).astype(int)
@@ -119,9 +123,9 @@ def test_parameter_recovery_fixed_params(fixed_param):
         assert np.isclose(res.parameter_estimate_MAP[p], sim_params[p], rtol=1e-4, atol=1 / 40), f"failed for parameter {p} for estimation with fixed: {fixed_param}."
 
 
-@pytest.mark.parametrize("sigmoid", list(ALL_SIGMOID_NAMES))
+@pytest.mark.parametrize("sigmoid_name", list(ALL_SIGMOID_NAMES))
 @fp_error_handler(over='ignore', invalid='ignore')
-def test_parameter_recovery_YN(sigmoid):
+def test_parameter_recovery_YN(sigmoid_name):
     width = 0.3
     stim_range = [0.001, 0.001 + width * 1.1]
     threshold = stim_range[1]/3
@@ -131,8 +135,8 @@ def test_parameter_recovery_YN(sigmoid):
     nsteps = 20
     stimulus_level = np.linspace(stim_range[0], stim_range[1], nsteps)
 
-    perccorr = psychometric(stimulus_level, threshold, width, gamma, lambda_,
-                            sigmoid)
+    sigmoid = sigmoid_by_name(sigmoid_name)
+    perccorr = sigmoid(stimulus_level, threshold, width, gamma, lambda_)
     ntrials = np.ones(nsteps) * 900000000
     hits = (perccorr * ntrials).astype(int)
     data = np.dstack([stimulus_level, hits, ntrials]).squeeze()
@@ -151,9 +155,9 @@ def test_parameter_recovery_YN(sigmoid):
     assert np.isclose(res.parameter_estimate_MAP['width'], width, atol=1e-4)
 
 
-@pytest.mark.parametrize("sigmoid", list(ALL_SIGMOID_NAMES))
+@pytest.mark.parametrize("sigmoid_name", list(ALL_SIGMOID_NAMES))
 @fp_error_handler(over='ignore', invalid='ignore')
-def test_parameter_recovery_eq_asymptote(sigmoid):
+def test_parameter_recovery_eq_asymptote(sigmoid_name):
     width = 0.3
     stim_range = [0.001, 0.001 + width * 1.1]
     threshold = stim_range[1]/3
@@ -163,8 +167,8 @@ def test_parameter_recovery_eq_asymptote(sigmoid):
     nsteps = 20
     stimulus_level = np.linspace(stim_range[0], stim_range[1], nsteps)
 
-    perccorr = psychometric(stimulus_level, threshold, width, gamma, lambda_,
-                            sigmoid)
+    sigmoid = sigmoid_by_name(sigmoid_name)
+    perccorr = sigmoid(stimulus_level, threshold, width, gamma, lambda_)
     ntrials = np.ones(nsteps) * 900000000
     hits = (perccorr * ntrials).astype(int)
     data = np.dstack([stimulus_level, hits, ntrials]).squeeze()
@@ -237,14 +241,14 @@ def test_mean_vs_map_estimate(random_state):
     gamma = 0.1
     num_trials = 3
 
-    sigmoid = "norm"
+    sigmoid = Gaussian()
     nsteps = 20
     stimulus_level = np.linspace(stim_range[0], stim_range[1], nsteps)
 
     # The data is a mixture of three sigmoids
-    perccorr1 = psychometric(stimulus_level, threshold, widths[0], gamma, lambda_, sigmoid)
-    perccorr2 = psychometric(stimulus_level, threshold, widths[1], gamma, lambda_, sigmoid)
-    perccorr3 = psychometric(stimulus_level, threshold, widths[2], gamma, lambda_, sigmoid)
+    perccorr1 = sigmoid(stimulus_level, threshold=threshold, width=widths[0], gamma=gamma, lambd=lambda_)
+    perccorr2 = sigmoid(stimulus_level, threshold=threshold, width=widths[1], gamma=gamma, lambd=lambda_)
+    perccorr3 = sigmoid(stimulus_level, threshold=threshold, width=widths[2], gamma=gamma, lambd=lambda_)
     perccorr = np.concatenate((perccorr1, perccorr2, perccorr3))
     levels = np.concatenate((stimulus_level, stimulus_level, stimulus_level))
 
