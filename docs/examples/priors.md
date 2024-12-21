@@ -61,19 +61,27 @@ res = ps.psignifit(data, sigmoid='norm', experiment_type='2AFC', debug=True)
 psigniplot.plot_prior(res)
 ```
 
-You should check that the assumptions `psignifit` take
-are actually true in the case of your data.
-e.g. check whether one of the following statements holds:
+The panels in the top row show the prior densities for threshold, width
+and lapse rate respectively. In the second row psychometric functions
+corresponding to the 0, 25, 75 and 100% quantiles of the prior are
+plotted in colour. The other parameters of the functions are left at
+the prior mean value, which is also marked in all panels in black.
+As an orientation the small black dots in the lower panels mark the
+levels at which data were sampled.
+
+
+You should check that the assumptions we make for the heuristic to
+work are actually true in the case of your data.
+e.g. check whether (at least) one of the following statements holds:
+
 
 - You understand what our priors mean exactly and judge them to be appropriate.
 - You are sure you recorded a trial well above and a trial well below threshold.
-- Your posterior concentrates on an area for which the prior was constant.
+- Your posterior concentrates on an area for which the prior was (nearly) constant.
 
-You can evaluate your priors with above plot. In the upper panels the plots show the priors for the `threshold`, `width` and $\lambda$ parameters.
-Five selected values are shown color-coded, as points on the prior and below the corresponding psychometric functions.
-The black case correspond to the mean of the prior; the yellow, red, blue and green cases correspond to the minimum, 25 % percentile, 75 % percentile, and maximum of the prior, respectively.
 
-With these example sigmoids you can evaluate the adequacy of the prior:
+You can evaluate your priors with above plot. With these color-coded sigmoids
+you can evaluate the adequacy of the prior:
 
 For a threshold prior to be adequate (first column), it should be flat along all your stimulus levels; this will ensure that the threshold estimation is driven exclusively by the data. The stimulus levels of your data are shown as black-dots in the x-axis.
 The prior is flat (constant) for all threshold values between the red and blue sigmoids; both are equally likely. The yellow and green sigmoids are very unlikely, and this makes sense as they are outside of the range of stimulus levels. Here you can see that `psignifit` assumes that you choose stimulus values along the whole range the psychometric function.
@@ -96,8 +104,10 @@ For example consider the followind dataset, which is a simulation of a
 3-down-1-up staircase procedure with 50 trials on a yes-no experiment.
 This samples considerably above threshold. In this case the true
 threshold and width were 1.
-Thus the assumption that we know that the threshold is in the range of
-the data is clearly violated.
+Thus the assumption that we know that the threshold
+(threshold as defined in psignifit 4, not what 3-down-1-up defines as threshold!)
+is in the range of the data is clearly violated.
+
 
 ```{code-cell} ipython3
 data = np.array([[1.5000, 3.0000, 3.0000], [1.3500, 3.0000, 3.0000],
@@ -110,19 +120,36 @@ data = np.array([[1.5000, 3.0000, 3.0000], [1.3500, 3.0000, 3.0000],
                  [1.3981, 1.0000, 2.0000], [1.5379, 1.0000, 2.0000],
                  [1.6917, 3.0000, 3.0000], [1.5225, 3.0000, 3.0000],
                  [1.3703, 2.0000, 3.0000]])
+```
 
-# We fit this assuming the same lapse rate for yes and for no.
-# By default this uses a cumulative normal fit, which is fine for now.
-res = ps.psignifit(data, experiment_type='equal asymptote', debug=True)
+We fit the data assuming the same lapse rate for yes and for no.
 
-# We first have a look at the fitted function
+```{code-cell} ipython3
+res = ps.psignifit(data,
+                   experiment_type='equal asymptote',
+                   debug=True)
+```
+by default this uses a cumulative normal fit, which is fine for now.
+The prior for this function looks like this:
+
+```{code-cell} ipython3
+psigniplot.plot_prior(res)
+```
+
+which is not particularly conspicuous. Comparing the functions to the
+stimulus range shows that we still expect a reasonably sampled
+psychometric function with threshold in the sampling range.
+
+But now, have a look at the fitted function:
+
+```{code-cell} ipython3
 plt.figure()
 psigniplot.plot_psychometric_function(res, data_size=0.1)
 ```
 
 You should notice that the proportion correct is larger than 50 and we did
-not measure a stimulus level clearly below threshold. Thus it might be
-that the theshold is below our data, as it is the case actually in our
+not measure a stimulus level clearly below threshold (as defined in psignifit 4).
+Thus it might be that the threshold is below our data, as it is the case actually in our
 example.
 This is a common problem with adaptive procedures, which do not explore
 the full possible stimulus range. Then our heuristic for the prior may
@@ -135,25 +162,24 @@ marginal plot for the threshold as well
 psigniplot.plot_marginal(res, 'threshold')
 ```
 
-Note that the dashed grey line, which marks the prior goes down where
+Note that the dashed grey line, which marks the prior, decreases where
 there is still posterior probability. This shows that the prior has an
 influence on the outcome.
 
-We can also examine the priors plot
 
-```{code-cell} ipython3
-psigniplot.plot_prior(res)
-```
 
 To "heal" this, psignifit allows you to pass another range, for which you
 believe in the assumptions of our prior.
 You pass this range with argument `_stimulus_range`, and `psignifit`
-will be set the prior according to this range.
+will be set the prior considering this range instead.
 For our example dataset we might give a generous range and assume the
 possible range is .5 to 1.5.
 
 ```{code-cell} ipython3
-res_range = ps.psignifit(data, experiment_type='equal asymptote', debug=True, _stimulus_range=[.5, 1.5])
+res_range = ps.psignifit(data,
+                         experiment_type='equal asymptote',
+                         debug=True,
+                         _stimulus_range=[.5, 1.5])
 ```
 
 We can now take a look how the prior changed
@@ -164,43 +190,49 @@ psigniplot.plot_prior(res_range)
 
 By having a look at the marginal plot we can see that there is no area
 where the prior dominates the posterior anymore. Thus our result for the
-threshold is now driven by the data everywhere.
+threshold is now driven by the data.
+Note also that the credible interval now extends considerably further down as well.
 
 ```{code-cell} ipython3
 plt.figure()
 psigniplot.plot_marginal(res_range, 'threshold')
 ```
 
-Finally we can also compare our new fitted psychometric function,
-to see that even the point estimate for the psychometric function was
-influenced by the prior here:
+Finally we can also compare our new fitted psychometric function.
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(1, 1)
-psigniplot.plot_psychometric_function(res_range, ax=ax, data_size=0.1)
-psigniplot.plot_psychometric_function(res, line_color='gray', ax=ax, plot_data=False)
+psigniplot.plot_psychometric_function(res_range, ax=ax,
+                                      data_size=0.1, plot_parameter=False)
+psigniplot.plot_psychometric_function(res, ax=ax, line_color='gray',
+                                      plot_data=False, plot_parameter=False)
 ```
 
-## Beta-binomial prior - adjusting how conservative to be
+The function the new prior (in black) is shifted to the left in
+comparison to the original one (in gray), indicating
+that the threshold was influenced by the prior
+
+
+## The prior on the beta-binomial variance — adjusting how conservative one wants to be
 
 With the betabinomial model we have an additional parameter which
 represents how stationary the observer was.
-
 The prior on this parameter can be adjusted with a single parameter of
 psignifit: `beta_prior`.
+
 Larger values for this parameter represent a stronger prior, e.g. stronger
 believe in a stationary observer. Smaller values represent a more
 conservative inference, giving non-stationary observers a higher prior
 probability.
+
 `beta_prior=1` represents a flat prior, e.g. maximally conservative inference. Our
 default is 10, which fitted our simulations well, around several hundred
-the analysis becomes very similar to the binomial analysis to which the
-analysis converges when `beta_prior` goes to infinity.
+the analysis becomes very similar to the binomial analysis.
 This will barely influence the point estimate you find for your
-psychometric function. It's main effect is on the confidence intervals
+psychometric function. Its main effect is on the confidence intervals
 which will grow or shrink.
 
-For an example we will fit the data from above once much more
+For example we will fit the data from above once much more
 conservative, once more progressively:
 
 ```{code-cell} ipython3
@@ -221,7 +253,10 @@ First lets have a look at the results with the standard prior strength:
 ```{code-cell} ipython3
 print('Fit:')
 print(json.dumps(res.parameter_estimate, indent=2))
+# (here we use json to show the dictionary in a pretty format)
 ```
+
+The credible intervals are
 
 ```{code-cell} ipython3
 print('Confidence intervals:')
@@ -251,7 +286,7 @@ print('Fit with beta prior = 200: ')
 print(json.dumps(res200.parameter_estimate, indent=2))
 ```
 
-Now we have a look at the confidence intervals
+Now we have a look at the confidence intervals (here only for the 95% ones)
 
 ```{code-cell} ipython3
 print('Confidence Intervals for beta prior = 1: ')
@@ -267,21 +302,23 @@ prior than for the 1 prior.
 Our recommendation based on the simulations is to keep the 10 prior. If
 you have questions contact us.
 
-## Passing Custom Priors
+## Passing custom priors
 
 This part explains how to use custom priors, when you do not want to use
 our standard set, or it is wrong even for a corrected stimulus range.
+
+```{warning}
 To do this you should know what you are doing, and everything is on your
 own risk.
+```
 
-As an example we will fix the prior on lambda the lapse rate parameter
-of the psychometric funtion to a constant between 0 and .1 and zero
-elsewhere as it was done in the psignifit 2 toolbox.
+As an example we will fix the prior on the lapse rate parameter $\lambda$
+to a constant between 0 and .1, and zero
+elsewhere, as it was done in the psignifit 2 toolbox.
 
 To use custom priors, first define the priors you want to use as function
-handles.
-
-For our example this works as follows:
+and include it in a dictionary with the key value corresponding to
+the parameter name. For our example this works as follows:
 
 ```{code-cell} ipython3
 def prior_lambda(x):
@@ -291,17 +328,14 @@ def prior_lambda(x):
 custom_priors = {'lambda': prior_lambda}
 ```
 
-If you are not familiar with function handles and anonymous functions
-in Python3 you can find an [introduction to them here](http://www.programiz.com/python-programming/anonymous-function).
-
-
 Note that we did not normalize this prior. This is internally done by
 psignifit.
 
 Most of the times you then have to adjust the bounds of integration as
 well. This confines the region psignifit operates on. All values outside
 the bounds implicitly have prior probability of 0.
-For our example we set manually the bounds for the lambda prior.
+
+For our example we set manually the bounds for the lambda parameter
 
 ```{code-cell} ipython3
 custom_bounds = {
@@ -309,7 +343,7 @@ custom_bounds = {
 }
 ```
 
-We fit now with the custom priors and boundaries
+We fit now with the custom priors and bounds
 
 ```{code-cell} ipython3
 res = ps.psignifit(data,
@@ -318,12 +352,7 @@ res = ps.psignifit(data,
                    experiment_type='2AFC', debug=True)
 ```
 
-There will be a warning that the prior chosen here is zero at some
-values. This is true, but we intend it to be like this, constraining our
-analysis stronger than the standard priors do.
-
-With these commands you have set the priors manually: Have a look at
-them:
+You can have a look at priors and the fitted function as follows
 
 ```{code-cell} ipython3
 plt.figure()
@@ -332,4 +361,3 @@ ps.psigniplot.plot_prior(res)
 plt.figure()
 ps.psigniplot.plot_psychometric_function(res)
 ```
-
