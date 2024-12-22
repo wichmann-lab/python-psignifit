@@ -325,6 +325,7 @@ _CLASS_BY_NAME = {
 
 ALL_SIGMOID_NAMES = set(_CLASS_BY_NAME.keys())
 ALL_SIGMOID_NAMES |= {'neg_' + name for name in ALL_SIGMOID_NAMES}
+ALL_SIGMOID_CLASSES = set(_CLASS_BY_NAME.values())
 
 
 def sigmoid_by_name(name, PC=None, alpha=None):

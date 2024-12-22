@@ -1,8 +1,11 @@
+from itertools import product
+
 import numpy as np
 from scipy import stats
 import pytest
 
 from psignifit import sigmoids
+from psignifit.sigmoids import ALL_SIGMOID_CLASSES, ALL_SIGMOID_NAMES
 
 
 def test_ALL_SIGMOID_NAMES():
@@ -12,10 +15,10 @@ def test_ALL_SIGMOID_NAMES():
         'weibull', 'neg_weibull',
         'tdist', 'student', 'heavytail', 'neg_tdist', 'neg_student', 'neg_heavytail')
     for name in TEST_SIGS:
-        assert name in sigmoids.ALL_SIGMOID_NAMES
+        assert name in ALL_SIGMOID_NAMES
 
 
-@pytest.mark.parametrize('sigmoid_name', sigmoids.ALL_SIGMOID_NAMES)
+@pytest.mark.parametrize('sigmoid_name', ALL_SIGMOID_NAMES)
 def test_sigmoid_by_name(sigmoid_name):
     s = sigmoids.sigmoid_by_name(sigmoid_name)
     assert isinstance(s, sigmoids.Sigmoid)
@@ -51,28 +54,28 @@ def test_sigmoid_values(subclass, expected_y):
     np.testing.assert_allclose(y, expected_y, atol=1e-6)
 
 
-@pytest.mark.parametrize('sigmoid_name', sigmoids.ALL_SIGMOID_NAMES)
-def test_sigmoid_inverse(sigmoid_name):
+@pytest.mark.parametrize('sigmoid_class, negative', product(ALL_SIGMOID_CLASSES, [True, False]))
+def test_sigmoid_inverse(sigmoid_class, negative):
     pc = 0.7
     alpha = 0.12
     threshold = 0.6
     width = 0.6
 
-    sigmoid = sigmoids.sigmoid_by_name(sigmoid_name, PC=pc, alpha=alpha)
+    sigmoid = sigmoid_class(negative=negative, PC=pc, alpha=alpha)
     x = np.linspace(0.1, 0.9, 10)
     y = sigmoid(x, threshold, width)
     reverse_x = sigmoid.inverse(y, threshold, width)
     np.testing.assert_allclose(x, reverse_x, atol=1e-6)
 
 
-@pytest.mark.parametrize('sigmoid_name', sigmoids.ALL_SIGMOID_NAMES)
-def test_sigmoid_slope(sigmoid_name):
+@pytest.mark.parametrize('sigmoid_class, negative', product(ALL_SIGMOID_CLASSES, [True, False]))
+def test_sigmoid_slope(sigmoid_class, negative):
     pc = 0.7
     alpha = 0.12
     threshold = 0.6
     width = 0.6
 
-    sigmoid = sigmoids.sigmoid_by_name(sigmoid_name, PC=pc, alpha=alpha)
+    sigmoid = sigmoid_class(negative=negative, PC=pc, alpha=alpha)
     x = 0.4
     slope = sigmoid.slope(x, threshold, width)
 
@@ -85,8 +88,8 @@ def test_sigmoid_slope(sigmoid_name):
     np.testing.assert_allclose(slope, numerical_slope, atol=1e-6)
 
 
-@pytest.mark.parametrize('sigmoid_name', sigmoids.ALL_SIGMOID_NAMES)
-def test_sigmoid_sanity_check(sigmoid_name):
+@pytest.mark.parametrize('sigmoid_class, negative', product(ALL_SIGMOID_CLASSES, [True, False]))
+def test_sigmoid_sanity_check(sigmoid_class, negative):
     """ Basic sanity checks for sigmoids.
 
     These sanity checks test some basic relations between the parameters
@@ -100,7 +103,7 @@ def test_sigmoid_sanity_check(sigmoid_name):
     threshold = 0.54
     alpha = 0.083
 
-    sigmoid = sigmoids.sigmoid_by_name(sigmoid_name, PC=PC, alpha=alpha)
+    sigmoid = sigmoid_class(negative=negative, PC=PC, alpha=alpha)
     sigmoids.assert_sigmoid_sanity_checks(
         sigmoid, n_samples=10000, threshold=threshold, width=0.7,
     )

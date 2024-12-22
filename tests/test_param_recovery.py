@@ -1,17 +1,18 @@
+from itertools import product
 import warnings
 
 import numpy as np
 import pytest
 
 from psignifit import psignifit
-from psignifit.sigmoids import ALL_SIGMOID_NAMES, Gaussian, sigmoid_by_name
+from psignifit.sigmoids import ALL_SIGMOID_CLASSES, Gaussian
 from psignifit.tools import psychometric_with_eta
 from psignifit._utils import fp_error_handler
 
 
-@pytest.mark.parametrize("sigmoid_name", list(ALL_SIGMOID_NAMES))
+@pytest.mark.parametrize("sigmoid_class, negative", product(ALL_SIGMOID_CLASSES, [True, False]))
 @fp_error_handler(over='ignore', invalid='ignore')
-def test_parameter_recovery_2afc(sigmoid_name):
+def test_parameter_recovery_2afc(sigmoid_class, negative):
     width = 0.3
     stim_range = [0.01, 0.01 + width * 1.1]
     threshold = stim_range[1] / 2.5
@@ -21,7 +22,7 @@ def test_parameter_recovery_2afc(sigmoid_name):
     nsteps = 10
     stimulus_level = np.linspace(stim_range[0], stim_range[1], nsteps)
 
-    sigmoid = sigmoid_by_name(sigmoid_name)
+    sigmoid = sigmoid_class(negative=negative)
     perccorr = sigmoid(stimulus_level, threshold=threshold, width=width, gamma=gamma, lambd=lambda_)
 
     ntrials = np.ones(nsteps) * 9000000
@@ -123,9 +124,9 @@ def test_parameter_recovery_fixed_params(fixed_param):
         assert np.isclose(res.parameter_estimate_MAP[p], sim_params[p], rtol=1e-4, atol=1 / 40), f"failed for parameter {p} for estimation with fixed: {fixed_param}."
 
 
-@pytest.mark.parametrize("sigmoid_name", list(ALL_SIGMOID_NAMES))
+@pytest.mark.parametrize("sigmoid_class, negative", product(ALL_SIGMOID_CLASSES, [True, False]))
 @fp_error_handler(over='ignore', invalid='ignore')
-def test_parameter_recovery_YN(sigmoid_name):
+def test_parameter_recovery_YN(sigmoid_class, negative):
     width = 0.3
     stim_range = [0.001, 0.001 + width * 1.1]
     threshold = stim_range[1]/3
@@ -135,7 +136,7 @@ def test_parameter_recovery_YN(sigmoid_name):
     nsteps = 20
     stimulus_level = np.linspace(stim_range[0], stim_range[1], nsteps)
 
-    sigmoid = sigmoid_by_name(sigmoid_name)
+    sigmoid = sigmoid_class(negative=negative)
     perccorr = sigmoid(stimulus_level, threshold, width, gamma, lambda_)
     ntrials = np.ones(nsteps) * 900000000
     hits = (perccorr * ntrials).astype(int)
@@ -155,9 +156,9 @@ def test_parameter_recovery_YN(sigmoid_name):
     assert np.isclose(res.parameter_estimate_MAP['width'], width, atol=1e-4)
 
 
-@pytest.mark.parametrize("sigmoid_name", list(ALL_SIGMOID_NAMES))
+@pytest.mark.parametrize("sigmoid_class, negative", product(ALL_SIGMOID_CLASSES, [True, False]))
 @fp_error_handler(over='ignore', invalid='ignore')
-def test_parameter_recovery_eq_asymptote(sigmoid_name):
+def test_parameter_recovery_eq_asymptote(sigmoid_class, negative):
     width = 0.3
     stim_range = [0.001, 0.001 + width * 1.1]
     threshold = stim_range[1]/3
@@ -167,7 +168,7 @@ def test_parameter_recovery_eq_asymptote(sigmoid_name):
     nsteps = 20
     stimulus_level = np.linspace(stim_range[0], stim_range[1], nsteps)
 
-    sigmoid = sigmoid_by_name(sigmoid_name)
+    sigmoid = sigmoid_class(negative=negative)
     perccorr = sigmoid(stimulus_level, threshold, width, gamma, lambda_)
     ntrials = np.ones(nsteps) * 900000000
     hits = (perccorr * ntrials).astype(int)
