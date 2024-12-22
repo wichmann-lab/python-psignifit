@@ -506,3 +506,87 @@ def plot_bias_analysis(data: np.ndarray, compare_data: np.ndarray,
         ax.autoscale()
 
 
+def plot_posterior_samples(
+        result: Result,
+        ax: matplotlib.axes.Axes = None,
+        n_samples: int = 100,
+        samples_color: str = 'k',
+        samples_alpha: float = 0.1,
+        plot_data: bool = True,
+        plot_parameter: bool = True,
+        data_color: str = '#0069AA',  # blue
+        line_color: str = 'r',
+        line_width: float = 1,
+        extrapolate_stimulus: float = 0.2,
+        x_label='Stimulus Level',
+        y_label='Proportion Correct',
+        estimate_type: EstimateType = None,
+        random_state: np.random.RandomState = None,
+    ):
+    """ Plot samples from the posterior over psychometric functions.
+
+    The posterior information is only available if the sigmoid has been fit with `debug=True`. If the
+    information is missing, an exception is raised.
+
+    Args:
+        n_samples: Number of samples to return
+        ax: Axis object on which to plot. Default is None (new axes are created)
+        n_samples: Number of sigmoid samples to plot (default is 100)
+        samples_color: Color to use for the samples (default is black)
+        samples_alpha: Transparency for the plot of the samples (default is 0.1)
+        plot_data: Should the data points be plotted? Default is True
+        plot_parameter: Should the threshold parameter be plotted? Default is True
+        data_color: Color for the data points (default is blue)
+        line_color: Color of the line for the point estimate of the optimal psychometric function (default is red)
+        line_width: Width of the line for the point estimate of the optimal psychometric function (default is 1)
+        extrapolate_stimulus: Fraction of the stimulus range to which to extrapolate the  psychometric function
+           (default is 0.2)
+        x_label: x-axis label (default is 'Stimulus Level')
+        y_label: y-axis label (deafult is 'Proportion Correct')
+        estimate_type: Type of point estimate to use for the optimal  psychometric function. Either 'MAP' or 'mean'.
+            Default is the estimate type specified in `Result.configuration` ('MAP' unless otherwise specified)
+        random_state: np.RandomState
+            Random state used to generate the samples from the posterior. If None, NumPy's default random number
+            generator is used.
+    Returns:
+        Axis object on which the plots has been made
+    Raises:
+        ValueError if the  psychometric function has been fit with `debug=False`
+    """
+
+    if ax is None:
+        ax = plt.gca()
+
+    if random_state is None:
+        random_state = np.random.default_rng()
+
+    params_samples = result.posterior_samples(n_samples, random_state=random_state)
+
+    # Plot the samples from the posterior
+    sigmoid = result.configuration.make_sigmoid()
+    x = np.linspace(0.001, 0.01, num=1000)
+    for idx in range(n_samples):
+        y = sigmoid(
+            x,
+            threshold=params_samples['threshold'][idx],
+            width=params_samples['width'][idx],
+            gamma=params_samples['gamma'][idx],
+            lambd=params_samples['lambda'][idx],
+        )
+        ax.plot(x, y, alpha=samples_alpha, color=samples_color)
+
+    # Plot the MAP estimate
+    plot_psychometric_function(
+        result,
+        ax=ax,
+        plot_data=plot_data,
+        plot_parameter=plot_parameter,
+        data_color=data_color,
+        line_width=line_width,
+        line_color=line_color,
+        extrapolate_stimulus=extrapolate_stimulus,
+        x_label=x_label,
+        y_label=y_label,
+        estimate_type=estimate_type,
+    )
+    return ax
