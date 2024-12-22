@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 
 from psignifit import Configuration, Result, psignifit
+from .fixtures import input_data
 
 
 @pytest.fixture
@@ -281,23 +282,15 @@ def test_standard_parameter_estimate():
     np.testing.assert_allclose(scale, expected_scale)
 
 
-def test_threshold_bug_172():
+def test_threshold_bug_172(input_data):
     # Reproduce bug in issue #172
-
-    data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
-                     [0.0020, 44.0000, 90.0000], [0.0025, 44.0000, 90.0000],
-                     [0.0030, 52.0000, 90.0000], [0.0035, 53.0000, 90.0000],
-                     [0.0040, 62.0000, 90.0000], [0.0045, 64.0000, 90.0000],
-                     [0.0050, 76.0000, 90.0000], [0.0060, 79.0000, 90.0000],
-                     [0.0070, 88.0000, 90.0000], [0.0080, 90.0000, 90.0000],
-                     [0.0100, 90.0000, 90.0000]])
 
     options = {
         'sigmoid': 'norm',
         'experiment_type': '2AFC'
     }
 
-    result = psignifit(data, **options)
+    result = psignifit(input_data, **options)
     threshold = result.threshold(0.9, return_ci=False)  # which should be 0.0058
 
     expected_threshold = 0.0058
