@@ -198,7 +198,7 @@ class Result:
         loc, scale = sigmoid.standard_parameters(estimate['threshold'], estimate['width'])
         return loc, scale
 
-    def posterior_samples(self, n_samples):
+    def posterior_samples(self, n_samples, random_state=None):
         """ Get samples from the posterior over parameters.
 
         Return parameters values as drawn at random from the posterior of the parameters.
@@ -208,6 +208,9 @@ class Result:
 
         Args:
             n_samples: Number of samples to return
+            random_state: np.RandomState
+                Random state used to generate the samples from the posterior.
+                If None, NumPy's default random number generator is used.
         Returns:
             Dictionary mapping parameter names to an array of parameter values, as drawn at random from the
             posterior over parameters.
@@ -219,6 +222,9 @@ class Result:
             raise ValueError("Expects `posteriors` in results, got `None`. Run the sigmoid fit with "
                              "`psignifit(..., debug=True)`.")
 
+        if random_state is None:
+            random_state = np.random.default_rng()
+
         values = self.parameter_values
         posterior = self.debug['posteriors']
         params_grid = np.meshgrid(*(values.values()), indexing='ij')
@@ -226,7 +232,7 @@ class Result:
 
         # Sample from the posterior
         n_params_combos = params_combos.shape[0]
-        samples_idx = np.random.choice(
+        samples_idx = random_state.choice(
             np.arange(n_params_combos),
             size=(n_samples,),
             replace=True,

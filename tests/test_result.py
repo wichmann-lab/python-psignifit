@@ -325,7 +325,7 @@ def test_posterior_samples(result, random_state):
 
     # Draw samples from the posterior
     n_samples = 150234
-    samples = result.posterior_samples(n_samples=n_samples)
+    samples = result.posterior_samples(n_samples=n_samples, random_state=random_state)
 
     # Check that the empirical posterior from the samples matches the random posterior
     for param in params:
