@@ -516,6 +516,7 @@ def plot_posterior_samples(
         plot_data: bool = True,
         plot_parameter: bool = True,
         data_color: str = '#0069AA',  # blue
+        data_size: float = 1,
         line_color: str = 'r',
         line_width: float = 1,
         extrapolate_stimulus: float = 0.2,
@@ -538,6 +539,7 @@ def plot_posterior_samples(
         plot_data: Should the data points be plotted? Default is True
         plot_parameter: Should the threshold parameter be plotted? Default is True
         data_color: Color for the data points (default is blue)
+        data_size: Multiplier for the automatic size of the data points (default is 1),
         line_color: Color of the line for the point estimate of the optimal psychometric function (default is red)
         line_width: Width of the line for the point estimate of the optimal psychometric function (default is 1)
         extrapolate_stimulus: Fraction of the stimulus range to which to extrapolate the  psychometric function
@@ -583,6 +585,7 @@ def plot_posterior_samples(
         plot_data=plot_data,
         plot_parameter=plot_parameter,
         data_color=data_color,
+        data_size=data_size,
         line_width=line_width,
         line_color=line_color,
         extrapolate_stimulus=extrapolate_stimulus,
