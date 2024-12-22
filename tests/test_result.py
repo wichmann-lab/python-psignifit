@@ -295,3 +295,51 @@ def test_threshold_bug_172(input_data):
 
     expected_threshold = 0.0058
     np.testing.assert_allclose(threshold, expected_threshold, atol=1e-4)
+
+
+def test_posterior_samples_raises_if_not_debug(input_data):
+    result = psignifit(input_data)
+    with pytest.raises(ValueError):
+        result.posterior_samples(n_samples=10)
+
+
+def test_posterior_samples(result, random_state):
+
+    params = ['eta', 'gamma', 'lambda', 'threshold', 'width']
+    parameter_values = {
+        'eta': np.array([0]),
+        'gamma': np.array([0, 1, 2]),
+        'lambda': np.array([0, 1]),
+        'threshold': np.array([0]),
+        'width': np.array([0, 1])
+    }
+
+    # Build a random posterior distribution
+    posterior_shape = (1, 3, 2, 1, 2)
+    posterior = random_state.uniform(size=posterior_shape)
+    posterior = posterior / posterior.sum()
+
+    # Inject in the Result object
+    result.parameter_values = parameter_values
+    result.debug['posteriors'] = posterior
+
+    # Draw samples from the posterior
+    n_samples = 150234
+    samples = result.posterior_samples(n_samples=n_samples)
+
+    # Check that the empirical posterior from the samples matches the random posterior
+    for param in params:
+        assert samples[param].shape == (n_samples,)
+
+    counts = np.zeros(posterior_shape)
+    for idx in range(n_samples):
+        counts[
+            samples['eta'][idx],
+            samples['gamma'][idx],
+            samples['lambda'][idx],
+            samples['threshold'][idx],
+            samples['width'][idx],
+        ] += 1
+
+    empirical_posterior = counts / n_samples
+    np.testing.assert_allclose(empirical_posterior, posterior, atol=1e-2)
