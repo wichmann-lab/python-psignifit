@@ -86,7 +86,7 @@ you can evaluate the adequacy of the prior:
 For a threshold prior to be adequate (first column), it should be flat along all your stimulus levels; this will ensure that the threshold estimation is driven exclusively by the data. The stimulus levels of your data are shown as black-dots in the x-axis.
 The prior is flat (constant) for all threshold values between the red and blue sigmoids; both are equally likely. The yellow and green sigmoids are very unlikely, and this makes sense as they are outside of the range of stimulus levels. Here you can see that `psignifit` assumes that you choose stimulus values along the whole range the psychometric function.
 
-Similarly, for the width prior (middle column) the sigmoids between varing between the red and blue cases are more or less likely; contrarily the yellow and green sigmoids are very unlikely. Again this make sense, as `psignifit` assumes that you sampled the whole range of the psychometric function and not just around the threshold.
+Similarly, for the width prior (middle column) the sigmoids varing between the red and blue cases are more or less likely; contrarily the yellow and green sigmoids are very unlikely. Again this makes sense, as `psignifit` assumes that you sampled the whole range of the psychometric function and not just around the threshold.
 
 Finally for the lapse prior it assumes a decaying prior (right column), which in simulations have been shown to be a reasonable assumption. You don't expect that observers lapse more than 20%; if so, then the observer is the problem (e.g. they were not following instructions, falling asleep, lapsing in attention, etc). For these cases maybe consider to repeat the experiment.
 
