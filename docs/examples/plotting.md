@@ -198,6 +198,23 @@ Same type of plot as the above but now for all parameter combinations.
 fig = ps.psigniplot.plot_bayes(res)
 ```
 
+## Plot samples from the posterior over psychometric functions
+
+To get an idea of the range of  psychometric functions that are compatible with the data, it's possible to plot 
+samples from the posterior over  psychometric functions. A number of samples are plot semi-transparently over one 
+another, creating a shaded area around the point estimate of the psychometric function.
+
+```{code-cell} ipython3
+plt.figure()
+
+n_samples = 100
+random_state = np.random.RandomState(7474)
+
+psigniplot.plot_posterior_samples(result=res, n_samples=n_samples, samples_alpha=0.1, 
+                                  samples_color='k', random_state=random_state)
+```
+
+
 ## Plot priors
 As a tool this function plots the actually used priors of the provided
 result dictionary.

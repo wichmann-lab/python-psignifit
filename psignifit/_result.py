@@ -106,7 +106,7 @@ class Result:
             proportion_correct: proportion correct at the threshold you want to calculate
             unscaled: If the proportion correct you provide are for the unscaled
                       sigmoid or for the one scaled by lambda and gamma.
-                      By default this function returns the one for the scaled sigmoid.
+                      By default, this function returns the one for the scaled sigmoid.
             return_ci: If the confidence bounds should be returned along with the stimulus value
             estimate_type: Type of estimate, either "MAP" or "mean".
                 If None, the value of `estimate_type` in `Result.configuration` is used instead.
@@ -197,3 +197,51 @@ class Result:
         estimate = self.get_parameter_estimate(estimate_type)
         loc, scale = sigmoid.standard_parameters(estimate['threshold'], estimate['width'])
         return loc, scale
+
+    def posterior_samples(self, n_samples, random_state=None):
+        """ Get samples from the posterior over parameters.
+
+        Return parameters values as drawn at random from the posterior of the parameters.
+
+        The posterior information is only available if the sigmoid has been fit with `debug=True`. If the
+        information is missing, an exception is raised.
+
+        Args:
+            n_samples: Number of samples to return
+            random_state: np.RandomState
+                Random state used to generate the samples from the posterior.
+                If None, NumPy's default random number generator is used.
+        Returns:
+            Dictionary mapping parameter names to an array of parameter values, as drawn at random from the
+            posterior over parameters.
+        Raises:
+            ValueError if the sigmoid has been fit with `debug=False`
+        """
+
+        if len(self.debug) == 0:
+            raise ValueError("Expects `posteriors` in results, got `None`. Run the sigmoid fit with "
+                             "`psignifit(..., debug=True)`.")
+
+        if random_state is None:
+            random_state = np.random.default_rng()
+
+        values = self.parameter_values
+        posterior = self.debug['posteriors']
+        params_grid = np.meshgrid(*(values.values()), indexing='ij')
+        params_combos = np.dstack([p.flatten() for p in params_grid]).squeeze()
+
+        # Sample from the posterior
+        n_params_combos = params_combos.shape[0]
+        samples_idx = random_state.choice(
+            np.arange(n_params_combos),
+            size=(n_samples,),
+            replace=True,
+            p=posterior.flatten()
+        )
+        samples_params_combo = params_combos[samples_idx]
+
+        samples = {}
+        for param_idx, param in enumerate(values.keys()):
+            samples[param] = samples_params_combo[:, param_idx]
+
+        return samples
