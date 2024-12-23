@@ -540,13 +540,13 @@ def plot_posterior_samples(
         plot_parameter: Should the threshold parameter be plotted? Default is True
         data_color: Color for the data points (default is blue)
         data_size: Multiplier for the automatic size of the data points (default is 1),
-        line_color: Color of the line for the point estimate of the optimal psychometric function (default is red)
-        line_width: Width of the line for the point estimate of the optimal psychometric function (default is 1)
+        line_color: Color of the line for the point estimate of the psychometric function (default is red)
+        line_width: Width of the line for the point estimate of the psychometric function (default is 1)
         extrapolate_stimulus: Fraction of the stimulus range to which to extrapolate the  psychometric function
            (default is 0.2)
         x_label: x-axis label (default is 'Stimulus Level')
         y_label: y-axis label (deafult is 'Proportion Correct')
-        estimate_type: Type of point estimate to use for the optimal  psychometric function. Either 'MAP' or 'mean'.
+        estimate_type: Type of point estimate to use for the psychometric function. Either 'MAP' or 'mean'.
             Default is the estimate type specified in `Result.configuration` ('MAP' unless otherwise specified)
         random_state: np.RandomState
             Random state used to generate the samples from the posterior. If None, NumPy's default random number

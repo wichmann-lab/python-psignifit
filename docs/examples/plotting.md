@@ -202,7 +202,7 @@ fig = ps.psigniplot.plot_bayes(res)
 
 To get an idea of the range of  psychometric functions that are compatible with the data, it's possible to plot 
 samples from the posterior over  psychometric functions. A number of samples are plot semi-transparently over one 
-another, creating a shaded area around the point estimate of the optimal psychometric function.
+another, creating a shaded area around the point estimate of the psychometric function.
 
 ```{code-cell} ipython3
 plt.figure()
