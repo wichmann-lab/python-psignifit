@@ -74,11 +74,11 @@ print(data)
 ```
 
 ```{code-cell} ipython3
-fig, ax = plt.subplots()
-ax.scatter(stimulus_level, perccorr)
-ax.set_xlabel("Stimulus Level")
-ax.set_ylabel("Percent Correct")
-ax.spines[['right', 'top']].set_visible(False)
+fig, ax = plt.subplots();
+ax.scatter(stimulus_level, perccorr);
+ax.set_xlabel("Stimulus Level");
+ax.set_ylabel("Percent Correct");
+ax.spines[['right', 'top']].set_visible(False);
 ```
 
 
@@ -116,7 +116,7 @@ assert np.isclose(res.parameter_estimate['width'], width, atol=1e-2)
 ```
 
 ```{code-cell} ipython3
-psigniplot.plot_psychometric_function(res)
+psigniplot.plot_psychometric_function(res);
 ```
 
 
@@ -132,11 +132,11 @@ data = np.dstack([stimulus_level, hits, ntrials]).squeeze()
 ```
 
 ```{code-cell} ipython3
-fig, ax = plt.subplots()
-ax.scatter(stimulus_level, perccorr)
-ax.set_xlabel("Stimulus Level")
-ax.set_ylabel("Percent Correct")
-ax.spines[['right', 'top']].set_visible(False)
+fig, ax = plt.subplots();
+ax.scatter(stimulus_level, perccorr);
+ax.set_xlabel("Stimulus Level");
+ax.set_ylabel("Percent Correct");
+ax.spines[['right', 'top']].set_visible(False);
 ```
 
 
@@ -156,5 +156,5 @@ res = psignifit.psignifit(data, **options)
 and plot to ensure we found a good fit
 
 ```{code-cell} ipython3
-psigniplot.plot_psychometric_function(res)
+psigniplot.plot_psychometric_function(res);
 ```

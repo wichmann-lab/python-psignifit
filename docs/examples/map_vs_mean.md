@@ -79,10 +79,10 @@ data = np.dstack([levels, hits, ntrials]).squeeze()
 This is what the data looks like -- as you can see, the data could be compatible with a wide range of psychometric functions. This means that the posterior distribution over parameters is going to be wide.
 
 ```{code-cell} ipython3
-fig, ax = plt.subplots()
-ax.scatter(levels, hits)
-ax.set_xlabel("Stimulus Level")
-ax.set_ylabel("Hits")
+fig, ax = plt.subplots();
+ax.scatter(levels, hits);
+ax.set_xlabel("Stimulus Level");
+ax.set_ylabel("Hits");
 ```
 
 We set the options for our fit. In this case we assume a yes/no experiment and we want to estimate all parameters (i.e. fix none).
@@ -132,19 +132,19 @@ In `psigniplot`, we can choose which one to visualize.
 
 ```{code-cell} ipython3
 # Uses the default, in this case `'mean'`
-psp.plot_marginal(result, 'width')  
+psp.plot_marginal(result, 'width');
 ```
 
 ```{code-cell} ipython3
 # Overwrites the default, uses `'MAP'`
-psp.plot_marginal(result, 'width', estimate_type='MAP')
+psp.plot_marginal(result, 'width', estimate_type='MAP');
 ```
 
 It works the same way for every other `psignifit` functionality involving the estimates. For example, we can visualize the psychometric function for both estimates, although the difference is almost imperceptible in this case (we superimpose the two plots so you can appreciate it ;-) ).
 
 ```{code-cell} ipython3
-ax = psp.plot_psychometric_function(result, estimate_type='mean')
-psp.plot_psychometric_function(result, estimate_type='MAP', ax=ax)
+ax = psp.plot_psychometric_function(result, estimate_type='mean');
+psp.plot_psychometric_function(result, estimate_type='MAP', ax=ax);
 
 ```
 

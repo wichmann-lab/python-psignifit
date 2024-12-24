@@ -62,7 +62,7 @@ stimulus_level = np.logspace(np.log10(stim_range[0]), np.log10(stim_range[1]), n
 Using the sigmoid object, we can simulate percent correct values for each stimulus level, without introducing 
 additional variability.
 
-We generate the data on the data and parameters transformed in log-space, since the fit it's going to be made there.
+We generate the data on the data and parameters transformed in log-space, since the fit is going to be made there.
 
 ```{code-cell} ipython3
 logspace_stimulus_level = np.log(stimulus_level)
@@ -75,13 +75,13 @@ perccorr = sigmoid(logspace_stimulus_level, log_threshold, log_width, gamma, lam
 This is what the generated data and threshold look like in the stimulus space
 
 ```{code-cell} ipython3
-fig, ax = plt.subplots()
-ax.semilogx(stimulus_level, perccorr, marker='o')
-ax.set_xlabel("Stimulus Level")
-ax.set_ylabel("Percent Correct")
-plt.axvline(threshold, color='r')
+fig, ax = plt.subplots();
+ax.semilogx(stimulus_level, perccorr, marker='o');
+ax.set_xlabel("Stimulus Level");
+ax.set_ylabel("Percent Correct");
+ax.axvline(threshold, color='r');
 pc = (1 - gamma - lambda_) / 2 + gamma
-plt.axhline(pc, color='r')
+ax.axhline(pc, color='r');
 ```
 
 We construct our data array. In this first case, we have so many trials that the average hit rate is identical to the value on the psychometric function.
@@ -128,10 +128,10 @@ assert np.isclose(res.parameter_estimate['eta'], 0, atol=1e-4)
 ```
 
 ```{code-cell} ipython3
-fig, ax = plt.subplots()
-psigniplot.plot_psychometric_function(res, ax=ax)
-ax.scatter(logspace_stimulus_level, perccorr)
-ax.set_xlabel('log(Stimulus Level)')
+fig, ax = plt.subplots();
+psigniplot.plot_psychometric_function(res, ax=ax);
+ax.scatter(logspace_stimulus_level, perccorr);
+ax.set_xlabel('log(Stimulus Level)');
 ```
 
 If we want to interpret the parameters in the original stimulus space, we need a minimum of math:
@@ -165,10 +165,10 @@ data = np.dstack([logspace_stimulus_level, hits, ntrials]).squeeze()
 
 ```{code-cell} ipython3
 experimental_perccorr = hits/ntrials
-fig, ax = plt.subplots()
-ax.semilogx(stimulus_level, experimental_perccorr, marker='o', ls='')
-ax.set_xlabel("Stimulus Level")
-ax.set_ylabel("Percent Correct")
+fig, ax = plt.subplots();
+ax.semilogx(stimulus_level, experimental_perccorr, marker='o', ls='');
+ax.set_xlabel("Stimulus Level");
+ax.set_ylabel("Percent Correct");
 ```
 
 We run the fit again
@@ -193,8 +193,8 @@ res.parameter_estimate
 ```
 
 ```{code-cell} ipython3
-fig, ax = plt.subplots()
-psigniplot.plot_psychometric_function(res, ax=ax)
+fig, ax = plt.subplots();
+psigniplot.plot_psychometric_function(res, ax=ax);
 ```
 
 ```{code-cell} ipython3
