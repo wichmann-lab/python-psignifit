@@ -29,6 +29,8 @@ parts:
     - file: examples/bias-analysis
     - file: user_guides/Pooling-Utility
     - file: examples/parameter_recovery_demo
+    - file: examples/parameter_recovery_in_logspace_demo
+    - file: examples/map_vs_mean
      
   - caption: Benchmarks
     chapters:
