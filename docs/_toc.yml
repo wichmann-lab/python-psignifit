@@ -16,6 +16,7 @@ parts:
     - file: examples/results-object
     - file: examples/advanced-options
     - file: examples/priors
+    - file: examples/pooling_utilities
 
   - caption: Quick how-to
     chapters:
