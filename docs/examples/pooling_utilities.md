@@ -19,7 +19,7 @@ Psignifit comes with an automatic pooling utility, which can pool trials of very
 In contrast to the matlab implementation, python-psignifit does not pool implicitly. Instead a warning is printed, if pooling might be useful. Then pooling can be run as a separate call using psignifit.tools.pool_blocks
 
 the general form of the manual pooling utility looks like this:
-```{code-cell} ipython3
+```
 pooled_data = pool_blocks(data, max_tol=0.4, max_gap=10, max_length=10)
 ```
 
