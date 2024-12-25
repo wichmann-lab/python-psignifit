@@ -16,7 +16,6 @@ parts:
     - file: examples/results-object
     - file: examples/advanced-options
     - file: examples/priors
-    - file: examples/pooling_utilities
 
   - caption: Quick how-to
     chapters:
@@ -28,7 +27,7 @@ parts:
   - caption: Extras
     chapters:
     - file: examples/bias-analysis
-    - file: user_guides/Pooling-Utility
+    - file: examples/pooling_utilities
     - file: examples/parameter_recovery_demo
     - file: examples/parameter_recovery_in_logspace_demo
     - file: examples/map_vs_mean

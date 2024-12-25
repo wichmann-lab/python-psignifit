@@ -18,11 +18,9 @@ Psignifit comes with an automatic pooling utility, which can pool trials of very
 
 In contrast to the matlab implementation, python-psignifit does not pool implicitly. Instead a warning is printed, if pooling might be useful. Then pooling can be run as a separate call using psignifit.tools.pool_blocks
 
-This way of pooling data is presumably acceptable for many datasets, but pooling by hand is probably more exact.
-
+the general form of the manual pooling utility looks like this:
 ```{code-cell} ipython3
-
-#act = pool_blocks(inp, max_tol=0.4, max_gap=10, max_length=10)
+pooled_data = pool_blocks(data, max_tol=0.4, max_gap=10, max_length=10)
 ```
 
 # Example
@@ -81,7 +79,7 @@ fig, ax = plt.subplots(1, 1);
 psigniplot.plot_psychometric_function(res, ax=ax);
 ```
 
-This brakes the large blocks up again allowing us to notice if there was more variability over time than expected.
+This breaks the large blocks up again allowing us to notice if there was more variability over time than expected.
 
 The last option gives us a different rule to achieve something in a similar direction: We can enforce that a block must be collected en bloc like this:
 
