@@ -170,7 +170,7 @@ influence on the outcome.
 
 To "heal" this, psignifit allows you to pass another range, for which you
 believe in the assumptions of our prior.
-You pass this range with argument `_stimulus_range`, and `psignifit`
+You pass this range with argument `stimulus_range`, and `psignifit`
 will be set the prior considering this range instead.
 For our example dataset we might give a generous range and assume the
 possible range is .5 to 1.5.
@@ -179,7 +179,7 @@ possible range is .5 to 1.5.
 res_range = ps.psignifit(data,
                          experiment_type='equal asymptote',
                          debug=True,
-                         _stimulus_range=[.5, 1.5])
+                         stimulus_range=[.5, 1.5])
 ```
 
 We can now take a look how the prior changed
