@@ -111,6 +111,18 @@ def plot_psychometric_function(result: Result,  # noqa: C901, this function is t
 
 def plot_stimulus_residuals(result: Result, ax: matplotlib.axes.Axes = None,
                             estimate_type: EstimateType = None) -> matplotlib.axes.Axes:
+    """ Plot the fit residuals against the stimulus levels.
+
+    Systematic deviations from 0 would indicate that the measured data
+    shows a different shape than the fitted one.
+
+    Args:
+        result: `Result` object containing the fitting information
+        ax: Axis object on which to plot. Default is None (new axes are created)
+        estimate_type: Type of point estimate to use for the psychometric function. Either 'MAP' or 'mean'.
+            Default is the estimate type specified in `Result.configuration` ('MAP' unless otherwise specified)
+    """
+
     if ax is None:
         ax = plt.gca()
     return _plot_residuals(result.data[:, 0], 'Stimulus Level', result, ax, estimate_type=estimate_type)
@@ -118,6 +130,16 @@ def plot_stimulus_residuals(result: Result, ax: matplotlib.axes.Axes = None,
 
 def plot_block_residuals(result: Result, ax: matplotlib.axes.Axes = None,
                          estimate_type: EstimateType = None) -> matplotlib.axes.Axes:
+    """ Plot the fit residuals against "time", i.e., against the order of the trials' blocks.
+
+    A trend in this plot would indicate learning / changes in performance over time.
+
+    Args:
+        result: `Result` object containing the fitting information
+        ax: Axis object on which to plot. Default is None (new axes are created)
+        estimate_type: Type of point estimate to use for the psychometric function. Either 'MAP' or 'mean'.
+            Default is the estimate type specified in `Result.configuration` ('MAP' unless otherwise specified)
+    """
     if ax is None:
         ax = plt.gca()
     return _plot_residuals(result.data[:, 0], 'Block Number', result, ax, estimate_type=estimate_type)
@@ -169,12 +191,12 @@ def plot_modelfit(result: Result, estimate_type: EstimateType = None) -> matplot
 
     The first plot on the left shows the fitted psychometric function with the data.
 
-    The second, central plot shows the fit residuals against the stimulus level.
+    The second, central plot shows the fit residuals against the stimulus levels.
     Systematic deviations from 0 would indicate that the measured data
     shows a different shape than the fitted one.
 
     The third plot on the right shows the residuals against "time", i.e., against
-    the order of the passed blocks. A trend in this plot would indicate
+    the order of the trials' blocks. A trend in this plot would indicate
     learning / changes in performance over time.
 
     For the central and right plot, dashed lines depict a linear, quadratic and
@@ -435,7 +457,18 @@ def plot_2D_margin(result: Result,
                    first_param: str,
                    second_param: str,
                    ax: matplotlib.axes.Axes = None):
-    """ Plot the 2D marginal posterior over two parameters. """
+    """ Plot the 2D marginal posterior over two parameters.
+
+    Args:
+        result: `Result` object containing the fitting information
+        first_param: The name of the first parameter, it should be one of 'threshold', 'width', 'lambda', 'gamma',
+            or 'eta'
+        second_param: The name of the second parameter, it should be one of 'threshold', 'width', 'lambda', 'gamma',
+            or 'eta'
+        ax: Axis object on which to plot. Default is None (new axes are created)
+    Returns:
+        Axis object on which the plot has been made
+"""
     if ax is None:
         ax = plt.gca()
     if result.debug=={}:
