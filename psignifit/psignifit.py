@@ -60,19 +60,20 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
 
     levels, ntrials = data[:, 0], data[:, 2]
     if conf.verbose:
-        _warn_common_data_mistakes(levels, ntrials, pool_max_blocks=conf.pool_max_blocks)
+        _warn_common_data_mistakes(levels, ntrials, has_user_stimulus_range=conf.stimulus_range is not None,
+                                   pool_max_blocks=conf.pool_max_blocks)
 
-    stimulus_range = conf._stimulus_range
+    stimulus_range = conf.stimulus_range
     if stimulus_range is None:
         stimulus_range = (levels.min(), levels.max())
 
     width_min = conf.width_min
     if width_min is None:
-        if conf._stimulus_range is None:
+        if conf.stimulus_range is None:
             width_min = np.diff(np.unique(levels)).min()
         else:
             # For user specified stimulus range, use conservative estimate of width_min.
-            width_min = (conf._stimulus_range[1] - conf._stimulus_range[0]) / 100
+            width_min = (conf.stimulus_range[1] - conf.stimulus_range[0]) / 100
 
     bounds = parameter_bounds(min_width=width_min, experiment_type=conf.experiment_type, stimulus_range=stimulus_range,
                               alpha=conf.width_alpha, nafc_choices=conf.experiment_choices)
@@ -126,8 +127,8 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
                   data=data)
 
 
-def _warn_common_data_mistakes(levels, ntrials, pool_max_blocks) -> None:
-    """ Raise warnings for common mistakes.
+def _warn_common_data_mistakes(levels, ntrials, has_user_stimulus_range, pool_max_blocks) -> None:
+    """ Show warnings for common mistakes.
 
     Checks for too many blocks and too few trials.
     The warnings recommend to use pooling or to manually specify stimulus ranges.
@@ -135,6 +136,7 @@ def _warn_common_data_mistakes(levels, ntrials, pool_max_blocks) -> None:
     Args:
         levels: Array of stimulus level per block
         ntrials: Array of trial numbers per block
+        has_user_stimulus_range: User configured the stimulus range
         pool_max_blocks: Maximum number of blocks until print of pool warning.
     """
     if ntrials.max() == 1:
@@ -147,15 +149,19 @@ def _warn_common_data_mistakes(levels, ntrials, pool_max_blocks) -> None:
                       "psignifit.pool_blocks(data).\n"
                       "Hide this warning by increasing conf.pool_max_blocks.")
     # warning if many blocks were measured
-    if len(levels) >= 25:
+    if len(levels) >= 25 and not has_user_stimulus_range:
         warnings.warn(f"""The data you supplied contained {len(levels)}>= 25 stimulus levels.
             Did you sample adaptively?
+            If so please specify a range which contains the whole psychometric function in
+            conf.stimulus_range.
             An appropriate prior prior will be then chosen. For now we use the standard
             heuristic, assuming that the psychometric function is covered by the stimulus
             levels,which is frequently invalid for adaptive procedures!""")
-    if ntrials.max() <= 5:
+    if ntrials.max() <= 5 and not has_user_stimulus_range:
         warnings.warn("""All provided data blocks contain <= 5 trials.
             Did you sample adaptively?
+            If so please specify a range which contains the whole psychometric function in
+            conf.stimulus_range.
             An appropriate prior prior will be then chosen. For now we use the standard
             heuristic, assuming that the psychometric function is covered by the stimulus
             levels, which is frequently invalid for adaptive procedures!""")
