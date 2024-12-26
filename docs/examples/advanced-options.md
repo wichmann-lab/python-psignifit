@@ -71,7 +71,6 @@ In this case the lapse rate is sampled at 50 points giving you a much more exact
 options['grid_steps'] = {'lambda': 50}
 res = ps.psignifit(data, **options)
 ```
-#TODO: this doesnt seem do anything
 
 ## Confidence intervals
 
@@ -102,6 +101,7 @@ res = ps.psignifit(data, **options)
 ```
 
 ## Threshold and width definitions
+#TODO: This does not work: Errors
 This option sets the proportion correct correspond to the threshold on the *unscaled* sigmoid.
 Possible values are in the range from 0 to 1, default is 0.5. The default corresponds to 75\% in a 2AFC task (midway between the guess rate of 50 % and ceiling performance 100%).
 
@@ -123,7 +123,6 @@ For example, this would enable the usage of the interval from .1 to .9 as the wi
 options['width_alpha'] = .05
 ```
 
-#TODO: This does not work: Errors
 ## Priors
 
 You can set the priors manually passing them as a dictionary with the parameter name as key and the custom prior function
@@ -133,9 +132,9 @@ For details on how do change these refer to the [priors demo](priors).
 
 
 The strength of the prior in favor of a binomial observer can be set with
-the `beta_prior` option. Larger values correspond to a stronger prior. 
+the `beta_prior` option. Larger values correspond to a stronger prior.
 The default value is 10; we choose this value after
-a rather large number of simulations. Refer to 
+a rather large number of simulations. Refer to
 [Schütt & Wichmann (2016)](http://www.sciencedirect.com/science/article/pii/S0042698916000390) 
 to learn more about this.
 
