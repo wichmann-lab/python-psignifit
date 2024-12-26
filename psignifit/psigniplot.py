@@ -25,6 +25,24 @@ def plot_psychometric_function(result: Result,  # noqa: C901, this function is t
                                y_label='Proportion Correct',
                                estimate_type: EstimateType = None):
     """ Plot psychometric function fit together with the data.
+
+    Args:
+        result: `Result` object containing the fitting information
+        ax: Axis object on which to plot. Default is None (new axes are created)
+        plot_data: Should the data points be plotted? Default is True
+        plot_parameter: Should the threshold parameter be plotted? Default is True
+        data_color: Color for the data points (default is blue)
+        data_size: Multiplier for the automatic size of the data points (default is 1),
+        line_color: Color of the line for the point estimate of the psychometric function (default is black)
+        line_width: Width of the line for the point estimate of the psychometric function (default is 2)
+        extrapolate_stimulus: Fraction of the stimulus range to which to extrapolate the  psychometric function
+           (default is 0.2)
+        x_label: x-axis label (default is 'Stimulus Level')
+        y_label: y-axis label (default is 'Proportion Correct')
+        estimate_type: Type of point estimate to use for the psychometric function. Either 'MAP' or 'mean'.
+            Default is the estimate type specified in `Result.configuration` ('MAP' unless otherwise specified)
+    Returns:
+        Axis object on which the plot has been made
     """
     if ax is None:
         ax = plt.gca()
@@ -93,6 +111,18 @@ def plot_psychometric_function(result: Result,  # noqa: C901, this function is t
 
 def plot_stimulus_residuals(result: Result, ax: matplotlib.axes.Axes = None,
                             estimate_type: EstimateType = None) -> matplotlib.axes.Axes:
+    """ Plot the fit residuals against the stimulus levels.
+
+    Systematic deviations from 0 would indicate that the measured data
+    shows a different shape than the fitted one.
+
+    Args:
+        result: `Result` object containing the fitting information
+        ax: Axis object on which to plot. Default is None (new axes are created)
+        estimate_type: Type of point estimate to use for the psychometric function. Either 'MAP' or 'mean'.
+            Default is the estimate type specified in `Result.configuration` ('MAP' unless otherwise specified)
+    """
+
     if ax is None:
         ax = plt.gca()
     return _plot_residuals(result.data[:, 0], 'Stimulus Level', result, ax, estimate_type=estimate_type)
@@ -100,6 +130,16 @@ def plot_stimulus_residuals(result: Result, ax: matplotlib.axes.Axes = None,
 
 def plot_block_residuals(result: Result, ax: matplotlib.axes.Axes = None,
                          estimate_type: EstimateType = None) -> matplotlib.axes.Axes:
+    """ Plot the fit residuals against "time", i.e., against the order of the trials' blocks.
+
+    A trend in this plot would indicate learning / changes in performance over time.
+
+    Args:
+        result: `Result` object containing the fitting information
+        ax: Axis object on which to plot. Default is None (new axes are created)
+        estimate_type: Type of point estimate to use for the psychometric function. Either 'MAP' or 'mean'.
+            Default is the estimate type specified in `Result.configuration` ('MAP' unless otherwise specified)
+    """
     if ax is None:
         ax = plt.gca()
     return _plot_residuals(result.data[:, 0], 'Block Number', result, ax, estimate_type=estimate_type)
@@ -143,24 +183,31 @@ def _plot_residuals(x_values: np.ndarray,
 
 
 def plot_modelfit(result: Result, estimate_type: EstimateType = None) -> matplotlib.figure.Figure:
-    """ Plot utilities to judge model fit.
+    """ Diagnosis plots to judge model fit.
 
-    Plots some standard plots, meant to help you judge whether there are
-    systematic deviations from the model. We dropped the statistical tests
-    here though.
+    Plots some standard plots meant to help you judge whether there are
+    systematic deviations from the model. This is meant for visual inspection only, and no statistical tests are
+    performed.
 
-    The left plot shows the psychometric function with the data.
+    The first plot on the left shows the fitted psychometric function with the data.
 
-    The central plot shows the Deviance residuals against the stimulus level.
-    Systematic deviations from 0 here would indicate that the measured data
+    The second, central plot shows the fit residuals against the stimulus levels.
+    Systematic deviations from 0 would indicate that the measured data
     shows a different shape than the fitted one.
 
-    The right plot shows the Deviance residuals against "time", e.g. against
-    the order of the passed blocks. A trend in this plot would indicate
-    learning/ changes in performance over time.
+    The third plot on the right shows the residuals against "time", i.e., against
+    the order of the trials' blocks. A trend in this plot would indicate
+    learning / changes in performance over time.
 
-    For the central and right plot, dashes lines depict a line, quadratic and
-    cubic fit; these should help in detecting systematic deviations from zero.
+    For the central and right plot, dashed lines depict a linear, quadratic and
+    cubic fit of the residuals. These should help in detecting systematic deviations from zero.
+
+    Args:
+        result: `Result` object containing the fitting information
+        estimate_type: Type of point estimate to use for the psychometric function. Either 'MAP' or 'mean'.
+            Default is the estimate type specified in `Result.configuration` ('MAP' unless otherwise specified)
+    Returns:
+        Figure object on which the plot has been made
     """
     fig = plt.figure(figsize=(15, 5))
 
@@ -182,9 +229,12 @@ def plot_modelfit(result: Result, estimate_type: EstimateType = None) -> matplot
 
 
 def plot_bayes(result: Result) -> matplotlib.figure.Figure:
-    """ Plot all posteriors.
+    """ Plot all pair-wise marginals of the posterior distribution over parameters.
 
-    Plots 2D marginals for all combinations of parameters.
+    Args:
+        result: `Result` object containing the fitting information
+    Returns:
+        Figure object on which the plot has been made
     """
     if result.debug=={}:
         raise ValueError("Expects posterior_mass in result, got None. You could try psignifit(debug=True).")
@@ -221,22 +271,37 @@ def plot_bayes(result: Result) -> matplotlib.figure.Figure:
     plt.tight_layout()
     return fig
 
+
 def plot_marginal(result: Result,
                   parameter: str,
                   ax: matplotlib.axes.Axes = None,
                   line_color: Union[str, List[float], np.ndarray] = '#0069AA',  # blue
                   line_width: float = 2,
-                  y_label: str ='Marginal Density',
+                  y_label: str = 'Marginal Density',
                   plot_prior: bool = True,
                   prior_color: Union[str, List[float], np.ndarray] = '#B2B2B2',  # light gray
                   plot_estimate: bool = True,
                   plot_ci: bool = True,
                   estimate_type: EstimateType = None):
-    """ Plots the marginal for a single dimension.
+    """ Plots the marginal distribution over a single parameter.
 
     Args:
-        result: should be a result object from the main psignifit routine
-        parameter: The name of the parameter to plot,'threshold', 'width', 'lambda', 'gamma', 'eta'
+        result: `Result` object containing the fitting information
+        parameter: The name of the parameter to plot, it should be one of 'threshold', 'width', 'lambda', 'gamma',
+            or 'eta'.
+        ax: Axis object on which to plot. Default is None (new axes are created)
+        line_color: Color of the line for the marginal (default is blue)
+        line_width: Width of the line for the marginal (default is 2)
+        y_label: y-axis label (default is 'Marginal Density')
+        plot_prior: True (default) if the plot should include the prior distribution over the parameter. This is
+            possible if the psychometric function has been fitted with the `debug=True` option.
+        prior_color: Color of the line for the prior (default is light gray).
+        plot_estimate: True (default) if the plot should include the point estimate of the parameter.
+        plot_ci: True (default) if the plot should include the confidence interval for the parameter.
+        estimate_type: Type of point estimate to use for the psychometric function. Either 'MAP' or 'mean'.
+            Default is the estimate type specified in `Result.configuration` ('MAP' unless otherwise specified)
+    Returns:
+        Axis object on which the plot has been made
     """
     if ax is None:
         ax = plt.gca()
@@ -262,13 +327,13 @@ def plot_marginal(result: Result,
         param_value = estimate[parameter]
         ax.plot([param_value] * 2, [0, np.interp(param_value, x, marginal)], color='#000000')
 
-    if plot_prior and result.debug!={}:
+    if plot_prior and result.debug != {}:
         prior_x, prior_val = _get_prior_values(result, parameter)
         ax.plot(prior_x, prior_val, ls='--', color=prior_color)
         xmin = np.concatenate((x, prior_x)).min()
         xmax = np.concatenate((x, prior_x)).max()
 
-    elif plot_prior and result.debug=={}:
+    elif plot_prior and result.debug == {}:
         warnings.warn("""Cannot plot priors without debug mode. Try calling psignifit(..., debug=True)""")
 
     ax.plot(x, marginal, lw=line_width, c=line_color)
@@ -280,8 +345,9 @@ def plot_marginal(result: Result,
 
     return ax
 
+
 def _get_prior_values(result, param):
-    """Get the prior evaluated on the whole prior range. This is used for plotting"""
+    """ Get the prior evaluated on the whole prior range. This is used for plotting. """
 
     priors_func = result.debug['priors']
     bounds = result.debug['bounds']
@@ -290,6 +356,7 @@ def _get_prior_values(result, param):
     prior_vals = priors_func[param](prior_x)
 
     return (prior_x, prior_vals)
+
 
 def _parameter_label(parameter):
     label_defaults = {'threshold': 'Threshold', 'width': 'Width',
@@ -302,15 +369,24 @@ def plot_prior(result: Result,
                line_width: float = 2,
                marker_size: float = 30,
                estimate_type: EstimateType = None):
-    """ Plot the priors for the threshold, width and lambda parameters.
+    """ Plot the priors over the threshold, width and lambda parameters.
 
     The upper panels show the priors. The lower panels show a set of psychometric
     functions at selected prior values; these values are shown as markers in the
     upper row panels.
 
-    The black function/markers indicate the value of the estimated psychometric function
-    from the data. The coloured function/markers correspond to the
-    0%, 25%, 75% and 100% quantiles of the prior.
+    The black functions/markers indicate the value of the mean of the prior.
+    The coloured functions/markers correspond to the 0%, 25%, 75% and 100% quantiles of the prior.
+
+    Args:
+        result: `Result` object containing the fitting information
+        line_color: Color of the line for the prior (default is blue)
+        line_width: Width of the line for the prior (default is 2)
+        marker_size: Size of the marker indicating the mean and quantiles of the prior (default is 30)
+        estimate_type: Type of point estimate to use for the parameters. Either 'MAP' or 'mean'
+            Default is the estimate type specified in `Result.configuration` ('MAP' unless otherwise specified)
+    Returns:
+        Axis object on which the plot has been made
     """
     if result.debug=={}:
         raise ValueError("Expects priors and marginals saved. Try running psignifit(....., debug=True).")
@@ -381,8 +457,18 @@ def plot_2D_margin(result: Result,
                    first_param: str,
                    second_param: str,
                    ax: matplotlib.axes.Axes = None):
-    """ Constructs a 2 dimensional marginal plot of the posterior density for
-    two given parameters."""
+    """ Plot the 2D marginal posterior over two parameters.
+
+    Args:
+        result: `Result` object containing the fitting information
+        first_param: The name of the first parameter, it should be one of 'threshold', 'width', 'lambda', 'gamma',
+            or 'eta'
+        second_param: The name of the second parameter, it should be one of 'threshold', 'width', 'lambda', 'gamma',
+            or 'eta'
+        ax: Axis object on which to plot. Default is None (new axes are created)
+    Returns:
+        Axis object on which the plot has been made
+"""
     if ax is None:
         ax = plt.gca()
     if result.debug=={}:
@@ -531,7 +617,7 @@ def plot_posterior_samples(
     information is missing, an exception is raised.
 
     Args:
-        n_samples: Number of samples to return
+        result: `Result` object containing the fitting information
         ax: Axis object on which to plot. Default is None (new axes are created)
         n_samples: Number of sigmoid samples to plot (default is 100)
         samples_color: Color to use for the samples (default is black)
@@ -545,14 +631,14 @@ def plot_posterior_samples(
         extrapolate_stimulus: Fraction of the stimulus range to which to extrapolate the  psychometric function
            (default is 0.2)
         x_label: x-axis label (default is 'Stimulus Level')
-        y_label: y-axis label (deafult is 'Proportion Correct')
+        y_label: y-axis label (default is 'Proportion Correct')
         estimate_type: Type of point estimate to use for the psychometric function. Either 'MAP' or 'mean'.
             Default is the estimate type specified in `Result.configuration` ('MAP' unless otherwise specified)
         random_state: np.RandomState
             Random state used to generate the samples from the posterior. If None, NumPy's default random number
             generator is used.
     Returns:
-        Axis object on which the plots has been made
+        Axis object on which the plot has been made
     Raises:
         ValueError if the  psychometric function has been fit with `debug=False`
     """
@@ -578,7 +664,7 @@ def plot_posterior_samples(
         )
         ax.plot(x, y, alpha=samples_alpha, color=samples_color)
 
-    # Plot the MAP estimate
+    # Plot the point estimate of the psychometric function
     plot_psychometric_function(
         result,
         ax=ax,
