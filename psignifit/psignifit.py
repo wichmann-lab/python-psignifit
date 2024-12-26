@@ -20,32 +20,33 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
               debug: bool = False, **kwargs) -> Result:
     """ Fit a psychometric function to experimental data.
 
-    This function is the user interface for fitting psychometric functions to data.
+    This function is the main entry point for fitting psychometric functions to experimental data.
 
     Notice that the parameters of the psychometric function are always fit in linear space, even
     for psychometric function that are supposed to work in a logarithmic space, like the Weibull
-    function. It is left to the user to transform the stimulus level to logarithmic space before
-    calling this function.
+    function. It is left to the user to transform the stimulus levels to logarithmic space before
+    calling this function (see the `Parameter recovery in log-space` demo in the documentation).
 
-    pass your data in the n x 3 matrix of the form:
-    [x-value, number correct, number of trials]
+    The data format must be an `n x 3` numpy array of the form:
+    `[x-value, number correct, number of trials]`
 
-    options should be a dictionary in which you set the options for your fit.
-    You can find a full overview over the options in demo002
+    Options for the fit can be passed using a `Configuration` object and the `conf` argument, or as keyword
+    arguments (more common). You can find an overview of the available options in the pages `Basic options` and
+    `Advanced options` in the documentation.
 
-    The result of this function is a dictionary, which contains all information the
-    program produced for your fit. You can pass this as whole to all further
-    processing function provided with psignifit. Especially to the plot functions.
-    You can find an explanation for all fields of the result in demo006
-
-    To get an introduction to basic usage start with demo001
-
+    The result of this function is a `Result` object, which contains all information that `psignfit`
+    produced for the fit. You can pass this object to all further processing function provided with
+    `psignifit`, including the plotting functions. A description of the `Result` object is provided in the section
+    `Result object` in the documentation.
 
     Args:
-        data: Trials as described above.
+        data: Trials data as described above.
         conf: Optional configuration object.
-        debug: If true, posterior matrix and prior functions will be returned to result object. In this mode the result object cannot be serialized.
-        kwargs: Configurations as function parameters.
+        debug: If true, the posterior probability grid and the prior functions will be returned in the `Result`
+            object in the `Result.debug` dictionary. In this mode, the `Result` object cannot be serialized.
+        kwargs: Fit options as keyword arguments (optional).
+    Returns:
+        `Result` object with all the fitting results.
     """
     if conf is None:
         conf = Configuration(**kwargs)
@@ -126,17 +127,15 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
 
 
 def _warn_common_data_mistakes(levels, ntrials, pool_max_blocks) -> None:
-    """ Show warnings for common mistakes.
+    """ Raise warnings for common mistakes.
 
     Checks for too many blocks and too few trials.
     The warnings recommend to use pooling or to manually specify stimulus ranges.
 
     Args:
-        level: Array of stimulus level per block
-        ntrial: Array of trial numbers per block
+        levels: Array of stimulus level per block
+        ntrials: Array of trial numbers per block
         pool_max_blocks: Maximum number of blocks until print of pool warning.
-    Returns:
-        None
     """
     if ntrials.max() == 1:
         warnings.warn("All blocks in data have only 1 trial.\n"
@@ -163,6 +162,7 @@ def _warn_common_data_mistakes(levels, ntrials, pool_max_blocks) -> None:
 
 
 def _warn_marginal_sanity_checks(marginals):
+    """ Raise warnings for common issues in the marginals of the posterior distribution. """
     if 'threshold' in marginals:
         threshold_marginals = marginals['threshold'] / np.sum(marginals['threshold'])
         if threshold_marginals[0] > .001:
@@ -202,26 +202,32 @@ def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
                     priors: Dict[str, Prior], sigmoid: sigmoids.Sigmoid,
                     steps_moving_bounds: Dict[str, int], max_bound_value: float,
                     grid_steps: Dict[str, int]) -> Dict[str, float]:
-    """ Fit sigmoid parameters in a three step procedure.
+    """ Fit sigmoid parameters in a three-step procedure.
 
-    1. Estimate posterior on wide bounds with large steps in between.
-    2. Estimate tighter bounds of relevant probability mass (> max_bound_values)
-       and calculate posterior there using fine steps.
-    3. Fit the sigmoid parameters using the fine and tight posterior grid.
+    1. Estimate posterior over parameters on a wider grid with coarse-grained steps (see `steps_moving_bounds`).
+    2. Estimate tighter bounds of relevant probability mass (>= max_bound_values)
+       and calculate the posterior over parameters there using finer-grained steps (see `grid_steps`).
+    3. Fit the sigmoid parameters using the finer-grained posterior grid.
 
     Args:
-         data: Training samples.
-         bounds: Dict of (min, max) parameter value.
-         priors: Dict of prior function per parameter.
-         sigmoid: Sigmoid function to fit.
-         steps_moving_bounds: Dict of number of possible parameter values for loose bounds.
-         max_bound_value: Threshold posterior on loose grid, used to tighten bounds.
-         grid_steps: Dict of number of possible parameter values for tight bounds.
+         data: Training data.
+         bounds: Dict mapping parameter names to (min, max) parameter value bounds.
+         priors: Dict mapping parameter names to prior functions.
+         sigmoid: `Sigmoid` class to fit.
+         steps_moving_bounds: Dict mapping parameter names to the number of steps to use for the parameter grid in
+            step 1. If the `bounds` for this parameter indicate that the parameter is fixed (i.e., the min bound is
+            the same as the max bound), this value is not used for the corresponding parameter.
+         max_bound_value: Minimum posterior probability value to consider when computing tighter bounds for the
+            finer-grained grid (step 2).
+         grid_steps: Dict mapping parameter names to the number of steps to use for the finer-grained parameter grid in
+            step 2. If the `bounds` for this parameter indicate that the parameter is fixed (i.e., the min bound is
+            the same as the max bound), this value is not used for the corresponding parameter.
 
     Returns:
-        fit_dict: Dict of fitted parameter value.
-        posteriors: Probability per parameter combination.
-        grid: Dict of possible parameter values.
+        estimate_MAP_dict: Dict mapping parameter names to the corresponding value of the MAP point estimate.
+        estimate_mean_dict: Dict mapping parameter names to the corresponding value for the mean point estimate.
+        posteriors: Posterior probability over parameters, over the finer-grained parameter grid of step 2.
+        grid: Dict mapping parameter names to the parameter values for the finer-grained parameter grid.
     """
     # do first sparse grid posterior_grid evaluation
     grid = parameter_grid(bounds, steps_moving_bounds)
