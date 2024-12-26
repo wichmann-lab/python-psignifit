@@ -46,14 +46,11 @@ class Configuration:
     pool_max_blocks: int = 25
     priors: Optional[Dict[str, Prior]] = dataclasses.field(default=None, hash=False)
     sigmoid: Union[str, sigmoids.Sigmoid] = 'norm'
+    stimulus_range: Optional[Tuple[float, float]] = None
     thresh_PC: float = 0.5
     verbose: bool = True
     width_alpha: float = 0.05
     width_min: Optional[float] = None
-
-    # private attributes, used for testing and benchmarking -> don't use unless you know
-    # what you are doing
-    _stimulus_range: Optional[Tuple[float, float]] = None
 
     # attributes, if not specified, will be initialized based on others
     bounds: Optional[Dict[str, Tuple[float, float]]] = None
@@ -209,7 +206,7 @@ class Configuration:
         except KeyError:
             raise PsignifitException('Invalid sigmoid name "{value}", use one of {sigmoids.ALL_SIGMOID_NAMES}')
 
-    def check__stimulus_range(self, value):
+    def check_stimulus_range(self, value):
         if value:
             try:
                 len_ = len(value)
