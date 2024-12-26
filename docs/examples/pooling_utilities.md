@@ -81,7 +81,7 @@ psigniplot.plot_psychometric_function(res, ax=ax);
 
 This breaks the large blocks up again allowing us to notice if there was more variability over time than expected.
 
-The last option gives us a different rule to achieve something in a similar direction: We can enforce that a block must be collected en bloc like this:
+The last option gives us a different rule to achieve something in a similar direction: we can enforce to pool only subsequent trials like this:
 
 ```{code-cell} ipython3
 pooled = pool_blocks(data, max_tol=0.01, max_length=np.inf, max_gap=0)
