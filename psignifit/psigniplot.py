@@ -664,7 +664,7 @@ def plot_posterior_samples(
         )
         ax.plot(x, y, alpha=samples_alpha, color=samples_color)
 
-    # Plot the MAP estimate
+    # Plot the point estimate of the psychometric function
     plot_psychometric_function(
         result,
         ax=ax,
