@@ -55,7 +55,6 @@ def plot_psychometric_function(result: Result,  # noqa: C901, this function is t
         params['gamma'] = params['lambda']
     if len(data) == 0:
         return
-    _data_size = min(20, 10000. / np.sum(data[:, 2]))
 
     if ExperimentType.N_AFC == ExperimentType(config.experiment_type):
         ymin = 1. / config.experiment_choices
@@ -67,8 +66,8 @@ def plot_psychometric_function(result: Result,  # noqa: C901, this function is t
     if plot_data:
         y_data = data[:, 1] / data[:, 2]
         # the size is proportional to the sqrt of the data size, as in the MATLAB version.
-        # We added a factor of 1000 to make visually similar to the MATLAB version
-        size = np.sqrt(_data_size / data[:, 2])*(data_size*1000)
+        # We added a factor of 100 to make visually similar to the MATLAB version
+        size = np.sqrt(data[:, 2])*(data_size*100)
         ax.scatter(x_data, y_data, s=size, color=data_color, marker='.', clip_on=False)
 
     sigmoid = config.make_sigmoid()
