@@ -5,17 +5,7 @@ import numpy as np
 import pytest
 
 from psignifit import psignifit, psigniplot
-
-
-@pytest.fixture
-def data():
-    return np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
-                     [0.0020, 44.0000, 90.0000], [0.0025, 44.0000, 90.0000],
-                     [0.0030, 52.0000, 90.0000], [0.0035, 53.0000, 90.0000],
-                     [0.0040, 62.0000, 90.0000], [0.0045, 64.0000, 90.0000],
-                     [0.0050, 76.0000, 90.0000], [0.0060, 79.0000, 90.0000],
-                     [0.0070, 88.0000, 90.0000], [0.0080, 90.0000, 90.0000],
-                     [0.0100, 90.0000, 90.0000]])
+from .fixtures import input_data
 
 
 def get_std_options():
@@ -26,9 +16,9 @@ def get_std_options():
     return options
 
 
-def test_fit_basic(data):
+def test_fit_basic(input_data):
     options = get_std_options()
-    res = psignifit(data, **options)
+    res = psignifit(input_data, **options)
     param = res.parameter_estimate_MAP
     assert isclose(param['threshold'], 0.0046, abs_tol=0.0001)
     assert isclose(param['width'], 0.0045, abs_tol=0.0001)
@@ -37,49 +27,49 @@ def test_fit_basic(data):
     assert isclose(param['eta'], 5.8e-06, abs_tol=0.0001)
 
 
-def test_plot_psych(data):
+def test_plot_psych(input_data):
     options = get_std_options()
-    res = psignifit(data, **options)
+    res = psignifit(input_data, **options)
     plt.figure()
     psigniplot.plot_psychometric_function(res)
     plt.close('all')
 
 
-def test_plot_marginal(data):
+def test_plot_marginal(input_data):
     options = get_std_options()
-    res = psignifit(data, debug=True, **options)
+    res = psignifit(input_data, debug=True, **options)
     plt.figure()
     psigniplot.plot_marginal(res, 'threshold')
     plt.close('all')
 
 
-def test_plot2D(data):
+def test_plot2D(input_data):
     options = get_std_options()
-    res = psignifit(data, debug=False, **options)
+    res = psignifit(input_data, debug=False, **options)
 
     with pytest.raises(ValueError):
         plt.figure()
         psigniplot.plot_2D_margin(res, 'threshold', 'width')
         plt.close('all')
 
-    res = psignifit(data, debug=True, **options)
+    res = psignifit(input_data, debug=True, **options)
     plt.figure()
     psigniplot.plot_2D_margin(res, 'threshold', 'width')
     plt.close('all')
 
 
-def test_bias_analysis(data):
+def test_bias_analysis(input_data):
     plt.figure()
-    other_data = np.array(data)
+    other_data = np.array(input_data)
     other_data[:, 1] += 2
     other_data[:, 2] += 5
-    psigniplot.plot_bias_analysis(data, other_data)
+    psigniplot.plot_bias_analysis(input_data, other_data)
     plt.close('all')
 
 
-def test_fixed_parameters(data):
+def test_fixed_parameters(input_data):
     options = get_std_options()
-    res = psignifit(data, **options)
+    res = psignifit(input_data, **options)
     estim_param = res.parameter_estimate_MAP
     fixed_param = res.configuration.fixed_parameters
     all_param_values = res.parameter_values
