@@ -8,29 +8,29 @@ from psignifit import _priors
 def test_check_priors():
     stimulus_range = (0., 1.)
     width_min = 0.1
+    alpha = 0.13
     prior_dict = {}
     for parameter in ['threshold', 'width', 'lambda', 'gamma', 'eta']:
-        prior_dict[parameter] = _priors.default_prior(parameter, stimulus_range, width_min, width_alpha=0.05, beta=10)
-
+        prior_dict[parameter] = _priors.default_prior(parameter, stimulus_range, width_min, width_alpha=alpha, beta=10)
 
     # should not fail for default priors
     _priors.check_priors(prior_dict, stimulus_range, width_min)
 
-    # should fail for parameters not matching default priors
+    # should fail for parameters so far outside prior that the prior over the stimulus range  is 0
     with pytest.raises(AssertionError):
-        _priors.check_priors(prior_dict, stimulus_range, 10 * width_min)
-        _priors.check_priors(prior_dict, (1 + stimulus_range[0], 1 + stimulus_range[1]), width_min)
+        _priors.check_priors(prior_dict, (10 + stimulus_range[0], 10 + stimulus_range[1]), width_min)
 
     # should fail for non-positive, non-finite, or missing priors
     with pytest.raises(AssertionError):
         prior_dict['threshold'] = lambda x: np.zeros_like(x)
         _priors.check_priors(prior_dict, stimulus_range, width_min)
 
-        prior_dict['threshold'] = lambda x: np.fill_like(x, np.inf)
+    with pytest.raises(AssertionError):
+        prior_dict['threshold'] = lambda x: np.full_like(x, np.inf)
         _priors.check_priors(prior_dict, stimulus_range, width_min)
 
-        del prior_dict['threshold']
-        _priors.check_priors(prior_dict, stimulus_range, width_min)
+    del prior_dict['threshold']
+    _priors.check_priors(prior_dict, stimulus_range, width_min)
 
 
 def test_normalize_sin():

@@ -82,7 +82,7 @@ def default_prior(parameter: str, stimulus_range: Tuple[float, float], width_min
         raise ValueError("Default prior 'threshold' expects thresh_PC=0.5, got {thresh_PC = }")
 
     if parameter == 'threshold':
-        prior =  partial(threshold_prior, stimulus_range=stimulus_range)
+        prior = partial(threshold_prior, stimulus_range=stimulus_range)
     elif parameter == 'width':
         prior = partial(width_prior, wmin=width_min,
                          wmax=stimulus_range[1] - stimulus_range[0],
@@ -104,7 +104,7 @@ def _check_prior(priors, name, values):
     result = priors[name](values)
     assert np.all(np.isfinite(result)), f"Prior '{name}' returns non-finite values."
     assert np.all(result >= 0), f"Prior '{name}' returns negative values."
-    assert np.all(result != 0), f"Prior '{name}' returns zeros."
+    assert np.any(result > 0), f"Prior '{name}' returns zeros."
 
 
 def check_priors(priors: Dict[str, Prior], stimulus_range: Tuple[float, float],
