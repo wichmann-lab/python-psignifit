@@ -20,7 +20,7 @@ latex:
 html:
   home_page_in_navbar         : true
   use_repository_button       : true  # Whether to add a link to your repository button
-  announcement                : "Some parts of this documentation are still work in progress! Some information might be outdated." # A banner announcement at the top of the site.
+  # announcement                : "Some parts of this documentation are still work in progress! Some information might be outdated." # A banner announcement at the top of the site.
 
 # Add a bibtex file so that we can create citations
 #bibtex_bibfiles:
