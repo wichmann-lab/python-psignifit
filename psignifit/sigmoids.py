@@ -13,9 +13,10 @@ N = TypeVar('N', float, np.ndarray)
 
 
 class Sigmoid:
-    """ Base class for sigmoid implementation.
+    """ Base class for all sigmoid implementations in psignifit.
 
-    Handles negative output for the specific sigmoid implementations.
+    For each sigmoid class, one only needs to implement the sigmoid with increase proportion correct as a function
+    of stimulus value. A decreasing version can be obtained by setting `negative = True`.
 
     Sigmoid classes should derive from this class and implement the methods '_value', '_slope', '_threshold',
     and `_standard_parameters`.
@@ -26,24 +27,24 @@ class Sigmoid:
     by implementing only the methods `_scipy_distr` and `_standard_parameters`. The methods
     '_value', '_slope', '_threshold' will be automatically defined in such a case.
 
-    The stimulus levels, threshold and width are parameters of method calls.
-    They correspond to the object attributes PC and alpha in the following way:
+    The threshold, width, gamma and lambda parameters are passed as arguments of the `Sigmoid` methods. They
+    correspond to the object attributes PC and alpha in the following way:
 
     threshold: threshold is the stimulus level at which the sigmoid has value PC (float)
          psi(m) = PC , typically PC=0.5
-    width: the difference of stimulus levels where the sigmoid has value alpha and 1-alpha
+    width: the difference of stimulus levels where the sigmoid has value alpha and 1-alpha, typically alpha=0.05
          width = X_(1-alpha) - X_(alpha)
-         psi(X_(1-alpha)) = 0.95 = 1-alpha
-         psi(X_(alpha)) = 0.05 = alpha
+         psi(X_(1-alpha)) = 1 - alpha
+         psi(X_(alpha)) = alpha
+
+    Args:
+         PC: Proportion correct (sigmoid function value) at threshold (default is 0.5)
+         alpha: Scaling parameter (default is 0.05)
+         negative: If True, flip the sigmoid such that the proportion correct is decreasing with simulus level
+             (default is False)
     """
 
     def __init__(self, PC=0.5, alpha=0.05, negative=False):
-        """
-        Args:
-             PC: Proportion correct (sigmoid function value) at threshold
-             alpha: Scaling parameter
-             negative: Flip sigmoid such proportion correct is decreasing.
-        """
         self.alpha = alpha
         self.negative = negative
         self.PC = PC
@@ -70,7 +71,7 @@ class Sigmoid:
             gamma: Guess rate (lower asymptote of the sigmoid)
             lambd: Lapse rate (upper asymptote of the sigmoid)
         Returns:
-            Proportion correct at the stimulus values.
+            Proportion correct at the stimulus level values
         """
 
         value = self._value(stimulus_level, threshold, width)
@@ -91,7 +92,7 @@ class Sigmoid:
             gamma: Guess rate (lower asymptote of the sigmoid)
             lambd: Lapse rate (upper asymptote of the sigmoid)
         Returns:
-            Slope at the stimulus values.
+            Slope at the stimulus level values
         """
 
         raw_slope = self._slope(stimulus_level, threshold, width)
@@ -104,18 +105,16 @@ class Sigmoid:
 
     def inverse(self, prop_correct: N, threshold: N, width: N,
                 gamma: Optional[N] = None, lambd: Optional[N] = None) -> np.ndarray:
-        """ Finds the stimulus value for given parameters at different proportion correct.
-
-        See :class:psignifit.sigmoids.Sigmoid for a discussion of the parameters.
+        """ Calculate the stimulus level at a given proportion correct value.
 
         Args:
-            prop_correct: Proportion correct at the threshold to calculate.
+            prop_correct: Proportion correct value
             threshold: Threshold at `PC`
             width: Width of the sigmoid
             gamma: Guess rate (lower asymptote of the sigmoid)
             lambd: Lapse rate (upper asymptote of the sigmoid)
         Returns:
-            Threshold at the proportion correct values.
+            Stimulus level at the proportion correct values
         """
         prop_correct = np.asarray(prop_correct)
         if lambd is not None and gamma is not None:
@@ -130,7 +129,7 @@ class Sigmoid:
         return result
 
     def standard_parameters(self, threshold: N, width: N) -> tuple:
-        """ Transforms parameters threshold and width to a standard parametrization.
+        """ Transforms the parameters threshold and width to a standard parametrization.
 
         The interpretation of the standard parameters, location and scale, depends on the sigmoid class used.
         For instance, for a Gaussian sigmoid, the location corresponds to the mean and the scale to the standard
@@ -159,7 +158,7 @@ class Sigmoid:
             threshold: Threshold at `PC`
             width: Width of the sigmoid
         Returns:
-            Proportion correct at the stimulus values.
+            Proportion correct at the stimulus level values
         """
         loc, scale = self._standard_parameters(threshold=threshold, width=width)
         value = self._cdf(stimulus_level, loc=loc, scale=scale)
@@ -176,7 +175,7 @@ class Sigmoid:
             threshold: Threshold at `PC`
             width: Width of the sigmoid
         Returns:
-            Slope at the stimulus level value
+            Slope at the stimulus level values
         """
         loc, scale = self._standard_parameters(threshold=threshold, width=width)
         raw_slope = self._pdf(stimulus_level, loc=loc, scale=scale)
@@ -214,16 +213,16 @@ class Sigmoid:
             threshold: Threshold at `PC`
             width: Width of the sigmoid
         Returns:
-            Standard parameters (loc, scale) for the sigmoid subclass.
+            Standard parameters (loc, scale) for the sigmoid subclass
         """
         raise NotImplementedError("This should be overwritten by an implementation.")
 
     def _scipy_distr(self):
-        """ Get the scipy.stats implementation of the underlying cdf.
+        """ Get the `scipy.stats` implementation of the underlying cdf.
 
         Returns
-            scipy_distr: scipy.stats implementation of the distribution
-            distr_kwarg: A dictionary of extra keyword arguments needed to initialize the scipy.stats distribution
+            scipy_distr: `scipy.stats` implementation of the distribution
+            distr_kwarg: A dictionary of extra keyword arguments needed to initialize the `scipy.stats` distribution
         """
         raise NotImplementedError("This should be overwritten by an implementation.")
 
@@ -329,19 +328,19 @@ ALL_SIGMOID_CLASSES = set(_CLASS_BY_NAME.values())
 
 
 def sigmoid_by_name(name, PC=None, alpha=None):
-    """ Find and initialize a sigmoid from the name.
+    """ Find and initialize a sigmoid from its name.
 
-    The list of supported name can be found in the global
-    variable :const:`psignifit.sigmoids.ALL_SIGMOID_NAMES`.
+    The list of supported name can be found in the global variable :const:`psignifit.sigmoids.ALL_SIGMOID_NAMES`.
 
-    Note, that some supported names are synonymes, such
-    equal sigmoids might be returned for different names.
+    Note that some sigmoids are known by different names, and `ALL_SIGMOID_NAMES` contains some aliases.
 
-    Names starting with `neg_` indicate, that the
-    sigmoid is decreasing instead of increasing.
+    Names starting with `neg_` indicate that, with increasing stimulus level, the sigmoid is decreasing instead of
+    increasing.
 
-    See :meth:`psignifit.sigmoids.Sigmoid.__init__` for
-     a description of the arguments.
+    Args:
+        name: Name of the sigmoid
+        PC: Proportion correct (sigmoid function value) at threshold (default is 0.5)
+        alpha: Scaling parameter (default is 0.05)
     """
     kwargs = dict()
     name = name.lower().strip()
@@ -357,14 +356,13 @@ def sigmoid_by_name(name, PC=None, alpha=None):
 
 
 def assert_sigmoid_sanity_checks(sigmoid, n_samples: int, threshold: float, width: float):
-    """ Assert multiple sanity checks on this sigmoid implementation.
+    """ Perform multiple sanity checks on a sigmoid implementation.
 
-    This is support code to have a first sanity check for  custom sigmoid subclasses.
+    This is support code to have a general sanity check for custom sigmoid subclasses.
     These checks cannot completely assure the correct implementation of a sigmoid,
-    but try to catch common and obvious mistakes.
+    but they try to catch common and obvious mistakes.
 
-    The checks are performed on linear spaced stimulus levels between 0 and 1
-    and the provided sigmoid parameters.
+    The checks are performed on linear spaced stimulus levels between 0 and 1 and the provided sigmoid parameters.
 
     Two checks for relations between parameters:
       - `sigmoid(threshold_stimulus_level) == threshold_percent_correct`
@@ -374,7 +372,7 @@ def assert_sigmoid_sanity_checks(sigmoid, n_samples: int, threshold: float, widt
 
     Two checks for the inverse:
       - `inverse(PC) == threshold_stimulus_level`
-      - `inverse(inverse(stimulus_levels) == stimulus_levels`
+      - `inverse(sigmoid(stimulus_levels)) == stimulus_levels`
 
     Two checks for the slope:
       - `maximum(|slope(stimulus_levels)|)` close to `|slope(0.5)|`

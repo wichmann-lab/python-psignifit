@@ -4,22 +4,22 @@ from scipy import stats
 from psignifit._utils import check_data
 from psignifit.sigmoids import sigmoid_by_name
 
-def pool_blocks(data: np.ndarray, max_tol=0, max_gap=np.inf, max_length=np.inf):
-    """ Pool trials
 
-    Pool trials together which differ at max_tol from the first one
-    it finds, are separated by maximally max_gap trials of other levels and
-    at max max_length trials appart in general.
+def pool_blocks(data: np.ndarray, max_tol=0, max_gap=np.inf, max_length=np.inf):
+    """ Pool trials by stimulus level.
+
+    Pool together trials which differ at most `max_tol`, are separated by maximally `max_gap` trials from other
+    levels, and are maximum `max_length` trials apart overall.
 
     Args:
         data: Array of integer triplets (stimulus level, number correct, number trials)
-        max_tol: Maximum difference in stimulus level to pool trials. Default: 0.
+        max_tol: Maximum difference in stimulus level in each pool of trials. Default: 0.
         max_gap: Maximum trial gap of other stimulus levels to perform pooling. Default: infinity.
         max_length: Maximum trial distance to pool. Default: infinity.
     Returns:
         Pooled data: Array of integer triplets (stimulus level, number correct, number trials),
-                     where stimulus level is averaged and correct/trial numbers are summed over
-                     the pooled data rows.
+                     where stimulus level is averaged and correct trial counts are summed over
+                     the pooled data.
     """
     data = check_data(data)
 
@@ -55,42 +55,25 @@ def psychometric_with_eta(stimulus_level, threshold, width, gamma, lambda_,
                           sigmoid_name, eta, random_state=None):
     """ Psychometric function with overdispersion.
 
-
-    This is a convenience function used mostly for testing and demos, to make the intent of creating a psychometric
-    function more explicit. The implementation simply combines creating a `Sigmoid` object using the sigmoid name,
-    and calling the object to generate the proportion correct values corresponding to `stimulus_level`.
-
-
     This is a convenience function used mostly for testing and demos. It first computes proportion correct values
     for a  given psychometric function type, specified by name, and then adds some additional noise to the data,
     so that its variance is compatible with the overdispersion parameter `eta`.
 
     See Section 2.2 in Schuett, Harmeling, Macke and Wichmann (2016).
 
-    Parameters:
-        stimulus_level: array
-          Values of the stimulus value
-        threshold: float
-            Threshold of the psychometric function
-        width: float
-            Width of the psychometric function
-        gamma: float
-            Guess rate
-        lambda_: float
-            Lapse rate
-        sigmoid_name: callable
-            Name of sigmoid function to use. See `psignifit.sigmoids.ALL_SIGMOID_NAMES` for the list of available
-            sigmoids.
-        eta: float
-            Overdispersion parameter
-        random_state: np.RandomState
-            Random state used to generate the additional variance in the data.
-            If None, NumPy's default random number generator is used.
-
+    Args:
+        stimulus_level: Values of the stimulus value
+        threshold: Threshold of the psychometric function
+        width: Width of the psychometric function
+        gamma: Guess rate
+        lambda_: Lapse rate
+        sigmoid_name: Name of sigmoid function to use. See `psignifit.sigmoids.ALL_SIGMOID_NAMES` for the list of
+            available sigmoids
+        eta: Overdispersion parameter
+        random_state: Random state used to generate the additional variance in the data. If None, NumPy's default
+            random number generator is used.
     Returns:
-        psi: array
-            Proportion correct values for each stimulus level
-
+        psi: Proportion correct values for each stimulus level
     """
 
     if random_state is None:
