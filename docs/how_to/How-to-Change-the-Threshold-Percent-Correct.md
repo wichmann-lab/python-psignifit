@@ -14,7 +14,7 @@ kernelspec:
 # Change the threshold percentage correct 
 
 ```{warning}
-The option to change the parameter 'thresh_PC' is so far only implemented in the MATLAB version of psignifit.
+This option is so far only implemented in the MATLAB version of psignifit.
 In this python version they are still work in progress and can not be changed from the default.
 ```
 
