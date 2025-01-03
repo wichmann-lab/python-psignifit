@@ -102,10 +102,12 @@ res = ps.psignifit(data, **options)
 
 ## Threshold and width definitions
 
+### Threshold definition (`thresh_PC`)
+
 ```{warning}
-Options to change the parameters 'thresh_PC' and 'width_alpha' (width parameter of the psychometric function) 
-are so far only implemented in the MATLAB version of psignifit.
-In this python version they are still work in progress and can not be changed from their defaults.
+This option is only implemented in the MATLAB version of psignifit.
+For the python version the default value cannot be changed. 
+Adding this functionality is still work in progress.
 ```
 
 This option sets the proportion correct to correspond to the threshold on the *unscaled* sigmoid. Possible values are in the range from 0 to 1, default is 0.5. The default corresponds to 75\% in a 2AFC task (midway between the guess rate of 50 % and ceiling performance 100%).
@@ -117,6 +119,9 @@ options['thresh_PC'] = .9
 ```
 
 Note that this corresponds to a 95 \% in a 2AFC task.
+
+
+### Width definition (`width_alpha`)
 
 The definition of the `width` parameter of a psychometric function can be changed with the option `width_alpha`.
 

@@ -14,8 +14,9 @@ kernelspec:
 # Change the threshold percentage correct 
 
 ```{warning}
-This option is so far only implemented in the MATLAB version of psignifit.
-In this python version they are still work in progress and can not be changed from the default.
+This option is only implemented in the MATLAB version of psignifit.
+For the python version the default value cannot be changed. 
+Adding this functionality is still work in progress.
 ```
 
 This option sets the proportion correct to correspond to the threshold on the *unscaled* sigmoid. Possible values are in the range from 0 to 1, default is 0.5. The default corresponds to 75\% in a 2AFC task (midway between the guess rate of 50 % and ceiling performance 100%).
