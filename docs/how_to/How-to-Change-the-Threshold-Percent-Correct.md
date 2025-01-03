@@ -14,9 +14,8 @@ kernelspec:
 # Change the threshold percentage correct 
 
 ```{warning}
-Options to change the parameters 'thresh_PC' and 'width_alpha' (width parameter of the psychometric function) 
-are so far only implemented in the MATLAB version of psignifit.
-In this python version they are still work in progress and can not be changed from their defaults.
+The option to change the parameter 'thresh_PC' is so far only implemented in the MATLAB version of psignifit.
+In this python version they are still work in progress and can not be changed from the default.
 ```
 
 This option sets the proportion correct to correspond to the threshold on the *unscaled* sigmoid. Possible values are in the range from 0 to 1, default is 0.5. The default corresponds to 75\% in a 2AFC task (midway between the guess rate of 50 % and ceiling performance 100%).
