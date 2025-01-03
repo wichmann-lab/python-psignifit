@@ -39,18 +39,22 @@ res = ps.psignifit(data, **options)
 
 
 ## Estimation Type
-
-This option sets how you want to estimate your fit from the posterior. 
+As described in detail in the section [Parameters estimates: MAP and mean](map_vs_mean), this option sets how you want to estimate your fit from the posterior.
 
 - 'mean': using the posterior mean. In a Bayesian sense this is a more suitable estimate of the expected value of the posterior. However, in our paper we show that for psychometric function fitting and the small datasets used in experimental psychology and the neurosciences, and for the our priors the MAP is preferable as default!
 - 'MAP': maximum a posteriori computed from the posterior. Default.
 
 ```{code-cell} ipython3
-options['estimate_type'] = 'MAP'
-# alternatively:
-options['estimate_type'] = 'mean'
+# This gives the default estimate, in this case the mean estimate since we set it in the options.
+print(f"parameter estimate (default=MAP): {res.parameter_estimate}")
+print(f"parameter estimate (MAP): {res.parameter_estimate_MAP}")
+print(f"parameter estimate (mean){res.parameter_estimate_mean}")
 ```
 
+you can also get it using this method:
+```{code-cell} ipython3
+print(res.get_parameter_estimate(estimate_type="MAP"))
+```
 
 ## Optimization Steps
 This option sets the number of grid points on each dimension in the final
@@ -61,13 +65,12 @@ The number of steps is passed as a dictionary with keys 'threshold', 'width', 'l
 You may change this if you need more accurate estimates on the sparsely
 sampled parameters. For example, to get an even more exact estimate on the
 lapse rate/upper asymptote, set lambda to 50.
-In this case the lapse rate is sampled at 50 points giving you a much more exact
-and smooth curve for comparisons.
+In this case the lapse rate is sampled at 50 points giving you a much more exact and smooth curve for comparisons.
 
 ```{code-cell} ipython3
 options['grid_steps'] = {'lambda': 50}
+res = ps.psignifit(data, **options)
 ```
-
 
 ## Confidence intervals
 
@@ -79,6 +82,7 @@ For example to get 95% **and** 99% confidence intervals try
 
 ```{code-cell} ipython3
 options['confP'] = [.95, .99]
+res = ps.psignifit(data, **options)
 ```
 
 ### Computing method
@@ -93,13 +97,16 @@ The option `CI_method` sets how the confidence intervals are computed. The possi
 options['CI_method'] = 'percentiles'
 # or
 options['CI_method'] = 'project'
+res = ps.psignifit(data, **options)
 ```
 
-## Threshold and width definitions 
-This option sets the proportion correct correspond to the threshold on the *unscaled* sigmoid. 
-Possible values are in the range from 0 to 1, default is 0.5. The default corresponds to 75\% in a 2AFC task (midway between the guess rate of 50 % and ceiling performance 100%).
+## Threshold and width definitions```{warning}
+Options to change the 'thresh_PC' and 'width_alpha' (width parameter of the psychometric function) parameters are implemented in the matlab version of the code. In this python version they are still work in progress and can not be changed from their defaults.
+```
 
-To set it to a different value, for example to 90 %, you'll do 
+This option sets the proportion correct to correspond to the threshold on the *unscaled* sigmoid. Possible values are in the range from 0 to 1, default is 0.5. The default corresponds to 75\% in a 2AFC task (midway between the guess rate of 50 % and ceiling performance 100%).
+
+To set it to a different value, for example to 90 %, you'll do
 
 ```{code-cell} ipython3
 options['thresh_PC'] = .9
@@ -107,7 +114,7 @@ options['thresh_PC'] = .9
 
 The definition of the `width` parameter of a psychometric function can be changed with the option `width_alpha`.
 
-`width=`$\Psi^{-1}(1-\alpha) - \Psi^{-1}(\alpha)$ where $\Psi^{-1}$ is the inverse of the sigmoid function.
+`width = `$\Psi^{-1}(1-\alpha) - \Psi^{-1}(\alpha)$ where $\Psi^{-1}$ is the inverse of the sigmoid function.
 
 `width_alpha` must be between 0 and .5 excluding. Default is `width=0.05`
 
@@ -120,15 +127,15 @@ options['width_alpha'] = .05
 ## Priors
 
 You can set the priors manually passing them as a dictionary with the parameter name as key and the custom prior function
-as the value.  
+as the value.
 
 For details on how do change these refer to the [priors demo](priors).
 
 
 The strength of the prior in favor of a binomial observer can be set with
-the `beta_prior` option. Larger values correspond to a stronger prior. 
+the `beta_prior` option. Larger values correspond to a stronger prior.
 The default value is 10; we choose this value after
-a rather large number of simulations. Refer to 
+a rather large number of simulations. Refer to
 [Schütt & Wichmann (2016)](http://www.sciencedirect.com/science/article/pii/S0042698916000390) 
 to learn more about this.
 
@@ -193,7 +200,7 @@ These options set how your data is pooled into blocks.
 Then we pool together a maximum of poolMaxLength trials,
 which are separated by a maximum of poolMaxGap trials of other stimulus levels.
 If you want you may specify a tolerance in stimulus level to pool trials,
-but by default we only pool trials with exactly the same stimulus level.
+but by default we only pool trials with exactly the same stimulus level. For more detail, see the page on [Pooling](pooling_utilities).
 
 ```{note}
 In contrast to the matlab implementation, python-psignifit does not pool implicitly. Instead a warning is printed, if pooling might be useful.
