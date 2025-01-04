@@ -25,6 +25,5 @@ options = {'thresh_PC': .9}
 
 Note that this corresponds to a 95 \% in a 2AFC task.
 
-Be aware that even though the interpretation of the threshold parameter changes with different values for `thresh_PC`,
-the prior over the threshold remains unchanged, which means that the prior over psychometric functions will be
-shifted. If this is not what you intended, please define a custom prior over the threshold.
+Be aware that the default prior over threshold assumes that the experimental stimulus range covers the range where 
+the threshold likely falls. If this doesn't match your setup, you'll need a custom prior.
