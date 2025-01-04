@@ -129,9 +129,14 @@ def plot_stimulus_residuals(result: Result, ax: matplotlib.axes.Axes = None,
 
 def plot_block_residuals(result: Result, ax: matplotlib.axes.Axes = None,
                          estimate_type: EstimateType = None) -> matplotlib.axes.Axes:
-    """ Plot the fit residuals against "time", i.e., against the order of the trials' blocks.
+    """ Plot the fit residuals against "time", i.e., against the order of the blocks.
 
-    A trend in this plot would indicate learning / changes in performance over time.
+    Psignifit assumes that the order of the rows in the input data array follows
+    the same order presented to the observer, i.e. the first row correspond to
+    the first block presented, the second row the second block presented, etc.
+
+    The deviance should be equally distributed across blocks. A trend in this plot
+    would indicate learning / changes in performance over time.
 
     Args:
         result: `Result` object containing the fitting information
@@ -141,7 +146,7 @@ def plot_block_residuals(result: Result, ax: matplotlib.axes.Axes = None,
     """
     if ax is None:
         ax = plt.gca()
-    return _plot_residuals(result.data[:, 0], 'Block Number', result, ax, estimate_type=estimate_type)
+    return _plot_residuals(np.arange(0, result.data.shape[0]), 'Block Number', result, ax, estimate_type=estimate_type)
 
 
 def _plot_residuals(x_values: np.ndarray,
@@ -195,8 +200,11 @@ def plot_modelfit(result: Result, estimate_type: EstimateType = None) -> matplot
     shows a different shape than the fitted one.
 
     The third plot on the right shows the residuals against "time", i.e., against
-    the order of the trials' blocks. A trend in this plot would indicate
-    learning / changes in performance over time.
+    the order of the blocks. A trend in this plot would indicate learning / changes
+    in performance over time. For this plot psignifit assumes that the order of the rows
+    in the input data array follows the same order presented to the observer,
+    i.e. the first row correspond to the first block presented,
+    the second row the second block presented, etc.
 
     For the central and right plot, dashed lines depict a linear, quadratic and
     cubic fit of the residuals. These should help in detecting systematic deviations from zero.
