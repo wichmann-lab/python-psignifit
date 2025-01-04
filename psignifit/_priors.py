@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from typing import Tuple, Dict
 from functools import partial
+from typing import Tuple, Dict
+import warnings
 
 import numpy as np
 import scipy.stats
@@ -79,7 +80,10 @@ def eta_prior(x, k):
 def default_prior(parameter: str, stimulus_range: Tuple[float, float], width_min: float,
                    width_alpha: float, beta: float, threshold_percent_correct: float = 0.5) -> Dict[str, Prior]:
     if not np.isclose(threshold_percent_correct, 0.5):
-        raise ValueError("Default prior 'threshold' expects thresh_PC=0.5, got {thresh_PC = }")
+        warnings.warn(f"The `thresh_PC` parameter is set to {threshold_percent_correct}, not the default 0.5. "
+                      f"Be aware that the default prior over threshold assumes that the experimental stimulus range "
+                      f"covers the range where the threshold likely falls. If this doesn't match your setup, you'll "
+                      f"need a custom prior. See the documentation for guidance.")
 
     if parameter == 'threshold':
         prior = partial(threshold_prior, stimulus_range=stimulus_range)

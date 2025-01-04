@@ -62,6 +62,7 @@ def plot_psychometric_function(result: Result,  # noqa: C901, this function is t
     else:
         ymin = 0
 
+    # --- Plot experimental data as dots
     x_data = data[:, 0]
     if plot_data:
         y_data = data[:, 1] / data[:, 2]
@@ -70,6 +71,7 @@ def plot_psychometric_function(result: Result,  # noqa: C901, this function is t
         size = np.sqrt(data[:, 2])*(data_size*100)
         ax.scatter(x_data, y_data, s=size, color=data_color, marker='.', clip_on=False)
 
+    # --- Plot the point estimate of the psychometric function
     sigmoid = config.make_sigmoid()
     x = np.linspace(x_data.min(), x_data.max(), num=1000)
     x_low = np.linspace(x[0] - extrapolate_stimulus * (x[-1] - x[0]), x[0], num=100)
@@ -85,16 +87,23 @@ def plot_psychometric_function(result: Result,  # noqa: C901, this function is t
     ax.plot(x_low, y[:len(x_low)], '--', c=line_color, lw=line_width, clip_on=False)
     ax.plot(x_high, y[-len(x_high):], '--', c=line_color, lw=line_width, clip_on=False)
 
+    # --- Plot the parameters
     if plot_parameter:
+        PC = config.thresh_PC
+        rescaled_PC = params['gamma'] + (1 - params['lambda'] - params['gamma']) * PC
+
+        # -- Vertical line at the point estimate of the threshold
         x = [params['threshold'], params['threshold']]
-        y = [ymin, params['gamma'] + (1 - params['lambda'] - params['gamma']) * config.thresh_PC]
+        y = [ymin, rescaled_PC]
         ax.plot(x, y, '-', c=line_color)
 
+        # -- Horizontal lines at lambda and gamma
         ax.axhline(y=1 - params['lambda'], linestyle=':', color=line_color)
         ax.axhline(y=params['gamma'], linestyle=':', color=line_color)
 
+        # -- Confidence interval of the threshold
         CI_95 = result.confidence_intervals['threshold']['0.95']
-        y = np.array([params['gamma'] + .5 * (1 - params['lambda'] - params['gamma'])] * 2)
+        y = np.array([rescaled_PC, rescaled_PC])
         ax.plot(CI_95, y, c=line_color)
         ax.plot([CI_95[0]] * 2, y + [-.01, .01], c=line_color)
         ax.plot([CI_95[1]] * 2, y + [-.01, .01], c=line_color)
@@ -467,7 +476,7 @@ def plot_2D_margin(result: Result,
         ax: Axis object on which to plot. Default is None (new axes are created)
     Returns:
         Axis object on which the plot has been made
-"""
+    """
     if ax is None:
         ax = plt.gca()
     if result.debug=={}:

@@ -104,13 +104,9 @@ res = ps.psignifit(data, **options)
 
 ### Threshold definition (`thresh_PC`)
 
-```{warning}
-This option is only implemented in the MATLAB version of psignifit.
-For the python version the default value cannot be changed. 
-Adding this functionality is still work in progress.
-```
-
-This option sets the proportion correct to correspond to the threshold on the *unscaled* sigmoid. Possible values are in the range from 0 to 1, default is 0.5. The default corresponds to 75\% in a 2AFC task (midway between the guess rate of 50 % and ceiling performance 100%).
+This option sets the proportion correct to correspond to the threshold on the *unscaled* sigmoid. Possible values 
+are in the range from 0 to 1, default is 0.5. The default corresponds to 75\% in a 2AFC task (midway between the 
+guess rate of 50 % and ceiling performance 100%).
 
 To set it to a different value, for example to 90 %, you'll do
 
