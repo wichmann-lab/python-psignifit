@@ -13,11 +13,11 @@ kernelspec:
 
 # Basic usage
 
-In this guide, we show the main features of *python-psignifit*. Please
+In this guide, we show the main features of *psignifit*. Please
 look at the [installation guide](./install_guide) for instructions 
-how to install this package.
+on how to install this package.
 
-*python-psignifit* is a toolbox to fit psychometric functions. It comes
+*psignifit* is a toolbox to fit psychometric functions. It comes
 with tools to visualize and evaluate the fit.
 
 
@@ -66,8 +66,8 @@ This dataset comes from a simple signal detection experiment.
 
 ## Fitting a psychometric function
 
-A simple call to `psignifit.psignifit` 
-will fit your sigmoid function to the data:
+A simple call of the `psignifit` function
+will fit a sigmoid function to the data:
 
 
 ```{code-cell} ipython3
@@ -79,7 +79,7 @@ jupyter:
 result = ps.psignifit(data, experiment_type='2AFC');
 ```
 
-*python-psignifit* comes with presets for different psychometric
+*psignifit* comes with presets for different psychometric
 experiments. 
 Apart from *nAFC* (`2AFC`, `3AFC`, ...) 
 we provide two other options:  `yes/no` which enables a 
@@ -95,7 +95,7 @@ the cummulative Gauss (`sigmoid="gauss"`). Another
 common alternative is the logistic (`sigmoid="logistic")`.
 
 Refer to the [options demo](examples/basic-options) and the [sigmoids page](examples/plot_all_sigmoids)
-for all possible sigmoids implemented in psignifit.
+for all possible sigmoids implemented in *psignifit*.
 
 Advanced users can pass more arguments to fine-tune the fitting procedure,
 [as described here](examples/advanced-options).
@@ -116,7 +116,7 @@ print(result.parameter_estimate)
 ```
 
 This returns a python dictionary containing the estimated parameters.
-The parameters estimated by psignifit are:
+The parameters estimated by *psignifit* are:
 
 1.  *threshold*, the stimulus value of equal-odds
 2.  *width*, the difference between the 5 and the 95 percentile of the
@@ -137,7 +137,7 @@ print(result.parameter_estimate['threshold'])
 
 
 
-Similarly, psignifit also returns the confidence intervals for 
+Similarly, *psignifit* also returns the confidence intervals for 
 each parameter. For example for the threshold 
 
 ```{code-cell} ipython3
@@ -171,6 +171,6 @@ plt.show()
 
 ## Next steps
 
-We covered the basic steps in using *python-psignifit*. Please refer to
-the demo and examples on the left menu to learn how to change the default
-parameters and explore other possibilities.
+We covered the basic steps in using *psignifit*.
+To dive deeper you can have a look at the *Usage guides*, the *Quick how-to*
+and the *Extras* on the left navigation menu.
