@@ -14,14 +14,21 @@ mystnb:
 ---
 # Pooling Utility
 
-Psignifit comes with an automatic pooling utility, which can pool trials of very similar stimulus levels into blocks to reduce the time required for fitting, to profit from the beta-binomial model and to improve interpretability of data-plots.
+*psignifit* comes with a pooling utility, which can pool trials of very similar stimulus levels into blocks to reduce the time required for fitting, to profit from the beta-binomial model and to improve interpretability of data-plots.
 
-In contrast to the matlab implementation, python-psignifit does not pool implicitly. Instead a warning is printed, if pooling might be useful. Then pooling can be run as a separate call using psignifit.tools.pool_blocks
+```{note}
+In contrast to the MATLAB implementation, *psignifit* does not pool implicitly. Instead a warning is printed if pooling might be useful. Then pooling can be run as a separate call using `psignifit.tools.pool_blocks`
+```
 
-the general form of the manual pooling utility looks like this:
+The general form of the manual pooling utility looks like this:
 ```
 pooled_data = pool_blocks(data, max_tol=0.4, max_gap=10, max_length=10)
 ```
+
+It pools together trials which differ at most `max_tol`, are separated by
+maximally `max_gap` trials from other levels, and are maximum `max_length`
+trials apart overall.
+
 
 # Example
 For illustration we will use a dataset obtained from running a Quest run with 400 trials.
