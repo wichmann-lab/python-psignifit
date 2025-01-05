@@ -32,10 +32,6 @@ parts:
     - file: examples/parameter_recovery_in_logspace_demo
     - file: examples/map_vs_mean
      
-  - caption: Benchmarks
-    chapters:
-    - file: test_MATLAB_version
-
   - caption: Reference
     chapters:
     - file: reference/api.md
