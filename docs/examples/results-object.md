@@ -60,7 +60,7 @@ print(res.confidence_intervals['width'])
 ```
 
 ## Options
-In addition, the result contains the complete set of options passed. We called this 'configuration'
+In addition, the result contains the complete set of options passed:
 
 ```{code-cell} ipython3
 print(res.configuration)
@@ -74,7 +74,7 @@ otherdata = np.copy(data)
 otherdata[:, 0] = otherdata[:, 0] + 0.01
 
 # fit with exact same options
-other_res = ps.psignifit(otherdata, res.configuration)
+other_res = ps.psignifit(otherdata, conf=res.configuration)
 
 # the difference in threshold should return the introduced shift
 print(other_res.parameter_estimate['threshold'] - res.parameter_estimate['threshold'])
@@ -104,5 +104,12 @@ psp.plot_psychometric_function(loaded_res);
 
 ## Debug mode
 
-If needed, psignifit can also return the whole grid of posterior probabilities by passing the option `debug=True`. In this mode also the prior definitions as lambda functions are stored. Because of this, the result object is not serializable anymore and cannot be saved to JSON.
-Some diagnostic plots require the debug mode, however this is not default.
+If needed, *psignifit* can also return the whole grid of posterior probabilities by passing the option `debug=True`:
+
+```{code-cell} ipython3
+# Run psignifit in debug mode
+res = ps.psignifit(data, sigmoid='norm', experiment_type='2AFC', debug=True)
+```
+
+In this mode the prior are stored as function objects. Because of this, the result object is not serializable anymore
+and cannot be saved to JSON. Some diagnostic plots require the debug mode though.
