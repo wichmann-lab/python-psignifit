@@ -35,10 +35,7 @@ data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
                  [0.0070, 88.0000, 90.0000], [0.0080, 90.0000, 90.0000],
                  [0.0100, 90.0000, 90.0000]])
 
-options = {'sigmoid': 'norm',
-           'experiment_type' : '2AFC'}
-
-res = ps.psignifit(data, **options)
+res = ps.psignifit(data, sigmoid='norm', experiment_type='2AFC')
 ```
 
 ## Obtaining Threshold Values
@@ -84,8 +81,7 @@ The credible intervals are for the confidence levels given for your
 function fit.
 The estimates calculated by this function are very conservative when
 you move far away from the original threshold, as we simply assume the
-worst case for all other parameters instead of averaging over the values
-correctly.
+worst case for all other parameters instead of averaging over the values.
 
 ## Obtaining Slope Values
 
