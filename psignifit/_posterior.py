@@ -250,7 +250,10 @@ def maximize_posterior(data, param_init: Dict[str, float], param_fixed: Dict[str
     init_values = [value for name, value in sorted(param_init.items())]
     optimized_values = optimize.fmin(objective, init_values, disp=False)
     # "sorted" is required so that the parameters are matched to the axes in  alphabetical order
-    optimized_param = dict(zip(sorted(param_init.keys()), optimized_values))
+    optimized_param = dict(zip(sorted(param_init.keys()), optimized_values.tolist()))
+    # convert fixed parameters to Python floats (they are numpy scalars)
+    for key, value in param_fixed.items():
+        param_fixed[key] = float(value)
     return {**param_fixed, **optimized_param}
 
 
