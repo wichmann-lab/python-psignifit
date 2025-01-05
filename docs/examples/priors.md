@@ -6,7 +6,7 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.16.4
 kernelspec:
-  display_name: Python 3 (ipykernel)
+  display_name: Python 3
   language: python
   name: python3
 ---
@@ -17,13 +17,12 @@ This demo covers how we set the priors for different situations.
 This gives you effective control over which parameters of the
 psychometric function are considered for fitting and all confidence
 statements.
-There is no way to do Bayesian statistics without a prior.
 
 
 ## Staying with the standard
 
-First let's have a look what psignifit does if you do not specify a
-prior explicitly. In this case psignifit uses an heuristic and chooses
+First let's have a look what *psignifit* does if you do not specify a
+prior explicitly. In this case *psignifit* uses an heuristic and chooses
 a prior which assumes that you somehow sampled the whole psychometric function.
 
 Specifically, it assumes that the threshold is within the range of
@@ -84,9 +83,9 @@ You can evaluate your priors with above plot. With these color-coded sigmoids
 you can evaluate the adequacy of the prior:
 
 For a threshold prior to be adequate (first column), it should be flat along all your stimulus levels; this will ensure that the threshold estimation is driven exclusively by the data. The stimulus levels of your data are shown as black-dots in the x-axis.
-The prior is flat (constant) for all threshold values between the red and blue sigmoids; both are equally likely. The yellow and green sigmoids are very unlikely, and this makes sense as they are outside of the range of stimulus levels. Here you can see that `psignifit` assumes that you choose stimulus values along the whole range the psychometric function.
+The prior is flat (constant) for all threshold values between the red and blue sigmoids; both are equally likely. The yellow and green sigmoids are very unlikely, and this makes sense as they are outside of the range of stimulus levels. Here you can see that *psignifit* assumes that you choose stimulus values along the whole range the psychometric function.
 
-Similarly, for the width prior (middle column) the sigmoids varing between the red and blue cases are more or less likely; contrarily the yellow and green sigmoids are very unlikely. Again this makes sense, as `psignifit` assumes that you sampled the whole range of the psychometric function and not just around the threshold.
+Similarly, for the width prior (middle column) the sigmoids varing between the red and blue cases are more or less likely; contrarily the yellow and green sigmoids are very unlikely. Again this makes sense, as *psignifit* assumes that you sampled the whole range of the psychometric function and not just around the threshold.
 
 Finally for the lapse prior it assumes a decaying prior (right column), which in simulations have been shown to be a reasonable assumption. You don't expect that observers lapse more than 20%; if so, then the observer is the problem (e.g. they were not following instructions, falling asleep, lapsing in attention, etc). For these cases maybe consider to repeat the experiment.
 
@@ -96,7 +95,7 @@ Finally for the lapse prior it assumes a decaying prior (right column), which in
 
 There are situations for which the assumptions for our standard prior
 do not hold. For example when **adaptive methods** are used or you fit
-incomplete datasets. To fit these correctly psignifit allows you to set
+incomplete datasets. To fit these correctly *psignifit* allows you to set
 the realistic range for the threshold/ the range of data you expect to
 measure manually. In this part we show how to do this.
 
@@ -105,7 +104,7 @@ For example consider the followind dataset, which is a simulation of a
 This samples considerably above threshold. In this case the true
 threshold and width were 1.
 Thus the assumption that we know that the threshold
-(threshold as defined in psignifit 4, not what 3-down-1-up defines as threshold!)
+(threshold as defined in *psignifit*, not what 3-down-1-up defines as threshold!)
 is in the range of the data is clearly violated.
 
 
@@ -153,7 +152,7 @@ psp.plot_psychometric_function(res, data_size=0.1);
 ```
 
 You should notice that the proportion correct is larger than 50 and we did
-not measure a stimulus level clearly below threshold (as defined in psignifit 4).
+not measure a stimulus level clearly below threshold (as defined in *psignifit*).
 Thus it might be that the threshold is below our data, as it is the case actually in our
 example.
 This is a common problem with adaptive procedures, which do not explore
@@ -173,9 +172,9 @@ influence on the outcome.
 
 
 
-To "heal" this, psignifit allows you to pass another range, for which you
+To "heal" this, *psignifit* allows you to pass another range, for which you
 believe in the assumptions of our prior.
-You pass this range with argument `stimulus_range`, and `psignifit`
+You pass this range with argument `stimulus_range`, and *psignifit*
 will be set the prior considering this range instead.
 For our example dataset we might give a generous range and assume the
 possible range is .5 to 1.5.
@@ -309,17 +308,17 @@ you have questions contact us.
 
 ## Passing custom priors
 
-This part explains how to use custom priors, when you do not want to use
-our standard set, or it is wrong even for a corrected stimulus range.
+This part explains how to use custom priors when you do not want to use
+our standard set.
 
 ```{warning}
-To do this you should know what you are doing, and everything is on your
+To do this you should know what you are doing, and everything is at your
 own risk.
 ```
 
 As an example we will fix the prior on the lapse rate parameter $\lambda$
 to a constant between 0 and .1, and zero
-elsewhere, as it was done in the psignifit 2 toolbox.
+elsewhere.
 
 To use custom priors, first define the priors you want to use as function
 and include it in a dictionary with the key value corresponding to
@@ -334,10 +333,10 @@ custom_priors = {'lambda': prior_lambda}
 ```
 
 Note that we did not normalize this prior. This is internally done by
-psignifit.
+*psignifit*.
 
 Most of the times you then have to adjust the bounds of integration as
-well. This confines the region psignifit operates on. All values outside
+well. This confines the region *psignifit* operates on. All values outside
 the bounds implicitly have prior probability of 0.
 
 For our example we set manually the bounds for the lambda parameter
