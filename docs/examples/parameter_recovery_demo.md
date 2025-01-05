@@ -30,7 +30,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import psignifit
-from psignifit import psigniplot
+import psignifit.psigniplot as psp
 from psignifit.sigmoids import sigmoid_by_name
 ```
 
@@ -116,7 +116,7 @@ assert np.isclose(res.parameter_estimate['width'], width, atol=1e-2)
 ```
 
 ```{code-cell} ipython3
-psigniplot.plot_psychometric_function(res);
+psp.plot_psychometric_function(res);
 ```
 
 
@@ -156,5 +156,5 @@ res = psignifit.psignifit(data, **options)
 and plot to ensure we found a good fit
 
 ```{code-cell} ipython3
-psigniplot.plot_psychometric_function(res);
+psp.plot_psychometric_function(res);
 ```

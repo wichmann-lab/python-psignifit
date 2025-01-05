@@ -29,7 +29,7 @@ jupyter:
 import matplotlib.pyplot as plt
 
 import psignifit as ps
-from psignifit import psigniplot
+import psignifit.psigniplot as psp
 ```
 
 
@@ -162,7 +162,7 @@ We show you here how to do some basic plotting of the psychometric function.
 
 ```{code-cell} ipython3
 plt.figure()
-psigniplot.plot_psychometric_function(result)
+psp.plot_psychometric_function(result)
 plt.show()
 ```
 

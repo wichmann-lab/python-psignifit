@@ -40,7 +40,7 @@ import numpy as np
 import json
 
 import psignifit as ps
-from psignifit import psigniplot
+import psignifit.psigniplot as psp
 ```
 
 To illustrate this we plot the priors from our original example from the [basic usage](../basic-usage) page.
@@ -58,7 +58,7 @@ data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
 res = ps.psignifit(data, sigmoid='norm', experiment_type='2AFC', debug=True)
 
 # notice that we need to pass 'debug=True'
-psigniplot.plot_prior(res);
+psp.plot_prior(res);
 ```
 
 The panels in the top row show the prior densities for threshold, width
@@ -125,15 +125,20 @@ data = np.array([[1.5000, 3.0000, 3.0000], [1.3500, 3.0000, 3.0000],
 We fit the data assuming the same lapse rate for yes and for no.
 
 ```{code-cell} ipython3
-res = ps.psignifit(data,
-                   experiment_type='equal asymptote',
-                   debug=True)
+import warnings
+
+# Now we run the fitting procedure. (We ignore a warnings that is trying
+# to tell us that we have too many stimulus levels.)
+
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    res = ps.psignifit(data, experiment_type='equal asymptote', debug=True)
 ```
 by default this uses a cumulative normal fit, which is fine for now.
 The prior for this function looks like this:
 
 ```{code-cell} ipython3
-psigniplot.plot_prior(res);
+psp.plot_prior(res);
 ```
 
 which is not particularly conspicuous. Comparing the functions to the
@@ -144,7 +149,7 @@ But now, have a look at the fitted function:
 
 ```{code-cell} ipython3
 plt.figure();
-psigniplot.plot_psychometric_function(res, data_size=0.1);
+psp.plot_psychometric_function(res, data_size=0.1);
 ```
 
 You should notice that the proportion correct is larger than 50 and we did
@@ -159,7 +164,7 @@ You can see how the prior influences the result by looking at the
 marginal plot for the threshold as well
 
 ```{code-cell} ipython3
-psigniplot.plot_marginal(res, 'threshold');
+psp.plot_marginal(res, 'threshold');
 ```
 
 Note that the dashed grey line, which marks the prior, decreases where
@@ -185,7 +190,7 @@ res_range = ps.psignifit(data,
 We can now take a look how the prior changed
 
 ```{code-cell} ipython3
-psigniplot.plot_prior(res_range);
+psp.plot_prior(res_range);
 ```
 
 By having a look at the marginal plot we can see that there is no area
@@ -195,16 +200,16 @@ Note also that the credible interval now extends considerably further down as we
 
 ```{code-cell} ipython3
 plt.figure();
-psigniplot.plot_marginal(res_range, 'threshold');
+psp.plot_marginal(res_range, 'threshold');
 ```
 
 Finally we can also compare our new fitted psychometric function.
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(1, 1);
-psigniplot.plot_psychometric_function(res_range, ax=ax,
+psp.plot_psychometric_function(res_range, ax=ax,
                                       data_size=0.1, plot_parameter=False);
-psigniplot.plot_psychometric_function(res, ax=ax, line_color='gray',
+psp.plot_psychometric_function(res, ax=ax, line_color='gray',
                                       plot_data=False, plot_parameter=False);
 ```
 
@@ -355,9 +360,7 @@ res = ps.psignifit(data,
 You can have a look at priors and the fitted function as follows
 
 ```{code-cell} ipython3
-plt.figure();
-ps.psigniplot.plot_prior(res);
-
-plt.figure();
-ps.psigniplot.plot_psychometric_function(res);
+fig = psp.plot_prior(res)
+plt.show()
+fig = psp.plot_psychometric_function(res)
 ```

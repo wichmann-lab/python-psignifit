@@ -28,9 +28,10 @@ For illustration we will use a dataset obtained from running a Quest run with 40
 
 ```{code-cell} ipython3
 import numpy as np
-import psignifit as ps
-from psignifit import psigniplot
 from matplotlib import pyplot as plt
+
+import psignifit as ps
+import psignifit.psigniplot as psp
 
 data = np.genfromtxt("pooling_example_data.csv", delimiter=',', usecols=(0,1,2))
 print(data)
@@ -50,7 +51,7 @@ Note that this takes a bit longer than usual and it gives us a warning about the
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(1, 1);
-psigniplot.plot_psychometric_function(res, ax=ax);
+psp.plot_psychometric_function(res, ax=ax);
 ```
 Each block contains only very few trials. Thus the beta-binomial model cannot help much to correct for overdispersion. Furthermore the many lines of data slow psignifit down.
 
@@ -64,7 +65,7 @@ pooled = pool_blocks(data, max_tol=0.01)
 print(pooled)
 res = ps.psignifit(pooled, **options)
 fig, ax = plt.subplots(1, 1);
-psigniplot.plot_psychometric_function(res, ax=ax);
+psp.plot_psychometric_function(res, ax=ax);
 ```
 
 Now we pooled quite strongly.
@@ -76,7 +77,7 @@ pooled = pool_blocks(data, max_tol=0.01, max_length=25)
 print(pooled)
 res = ps.psignifit(pooled, **options)
 fig, ax = plt.subplots(1, 1);
-psigniplot.plot_psychometric_function(res, ax=ax);
+psp.plot_psychometric_function(res, ax=ax);
 ```
 
 This breaks the large blocks up again allowing us to notice if there was more variability over time than expected.
@@ -87,7 +88,7 @@ The last option gives us a different rule to achieve something in a similar dire
 pooled = pool_blocks(data, max_tol=0.01, max_length=np.inf, max_gap=0)
 res = ps.psignifit(pooled, **options)
 fig, ax = plt.subplots(1, 1);
-psigniplot.plot_psychometric_function(res, ax=ax);
+psp.plot_psychometric_function(res, ax=ax);
 ```
 Values between 0 and infinity will allow "gaps" of maximally options.poolMaxGap trials which are not included into the block (because their stimulus level differs too much).
 

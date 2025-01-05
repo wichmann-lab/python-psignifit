@@ -20,7 +20,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import psignifit as ps
-from psignifit import psigniplot
+import psignifit.psigniplot as psp
 
 # to have some data we use the data from demo_001
 data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
@@ -99,7 +99,7 @@ print(loaded_res.parameter_estimate)
 
 ```{code-cell} ipython3
 # plotting from loaded file
-psigniplot.plot_psychometric_function(loaded_res)
+psp.plot_psychometric_function(loaded_res);
 ```
 
 ## Debug mode

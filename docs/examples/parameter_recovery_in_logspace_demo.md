@@ -35,7 +35,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 import psignifit
-from psignifit import psigniplot
+import psignifit.psigniplot as psp
 from psignifit.sigmoids import sigmoid_by_name
 ```
 
@@ -130,7 +130,7 @@ assert np.isclose(res.parameter_estimate['eta'], 0, atol=1e-4)
 ```{code-cell} ipython3
 fig, ax = plt.subplots();
 # we adjust the size of the scatter dots here, because we have num_trials=5000
-psigniplot.plot_psychometric_function(res, ax=ax, data_size=0.03);
+psp.plot_psychometric_function(res, ax=ax, data_size=0.03);
 ax.scatter(logspace_stimulus_level, perccorr);
 ax.set_xlabel('log(Stimulus Level)');
 ```
@@ -195,7 +195,7 @@ res.parameter_estimate
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots();
-psigniplot.plot_psychometric_function(res, ax=ax);
+psp.plot_psychometric_function(res, ax=ax);
 ```
 
 ```{code-cell} ipython3

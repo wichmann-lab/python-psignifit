@@ -26,7 +26,6 @@ standard data from [basic usage example](../basic-usage):
 import numpy as np
 
 import psignifit as ps
-from psignifit import psigniplot
 
 data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
                  [0.0020, 44.0000, 90.0000], [0.0025, 44.0000, 90.0000],

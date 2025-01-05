@@ -37,7 +37,7 @@ In the demo `data11` and `data12`, `data21` and `data22`, and `data31` and
 import numpy as np
 
 import psignifit as ps
-from psignifit import psigniplot
+import psignifit.psigniplot as psp
 ```
 
 ```{code-cell} ipython3
@@ -98,7 +98,7 @@ dataset alone (red), for the second dataset alone (blue) and for the
 combined dataset (black).
 
 ```{code-cell} ipython3
-psigniplot.plot_bias_analysis(data11, data12)
+psp.plot_bias_analysis(data11, data12)
 ```
 
 The top plot show the three psychometric functions, which for the first
@@ -118,7 +118,7 @@ changed much.
 Next, we check our second split of data
 
 ```{code-cell} ipython3
-psigniplot.plot_bias_analysis(data21, data22)
+psp.plot_bias_analysis(data21, data22)
 ```
 
 In this case there seems to be very strong "finger bias", i.e. the
@@ -140,7 +140,7 @@ be usable.
 Now we have a look at our third split
 
 ```{code-cell} ipython3
-psigniplot.plot_bias_analysis(data31, data32)
+psp.plot_bias_analysis(data31, data32)
 ```
 
 In this case the guessing rate does not seem to differ between intervals,
