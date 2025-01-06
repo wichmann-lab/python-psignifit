@@ -359,10 +359,10 @@ def test_floats_not_0D_ndarray(input_data, ci_method, fixed_parm):
         fixed_parm = {}
     result = psignifit(input_data[:3,:], experiment_type='yes/no', fixed_parameters=fixed_parm, CI_method=ci_method)
     for parm, value in result.parameter_estimate_mean.items():
-        assert isinstance(value, (int, float)), f'Mean parameter estimate {parm} is not a Python int/float'
+        assert type(value) in (int, float), f'Mean parameter estimate {parm} is not a Python int/float'
     for parm, value in result.parameter_estimate_MAP.items():
-        assert isinstance(value, (int, float)), f'MAP parameter estimate {parm} is not a Python int/float'
+        assert type(value) in (int, float), f'MAP parameter estimate {parm} is not a Python int/float'
     for parm, CI in result.confidence_intervals.items():
         for pc, (low, high) in CI.items():
-            assert isinstance(low, (int, float)), f'Confidence interval {pc} lower bound for {parm} is not a Python int/float'
-            assert isinstance(high, (int, float)), f'Confidence interval {pc} upper bound for  {parm} is not a Python int/float'
+            assert type(low) in (int, float), f'Confidence interval {pc} lower bound for {parm} is not a Python int/float'
+            assert type(high) in (int, float), f'Confidence interval {pc} upper bound for  {parm} is not a Python int/float'
