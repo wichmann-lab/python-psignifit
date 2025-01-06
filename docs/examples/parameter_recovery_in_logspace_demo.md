@@ -15,9 +15,9 @@ kernelspec:
 
 # Parameter Recovery in Log-Space Demo
 
-In this demo, we show a parameter recovery using `psignifit`, in the case where we want to fit a sigmoid in log space. 
+In this demo, we show a parameter recovery using *psignifit*, in the case where we want to fit a sigmoid in log space. 
 
-This demo is very similar to the "Parameter Recovery Demo", and you should have a look at that one first, but it also shows how to fit the sigmoid in log-space, and how to recover width, threshold, and confidence intercals in the original simulus space.
+This demo is very similar to the "Parameter Recovery Demo", and you should have a look at that one first, but it also shows how to fit the sigmoid in log-space, and how to recover width, threshold, and confidence intervals in the original simulus space.
 
 We will cover the following steps:
 
@@ -95,19 +95,10 @@ hits = (perccorr * ntrials).astype(int)
 data = np.dstack([logspace_stimulus_level, hits, ntrials]).squeeze()
 ```
 
-We set the options for our fit. In this case we assume a yes/no experiment and we want to estimate all parameters (i.e. fix none).
+We set the options for our fit. In this case we assume a yes/no experiment and run the fitting procedure. We don't need to do anything special about the log-space: since the data lives in that space, the fit is going to happen in that space.
 
 ```{code-cell} ipython3
-options = {}
-options['sigmoid'] = sigmoid 
-options['experiment_type'] = 'yes/no'
-options['fixed_parameters'] = {}
-```
-
-Now we run the fitting procedure. We don't need to do anything special about the log-space: since the data lives in that space, the fit is going to happen in that space.
-
-```{code-cell} ipython3
-res = psignifit.psignifit(data, **options)
+res = psignifit.psignifit(data, sigmoid=sigmoid, experiment_type='yes/no')
 ```
 
 Lastly, we can ensure that the values in our `res.parameter_estimate` dictionary are equal to the values that we used to simulate them. Notice that, since the fit is done in log-space, the parameters that correspond to the stimulus space (threshold and width) are themselves to be interpreted in log-space.
@@ -175,15 +166,7 @@ ax.set_ylabel("Percent Correct");
 We run the fit again
 
 ```{code-cell} ipython3
-options = {}
-options['sigmoid'] = sigmoid 
-options['experiment_type'] = 'yes/no'
-options['fixed_parameters'] = {}
-
-```
-
-```{code-cell} ipython3
-res = psignifit.psignifit(data, **options)
+res = psignifit.psignifit(data, sigmoid=sigmoid, experiment_type='yes/no')
 ```
 
 Plot to ensure we found a good fit
@@ -199,7 +182,7 @@ psp.plot_psychometric_function(res, ax=ax);
 ```
 
 ```{code-cell} ipython3
-lin_threshold = np.exp(res.parameter_estimate['threshold'])
-lin_width = np.exp(res.threshold(0.95, return_ci=False, unscaled=True)) - np.exp(res.threshold(0.05, return_ci=False, unscaled=True))
+lin_threshold = float(np.exp(res.parameter_estimate['threshold']))
+lin_width = float(np.exp(res.threshold(0.95, return_ci=False, unscaled=True))) - float(np.exp(res.threshold(0.05, return_ci=False, unscaled=True)))
 lin_threshold, lin_width
 ```
