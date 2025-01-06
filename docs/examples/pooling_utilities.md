@@ -31,7 +31,7 @@ trials apart overall.
 
 
 # Example
-For illustration we will use a dataset obtained from running a Quest run with 400 trials.
+For illustration we will use a dataset obtained from running a [Quest run with 400 trials](./pooling_example_data.csv).
 
 ```{code-cell} ipython3
 import numpy as np
@@ -48,13 +48,9 @@ First we fit this dataset using the settings for a 2AFC experiment and a normal 
 
 
 ```{code-cell} ipython3
-options = {'sigmoid': 'norm',
-           'experiment_type': '2AFC'
-           }
-
-res = ps.psignifit(data, **options)
+res = ps.psignifit(data, sigmoid='norm', experiment_type='2AFC')
 ```
-Note that this takes a bit longer than usual and it gives us a warning about the number per bloc. Let's have a look at what psignifit did automatically here:
+Note that this takes a bit longer than usual and it gives us several warnings about the number per bloc. Let's have a look at what *psignifit* did automatically here:
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(1, 1);
@@ -63,14 +59,14 @@ psp.plot_psychometric_function(res, ax=ax);
 Each block contains only very few trials. Thus the beta-binomial model cannot help much to correct for overdispersion. Furthermore the many lines of data slow psignifit down.
 
 
-By default psignifit pools only trials collected at the exact same stimulus level. We can pool the data manually to make each bloc contain all trials which differ by up to 0.01.
+By default *psignifit* pools only trials collected at the exact same stimulus level. We can pool the data manually to make each bloc contain all trials which differ by up to 0.01.
 
 
 ```{code-cell} ipython3
 from psignifit.tools import pool_blocks
 pooled = pool_blocks(data, max_tol=0.01)
 print(pooled)
-res = ps.psignifit(pooled, **options)
+res = ps.psignifit(pooled, sigmoid='norm', experiment_type='2AFC')
 fig, ax = plt.subplots(1, 1);
 psp.plot_psychometric_function(res, ax=ax);
 ```
@@ -82,7 +78,7 @@ The other two options allow us to restrict which trials should be pooled again. 
 ```{code-cell} ipython3
 pooled = pool_blocks(data, max_tol=0.01, max_length=25)
 print(pooled)
-res = ps.psignifit(pooled, **options)
+res = ps.psignifit(pooled, sigmoid='norm', experiment_type='2AFC')
 fig, ax = plt.subplots(1, 1);
 psp.plot_psychometric_function(res, ax=ax);
 ```
@@ -93,10 +89,10 @@ The last option gives us a different rule to achieve something in a similar dire
 
 ```{code-cell} ipython3
 pooled = pool_blocks(data, max_tol=0.01, max_length=np.inf, max_gap=0)
-res = ps.psignifit(pooled, **options)
+res = ps.psignifit(pooled, sigmoid='norm', experiment_type='2AFC')
 fig, ax = plt.subplots(1, 1);
 psp.plot_psychometric_function(res, ax=ax);
 ```
-Values between 0 and infinity will allow "gaps" of maximally options.poolMaxGap trials which are not included into the block (because their stimulus level differs too much).
+Values between 0 and infinity will allow "gaps" of maximally `max_gap` trials which are not included into the block (because their stimulus level differs too much).
 
 Of course all pooling options can be combined.
