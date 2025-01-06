@@ -15,7 +15,8 @@ kernelspec:
 
 # Parameter recovery demo
 
-In this demo, we show a parameter recovery using `psignifit`. Parameter recovery is a crucial step in validating the robustness and accuracy of any model. We simulate data with known parameters ('ground truth') and then attempt to recover those parameters using psignifit. If the fitting procedure returns the same parameter values as the true parameters that generated the data, then we can be sure that the fitting works correctly. In `tests/test_param_recovery.py` we systematically run this test.
+In this demo, we show a parameter recovery using *psignifit*. Parameter recovery is a crucial step in validating the robustness and accuracy of any model. We simulate data with known parameters ('ground truth') and then attempt to recover those parameters using *psignifit*. If the fitting procedure returns the same parameter values as the true parameters that generated the data, then we can be sure that the fitting works correctly. 
+In [`tests/test_param_recovery.py`](https://github.com/wichmann-lab/python-psignifit/blob/main/tests/test_param_recovery.py) we systematically run this test.
 
 We will cover the following steps:
 
@@ -82,20 +83,10 @@ ax.spines[['right', 'top']].set_visible(False);
 ```
 
 
-We set the options for our fit. In this case we assume a yes/no experiment and we want to estimate all parameters (i.e. fix none of them).
+We set the options for our fit. In this case we assume a yes/no experiment and we run the fitting procedure
 
 ```{code-cell} ipython3
-options = {}
-options['sigmoid'] = sigmoid 
-options['experiment_type'] = 'yes/no'
-options['fixed_parameters'] = {}
-```
-
-
-Now we run the fitting procedure
-
-```{code-cell} ipython3
-res = psignifit.psignifit(data, **options)
+res = psignifit.psignifit(data, sigmoid=sigmoid, experiment_type='yes/no')
 ```
 
 
@@ -143,14 +134,7 @@ ax.spines[['right', 'top']].set_visible(False);
 We run the fit again
 
 ```{code-cell} ipython3
-options = {}
-options['sigmoid'] = sigmoid 
-options['experiment_type'] = 'yes/no'
-options['fixed_parameters'] = {}
-```
-
-```{code-cell} ipython3
-res = psignifit.psignifit(data, **options)
+res = psignifit.psignifit(data, sigmoid=sigmoid, experiment_type='yes/no')
 ```
 
 and plot to ensure we found a good fit
