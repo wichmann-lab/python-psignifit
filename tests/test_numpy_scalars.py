@@ -1,8 +1,21 @@
+import numbers
+
 import numpy as np
 import pytest
 
 from psignifit import psignifit
+from psignifit._utils import cast_np_scalar
 from .fixtures import input_data
+
+@pytest.mark.parametrize('num', (1, 1., np.int64(1), np.float64(1.)))
+def test_cast_np_scalar_numbers(num):
+    cast = cast_np_scalar(num)
+    assert not isinstance(cast, np.number)
+    assert isinstance(cast, numbers.Number)
+
+def test_cast_np_scalar_ndarray_noop():
+    cast = cast_np_scalar(np.ones(1))
+    assert isinstance(cast, np.ndarray)
 
 @pytest.mark.parametrize('ci_method', ('percentiles', 'project'))
 def test_floats_not_0D_ndarray_ci(input_data, ci_method):
