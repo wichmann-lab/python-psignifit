@@ -102,8 +102,8 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
         _warn_marginal_sanity_checks(marginals)
 
     if conf.experiment_type == 'equal asymptote':
-        estimate_MAP_dict['gamma'] = estimate_MAP_dict['lambda']
-        estimate_mean_dict['gamma'] = estimate_mean_dict['lambda']
+        estimate_MAP_dict['gamma'] = estimate_MAP_dict['lambda'].copy()
+        estimate_mean_dict['gamma'] = estimate_mean_dict['lambda'].copy()
         grid['gamma'] = grid['lambda'].copy()
         priors['gamma'] = priors['lambda']
         marginals['gamma'] = marginals['lambda'].copy()
@@ -249,7 +249,7 @@ def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
     params_values = [grid[p] for p in sorted(grid.keys())]
     params_grid = np.meshgrid(*params_values, indexing='ij')
     for idx, p in enumerate(sorted(grid.keys())):
-        estimate_mean_dict[p] = float((params_grid[idx] * posteriors).sum())
+        estimate_mean_dict[p] = (params_grid[idx] * posteriors).sum()
 
     # Estimate parameters as the mode of the posterior (MAP)
     fixed_param = {}
