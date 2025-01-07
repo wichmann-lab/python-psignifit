@@ -140,9 +140,9 @@ class Result:
                 lambd_ci = self.confidence_intervals['lambda'][coverage_key]
             ci_min = sigmoid.inverse(proportion_correct, thres_ci[0], width_ci[0], gamma_ci[0], lambd_ci[0])
             ci_max = sigmoid.inverse(proportion_correct, thres_ci[1], width_ci[1], gamma_ci[1], lambd_ci[1])
-            new_threshold_ci[coverage_key] = [float(ci_min), float(ci_max)]
+            new_threshold_ci[coverage_key] = [ci_min, ci_max]
 
-        return float(new_threshold), new_threshold_ci
+        return new_threshold, new_threshold_ci
 
     def slope(self, stimulus_level: np.ndarray, estimate_type: Optional[EstimateType]=None) -> np.ndarray:
         """ Slope of the psychometric function at a given stimulus levels.
