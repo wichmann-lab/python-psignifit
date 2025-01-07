@@ -13,7 +13,7 @@ from ._posterior import posterior_grid, maximize_posterior, marginalize_posterio
 from ._priors import setup_priors
 from ._result import Result
 from ._typing import ParameterBounds, Prior
-from ._utils import (PsignifitException, check_data)
+from ._utils import PsignifitException, check_data, cast_np_scalar
 
 
 def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
@@ -249,7 +249,7 @@ def _fit_parameters(data: np.ndarray, bounds: ParameterBounds,
     params_values = [grid[p] for p in sorted(grid.keys())]
     params_grid = np.meshgrid(*params_values, indexing='ij')
     for idx, p in enumerate(sorted(grid.keys())):
-        estimate_mean_dict[p] = (params_grid[idx] * posteriors).sum()
+        estimate_mean_dict[p] = cast_np_scalar((params_grid[idx] * posteriors).sum())
 
     # Estimate parameters as the mode of the posterior (MAP)
     fixed_param = {}
