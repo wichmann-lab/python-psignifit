@@ -44,13 +44,20 @@ def test_py_not_np_scalar_param_estimate(input_data, fixed_parm):
     for parm, value in result.parameter_estimate_MAP.items():
         assert type(value) in (int, float), f'MAP parameter estimate {parm} is not a Python int/float'
 
-def test_py_not_np_scalar_get_threshold(input_data):
+def test_py_not_np_scalar_threshold(input_data):
     result = psignifit(input_data[:3,:], experiment_type='yes/no')
     value, ci = result.threshold(0.5)
     assert type(value) in (int, float)
     for pc, (low, high) in ci.items():
         assert type(low) in (int, float), f'Confidence interval {pc} lower bound is not a Python int/float'
         assert type(high) in (int, float), f'Confidence interval {pc} upper bound is not a Python int/float'
+
+def test_py_not_np_scalar_slope(input_data):
+    result = psignifit(input_data[:3,:], experiment_type='yes/no')
+    value = result.slope(0.5)
+    assert type(value) in (int, float)
+    value = result.slope_at_proportion_correct(0.5, 0.3)
+    assert type(value) in (int, float)
 
 @pytest.mark.parametrize('negative', (True, False))
 @pytest.mark.parametrize('sigmoid_class', ALL_SIGMOID_CLASSES)
