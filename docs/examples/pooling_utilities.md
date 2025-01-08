@@ -50,7 +50,7 @@ First we fit this dataset using the settings for a 2AFC experiment and a normal 
 ```{code-cell} ipython3
 res = ps.psignifit(data, sigmoid='norm', experiment_type='2AFC')
 ```
-Note that this takes a bit longer than usual and it gives us several warnings about the number per bloc. Let's have a look at what *psignifit* did automatically here:
+Note that this takes a bit longer than usual and it gives us several warnings about the number per block. Let's have a look at what *psignifit* did automatically here:
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(1, 1);
@@ -59,7 +59,7 @@ psp.plot_psychometric_function(res, ax=ax);
 Each block contains only very few trials. Thus the beta-binomial model cannot help much to correct for overdispersion. Furthermore the many lines of data slow psignifit down.
 
 
-By default *psignifit* pools only trials collected at the exact same stimulus level. We can pool the data manually to make each bloc contain all trials which differ by up to 0.01.
+By default *psignifit* pools only trials collected at the exact same stimulus level. We can pool the data manually to make each block contain all trials which differ by up to 0.01.
 
 
 ```{code-cell} ipython3
