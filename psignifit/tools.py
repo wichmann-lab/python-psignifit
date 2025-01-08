@@ -1,9 +1,9 @@
 import numpy as np
 from scipy import stats
 
-from psignifit._utils import check_data
-from psignifit.sigmoids import sigmoid_by_name
-
+from ._utils import check_data
+from .sigmoids import sigmoid_by_name
+from ._utils import cast_np_scalar
 
 def pool_blocks(data: np.ndarray, max_tol=0, max_gap=np.inf, max_length=np.inf):
     """ Pool trials by stimulus level.
