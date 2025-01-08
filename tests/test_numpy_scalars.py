@@ -68,3 +68,11 @@ def test_py_not_np_scalar_sigmoid_methods(negative, sigmoid_class, method):
     y = getattr(sigmoid, method)(x, thr, wd)
     assert type(y) in (int, float), f'method of Sigmoid does not return Python int/float'
 
+@pytest.mark.parametrize('negative', (True, False))
+@pytest.mark.parametrize('sigmoid_class', ALL_SIGMOID_CLASSES)
+def test_py_not_np_scalar_sigmoid_standard_parameters(negative, sigmoid_class):
+    x, thr, wd = 0.3, 0.2, 0.1
+    sigmoid = sigmoid_class()
+    st_params = sigmoid.standard_parameters(thr, wd)
+    for parm in st_params:
+        assert type(parm) in (int, float), f'Sigmoid.standard_parameters does not return Python int/float'
