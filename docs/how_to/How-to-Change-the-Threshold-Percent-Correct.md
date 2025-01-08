@@ -13,7 +13,7 @@ kernelspec:
 
 # Change the threshold percentage correct 
 
-This option sets the proportion correct to correspond to the threshold on the *unscaled* sigmoid. Possible values are 
+The option `thresh_PC` sets the proportion correct to correspond to the threshold on the *unscaled* sigmoid. Possible values are 
 in the range from 0 to 1, default is 0.5. The default corresponds to 75\% in a 2AFC task (midway between the guess 
 rate of 50 % and ceiling performance 100%).
 
