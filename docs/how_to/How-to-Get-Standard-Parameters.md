@@ -32,7 +32,7 @@ data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
 res = ps.psignifit(data, sigmoid='norm', experiment_type='yes/no')
 ```
 
-In this example we have a Gaussian sigmoid with `alpha=0.05`, `PC=0.5` fitted. The parameters we would get out, threshold and width, correspond to the standard parameters `loc` (mean) and `scale` (standard deviation) in the following way:
+In this example we have a Gaussian sigmoid with `width_alpha=0.05`, `thresh_PC=0.5` fitted. The parameters we would get out, threshold and width, correspond to the standard parameters `loc` (mean) and `scale` (standard deviation) in the following way:
 
 ```{code-cell} ipython3
 # the mean (loc):
