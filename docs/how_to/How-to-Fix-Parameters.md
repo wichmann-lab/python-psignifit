@@ -13,13 +13,12 @@ kernelspec:
 
 # Fix parameters
 
-Fixing parameters is done by simply adding a dictionary to the options
-using the key 'fixed_parameters'. 
-In the following example we fix the
-parameters lambda and gamma to 0.02 and 0.5 respectively.
+Fixing parameters is done by simply passing a dictionary as the option 'fixed_parameters'. 
+For example, in the following example we fix the
+parameters lambda and gamma to 0.02 and 0.5 respectively:
 
 ```
-options['fixed_parameters'] = {'lambda': 0.02, 'gamma': 0.5}
+fixed_parameters = {'lambda': 0.02, 'gamma': 0.5}
 ```
 
 The following example uses those fixed parameters to fit data
@@ -38,14 +37,10 @@ data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
                  [0.0070, 88.0000, 90.0000], [0.0080, 90.0000, 90.0000],
                  [0.0100, 90.0000, 90.0000]])
 
-# initializing options dictionary
-options = {}
-options['sigmoid'] = 'norm'
-options['experiment_type'] = 'yes/no'
+fixed_parameters = {'lambda': 0.02, 'gamma': 0.5}
 
-options['fixed_parameters'] = {'lambda': 0.02, 'gamma': 0.5}
-
-res = ps.psignifit(data, **options)
+res = ps.psignifit(data, sigmoid='norm', experiment_type='yes/no',
+                   fixed_parameters=fixed_parameters)
 ```
 
 We print the parameter estimates to check that lambda was indeed fixed
@@ -53,4 +48,3 @@ We print the parameter estimates to check that lambda was indeed fixed
 ```{code-cell} ipython3
 print(res.parameter_estimate)
 ```
-

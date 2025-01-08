@@ -15,7 +15,7 @@ kernelspec:
 
 ## Supported sigmoids
 
-Out of the box psignifit supports the following sigmoid functions
+Out of the box *psignifit* supports the following sigmoid functions
 
 
 :::{list-table} Supported sigmoids
@@ -24,28 +24,29 @@ Out of the box psignifit supports the following sigmoid functions
 
 *   -  `sigmoid= ...`
 	- Distribution
-*   - `norm`
+*   - `'norm'`
     - Cumulative gauss distribution. The default.
-*   - `logistic`
+*   - `'logistic'`
 	- Logistic function. Common alternative.
-*   - `gumbel`
+*   - `'gumbel'`
     - Cumulative gumbel distribution. Asymmetric, with a longer lower tail.
-*   - `rgumbel`
+*   - `'rgumbel'`
     - Reversed gumbel distribution. Asymmetric, with a longer upper tail.
-*   - `tdist`
+*   - `'tdist'`
     - Student t-distribution with df=1 for heavy tailed functions.
-*   - `weibull` 
+*   - `'weibull'` 
     - Weibull distribution
 :::
 
-For positive data on a log-scale, we define the 'weibull' sigmoid class. Notice that it is left
+For positive data on a log-scale, we define the `weibull` sigmoid class. Notice that it is left
 to the user to transform the stimulus level in logarithmic space, and the threshold and width
-back to linear space. 'weibull' is therefore just an alias for 'gumbel'.
+back to linear space, see this [demo](parameter_recovery_in_logspace_demo) for an example on how to do that.
+`weibull` is therefore just an alias for `gumbel`.
 
 
 ## Visualizing all sigmoids
 
-In this example, we access all sigmoids that come with psignifit
+In this example, we access all sigmoids that come with *psignifit*
 and visualize their function values and slopes.
 
 ```{code-cell} ipython3

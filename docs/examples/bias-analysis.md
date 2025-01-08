@@ -20,16 +20,17 @@ To facilitate such checks we provide a function
 
 In the background this function calculates fits with changed priors
 on the guessing and lapse rate, to leave the guessing rate free with only
-a weak prior (beta(2,2)) to be near 0.5. To allow this in the fitting we
-have to constrain the lapse rate to the range [0, 0.1] leaving the range
-[0, 0.9] for the guessing rate.
+a weak prior (`beta(2,2)`) to be near `0.5`. To allow this in the fitting we
+have to constrain the lapse rate to the range `[0, 0.1]` leaving the range
+`[0, 0.9]` for the guessing rate.
 
 To use the function we first have to separate our dataset to produce two
 separate datasets for the two alternatives (i.e. for signal in the first
 interval vs. signal in the second interval; signal left vs signal right, etc.)
 
 For demonstration purposes we produced different pairs of datasets, which 
-combine to our standard test dataset (see Basic Usage). 
+combine to our standard test dataset (see [basic usage](../basic-usage)).
+
 In the demo `data11` and `data12`, `data21` and `data22`, and `data31` and 
 `data32` are a pair each. We can explore whether our different pairs show biased behaviour.
 
@@ -37,7 +38,12 @@ In the demo `data11` and `data12`, `data21` and `data22`, and `data31` and
 import numpy as np
 
 import psignifit as ps
-from psignifit import psigniplot
+import psignifit.psigniplot as psp
+
+# In this example we eill ignore the warnings from psignifit
+# that is trying to tell us that we have too many stimulus levels.
+import warnings
+warnings.simplefilter("ignore")
 ```
 
 ```{code-cell} ipython3
@@ -98,8 +104,9 @@ dataset alone (red), for the second dataset alone (blue) and for the
 combined dataset (black).
 
 ```{code-cell} ipython3
-psigniplot.plot_bias_analysis(data11, data12)
+psp.plot_bias_analysis(data11, data12)
 ```
+
 
 The top plot show the three psychometric functions, which for the first
 split of the data lie neatly on top of each other, suggesting already
@@ -118,7 +125,7 @@ changed much.
 Next, we check our second split of data
 
 ```{code-cell} ipython3
-psigniplot.plot_bias_analysis(data21, data22)
+psp.plot_bias_analysis(data21, data22)
 ```
 
 In this case there seems to be very strong "finger bias", i.e. the
@@ -140,7 +147,7 @@ be usable.
 Now we have a look at our third split
 
 ```{code-cell} ipython3
-psigniplot.plot_bias_analysis(data31, data32)
+psp.plot_bias_analysis(data31, data32)
 ```
 
 In this case the guessing rate does not seem to differ between intervals,

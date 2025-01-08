@@ -7,7 +7,7 @@ Python toolbox for Bayesian psychometric function estimation.
 
 ## Getting started
 
-Install python-psignifit with the latest python:
+Install *psignifit* with `pip`:
 ```
 pip install psignifit
 ```

@@ -13,7 +13,7 @@ kernelspec:
 
 # Plotting
 
-Here we explain the basic plot functions which come with psignifit.
+Here we explain the basic plot functions which come with *psignifit*.
 All these functions are located in the submodule `psigniplot`.
 
 Most of the functions take an matplotlib axes handle, and 
@@ -30,7 +30,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import psignifit as ps
-from psignifit import psigniplot
+import psignifit.psigniplot as psp
 
 data = np.array([[0.0010, 45.0000, 90.0000], [0.0015, 50.0000, 90.0000],
                  [0.0020, 44.0000, 90.0000], [0.0025, 44.0000, 90.0000],
@@ -50,7 +50,7 @@ It takes as input the result object you want to plot.
 
 ```{code-cell} ipython3
 plt.figure()
-ps.psigniplot.plot_psychometric_function(res)
+psp.plot_psychometric_function(res);
 ```
 
 The function also take the following arguments, here we print the defaults
@@ -70,7 +70,7 @@ For example, to increase the linewidth and change it to red, you could pass
 
 ```{code-cell} ipython3
 plt.figure()
-psigniplot.plot_psychometric_function(res, line_width=5, line_color='r')
+psp.plot_psychometric_function(res, line_width=5, line_color='r');
 ```
 
 ## Plotting more than one function
@@ -93,34 +93,30 @@ Now we plot both datasets and fitted functions in a single plot
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(1, 1)
-psigniplot.plot_psychometric_function(res, ax=ax)
-psigniplot.plot_psychometric_function(other_res, ax=ax, line_color='r', data_color='r')
-plt.show()
+psp.plot_psychometric_function(res, ax=ax)
+psp.plot_psychometric_function(other_res, ax=ax, line_color='r', data_color='r');
 ```
 
 Alternatively we can plot them in different subplots
 
 ```{code-cell} ipython3
 fig, axes = plt.subplots(1, 2, figsize=(8, 4))
-psigniplot.plot_psychometric_function(res, ax=axes[0])
-psigniplot.plot_psychometric_function(other_res, ax=axes[1], line_color='r', data_color='r')
-plt.show()
+psp.plot_psychometric_function(res, ax=axes[0])
+psp.plot_psychometric_function(other_res, ax=axes[1], line_color='r', data_color='r');
 ```
 
 
 
 ## Plot model fit
 
-We offer you a function which creates the plots psignifit 2 created for
-checking the modelfit.
-It can be run with the following command follows:
+The function `plot_modelfit` helps in evaluating the model fit:
 
 
 ```{code-cell} ipython3
-fig = psigniplot.plot_modelfit(res)
+fig = psp.plot_modelfit(res)
 ```
 
-This method will show you three plots, based on the deviance residuals,
+It generates three plots, based on the deviance residuals,
 which are the normalized deviations from the fitted psychometric function:
 
 - (left) the psychometric function with the data around it as a first general
@@ -151,21 +147,21 @@ which parameter to plot, as a string
 
 ```{code-cell} ipython3
 plt.figure()
-psigniplot.plot_marginal(res, 'threshold')
+psp.plot_marginal(res, 'threshold', plot_prior=False);
 ```
 
 The blue shadow corresponds to the chosen confidence interval and the black
 line shows the point estimate for the plotted parameter.
 
 When the fit is done in debug mode (`debug=True` as option),
-then the plot also includes the prior as a gray dashed line.
+then we can also plot the prior as a gray dashed line.
 
 ```{code-cell} ipython3
 # we refit in debug mode
 res = ps.psignifit(data, sigmoid='norm', experiment_type='2AFC', debug=True)
 
 plt.figure()
-psigniplot.plot_marginal(res, 'threshold')
+psp.plot_marginal(res, 'threshold', plot_prior=True);
 ```
 
 The following list shows the options for this plot and the defaults
@@ -187,7 +183,7 @@ to plot against each other.
 
 ```{code-cell} ipython3
 plt.figure()
-ps.psigniplot.plot_2D_margin(res, 'threshold', 'width')
+psp.plot_2D_margin(res, 'threshold', 'width');
 ```
 
 ## Plot all 2D posteriors
@@ -195,7 +191,7 @@ ps.psigniplot.plot_2D_margin(res, 'threshold', 'width')
 Same type of plot as the above but now for all parameter combinations.
 
 ```{code-cell} ipython3
-fig = ps.psigniplot.plot_bayes(res)
+fig = psp.plot_bayes(res)
 ```
 
 ## Plot samples from the posterior over psychometric functions
@@ -210,8 +206,8 @@ plt.figure()
 n_samples = 100
 random_state = np.random.RandomState(7474)
 
-psigniplot.plot_posterior_samples(result=res, n_samples=n_samples, samples_alpha=0.1, 
-                                  samples_color='k', random_state=random_state)
+psp.plot_posterior_samples(result=res, n_samples=n_samples, samples_alpha=0.1, 
+                                     samples_color='k', random_state=random_state);
 ```
 
 
@@ -220,10 +216,6 @@ As a tool this function plots the actually used priors of the provided
 result dictionary.
 
 ```{code-cell} ipython3
-plt.figure()
-ps.psigniplot.plot_prior(res)
+fig = psp.plot_prior(res)
 ```
 
-```{code-cell} ipython3
-
-```
