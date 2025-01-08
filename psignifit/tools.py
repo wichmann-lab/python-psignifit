@@ -86,7 +86,7 @@ def psychometric_with_eta(stimulus_level, threshold, width, gamma, lambda_,
     psi = sigmoid(stimulus_level, threshold=threshold, width=width, gamma=gamma, lambd=lambda_)
 
     new_psi = []
-    for p in psi:
+    for p in np.atleast_1d(psi):
         a = ((1/eta**2) - 1) * p
         b = ((1/eta**2) - 1) * (1 - p)
         noised_p = stats.beta.rvs(a=a, b=b, size=1, random_state=random_state)
