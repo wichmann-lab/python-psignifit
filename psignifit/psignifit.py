@@ -102,8 +102,8 @@ def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
         _warn_marginal_sanity_checks(marginals)
 
     if conf.experiment_type == 'equal asymptote':
-        estimate_MAP_dict['gamma'] = estimate_MAP_dict['lambda'].copy()
-        estimate_mean_dict['gamma'] = estimate_mean_dict['lambda'].copy()
+        estimate_MAP_dict['gamma'] = estimate_MAP_dict['lambda']
+        estimate_mean_dict['gamma'] = estimate_mean_dict['lambda']
         grid['gamma'] = grid['lambda'].copy()
         priors['gamma'] = priors['lambda']
         marginals['gamma'] = marginals['lambda'].copy()
