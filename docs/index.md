@@ -29,7 +29,7 @@ Then, check out the [basic usage](basic-usage) page.
 
 The first implementation, as Python-clone of the original MATLAB library, was done by Sophie Laturnus and Ole Fortmann. 
 
-The current completely rewritten implementation is the result of the work of several [contributors](https://github.com/wichmann-lab/python-psignifit/blob/main/CONTRIBUTORS).
+The current completely rewritten implementation is the result of a programming sprint in September 2024 and later work. The participants were David-Elias Künstle, Felix Wichmann, Guillermo Aguilar, Lisa Schwetlick, Pietro Berkes and Tiziano Zito. The complete list of [contributors](https://github.com/wichmann-lab/python-psignifit/blob/main/CONTRIBUTORS).
 
 We would like to thank previous members of the Wichmann-lab who
 were involved in developing MCMC based methods of Bayesian inference for
