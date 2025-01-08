@@ -104,7 +104,7 @@ Let's have a look at the results, starting from the posterior distribution over 
 psp.plot_bayes(result);
 ```
 
-As you can see, the posterior is quite broad and asymmetrical, and we expect the mean and MAP estimates to be slightly different. We can ask `result` for both estimate.
+As you can see, the posterior is quite broad and asymmetrical, and we expect the mean and MAP estimates to be slightly different. We can ask `result` for both estimates.
 
 ```{code-cell} ipython3
 # This gives the default estimate, in this case the mean estimate since we set it in the options.
