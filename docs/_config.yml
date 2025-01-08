@@ -43,6 +43,7 @@ sphinx:
     - sphinx.ext.napoleon
     
   config:
+    myst_heading_anchors : 4
     suppress_warnings : ["etoc.toctree"] # Workaround for: https://github.com/executablebooks/sphinx-external-toc/issues/36
                                          # and: https://github.com/executablebooks/sphinx-external-toc/issues/79
     autodoc_default_options: {
