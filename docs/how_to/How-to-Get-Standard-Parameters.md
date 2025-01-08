@@ -36,11 +36,11 @@ In this example we have a Gaussian sigmoid with `alpha=0.05`, `PC=0.5` fitted. T
 
 ```{code-cell} ipython3
 # the mean (loc):
-print(f'loc = {res.parameter_estimate['threshold']}')
+print(f'loc = {res.parameter_estimate["threshold"]}')
 
 # the standard deviation (scale):
 # 1.644853626951472 is the normal PPF at alpha=0.95
-print(f'scale = {res.parameter_estimate['width'] / (2 * 1.644853626951472)}')
+print(f'scale = {res.parameter_estimate["width"] / (2 * 1.644853626951472)}')
 ```
 
 The standard parameters can be computed for any sigmoids more easily like this:
