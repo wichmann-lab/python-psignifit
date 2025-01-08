@@ -14,9 +14,11 @@ def test_cast_np_scalar_numbers(num):
     assert not isinstance(cast, np.number)
     assert isinstance(cast, numbers.Number)
 
+
 def test_cast_np_scalar_ndarray_noop():
     cast = cast_np_scalar(np.ones(1))
     assert isinstance(cast, np.ndarray)
+
 
 @pytest.mark.parametrize('ci_method', ('percentiles', 'project'))
 def test_py_not_np_scalar_ci(input_data, ci_method):
@@ -25,6 +27,7 @@ def test_py_not_np_scalar_ci(input_data, ci_method):
         for pc, (low, high) in CI.items():
             assert type(low) in (int, float), f'Confidence interval {pc} lower bound for {parm} is not a Python int/float'
             assert type(high) in (int, float), f'Confidence interval {pc} upper bound for  {parm} is not a Python int/float'
+
 
 @pytest.mark.parametrize('fixed_parm', [(None, None),
                                         ('lambda', 3e-7),
@@ -44,6 +47,7 @@ def test_py_not_np_scalar_param_estimate(input_data, fixed_parm):
     for parm, value in result.parameter_estimate_MAP.items():
         assert type(value) in (int, float), f'MAP parameter estimate {parm} is not a Python int/float'
 
+
 def test_py_not_np_scalar_threshold(input_data):
     result = psignifit(input_data[:3,:], experiment_type='yes/no')
     value, ci = result.threshold(0.5)
@@ -52,12 +56,14 @@ def test_py_not_np_scalar_threshold(input_data):
         assert type(low) in (int, float), f'Confidence interval {pc} lower bound is not a Python int/float'
         assert type(high) in (int, float), f'Confidence interval {pc} upper bound is not a Python int/float'
 
+
 def test_py_not_np_scalar_slope(input_data):
     result = psignifit(input_data[:3,:], experiment_type='yes/no')
     value = result.slope(0.5)
     assert type(value) in (int, float)
     value = result.slope_at_proportion_correct(0.5, 0.3)
     assert type(value) in (int, float)
+
 
 @pytest.mark.parametrize('negative', (True, False))
 @pytest.mark.parametrize('sigmoid_class', ALL_SIGMOID_CLASSES)
@@ -67,6 +73,7 @@ def test_py_not_np_scalar_sigmoid_methods(negative, sigmoid_class, method):
     sigmoid = sigmoid_class()
     y = getattr(sigmoid, method)(x, thr, wd)
     assert type(y) in (int, float), f'method of Sigmoid does not return Python int/float'
+
 
 @pytest.mark.parametrize('negative', (True, False))
 @pytest.mark.parametrize('sigmoid_class', ALL_SIGMOID_CLASSES)
