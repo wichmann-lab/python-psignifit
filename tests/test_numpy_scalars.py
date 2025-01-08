@@ -20,6 +20,11 @@ def test_cast_np_scalar_ndarray_noop():
     assert isinstance(cast, np.ndarray)
 
 
+def test_cast_np_scalar_ndarray_0d():
+    cast = cast_np_scalar(np.array(1))
+    assert isinstance(cast, numbers.Number)
+
+
 @pytest.mark.parametrize('ci_method', ('percentiles', 'project'))
 def test_py_not_np_scalar_ci(input_data, ci_method):
     result = psignifit(input_data[:3,:], experiment_type='yes/no', CI_method=ci_method)

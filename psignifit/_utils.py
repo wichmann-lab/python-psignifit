@@ -51,10 +51,12 @@ def check_data(data: np.ndarray) -> np.ndarray:
 
 
 def cast_np_scalar(x):
-    """Cast an object to a Python scalar if it is a numpy scalar.
+    """Cast an object to a Python scalar if it is a numpy scalar or a 0-d numpy array .
 
     The function is a no-op if x is not a numpy scalar."""
     if isinstance(x, np.number):
+        return x.item()
+    elif isinstance(x, np.ndarray) and x.ndim == 0:
         return x.item()
     else:
         return x
