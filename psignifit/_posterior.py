@@ -5,8 +5,8 @@ import numpy as np
 import scipy.special as sp
 from scipy import optimize
 
-from ._utils import fp_error_handler, PsignifitException, cast_np_scalar
-from ._typing import Prior, ParameterGrid
+from ._utils import PsignifitException, cast_np_scalar, fp_error_handler
+from ._typing import ParameterGrid, Prior
 from .sigmoids import Sigmoid
 
 # accomodate numpy versions < 2

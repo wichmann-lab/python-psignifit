@@ -6,14 +6,14 @@ from typing import Dict, Optional
 import numpy as np
 
 from . import sigmoids
-from ._parameter import parameter_bounds, masked_parameter_bounds, parameter_grid
-from ._configuration import Configuration
 from ._confidence import confidence_intervals
-from ._posterior import posterior_grid, maximize_posterior, marginalize_posterior
+from ._configuration import Configuration
+from ._parameter import masked_parameter_bounds, parameter_bounds, parameter_grid
+from ._posterior import marginalize_posterior, maximize_posterior, posterior_grid
 from ._priors import setup_priors
 from ._result import Result
 from ._typing import ParameterBounds, Prior
-from ._utils import PsignifitException, check_data, cast_np_scalar
+from ._utils import PsignifitException, cast_np_scalar, check_data
 
 
 def psignifit(data: np.ndarray, conf: Optional[Configuration] = None,
