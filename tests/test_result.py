@@ -298,7 +298,7 @@ def test_threshold_bug_172(input_data):
 
 
 def test_posterior_samples_raises_if_not_debug(input_data):
-    result = psignifit(input_data)
+    result = psignifit(input_data[:3,:])
     with pytest.raises(ValueError):
         result.posterior_samples(n_samples=10)
 
@@ -343,3 +343,4 @@ def test_posterior_samples(result, random_state):
 
     empirical_posterior = counts / n_samples
     np.testing.assert_allclose(empirical_posterior, posterior, atol=1e-2)
+

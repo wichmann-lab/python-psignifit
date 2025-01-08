@@ -7,6 +7,7 @@ from typing import Optional, TypeVar
 import numpy as np
 import scipy.stats
 
+from ._utils import cast_np_scalar
 
 # sigmoid can be calculated on single floats, or on numpy arrays of floats
 N = TypeVar('N', float, np.ndarray)
@@ -80,7 +81,7 @@ class Sigmoid:
         if self.negative:
             value = 1 - value
 
-        return value
+        return cast_np_scalar(value)
 
     def slope(self, stimulus_level: N, threshold: N, width: N, gamma: N = 0, lambd: N = 0) -> N:
         """ Calculate the slope at specified stimulus levels.
@@ -99,9 +100,10 @@ class Sigmoid:
         slope = (1 - gamma - lambd) * raw_slope
 
         if self.negative:
-            return -slope
+            out = -slope
         else:
-            return slope
+            out = slope
+        return cast_np_scalar(out)
 
     def inverse(self, prop_correct: N, threshold: N, width: N,
                 gamma: Optional[N] = None, lambd: Optional[N] = None) -> np.ndarray:
@@ -124,9 +126,7 @@ class Sigmoid:
         if self.negative:
             prop_correct = 1 - prop_correct
 
-        result = self._inverse(prop_correct, threshold, width)
-
-        return result
+        return cast_np_scalar(self._inverse(prop_correct, threshold, width))
 
     def standard_parameters(self, threshold: N, width: N) -> tuple:
         """ Transforms the parameters threshold and width to a standard parametrization.
@@ -143,7 +143,7 @@ class Sigmoid:
         Returns:
             Standard parameters (loc, scale) for the sigmoid subclass.
         """
-        return self._standard_parameters(threshold, width)
+        return [cast_np_scalar(value) for value in self._standard_parameters(threshold, width)]
 
     # --- Private interface
 
@@ -161,8 +161,7 @@ class Sigmoid:
             Proportion correct at the stimulus level values
         """
         loc, scale = self._standard_parameters(threshold=threshold, width=width)
-        value = self._cdf(stimulus_level, loc=loc, scale=scale)
-        return value
+        return cast_np_scalar(self._cdf(stimulus_level, loc=loc, scale=scale))
 
     def _slope(self, stimulus_level: N, threshold: N, width: N) -> N:
         """ Compute the slope of the sigmoid at a given stimulus level.
@@ -178,8 +177,7 @@ class Sigmoid:
             Slope at the stimulus level values
         """
         loc, scale = self._standard_parameters(threshold=threshold, width=width)
-        raw_slope = self._pdf(stimulus_level, loc=loc, scale=scale)
-        return raw_slope
+        return cast_np_scalar(self._pdf(stimulus_level, loc=loc, scale=scale))
 
     def _inverse(self, prop_correct: N, threshold: N, width: N) -> N:
         """ Compute the stimulus value at different proportion correct values.
@@ -195,8 +193,7 @@ class Sigmoid:
             Stimulus values corresponding to the proportion correct values.
         """
         loc, scale = self._standard_parameters(threshold=threshold, width=width)
-        result = self._ppf(prop_correct, loc=loc, scale=scale)
-        return result
+        return cast_np_scalar(self._ppf(prop_correct, loc=loc, scale=scale))
 
     def _standard_parameters(self, threshold: N, width: N) -> list:
         """ Transforms parameters threshold and width to a standard parametrization.
