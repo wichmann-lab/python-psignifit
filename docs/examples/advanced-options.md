@@ -92,9 +92,7 @@ res = ps.psignifit(data, CI_method='percentiles')
 res = ps.psignifit(data, CI_method='project')
 ```
 
-## Threshold and width definitions
-
-### Threshold definition (`thresh_PC`)
+## Threshold definition (`thresh_PC`)
 
 This option sets the proportion correct to correspond to the threshold on the *unscaled* sigmoid. Possible values 
 are in the range from 0 to 1, default is 0.5. The default corresponds to 75\% in a 2AFC task (midway between the 
@@ -114,7 +112,7 @@ setup, you'll need a custom prior. See the [priors demo](priors) to learn how to
 
 
 
-### Width definition (`width_alpha`)
+## Width definition (`width_alpha`)
 
 The definition of the `width` parameter of a psychometric function can be changed with the option `width_alpha`.
 
