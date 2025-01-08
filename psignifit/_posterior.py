@@ -248,11 +248,12 @@ def maximize_posterior(data, param_init: Dict[str, float], param_fixed: Dict[str
 
     # "sorted" is required so that the parameters are matched to the axes in  alphabetical order
     init_values = [value for name, value in sorted(param_init.items())]
-    optimized_values = [cast_np_scalar(value) for value in optimize.fmin(objective, init_values, disp=False)]
+    optimized_values = optimize.fmin(objective, init_values, disp=False)
     # "sorted" is required so that the parameters are matched to the axes in  alphabetical order
     optimized_param = dict(zip(sorted(param_init.keys()), optimized_values))
-    out_param_fixed = { key: cast_np_scalar(value) for key, value in param_fixed.items()}
-    return {**out_param_fixed, **optimized_param}
+    cast_optimized_param = { key: cast_np_scalar(value) for key, value in optimized_param.items() }
+    cast_param_fixed = { key: cast_np_scalar(value) for key, value in param_fixed.items() }
+    return {**cast_param_fixed, **cast_optimized_param}
 
 
 def marginalize_posterior(parameter_grid: ParameterGrid, posterior_mass: np.ndarray) -> Dict[str, np.ndarray]:
