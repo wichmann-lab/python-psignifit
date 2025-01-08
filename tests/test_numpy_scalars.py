@@ -70,6 +70,13 @@ def test_py_not_np_scalar_slope(input_data):
     assert type(value) in (int, float)
 
 
+@pytest.mark.parametrize('with_eta', (True, False))
+def test_py_not_np_scalar_proportion_correct(input_data, with_eta):
+    result = psignifit(input_data[:3,:], experiment_type='yes/no')
+    value = result.proportion_correct(input_data[0,0], with_eta=with_eta)
+    assert type(value) in (int, float)
+
+
 @pytest.mark.parametrize('negative', (True, False))
 @pytest.mark.parametrize('sigmoid_class', ALL_SIGMOID_CLASSES)
 @pytest.mark.parametrize('method', ('__call__', '_value', 'inverse', 'slope'))

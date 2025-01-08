@@ -8,7 +8,7 @@ from numpy.typing import NDArray
 
 from ._configuration import Configuration
 from ._typing import EstimateType
-
+from .tools import psychometric_with_eta
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -157,6 +157,35 @@ class Result:
         stimulus_level, param = np.asarray(stimulus_level), self.get_parameter_estimate(estimate_type)
         sigmoid = self.configuration.make_sigmoid()
         return sigmoid.slope(stimulus_level, param['threshold'], param['width'], param['gamma'], param['lambda'])
+
+    def proportion_correct(self, stimulus_level: np.ndarray,  with_eta: bool = False,
+                           estimate_type: Optional[EstimateType]=None, random_state=None) -> np.ndarray:
+        """ Proportion correct corresponding to the given stimulus levels for the fitted psychometric function.
+
+        Args:
+            stimulus_level: stimulus levels.
+            with_eta: if set after computing proportion correct values adds noise
+                to the data so that its variance is compatible with the estimated
+                overdispersion parameter `eta`.
+            estimate_type: Type of estimate, either "MAP" or "mean".
+                If None, the value of `estimate_type` in `Result.configuration` is used instead.
+            random_state: Random state used to generate the additional variance in the data if with_eta is True.
+                If None, NumPy's default random number generator is used.
+        Returns:
+            Proportion correct values for the fitted psychometric function at the given stimulus levels.
+        """
+        stimulus_level, param = np.asarray(stimulus_level), self.get_parameter_estimate(estimate_type)
+        if with_eta:
+            out = psychometric_with_eta(stimulus_level, param['threshold'], param['width'],
+                                        param['gamma'], param['lambda'],
+                                        self.configuration.make_sigmoid(),
+                                        param['eta'], random_state=None)
+        else:
+            sigmoid = self.configuration.make_sigmoid()
+            out = sigmoid(stimulus_level, threshold=param['threshold'], width=param['width'],
+                          gamma=param['gamma'], lambd=param['lambda'])
+
+        return out
 
     def slope_at_proportion_correct(self, proportion_correct: np.ndarray, unscaled: bool = False,
                                     estimate_type: Optional[EstimateType]=None):
