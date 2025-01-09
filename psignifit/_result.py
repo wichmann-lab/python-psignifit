@@ -175,13 +175,12 @@ class Result:
             Proportion correct values for the fitted psychometric function at the given stimulus levels.
         """
         stimulus_level, param = np.asarray(stimulus_level), self.get_parameter_estimate(estimate_type)
+        sigmoid = self.configuration.make_sigmoid()
         if with_eta:
             out = psychometric_with_eta(stimulus_level, param['threshold'], param['width'],
-                                        param['gamma'], param['lambda'],
-                                        self.configuration.make_sigmoid(),
+                                        param['gamma'], param['lambda'], sigmoid,
                                         param['eta'], random_state=random_state)
         else:
-            sigmoid = self.configuration.make_sigmoid()
             out = sigmoid(stimulus_level, threshold=param['threshold'], width=param['width'],
                           gamma=param['gamma'], lambd=param['lambda'])
 
