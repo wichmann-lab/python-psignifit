@@ -44,6 +44,8 @@ prop_correct = res.proportion_correct(stimulus_levels)
 print(prop_correct)
 ```
 
+Note that `stimulus_levels` can be a NumPy array, for example `stimulus_levels = np.linspace(0.012, 0.015, n=10)`.
+
 We can also get the proportion correct values with added noise derived from the estimated overdispersion
 parameter `eta` (see the [Parameter recovery demo](../examples/parameter_recovery_demo.md#and-now-with-some-more-realistic-data)
 and the [*Vision Research* paper](http://www.sciencedirect.com/science/article/pii/S0042698916000390)
