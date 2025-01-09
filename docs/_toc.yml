@@ -23,6 +23,7 @@ parts:
     - file: how_to/How-to-Fix-Parameters
     - file: how_to/How-to-Change-the-Threshold-Percent-Correct
     - file: how_to/How-to-Get-Standard-Parameters
+    - file: how_to/How-to-Get-Proportion-Correct.md
     
   - caption: Extras
     chapters:

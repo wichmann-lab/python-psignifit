@@ -20,6 +20,11 @@ def test_cast_np_scalar_ndarray_noop():
     assert isinstance(cast, np.ndarray)
 
 
+def test_cast_np_scalar_ndarray_0d():
+    cast = cast_np_scalar(np.array(1))
+    assert isinstance(cast, numbers.Number)
+
+
 @pytest.mark.parametrize('ci_method', ('percentiles', 'project'))
 def test_py_not_np_scalar_ci(input_data, ci_method):
     result = psignifit(input_data[:3,:], experiment_type='yes/no', CI_method=ci_method)
@@ -62,6 +67,13 @@ def test_py_not_np_scalar_slope(input_data):
     value = result.slope(0.5)
     assert type(value) in (int, float)
     value = result.slope_at_proportion_correct(0.5, 0.3)
+    assert type(value) in (int, float)
+
+
+@pytest.mark.parametrize('with_eta', (True, False))
+def test_py_not_np_scalar_proportion_correct(input_data, with_eta):
+    result = psignifit(input_data[:3,:], experiment_type='yes/no')
+    value = result.proportion_correct(input_data[0,0], with_eta=with_eta)
     assert type(value) in (int, float)
 
 

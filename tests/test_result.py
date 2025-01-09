@@ -344,3 +344,13 @@ def test_posterior_samples(result, random_state):
     empirical_posterior = counts / n_samples
     np.testing.assert_allclose(empirical_posterior, posterior, atol=1e-2)
 
+
+def test_result_proportion_correct(result):
+    exp = np.linspace(0.2, 0.5, num=1000)
+    stimulus_levels = result.threshold(exp, return_ci=False)
+    out = result.proportion_correct(stimulus_levels, with_eta=False)
+    np.testing.assert_allclose(exp, out)
+    # we can't really test with_eta properly, but we can make sure
+    # that given a small eta the output is still quite close
+    out = result.proportion_correct(stimulus_levels, with_eta=True)
+    np.testing.assert_allclose(exp, out, rtol=1e-3)

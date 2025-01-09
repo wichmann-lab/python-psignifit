@@ -1,9 +1,9 @@
 import numpy as np
 from scipy import stats
 
-from psignifit._utils import check_data
-from psignifit.sigmoids import sigmoid_by_name
-
+from ._utils import check_data
+from .sigmoids import sigmoid_by_name
+from ._utils import cast_np_scalar
 
 def pool_blocks(data: np.ndarray, max_tol=0, max_gap=np.inf, max_length=np.inf):
     """ Pool trials by stimulus level.
@@ -52,7 +52,7 @@ def pool_blocks(data: np.ndarray, max_tol=0, max_gap=np.inf, max_length=np.inf):
 
 
 def psychometric_with_eta(stimulus_level, threshold, width, gamma, lambda_,
-                          sigmoid_name, eta, random_state=None):
+                          sigmoid, eta, random_state=None):
     """ Psychometric function with overdispersion.
 
     This is a convenience function used mostly for testing and demos. It first computes proportion correct values
@@ -67,8 +67,9 @@ def psychometric_with_eta(stimulus_level, threshold, width, gamma, lambda_,
         width: Width of the psychometric function
         gamma: Guess rate
         lambda_: Lapse rate
-        sigmoid_name: Name of sigmoid function to use. See `psignifit.sigmoids.ALL_SIGMOID_NAMES` for the list of
-            available sigmoids
+        sigmoid: A callable, for example a sigmoid function as returned by Configuration.make_sigmoid(), or
+                 a name of the sigmoid function to use. See `psignifit.sigmoids.ALL_SIGMOID_NAMES` for the list of
+                 available sigmoids
         eta: Overdispersion parameter
         random_state: Random state used to generate the additional variance in the data. If None, NumPy's default
             random number generator is used.
@@ -79,14 +80,16 @@ def psychometric_with_eta(stimulus_level, threshold, width, gamma, lambda_,
     if random_state is None:
         random_state = np.random.default_rng()
 
-    sigmoid = sigmoid_by_name(sigmoid_name)
+    if isinstance(sigmoid, str):
+        sigmoid = sigmoid_by_name(sigmoid)
+
     psi = sigmoid(stimulus_level, threshold=threshold, width=width, gamma=gamma, lambd=lambda_)
 
     new_psi = []
-    for p in psi:
+    for p in np.atleast_1d(psi):
         a = ((1/eta**2) - 1) * p
         b = ((1/eta**2) - 1) * (1 - p)
         noised_p = stats.beta.rvs(a=a, b=b, size=1, random_state=random_state)
         new_psi.append(noised_p)
 
-    return np.array(new_psi).squeeze()
+    return cast_np_scalar(np.array(new_psi).squeeze())
