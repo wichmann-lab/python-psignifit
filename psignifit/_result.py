@@ -179,7 +179,7 @@ class Result:
             out = psychometric_with_eta(stimulus_level, param['threshold'], param['width'],
                                         param['gamma'], param['lambda'],
                                         self.configuration.make_sigmoid(),
-                                        param['eta'], random_state=None)
+                                        param['eta'], random_state=random_state)
         else:
             sigmoid = self.configuration.make_sigmoid()
             out = sigmoid(stimulus_level, threshold=param['threshold'], width=param['width'],
