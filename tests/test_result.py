@@ -344,6 +344,7 @@ def test_posterior_samples(result, random_state):
     empirical_posterior = counts / n_samples
     np.testing.assert_allclose(empirical_posterior, posterior, atol=1e-2)
 
+
 def test_result_proportion_correct(result):
     exp = np.linspace(0.2, 0.5, num=1000)
     stimulus_levels = result.threshold(exp, return_ci=False)
