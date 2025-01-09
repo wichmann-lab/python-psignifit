@@ -164,7 +164,7 @@ class Result:
 
         Args:
             stimulus_level: stimulus levels.
-            with_eta: if set after computing proportion correct values adds noise
+            with_eta: if set, after computing proportion correct values, add noise
                 to the data so that its variance is compatible with the estimated
                 overdispersion parameter `eta`.
             estimate_type: Type of estimate, either "MAP" or "mean".
