@@ -49,8 +49,8 @@ Note that `stimulus_levels` can be a NumPy array, for example `stimulus_levels =
 We can also get the proportion correct values with added noise derived from the estimated overdispersion
 parameter `eta` (see the [Parameter recovery demo](../examples/parameter_recovery_demo.md#and-now-with-some-more-realistic-data)
 and the [*Vision Research* paper](http://www.sciencedirect.com/science/article/pii/S0042698916000390)
-for more info about the `eta` parameter). In essence, were you to draw a lot of these proportion correct values, their
-variance would be compatible with that of samples from a beta binomial distribution with scale paramter equal to `eta`.
+for more info about the `eta` parameter). In essence, were you to draw several proportion correct values, their
+variance would be compatible with that of samples from a beta binomial distribution with scale parameter equal to `eta`.
 
 ```{code-cell} ipython3
 stimulus_levels = [0.0012, 0.0013]
@@ -58,7 +58,7 @@ prop_correct = res.proportion_correct(stimulus_levels, with_eta=True)
 print(prop_correct)
 ```
 
-If you are intersted in the proportion correct values based on the `mean` estimate instead of the default
+If you are interested in the proportion correct values based on the `mean` estimate instead of the default
 `MAP` estimate, you can get them with:
 
 ```{code-cell} ipython3
