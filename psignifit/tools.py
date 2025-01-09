@@ -80,7 +80,7 @@ def psychometric_with_eta(stimulus_level, threshold, width, gamma, lambda_,
     if random_state is None:
         random_state = np.random.default_rng()
 
-    if type(sigmoid) is str:
+    if isinstance(sigmoid, str):
         sigmoid = sigmoid_by_name(sigmoid)
 
     psi = sigmoid(stimulus_level, threshold=threshold, width=width, gamma=gamma, lambd=lambda_)
