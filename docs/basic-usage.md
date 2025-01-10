@@ -17,9 +17,8 @@ In this guide, we show the main features of *psignifit*. Please
 look at the [installation guide](./install_guide) for instructions 
 on how to install this package.
 
-*psignifit* is a toolbox to fit psychometric functions. It comes
-with tools to visualize and evaluate the fit.
-
+*psignifit* is a toolbox to fit psychometric functions from behavioral data. 
+It comes with tools to visualize and evaluate the fit.
 
 ```{code-cell} ipython3
 ---
@@ -35,8 +34,7 @@ import psignifit.psigniplot as psp
 
 ## Trial data format
 
-Your data for each psychometric function should be formatted as a *nx3
-matrix* with columns for the stimulus level, the number of correct
+Your data should be formatted as a *nx3 matrix* with columns for the stimulus level, the number of correct
 responses and the number of total responses.
 
 It should look something like this example dataset:
@@ -64,18 +62,16 @@ data = [[0.0010,   45.0000,   90.0000],
 
 This dataset comes from a simple signal detection experiment.
 
-## Fitting a psychometric function
+## Fitting the psychometric function
 
 A simple call of the `psignifit` function
 will fit a sigmoid function to the data:
-
 
 ```{code-cell} ipython3
 ---
 jupyter:
   outputs_hidden: False
 ---
-
 result = ps.psignifit(data, experiment_type='2AFC');
 ```
 
@@ -129,7 +125,10 @@ The parameters estimated by *psignifit* are:
     indicate severely overdispersed data.
 
 
-Then, to obtain the threhsold you run
+![psyfn](sigmoid_plot_params.png)
+
+
+Then, to obtain the threshold you run
 
 ```{code-cell} ipython3
 print(result.parameter_estimate['threshold'])
@@ -165,9 +164,6 @@ plt.figure()
 psp.plot_psychometric_function(result)
 plt.show()
 ```
-
-
-
 
 ## Next steps
 
