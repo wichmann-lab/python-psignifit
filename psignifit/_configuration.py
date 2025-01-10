@@ -139,7 +139,7 @@ class Configuration:
                 # 0 <= gamma + lambda < 1
                 if not (0 <= gamma+lambda_ < 1):
                     raise PsignifitException(f'For gamma and lambda the condition'
-                                             f' 0 <= gamma + lambda < 1 mut always apply:'
+                                             f' 0 <= gamma + lambda < 1 must always apply:'
                                              f' got gamma={gamma}, lambda={lambda_} instead!')
             for parm_name, parm_value in value.items():
                 # ERRORS
