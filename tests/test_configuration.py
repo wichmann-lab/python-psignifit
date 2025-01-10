@@ -138,3 +138,40 @@ def test_warning_for_equal_asymptote_fixing_lambda_and_gamma():
         Configuration(**options)
 
 
+def test_fixed_parm_width():
+    # 0 < width < +inf
+    with pytest.raises(PsignifitException, match='width'):
+        Configuration(fixed_parameters={'width': 0})
+    with pytest.raises(PsignifitException, match='width'):
+        Configuration(fixed_parameters={'width': -1})
+
+
+def test_fixed_parm_eta():
+    # 0 <= eta <= 1
+    with pytest.raises(PsignifitException, match='eta'):
+        Configuration(fixed_parameters={'eta': -1})
+    with pytest.raises(PsignifitException, match='eta'):
+        Configuration(fixed_parameters={'eta': 2})
+
+
+def test_fixed_parm_gamma():
+    # 0 <= gamma < 1
+    with pytest.raises(PsignifitException, match='gamma'):
+        Configuration(fixed_parameters={'gamma': -1})
+    with pytest.raises(PsignifitException, match='gamma'):
+        Configuration(fixed_parameters={'gamma': 2})
+
+
+def test_fixed_parm_lambda():
+    # 0 <= lambda < 1
+    with pytest.raises(PsignifitException, match='lambda'):
+        Configuration(fixed_parameters={'lambda': -1})
+    with pytest.raises(PsignifitException, match='lambda'):
+        Configuration(fixed_parameters={'lambda': 2})
+
+
+def test_fixed_parm_gamma_lambda():
+    # 0 <= gamma + lambda < 1
+    with pytest.raises(PsignifitException, match=r'gamma \+ lambda'):
+        Configuration(fixed_parameters={'gamma': 0.9, 'lambda': 0.2})
+

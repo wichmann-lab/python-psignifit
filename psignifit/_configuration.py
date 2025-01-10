@@ -131,9 +131,30 @@ class Configuration:
             vkeys = _PARAMETERS
             if vkeys < set(value.keys()):
                 raise PsignifitException(
-                    f'Option fixed_paramters keys must be in {vkeys}. Given {list(value.keys())}!'
+                    f'Option fixed_parameters keys must be in {vkeys}. Given {list(value.keys())}!'
                 )
-
+            # Check that the fixed parameters have been set to meaningful values
+            if (gamma := value.get('gamma')) and (lambda_ := value.get('lambda')):
+                # this condition can only happen if both lambda and gamma are fixed
+                # 0 <= gamma + lambda < 1
+                if not (0 <= gamma+lambda_ < 1):
+                    raise PsignifitException(f'For gamma and lambda the condition'
+                                             f' 0 <= gamma + lambda < 1 mut always apply:'
+                                             f' got gamma={gamma}, lambda={lambda_} instead!')
+            for parm_name, parm_value in value.items():
+                # ERRORS
+                prefix = f'Fixed parameter {parm_name} must be strictly'
+                suffix = f': got {parm_name}={parm_value} instead!'
+                if parm_name == 'width' and parm_value <= 0:
+                    # 0 < width < +inf
+                    raise PsignifitException(f'{prefix} > 0 {suffix}')
+                elif parm_name == 'eta' and not(0 <= parm_value <= 1):
+                    # 0 <= eta <= 1
+                    raise PsignifitException(f'{prefix} 0 <= eta <= 1 {suffix}')
+                elif parm_name in ('gamma', 'lambda') and not(0 <= parm_value < 1):
+                    # 0 <= gamma < 1 and 0 <= lambda < 1
+                    raise PsignifitException(f'{prefix} 0 <= {parm_name} < 1 {suffix}')
+                # WARNINGS
 
     def check_experiment_type_matches_fixed_parameters(self, fixed_params, experiment_type):
         if experiment_type == ExperimentType.N_AFC.value:
