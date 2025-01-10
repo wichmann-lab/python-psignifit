@@ -163,7 +163,9 @@ def test_fixed_parm_gamma():
         Configuration(fixed_parameters={'gamma': EPSNEG})
     with pytest.raises(PsignifitException, match='gamma'):
         Configuration(fixed_parameters={'gamma': 1})
-
+    # gamma > 0.2 and yes/no is unusual
+    with pytest.warns(UserWarning, match='unusual'):
+        Configuration(fixed_parameters={'gamma': 0.2+EPSPOS}, experiment_type='yes/no')
 
 def test_fixed_parm_lambda():
     # 0 <= lambda < 1
@@ -174,9 +176,6 @@ def test_fixed_parm_lambda():
     # lambda > 0.2 is unusual
     with pytest.warns(UserWarning, match='unusual'):
         Configuration(fixed_parameters={'lambda': 0.2+EPSPOS})
-    # gamma > 0.2 and yes/no is unusual
-    with pytest.warns(UserWarning, match='unusual'):
-        Configuration(fixed_parameters={'gamma': 0.2+EPSPOS}, experiment_type='yes/no')
 
 
 def test_fixed_parm_gamma_lambda():
