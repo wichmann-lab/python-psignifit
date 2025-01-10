@@ -36,7 +36,7 @@ def test_py_not_np_scalar_ci(input_data, ci_method):
 
 @pytest.mark.parametrize('fixed_parm', [(None, None),
                                         ('lambda', 3e-7),
-                                        ('gamma', 0.5),
+                                        ('gamma', 0.1),
                                         ('eta', 1e-4),
                                         ('threshold', 0.0046),
                                         ('width', 0.0046)])
