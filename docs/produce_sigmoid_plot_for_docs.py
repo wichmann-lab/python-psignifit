@@ -1,11 +1,7 @@
 import numpy as np
-
-from psignifit import psignifit
-from psignifit import psigniplot
-from psignifit import sigmoids
-
 import matplotlib.pyplot as plt
 
+from psignifit import sigmoids
 
 sigmoid = sigmoids.sigmoid_by_name('norm', PC=0.5, alpha=0.05)
 
@@ -37,22 +33,29 @@ ax.hlines(y=gamma, xmin=x.min()-0.05, xmax=x.max(), color='k', linestyle='--')
 x2 = sigmoid.inverse(0.95, threshold, width)
 x1 = sigmoid.inverse(0.05, threshold, width)
 
-ax.vlines(x=x1, ymin=0, ymax=sigmoid(x1, threshold, width, gamma, lambda_), color='k', linestyle='--')
-ax.vlines(x=x2, ymin=0, ymax=sigmoid(x2, threshold, width, gamma, lambda_), color='k', linestyle='--')
+ax.vlines(x=x1, ymin=0, ymax=sigmoid(x1, threshold, width, gamma, lambda_),
+          color='k', linestyle='--')
+ax.vlines(x=x2, ymin=0, ymax=sigmoid(x2, threshold, width, gamma, lambda_),
+          color='k', linestyle='--')
 
 
 # annotate threshold
-ax.annotate('threshold', xy=(0.5, -0.05), xytext=(0.5, -0.05), xycoords='axes fraction', textcoords='axes fraction',
+ax.annotate('threshold', xy=(0.5, -0.05), xytext=(0.5, -0.05),
+            xycoords='axes fraction', textcoords='axes fraction',
             ha='center', va='center', fontsize=10)
 
 # annotate width
-arrow_linecolor='black'
-arrow_linewidth=1
+arrow_linecolor = 'black'
+arrow_linewidth = 1
 
-ax.annotate('', xy=(x1, -0.12), xytext=(x2, -0.12), xycoords='axes fraction', textcoords='axes fraction',
-            arrowprops={'arrowstyle': '<|-|>', 'color':arrow_linecolor, 'linewidth':arrow_linewidth})
+ax.annotate('', xy=(x1, -0.12), xytext=(x2, -0.12), xycoords='axes fraction',
+            textcoords='axes fraction',
+            arrowprops={'arrowstyle': '<|-|>',
+                        'color': arrow_linecolor,
+                        'linewidth': arrow_linewidth})
 
-ax.annotate('width', xy=(x2, -0.12), xytext=(x2, -0.12), xycoords='axes fraction', textcoords='axes fraction',
+ax.annotate('width', xy=(x2, -0.12), xytext=(x2, -0.12),
+            xycoords='axes fraction', textcoords='axes fraction',
             ha='left', va='center', fontsize=10)
 
 
@@ -60,20 +63,27 @@ ax.annotate('width', xy=(x2, -0.12), xytext=(x2, -0.12), xycoords='axes fraction
 yoffset = -0.06
 
 
-ax.annotate('', xy=(yoffset, -0.01), xytext=(yoffset, gamma+0.01), xycoords='axes fraction', textcoords='axes fraction',
-            arrowprops={'arrowstyle': '<|-|>', 'color':arrow_linecolor, 'linewidth':arrow_linewidth})
-
-ax.annotate(r'guess rate ($\gamma$)', xy=(yoffset-0.025, 0), xytext=(yoffset-0.025, gamma/2), 
+ax.annotate('', xy=(yoffset, -0.01), xytext=(yoffset, gamma+0.01),
             xycoords='axes fraction', textcoords='axes fraction',
-            rotation=90,
-            ha='center', va='center', fontsize=10)
+            arrowprops={'arrowstyle': '<|-|>',
+                        'color': arrow_linecolor,
+                        'linewidth': arrow_linewidth})
+
+ax.annotate(r'guess rate ($\gamma$)', xy=(yoffset-0.025, 0),
+            xytext=(yoffset-0.025, gamma/2), xycoords='axes fraction',
+            textcoords='axes fraction', rotation=90, ha='center', va='center',
+            fontsize=10)
 
 # annotate lambda
-ax.annotate('', xy=(yoffset, 1-lambda_-0.01), xytext=(yoffset, 1+0.01), xycoords='axes fraction', textcoords='axes fraction',
-            arrowprops={'arrowstyle': '<|-|>', 'color':arrow_linecolor, 'linewidth':arrow_linewidth})
+ax.annotate('', xy=(yoffset, 1-lambda_-0.01), xytext=(yoffset, 1+0.01),
+            xycoords='axes fraction', textcoords='axes fraction',
+            arrowprops={'arrowstyle': '<|-|>',
+                        'color': arrow_linecolor,
+                        'linewidth': arrow_linewidth})
 
 
-ax.annotate(r'lapse rate ($\lambda$)', xy=(yoffset-0.025, 0), xytext=(yoffset-0.025, (1-lambda_/2)), 
+ax.annotate(r'lapse rate ($\lambda$)', xy=(yoffset-0.025, 0),
+            xytext=(yoffset-0.025, (1-lambda_/2)),
             xycoords='axes fraction', textcoords='axes fraction',
             rotation=90,
             ha='center', va='center', fontsize=10)
