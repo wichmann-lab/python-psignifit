@@ -4,7 +4,7 @@
 title: Psignifit
 author: Psignifit contributors
 #logo: logo.png
-copyright: "2024. Licence: GPLv2"  # Copyright year to be placed in the footer
+copyright: "2025. Licence: GPLv3+"  # Copyright year to be placed in the footer
 
 execute:
   execute_notebooks: force
