@@ -10,13 +10,18 @@ on:
 
 jobs:
   test:
-    name: ${{ matrix.os}} / py${{ matrix.python_version }}
+    name: ${{ matrix.os}} / py${{ matrix.python_version }} / numpy${{ matrix.numpy_version }}
     runs-on: ${{ matrix.os }}-latest
     strategy:
       fail-fast: false
       matrix:
         os: [Ubuntu]
         python_version: ['3.10', '3.11', '3.12', '3.13']
+        numpy_version: ['2.*']
+        include:
+          - python_version: '3.12'
+            numpy_version: '1.26.4'
+            os: 'Ubuntu'
     steps:
       - uses: actions/checkout@v4
 
@@ -30,6 +35,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip setuptools
           pip install pytest
+      - name: Install numpy version ${{ matrix.numpy_version }}
+        run: |
+          pip install numpy==${{ matrix.numpy_version }}
       - name: Install psignifit to be tested
         run: |
           pip install .
