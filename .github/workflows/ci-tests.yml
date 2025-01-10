@@ -10,7 +10,7 @@ on:
 
 jobs:
   test:
-    name: ${{ matrix.os}} / py${{ matrix.python_version }}
+    name: ${{ matrix.os}} / py${{ matrix.python_version }} / numpy${{ matrix.numpy_version }}
     runs-on: ${{ matrix.os }}-latest
     strategy:
       fail-fast: false
