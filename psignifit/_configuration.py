@@ -165,7 +165,7 @@ class Configuration:
             if fixed_params is not None and 'gamma' in fixed_params:
                 warnings.warn(
                     f'The parameter gamma was fixed to {fixed_params["gamma"]}. In {ExperimentType.N_AFC.value} experiments gamma is automatically fixed to 1/n. Ignoring fixed gamma.')
-        if experiment_type == ExperimentType.EQ_ASYMPTOTE.value:
+        elif experiment_type == ExperimentType.EQ_ASYMPTOTE.value:
             if fixed_params is not None:
                 if 'gamma' in fixed_params:
                     pass # we assume the user knows what they are doing
@@ -177,6 +177,12 @@ class Configuration:
                             f'The parameters lambda {fixed_params["lambda"]} and'
                             f' gamma {fixed_params["gamma"]} were fixed to different values.'
                             f' In {experiment_type} experiments gamma and lambda need to be equal. ')
+        elif experiment_type == ExperimentType.YES_NO.value and fixed_params is not None:
+            if (gamma := fixed_params.get('gamma')) and gamma > 0.2:
+                    # gamma > 0.2 for yes/no experiments is unusual
+                    warnings.warn(f"You have fixed the guess rate gamma to an unusually high value ({gamma}). "
+                                  f"In typical psychophysical experiment of type 'yes/no' gamma is "
+                                  f"rarely above 0.2 for human observers.")
 
 
     def check_experiment_type(self, value):
