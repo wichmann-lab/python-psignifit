@@ -155,6 +155,10 @@ class Configuration:
                     # 0 <= gamma < 1 and 0 <= lambda < 1
                     raise PsignifitException(f'{prefix} 0 <= {parm_name} < 1 {suffix}')
                 # WARNINGS
+                if parm_name == 'lambda' and parm_value > 0.2:
+                    # lambda > 0.2 is unusual
+                    warnings.warn(f"You have fixed the lapse rate lambda to an unusually high value ({parm_value}). "
+                                  f"In typical psychophysical experiments lambda is rarely above 0.2 for human observers.")
 
     def check_experiment_type_matches_fixed_parameters(self, fixed_params, experiment_type):
         if experiment_type == ExperimentType.N_AFC.value:

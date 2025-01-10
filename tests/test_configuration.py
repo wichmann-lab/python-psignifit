@@ -168,6 +168,9 @@ def test_fixed_parm_lambda():
         Configuration(fixed_parameters={'lambda': -1})
     with pytest.raises(PsignifitException, match='lambda'):
         Configuration(fixed_parameters={'lambda': 2})
+    # lambda > 0.2 is unusual
+    with pytest.warns(UserWarning, match='unusual'):
+        Configuration(fixed_parameters={'lambda': 0.3})
 
 
 def test_fixed_parm_gamma_lambda():
