@@ -1,11 +1,14 @@
 import dataclasses
 from unittest.mock import patch
 
+import numpy as np
 import pytest
 
 from psignifit._configuration import Configuration
 from psignifit._utils import PsignifitException
 
+EPSNEG = -np.finfo(np.float64).epsneg
+EPSPOS = np.finfo(np.float64).eps
 
 def test_setting_valid_option():
     c = Configuration(verbose=20)
@@ -143,37 +146,37 @@ def test_fixed_parm_width():
     with pytest.raises(PsignifitException, match='width'):
         Configuration(fixed_parameters={'width': 0})
     with pytest.raises(PsignifitException, match='width'):
-        Configuration(fixed_parameters={'width': -1})
+        Configuration(fixed_parameters={'width': EPSNEG})
 
 
 def test_fixed_parm_eta():
     # 0 <= eta <= 1
     with pytest.raises(PsignifitException, match='eta'):
-        Configuration(fixed_parameters={'eta': -1})
+        Configuration(fixed_parameters={'eta': EPSNEG})
     with pytest.raises(PsignifitException, match='eta'):
-        Configuration(fixed_parameters={'eta': 2})
+        Configuration(fixed_parameters={'eta': 1+EPSPOS})
 
 
 def test_fixed_parm_gamma():
     # 0 <= gamma < 1
     with pytest.raises(PsignifitException, match='gamma'):
-        Configuration(fixed_parameters={'gamma': -1})
+        Configuration(fixed_parameters={'gamma': EPSNEG})
     with pytest.raises(PsignifitException, match='gamma'):
-        Configuration(fixed_parameters={'gamma': 2})
+        Configuration(fixed_parameters={'gamma': 1})
 
 
 def test_fixed_parm_lambda():
     # 0 <= lambda < 1
     with pytest.raises(PsignifitException, match='lambda'):
-        Configuration(fixed_parameters={'lambda': -1})
+        Configuration(fixed_parameters={'lambda': EPSNEG})
     with pytest.raises(PsignifitException, match='lambda'):
-        Configuration(fixed_parameters={'lambda': 2})
+        Configuration(fixed_parameters={'lambda': 1})
     # lambda > 0.2 is unusual
     with pytest.warns(UserWarning, match='unusual'):
-        Configuration(fixed_parameters={'lambda': 0.3})
+        Configuration(fixed_parameters={'lambda': 0.2+EPSPOS})
     # gamma > 0.2 and yes/no is unusual
     with pytest.warns(UserWarning, match='unusual'):
-        Configuration(fixed_parameters={'gamma': 0.3}, experiment_type='yes/no')
+        Configuration(fixed_parameters={'gamma': 0.2+EPSPOS}, experiment_type='yes/no')
 
 
 def test_fixed_parm_gamma_lambda():
