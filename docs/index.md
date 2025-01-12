@@ -39,6 +39,8 @@ confidence intervals, based on two papers by Felix Wichmann and Jeremy Hill:
   - Wichmann, F. A. and Hill, N. J. (2001). [The psychometric function: I. Fitting, sampling and goodness-of-fit](https://link.springer.com/article/10.3758/BF03194544). *Perception and Psychophysics*, 63(8), 1293-1313.
   - Wichmann, F. A. and Hill, N. J. (2001). [The psychometric function: II. Bootstrap-based confidence intervals and sampling](https://link.springer.com/article/10.3758/BF03194545). *Perception and Psychophysics*, 63(8), 1314-1329.
 
+A copy of the original website and code is still [available](https://uni-tuebingen.de/fakultaeten/mathematisch-naturwissenschaftliche-fakultaet/fachbereiche/informatik/lehrstuehle/neuronale-informationsverarbeitung/research/software/psignifit-legacy/).
+
 *psignifit* `3` was developed by Ingo Fründ, Valentin Hänel and Felix Wichmann at the
 TU Berlin between 2009 and 2012 using a mix of Python and C/C++, inspired by Malte Kuss, Frank Jäkel and
 Felix Wichmann's Bayesian psychometric function fitting package PsychoFun written in R:
