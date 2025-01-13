@@ -61,7 +61,7 @@ Heiko Schütt implemented Bayesian inference based on numerical integration rath
 sampling, helped by Stefan Harmeling and Felix Wichmann as well as statistical
 support by Jakob Macke. Numerical integration avoids the reliability issues
 plaguing *psignifit* `3`. Furthermore, *psignifit* `4` is fast enough to be used without
-MEX files. These two changesi–avoiding the pain of MCMC chain diagnosis and
+MEX files. These two changes–avoiding the pain of MCMC chain diagnosis and
 the pain of MEX file compilation–are alluded to in the title of the paper
 describing the method:
 
