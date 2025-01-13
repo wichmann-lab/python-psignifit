@@ -25,7 +25,8 @@ First [install](install_guide) the package.
 
 Then, check out the [basic usage](basic-usage) page.
 
-## Acknowledgements
+## A brief history of *psignifit*
+
 The development of *psignifit* began in the mid 1990's by Felix Wichmann when
 he worked for his doctoral degree at the University of Oxford.
 
@@ -90,6 +91,8 @@ official release of the completely rewritten [implementation](https://github.com
 of the [*Vision Research* paper](http://www.sciencedirect.com/science/article/pii/S0042698916000390).
 
 Since then the *psignifit* Python library is maintained by several [contributors](https://github.com/wichmann-lab/python-psignifit/blob/main/CONTRIBUTORS). 
+
+## Acknowledgements
 
 Our thanks go to the reviewers of our manuscript and the
 students and colleagues who read the paper or tested the software and
