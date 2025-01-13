@@ -134,13 +134,6 @@ class Configuration:
                     f'Option fixed_parameters keys must be in {vkeys}. Given {list(value.keys())}!'
                 )
             # Check that the fixed parameters have been set to meaningful values
-            if (gamma := value.get('gamma')) and (lambda_ := value.get('lambda')):
-                # this condition can only happen if both lambda and gamma are fixed
-                # 0 <= gamma + lambda < 1
-                if not (0 <= gamma+lambda_ < 1):
-                    raise PsignifitException(f'For gamma and lambda the condition'
-                                             f' 0 <= gamma + lambda < 1 must always apply:'
-                                             f' got gamma={gamma}, lambda={lambda_} instead!')
             for parm_name, parm_value in value.items():
                 # ERRORS
                 prefix = f'Fixed parameter {parm_name} must be strictly'
@@ -159,6 +152,16 @@ class Configuration:
                     # lambda > 0.2 is unusual
                     warnings.warn(f"You have fixed the lapse rate lambda to an unusually high value ({parm_value}). "
                                   f"In typical psychophysical experiments lambda is rarely above 0.2 for human observers.")
+
+            if 'gamma' in value and 'lambda' in value:
+                gamma, lambda_ = value['gamma'], value['lambda']
+                # this condition can only happen if both lambda and gamma are fixed
+                # 0 <= gamma + lambda < 1
+                if not (0 <= gamma+lambda_ < 1):
+                    raise PsignifitException(f'For gamma and lambda the condition'
+                                             f' 0 <= gamma + lambda < 1 must always apply:'
+                                             f' got gamma={gamma}, lambda={lambda_} instead!')
+
 
     def check_experiment_type_matches_fixed_parameters(self, fixed_params, experiment_type):
         if experiment_type == ExperimentType.N_AFC.value:
