@@ -8,6 +8,7 @@ copyright: "2024. Licence: GPLv2"  # Copyright year to be placed in the footer
 
 execute:
   execute_notebooks: force
+  timeout: -1
 
 #only_build_toc_files        : true
 
@@ -51,6 +52,7 @@ sphinx:
      "member-order": 'bysource',     # Order members as in source file.
     }
     exclude_patterns: ['_build']
+    nb_execution_show_tb: True
     intersphinx_mapping:
         python:
           - 'https://docs.python.org/3/'
