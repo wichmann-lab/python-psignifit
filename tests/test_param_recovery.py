@@ -115,7 +115,10 @@ def test_parameter_recovery_fixed_params(fixed_param):
     # we fix it to a slightly off value, so we can check if stays fixed
     options['fixed_parameters'][fixed_param] = sim_params[fixed_param]
 
-    res = psignifit(data, **options)
+    with warnings.catch_warnings():
+        # ignore warning about gamma behind unusual
+        warnings.simplefilter("ignore")
+        res = psignifit(data, **options)
     # check fixed params are not touched
     assert res.parameter_estimate_MAP[fixed_param] == sim_params[fixed_param]
 

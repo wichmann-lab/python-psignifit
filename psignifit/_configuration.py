@@ -131,8 +131,36 @@ class Configuration:
             vkeys = _PARAMETERS
             if vkeys < set(value.keys()):
                 raise PsignifitException(
-                    f'Option fixed_paramters keys must be in {vkeys}. Given {list(value.keys())}!'
+                    f'Option fixed_parameters keys must be in {vkeys}. Given {list(value.keys())}!'
                 )
+            # Check that the fixed parameters have been set to meaningful values
+            for parm_name, parm_value in value.items():
+                # ERRORS
+                prefix = f'Fixed parameter {parm_name} must be strictly'
+                suffix = f': got {parm_name}={parm_value} instead!'
+                if parm_name == 'width' and parm_value <= 0:
+                    # 0 < width < +inf
+                    raise PsignifitException(f'{prefix} > 0 {suffix}')
+                elif parm_name == 'eta' and not(0 <= parm_value <= 1):
+                    # 0 <= eta <= 1
+                    raise PsignifitException(f'{prefix} 0 <= eta <= 1 {suffix}')
+                elif parm_name in ('gamma', 'lambda') and not(0 <= parm_value < 1):
+                    # 0 <= gamma < 1 and 0 <= lambda < 1
+                    raise PsignifitException(f'{prefix} 0 <= {parm_name} < 1 {suffix}')
+                # WARNINGS
+                if parm_name == 'lambda' and parm_value > 0.2:
+                    # lambda > 0.2 is unusual
+                    warnings.warn(f"You have fixed the lapse rate lambda to an unusually high value ({parm_value}). "
+                                  f"In typical psychophysical experiments lambda is rarely above 0.2 for human observers.")
+
+            if 'gamma' in value and 'lambda' in value:
+                gamma, lambda_ = value['gamma'], value['lambda']
+                # this condition can only happen if both lambda and gamma are fixed
+                # 0 <= gamma + lambda < 1
+                if not (0 <= gamma+lambda_ < 1):
+                    raise PsignifitException(f'For gamma and lambda the condition'
+                                             f' 0 <= gamma + lambda < 1 must always apply:'
+                                             f' got gamma={gamma}, lambda={lambda_} instead!')
 
 
     def check_experiment_type_matches_fixed_parameters(self, fixed_params, experiment_type):
@@ -140,7 +168,7 @@ class Configuration:
             if fixed_params is not None and 'gamma' in fixed_params:
                 warnings.warn(
                     f'The parameter gamma was fixed to {fixed_params["gamma"]}. In {ExperimentType.N_AFC.value} experiments gamma is automatically fixed to 1/n. Ignoring fixed gamma.')
-        if experiment_type == ExperimentType.EQ_ASYMPTOTE.value:
+        elif experiment_type == ExperimentType.EQ_ASYMPTOTE.value:
             if fixed_params is not None:
                 if 'gamma' in fixed_params:
                     pass # we assume the user knows what they are doing
@@ -152,6 +180,12 @@ class Configuration:
                             f'The parameters lambda {fixed_params["lambda"]} and'
                             f' gamma {fixed_params["gamma"]} were fixed to different values.'
                             f' In {experiment_type} experiments gamma and lambda need to be equal. ')
+        elif experiment_type == ExperimentType.YES_NO.value and fixed_params is not None:
+            if (gamma := fixed_params.get('gamma')) and gamma > 0.2:
+                    # gamma > 0.2 for yes/no experiments is unusual
+                    warnings.warn(f"You have fixed the guess rate gamma to an unusually high value ({gamma}). "
+                                  f"In typical psychophysical experiment of type 'yes/no' gamma is "
+                                  f"rarely above 0.2 for human observers.")
 
 
     def check_experiment_type(self, value):

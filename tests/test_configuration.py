@@ -1,11 +1,14 @@
 import dataclasses
 from unittest.mock import patch
 
+import numpy as np
 import pytest
 
 from psignifit._configuration import Configuration
 from psignifit._utils import PsignifitException
 
+EPSNEG = -np.finfo(np.float64).epsneg
+EPSPOS = np.finfo(np.float64).eps
 
 def test_setting_valid_option():
     c = Configuration(verbose=20)
@@ -138,3 +141,51 @@ def test_warning_for_equal_asymptote_fixing_lambda_and_gamma():
         Configuration(**options)
 
 
+def test_fixed_parm_width():
+    # 0 < width < +inf
+    with pytest.raises(PsignifitException, match='width'):
+        Configuration(fixed_parameters={'width': 0})
+    with pytest.raises(PsignifitException, match='width'):
+        Configuration(fixed_parameters={'width': EPSNEG})
+
+
+def test_fixed_parm_eta():
+    # 0 <= eta <= 1
+    with pytest.raises(PsignifitException, match='eta'):
+        Configuration(fixed_parameters={'eta': EPSNEG})
+    with pytest.raises(PsignifitException, match='eta'):
+        Configuration(fixed_parameters={'eta': 1+EPSPOS})
+
+
+def test_fixed_parm_gamma():
+    # 0 <= gamma < 1
+    with pytest.raises(PsignifitException, match='gamma'):
+        Configuration(fixed_parameters={'gamma': EPSNEG})
+    with pytest.raises(PsignifitException, match='gamma'):
+        Configuration(fixed_parameters={'gamma': 1})
+    # gamma > 0.2 and yes/no is unusual
+    with pytest.warns(UserWarning, match='unusual'):
+        Configuration(fixed_parameters={'gamma': 0.2+EPSPOS}, experiment_type='yes/no')
+
+
+def test_fixed_parm_lambda():
+    # 0 <= lambda < 1
+    with pytest.raises(PsignifitException, match='lambda'):
+        Configuration(fixed_parameters={'lambda': EPSNEG})
+    with pytest.raises(PsignifitException, match='lambda'):
+        Configuration(fixed_parameters={'lambda': 1})
+    # lambda > 0.2 is unusual
+    with pytest.warns(UserWarning, match='unusual'):
+        Configuration(fixed_parameters={'lambda': 0.2+EPSPOS})
+
+
+def test_fixed_parm_gamma_lambda():
+    # 0 <= gamma + lambda < 1
+    with pytest.raises(PsignifitException, match=r'gamma \+ lambda'):
+        Configuration(fixed_parameters={'gamma': 0.9, 'lambda': 0.2})
+    # gamma == 0 and lambda == 2 should fail!
+    with pytest.raises(PsignifitException):
+        Configuration(fixed_parameters={'gamma': 0, 'lambda': 2})
+    # gamma == 2 and lambda == 0 should fail!
+    with pytest.raises(PsignifitException):
+        Configuration(fixed_parameters={'gamma': 2, 'lambda': 0})
