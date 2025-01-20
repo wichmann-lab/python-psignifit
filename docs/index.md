@@ -27,7 +27,7 @@ Then, check out the [basic usage](basic-usage) page.
 
 ## A brief history of *psignifit*
 
-The development of *psignifit* began in the mid 1990's by Felix Wichmann when
+The development of *psignifit* (Psychometric SIGNIficant FITting) began in the mid 1990's by Felix Wichmann when
 he worked for his doctoral degree at the University of Oxford.
 
 The first version (*psignifit* `1`) was programmed in Mathematica, but was soon ported
