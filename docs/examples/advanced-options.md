@@ -118,7 +118,7 @@ The definition of the `width` parameter of a psychometric function can be change
 
 `width = `$\Psi^{-1}(1-\alpha) - \Psi^{-1}(\alpha)$ where $\Psi^{-1}$ is the inverse of the sigmoid function.
 
-`width_alpha` must be between 0 and .5 excluding. Default is `width=0.05`
+`width_alpha` must be between 0 and .5 excluding. Default is `width_alpha=0.05`
 
 For example, this would enable the usage of the interval from .1 to .9 as the width
 
