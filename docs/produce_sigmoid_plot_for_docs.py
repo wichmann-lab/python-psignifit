@@ -11,6 +11,8 @@ width = 0.5
 gamma = 0.1
 lambda_ = 0.1
 
+gray = '#888888'
+
 x = np.linspace(1e-12, 1-1e-12, num=10000)
 y = sigmoid(x, threshold, width, gamma, lambda_)
 
@@ -34,9 +36,16 @@ x2 = sigmoid.inverse(0.95, threshold, width)
 x1 = sigmoid.inverse(0.05, threshold, width)
 
 ax.vlines(x=x1, ymin=0, ymax=sigmoid(x1, threshold, width, gamma, lambda_),
-          color='k', linestyle='--')
+          color=gray, linestyle='--')
 ax.vlines(x=x2, ymin=0, ymax=sigmoid(x2, threshold, width, gamma, lambda_),
-          color='k', linestyle='--')
+          color=gray, linestyle='--')
+
+#ax.hlines(y=0.95-lambda_, xmin=0, xmax=x2, color=gray, linestyle='--')
+#ax.hlines(y=0.05+gamma, xmin=0, xmax=x1, color=gray, linestyle='--')
+
+#ax.annotate('0.05+gamma', xy=(0.0, 0.05+gamma), xytext=(-0.01, 0.05+gamma),
+#            xycoords='axes fraction', textcoords='axes fraction',
+#            ha='right', va='center', fontsize=10)
 
 
 # annotate threshold
@@ -69,7 +78,7 @@ ax.annotate('', xy=(yoffset, -0.01), xytext=(yoffset, gamma+0.01),
                         'color': arrow_linecolor,
                         'linewidth': arrow_linewidth})
 
-ax.annotate(r'guess rate ($\gamma$)', xy=(yoffset-0.025, 0),
+ax.annotate('gamma', xy=(yoffset-0.025, 0),
             xytext=(yoffset-0.025, gamma/2), xycoords='axes fraction',
             textcoords='axes fraction', rotation=90, ha='center', va='center',
             fontsize=10)
@@ -82,7 +91,7 @@ ax.annotate('', xy=(yoffset, 1-lambda_-0.01), xytext=(yoffset, 1+0.01),
                         'linewidth': arrow_linewidth})
 
 
-ax.annotate(r'lapse rate ($\lambda$)', xy=(yoffset-0.025, 0),
+ax.annotate('lambda', xy=(yoffset-0.025, 0),
             xytext=(yoffset-0.025, (1-lambda_/2)),
             xycoords='axes fraction', textcoords='axes fraction',
             rotation=90,
@@ -95,9 +104,9 @@ ax.set_xticks([0, 1])
 ax.set_xticklabels(["0", "1"], fontsize=11)
 ax.set_yticks([0, 1])
 ax.set_yticklabels(["0", "1"], fontsize=11)
-ax.set_ylabel('Percent correct', fontsize=14)
+ax.set_ylabel('Proportion correct', fontsize=14)
 ax.set_xlabel('Stimulus level', fontsize=14)
 ax.xaxis.set_label_coords(.5, -.2)
 ax.yaxis.set_label_coords(-.15, .5)
 
-fig.savefig('sigmoid_plot_params.png', bbox_inches='tight')
+fig.savefig('sigmoid_and_params.png', bbox_inches='tight')
