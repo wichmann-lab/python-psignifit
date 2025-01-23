@@ -62,6 +62,32 @@ data = [[0.0010,   45.0000,   90.0000],
 
 This dataset comes from a simple signal detection experiment.
 
+## Paramaters of the psychometric function
+
+In  *psignifit* the psychometric function is defined as a sigmoid ($S$)
+scaled by the guess and lapse rate.
+The guess rate (*gamma*) and lapse rate (*lambda*) define the lower 
+and upper asymptotes of the sigmoid, respectively. 
+
+![psyfn](sigmoid_and_params.png)
+
+The guess rate (*gamma) is fixed for nAFC experiments, at a value of 1/n.
+Thus for a 2AFC experiment gamma is fixed to 0.5
+
+The sigmoid has two parameters:
+- its *threshold*, the stimulus level at which the unscaled psychometric 
+function reaches 0.5
+- its *width*, the difference between the 95 and the 5 percentile of the
+(unscaled) sigmoid
+
+
+Finally *psignifit* also estimated an overdispersion parameter *eta*.
+A value near zero indicates your data behaves binomially distributed, 
+whereas values near one indicate severely overdispersed data.
+Refer to the [original publication](http://www.sciencedirect.com/science/article/pii/S0042698916000390)
+for more details on the interpreation of this parameter.
+
+
 ## Fitting the psychometric function
 
 A simple call of the `psignifit` function
@@ -86,7 +112,7 @@ You find a more detailed description of the
 [experiment types here](examples/basic-options).
 
 You also might want to specify the sigmoid you want to use. 
-You do this by setting the paramter `sigmoid`. Default is 
+You do this by setting the parameter `sigmoid`. Default is 
 the cummulative Gauss (`sigmoid="gauss"`). Another 
 common alternative is the logistic (`sigmoid="logistic")`.
 
@@ -100,8 +126,8 @@ Advanced users can pass more arguments to fine-tune the fitting procedure,
 ## Getting results from the fit
 
 The `result` is a python object with all information obtained from
-fitting your data. Perhaps of primary interest are the fitted parameters
-and the confidence intervals:
+fitting your data. Of primary interest are the fitted parameters
+and the confidence intervals
 
 ```{code-cell} ipython3
 ---
@@ -112,22 +138,6 @@ print(result.parameter_estimate)
 ```
 
 This returns a python dictionary containing the estimated parameters.
-The parameters estimated by *psignifit* are:
-
-1.  *threshold*, the stimulus value of equal-odds
-2.  *width*, the difference between the 5 and the 95 percentile of the
-    unscaled sigmoid
-3.  *lambda*, the lapse rate (upper asymptote of the sigmoid)
-4.  *gamma*, the guess rate (lower asymptote of the sigmoid). This
-    parameter is fixed for nAFC experiment types.
-5.  *eta*,the overdispersion parameter. A value near zero indicates your
-    data behaves binomially distributed, whereas values near one
-    indicate severely overdispersed data.
-
-
-![psyfn](sigmoid_plot_params.png)
-
-
 Then, to obtain the threshold you run
 
 ```{code-cell} ipython3
