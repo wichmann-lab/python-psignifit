@@ -64,14 +64,14 @@ This dataset comes from a simple signal detection experiment.
 
 ## Paramaters of the psychometric function
 
-In  *psignifit* the psychometric function is defined as a sigmoid ($S$)
+In  *psignifit* the psychometric function is defined as a sigmoid
 scaled by the guess and lapse rate.
 The guess rate (*gamma*) and lapse rate (*lambda*) define the lower 
 and upper asymptotes of the sigmoid, respectively. 
 
 ![psyfn](sigmoid_and_params.png)
 
-The guess rate (*gamma) is fixed for nAFC experiments, at a value of 1/n.
+The guess rate (*gamma*) is fixed for nAFC experiments, at a value of 1/n.
 Thus for a 2AFC experiment gamma is fixed to 0.5
 
 The sigmoid has two parameters:
