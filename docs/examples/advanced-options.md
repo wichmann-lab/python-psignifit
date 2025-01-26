@@ -101,7 +101,7 @@ res = ps.psignifit(data, CI_method='project')
 
 In *psignifit*, sigmoids are defined on the range between 0 and 1,
 to be later scaled by *gamma* and *lambda*. 
-These *unscaled* [sigmoids](plot_all_sigmoids) have two parameters:
+These [*unscaled* sigmoids](plot_all_sigmoids) have two parameters:
 
 - its *threshold*, by default being the stimulus level at which the sigmoid reaches 0.5
 - its *width*, by default being the difference between the 95 and the 5 percentiles
@@ -112,7 +112,7 @@ You can change these definitions as explained in the following.
 
 ### Threshold definition (`thresh_PC`)
 
-This option sets the proportion correct that will define the threshold,
+This option sets the proportion correct that will define the threshold
 on the *unscaled* sigmoid. 
 Possible values are in the range from 0 to 1, default is 0.5. 
 The default corresponds to 75\% in a 2AFC task (midway between the 

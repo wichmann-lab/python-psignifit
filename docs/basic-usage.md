@@ -62,7 +62,7 @@ data = [[0.0010,   45.0000,   90.0000],
 
 This dataset comes from a simple signal detection experiment.
 
-## Paramaters of the psychometric function
+## Parameters of the psychometric function
 
 In  *psignifit* the psychometric function is defined as a sigmoid
 scaled by the guess and lapse rate.
