@@ -85,7 +85,7 @@ Finally *psignifit* also estimated an overdispersion parameter *eta*.
 A value near zero indicates your data behaves binomially distributed, 
 whereas values near one indicate severely overdispersed data.
 Refer to the [original publication](http://www.sciencedirect.com/science/article/pii/S0042698916000390)
-for more details on the interpreation of this parameter.
+for more details on the interpretation of this parameter.
 
 
 ## Fitting the psychometric function
@@ -104,8 +104,8 @@ result = ps.psignifit(data, experiment_type='2AFC');
 *psignifit* comes with presets for different psychometric
 experiments. 
 Apart from *nAFC* (`2AFC`, `3AFC`, ...) 
-we provide two other options:  `yes/no` which enables a 
-free upper and lower asymptote and,
+we provide two other options:  `yes/no` which enables 
+free upper and lower asymptotes, and
 `equal asymptote`, 
 which assumes that the upper and the lower asymptote are equal. 
 You find a more detailed description of the 
@@ -116,7 +116,7 @@ You do this by setting the parameter `sigmoid`. Default is
 the cummulative Gauss (`sigmoid="gauss"`). Another 
 common alternative is the logistic (`sigmoid="logistic")`.
 
-Refer to the [options demo](examples/basic-options) and the [sigmoids page](examples/plot_all_sigmoids)
+Refer to the [basic options page](examples/basic-options) and the [sigmoids page](examples/plot_all_sigmoids)
 for all possible sigmoids implemented in *psignifit*.
 
 Advanced users can pass more arguments to fine-tune the fitting procedure,
@@ -127,7 +127,7 @@ Advanced users can pass more arguments to fine-tune the fitting procedure,
 
 The `result` is a python object with all information obtained from
 fitting your data. Of primary interest are the fitted parameters
-and the confidence intervals
+and their confidence intervals
 
 ```{code-cell} ipython3
 ---
@@ -153,7 +153,7 @@ each parameter. For example for the threshold
 print(result.confidence_intervals['threshold'])
 ```
 
-Each element in this result contain the lower and
+Each element in this dictionary contain the lower and
 upper bound for the asked confidences. 
 In this case it returns the intervals for the default confidences of 
 95%, 90% and 68%.
