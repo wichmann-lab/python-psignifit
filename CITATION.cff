@@ -3,15 +3,19 @@ message: "If you use this software, please cite it as below."
 authors:
 - family-names: Zito
   given-names: Tiziano
+  orcid: https://orcid.org/0000-0002-7199-7456
 - family-names: Künstle
   given-names: David-Elias
+  orcid: https://orcid.org/0000-0001-5507-3731
 - family-names: Aguilar
   given-names: Guillermo
   orcid: https://orcid.org/0000-0003-0970-5720
 - family-names: Berkes
   given-names: Pietro
+  orcid: https://orcid.org/0000-0002-2827-3911
 - family-names: Schwetlick
-  given-names: Lisa 
+  given-names: Lisa
+  orcid: https://orcid.org/0000-0003-3356-8324
 title: "psignifit 4.3"
 version: 4.3
 date-released: 2025-01-xx
