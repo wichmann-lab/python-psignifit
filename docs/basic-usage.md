@@ -77,13 +77,16 @@ Thus for a 2AFC experiment gamma is fixed to 0.5
 The sigmoid has two parameters:
 - its *threshold*, the stimulus level at which the unscaled psychometric 
 function reaches 0.5
-- its *width*, the difference between the 95 and the 5 percentile of the
+- its *width*, the difference between the 5th and the 95th percentiles of the
 (unscaled) sigmoid
 
 
-Finally *psignifit* also estimated an overdispersion parameter *eta*.
-A value near zero indicates your data behaves binomially distributed, 
-whereas values near one indicate severely overdispersed data.
+Finally *psignifit* also estimates an overdispersion parameter *eta*.
+A value near zero indicates that the data are consistent with
+a binomial distribution.
+A value near one indicate severely overdispersed data,
+that means, the data show a variance that is larger than the variance
+expected from a binomial distribution.
 Refer to the [original publication](http://www.sciencedirect.com/science/article/pii/S0042698916000390)
 for more details on the interpretation of this parameter.
 

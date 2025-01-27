@@ -125,7 +125,7 @@ res = ps.psignifit(data, thresh_PC=0.9)
 ```
 
 Note that this value is changed on the *unscaled* sigmoid, so for a 2AFC 
-task it corresponds to a 95 \%.
+task it corresponds to a 95% (when the lapse rate *lambda* is zero).
 
 Note also that you will get a warning, because the default prior assumes that the experimental
 stimulus range covers the range where the threshold likely falls. If this doesn't match your
