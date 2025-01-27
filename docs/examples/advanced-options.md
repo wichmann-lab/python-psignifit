@@ -36,8 +36,13 @@ res = ps.psignifit(data, sigmoid='norm', experiment_type='2AFC')
 ## Estimation Type
 As described in detail in the section [Parameters estimates: MAP and mean](map_vs_mean), this option sets how you want to estimate your fit from the posterior.
 
-- 'mean': using the posterior mean. In a Bayesian sense this is a more suitable estimate of the expected value of the posterior. However, in our paper we show that for psychometric function fitting and the small datasets used in experimental psychology and the neurosciences, and for the our priors the MAP is preferable as default!
-- 'MAP': maximum a posteriori computed from the posterior. Default.
+- `mean`: using the posterior mean. 
+- `MAP`: maximum a posteriori computed from the posterior. Default.
+
+In a Bayesian sense the `mean` estimate is a more suitable estimate of the expected value of the posterior. 
+However, in the original publication it is shown that the `MAP` estimate is preferable for psychometric function fitting, given the small datasets commonly used in experimental psychology and the neurosciences.
+This justifies our choice of `MAP` as the default.
+
 
 ```{code-cell} ipython3
 # This gives the default estimate, in this case the mean estimate since we set it in the options.
@@ -92,39 +97,61 @@ res = ps.psignifit(data, CI_method='percentiles')
 res = ps.psignifit(data, CI_method='project')
 ```
 
-## Threshold definition (`thresh_PC`)
+## Sigmoid parametrization
 
-This option sets the proportion correct to correspond to the threshold on the *unscaled* sigmoid. Possible values 
-are in the range from 0 to 1, default is 0.5. The default corresponds to 75\% in a 2AFC task (midway between the 
+In *psignifit*, sigmoids are defined on the range between 0 and 1,
+to be later scaled by *gamma* and *lambda*. 
+These [*unscaled* sigmoids](plot_all_sigmoids) have two parameters:
+
+- its *threshold*, by default being the stimulus level at which the sigmoid reaches 0.5
+- its *width*, by default being the difference between the 95 and the 5 percentiles
+
+![psyfn](../sigmoid_and_params_advanced.png)
+
+You can change these definitions as explained in the following.
+
+### Threshold definition (`thresh_PC`)
+
+This option sets the proportion correct that will define the threshold
+on the *unscaled* sigmoid. 
+Possible values are in the range from 0 to 1, default is 0.5. 
+The default corresponds to 75\% in a 2AFC task (midway between the 
 guess rate of 50 % and ceiling performance 100%).
 
-To set it to a different value, for example to 90 %, you'll do
+To set it to a different value, for example to 90%, you'll do
 
 ```{code-cell} ipython3
 res = ps.psignifit(data, thresh_PC=0.9)
 ```
 
-Note that this corresponds to a 95 \% in a 2AFC task.
+Note that this value is changed on the *unscaled* sigmoid, so for a 2AFC 
+task it corresponds to a 95% (when the lapse rate *lambda* is zero).
 
 Note also that you will get a warning, because the default prior assumes that the experimental
 stimulus range covers the range where the threshold likely falls. If this doesn't match your
-setup, you'll need a custom prior. See the [priors demo](priors) to learn how to do it.
+setup, you'll need to pass custom priors and evaluate their adequacy. 
+See the [priors demo](priors) to learn how to do it.
 
 
 
-## Width definition (`width_alpha`)
+### Width definition (`width_alpha`)
 
-The definition of the `width` parameter of a psychometric function can be changed with the option `width_alpha`.
+The definition of the `width` parameter of a sigmoid can be changed with 
+the option `width_alpha`. The width is defined as 
 
-`width = `$\Psi^{-1}(1-\alpha) - \Psi^{-1}(\alpha)$ where $\Psi^{-1}$ is the inverse of the sigmoid function.
+$\Psi^{-1}(1-\alpha) - \Psi^{-1}(\alpha)$ 
 
-`width_alpha` must be between 0 and .5 excluding. Default is `width_alpha=0.05`
+where $\Psi^{-1}$ is the inverse of the sigmoid function. 
+The option `width_alpha` is $\alpha$ in the formula above, and must be
+between 0 and .5 excluding. Default is `width_alpha = 0.05`
 
-For example, this would enable the usage of the interval from .1 to .9 as the width
+For example, the following code would redefine the width as 
+the interval between percentiles 10 and 90.
 
 ```{code-cell} ipython3
-res = ps.psignifit(data, width_alpha=0.05)
+res = ps.psignifit(data, width_alpha=0.1)
 ```
+
 
 ## Priors
 
@@ -138,7 +165,7 @@ The strength of the prior in favor of a binomial observer can be set with
 the `beta_prior` option. Larger values correspond to a stronger prior.
 The default value is 10; we choose this value after
 a rather large number of simulations. Refer to
-[Schütt & Wichmann (2016)](http://www.sciencedirect.com/science/article/pii/S0042698916000390) 
+[the original publication](http://www.sciencedirect.com/science/article/pii/S0042698916000390) 
 to learn more about this.
 
 ```{code-cell} ipython3
@@ -151,7 +178,7 @@ res = ps.psignifit(data, beta_prior=15)
 ```{warning}
 By changing the default bounds you might artificially bias the estimation procedure. 
 The defaults were choosen after extensive simulations; these are reported in 
-[Schütt & Wichmann (2016)](http://www.sciencedirect.com/science/article/pii/S0042698916000390). 
+[the original publication](http://www.sciencedirect.com/science/article/pii/S0042698916000390). 
 Change the defaults if you know what you are doing!
 ```
 
