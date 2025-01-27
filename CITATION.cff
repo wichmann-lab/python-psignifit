@@ -1,0 +1,19 @@
+cff-version: 1.1.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: Zito
+  given-names: Tiziano
+- family-names: Künstle
+  given-names: David-Elias
+- family-names: Aguilar
+  given-names: Guillermo
+  orcid: https://orcid.org/0000-0003-0970-5720
+- family-names: Berkes
+  given-names: Pietro
+- family-names: Schwetlick
+  given-names: Lisa 
+title: "psignifit 4.3"
+version: 4.3
+date-released: 2025-01-xx
+url: "https://github.com/wichmann-lab/python-psignifit"
+doi: 10.5281/zenodo.14750244
