@@ -25,6 +25,17 @@ First [install](install_guide) the package.
 
 Then, check out the [basic usage](basic-usage) page.
 
+## How to cite
+
+If you use this package, please cite both *this implementation*:
+
+  - Zito, T., Künstle, D., Aguilar, G., Berkes, P., & Schwetlick, L. psignifit 4.3 (Version 4.3) [Computer software]. https://doi.org/10.5281/zenodo.14750140
+
+as well as the *original paper*:
+
+  - Schütt, H. H., Harmeling, S., Macke, J. H., & Wichmann, F. A. (2016). Painfree and accurate Bayesian estimation of psychometric functions for (potentially) overdispersed data. Vision Research, 122, 105–123. [doi:10.1016/j.visres.2016.02.002](https://doi.org/10.1016/j.visres.2016.02.002)
+
+
 ## A brief history of *psignifit*
 
 The development of *psignifit* (Psychometric SIGNIficant FITting) began in the mid 1990's by Felix Wichmann when
