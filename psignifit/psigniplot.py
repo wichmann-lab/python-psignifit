@@ -669,7 +669,7 @@ def plot_posterior_samples(
 
     # Plot the samples from the posterior
     sigmoid = result.configuration.make_sigmoid()
-    x = np.linspace(0.001, 0.01, num=1000)
+    x = np.linspace(result.data[:, 0].min(), result.data[:, 0].max(), num=1000)
     for idx in range(n_samples):
         y = sigmoid(
             x,
