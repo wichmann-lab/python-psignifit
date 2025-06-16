@@ -678,7 +678,7 @@ def plot_posterior_samples(
             gamma=params_samples['gamma'][idx],
             lambd=params_samples['lambda'][idx],
         )
-        ax.plot(x, y, alpha=samples_alpha, color=samples_color, zorder=-1)
+        ax.plot(x, y, alpha=samples_alpha, color=samples_color, zorder=.5)
 
     # Plot the point estimate of the psychometric function
     plot_psychometric_function(
