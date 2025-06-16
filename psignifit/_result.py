@@ -124,8 +124,7 @@ class Result:
             proportion_correct_unscaled = proportion_correct
         else:
             lambd, gamma = estimate['lambda'], estimate['gamma']
-            proportion_correct_unscaled = (proportion_correct - gamma)/(1- lambd - gamma)
-            
+            proportion_correct_unscaled = (proportion_correct - gamma)/(1- lambd - gamma)     
         new_threshold = sigmoid.inverse(proportion_correct, estimate['threshold'],
                                         estimate['width'], gamma, lambd)
         if not return_ci:
