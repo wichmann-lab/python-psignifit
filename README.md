@@ -35,3 +35,4 @@ See the [CONTRIBUTORS](https://github.com/wichmann-lab/python-psignifit/blob/mas
 ## License and COPYRIGHT
 
 See the [COPYRIGHT](https://github.com/wichmann-lab/python-psignifit/blob/master/COPYRIGHT) file
+
