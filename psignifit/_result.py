@@ -121,8 +121,11 @@ class Result:
         estimate = self.get_parameter_estimate(estimate_type)
         if unscaled:  # set asymptotes to 0 for everything.
             lambd, gamma = 0, 0
+            proportion_correct_unscaled = proportion_correct
         else:
             lambd, gamma = estimate['lambda'], estimate['gamma']
+            proportion_correct_unscaled = (proportion_correct - gamma)/(1- lambd - gamma)
+            
         new_threshold = sigmoid.inverse(proportion_correct, estimate['threshold'],
                                         estimate['width'], gamma, lambd)
         if not return_ci:
@@ -138,8 +141,13 @@ class Result:
             else:
                 gamma_ci = self.confidence_intervals['gamma'][coverage_key]
                 lambd_ci = self.confidence_intervals['lambda'][coverage_key]
-            ci_min = sigmoid.inverse(proportion_correct, thres_ci[0], width_ci[0], gamma_ci[0], lambd_ci[0])
-            ci_max = sigmoid.inverse(proportion_correct, thres_ci[1], width_ci[1], gamma_ci[1], lambd_ci[1])
+
+            if proportion_correct_unscaled > self.configuration.thresh_PC:
+                ci_min = sigmoid.inverse(proportion_correct, thres_ci[0], width_ci[0], gamma_ci[0], lambd_ci[1])
+                ci_max = sigmoid.inverse(proportion_correct, thres_ci[1], width_ci[1], gamma_ci[1], lambd_ci[0])
+            else:
+                ci_min = sigmoid.inverse(proportion_correct, thres_ci[0], width_ci[1], gamma_ci[0], lambd_ci[1])
+                ci_max = sigmoid.inverse(proportion_correct, thres_ci[1], width_ci[0], gamma_ci[1], lambd_ci[0])
             new_threshold_ci[coverage_key] = [ci_min, ci_max]
 
         return new_threshold, new_threshold_ci
