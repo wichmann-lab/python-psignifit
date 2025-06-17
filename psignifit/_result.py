@@ -119,7 +119,7 @@ class Result:
         if return_ci:
             warnings.warn("""The confidence intervals computed by this method are only upper bounds. 
                           To get a more accurate confidence interval at another level of proportion 
-                          correct, you need to redefine the threshold, that is, refine at which level
+                          correct, you need to redefine the threshold, that is, redefine at which level
                           the threshold parameter is set. You can do that by changing the argument 
                           'thresh_PC', and call psignifit again. For an example, see documentation, 
                           page "Advanced options").
