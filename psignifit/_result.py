@@ -9,8 +9,8 @@ from numpy.typing import NDArray
 
 from ._configuration import Configuration
 from ._typing import EstimateType
-from .tools import psychometric_with_eta
 from ._utils import cast_np_scalar
+from .tools import psychometric_with_eta
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -139,7 +139,7 @@ class Result:
             proportion_correct_unscaled = proportion_correct
         else:
             lambd, gamma = estimate['lambda'], estimate['gamma']
-            proportion_correct_unscaled = (proportion_correct - gamma)/(1- lambd - gamma)     
+            proportion_correct_unscaled = (proportion_correct - gamma) / (1- lambd - gamma)
         new_threshold = sigmoid.inverse(proportion_correct, estimate['threshold'],
                                         estimate['width'], gamma, lambd)
         if not return_ci:
