@@ -162,16 +162,16 @@ class Result:
             ci_max = np.zeros(proportion_correct.shape)
 
             ci_min[mask_above] = sigmoid.inverse(proportion_correct[mask_above],
-                                                 thres_ci[0], width_ci[0], gamma_ci[0], lambd_ci[1])
+                                                 thres_ci[0], width_ci[0], gamma_ci[0], lambd_ci[0])
             ci_max[mask_above] = sigmoid.inverse(proportion_correct[mask_above],
-                                                 thres_ci[1], width_ci[1], gamma_ci[1], lambd_ci[0])
+                                                 thres_ci[1], width_ci[1], gamma_ci[1], lambd_ci[1])
 
             ci_min[~mask_above] = sigmoid.inverse(proportion_correct[~mask_above],
-                                                 thres_ci[0], width_ci[1], gamma_ci[0], lambd_ci[1])
+                                                 thres_ci[0], width_ci[1], gamma_ci[0], lambd_ci[0])
             ci_max[~mask_above] = sigmoid.inverse(proportion_correct[~mask_above],
-                                                 thres_ci[1], width_ci[0], gamma_ci[1], lambd_ci[0])
+                                                 thres_ci[1], width_ci[0], gamma_ci[1], lambd_ci[1])
 
-            new_threshold_ci[coverage_key] = [cast_np_scalar(ci_min), 
+            new_threshold_ci[coverage_key] = [cast_np_scalar(ci_min),
                                               cast_np_scalar(ci_max)]
 
         return new_threshold, new_threshold_ci
