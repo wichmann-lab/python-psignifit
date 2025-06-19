@@ -10,6 +10,7 @@ from numpy.typing import NDArray
 from ._configuration import Configuration
 from ._typing import EstimateType
 from .tools import psychometric_with_eta
+from ._utils import cast_np_scalar
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -155,13 +156,23 @@ class Result:
                 gamma_ci = self.confidence_intervals['gamma'][coverage_key]
                 lambd_ci = self.confidence_intervals['lambda'][coverage_key]
 
-            if proportion_correct_unscaled > self.configuration.thresh_PC:
-                ci_min = sigmoid.inverse(proportion_correct, thres_ci[0], width_ci[0], gamma_ci[0], lambd_ci[1])
-                ci_max = sigmoid.inverse(proportion_correct, thres_ci[1], width_ci[1], gamma_ci[1], lambd_ci[0])
-            else:
-                ci_min = sigmoid.inverse(proportion_correct, thres_ci[0], width_ci[1], gamma_ci[0], lambd_ci[1])
-                ci_max = sigmoid.inverse(proportion_correct, thres_ci[1], width_ci[0], gamma_ci[1], lambd_ci[0])
-            new_threshold_ci[coverage_key] = [ci_min, ci_max]
+            mask_above = proportion_correct_unscaled > self.configuration.thresh_PC
+
+            ci_min = np.zeros(proportion_correct.shape)
+            ci_max = np.zeros(proportion_correct.shape)
+
+            ci_min[mask_above] = sigmoid.inverse(proportion_correct[mask_above],
+                                                 thres_ci[0], width_ci[0], gamma_ci[0], lambd_ci[1])
+            ci_max[mask_above] = sigmoid.inverse(proportion_correct[mask_above],
+                                                 thres_ci[1], width_ci[1], gamma_ci[1], lambd_ci[0])
+
+            ci_min[~mask_above] = sigmoid.inverse(proportion_correct[~mask_above],
+                                                 thres_ci[0], width_ci[1], gamma_ci[0], lambd_ci[1])
+            ci_max[~mask_above] = sigmoid.inverse(proportion_correct[~mask_above],
+                                                 thres_ci[1], width_ci[0], gamma_ci[1], lambd_ci[0])
+
+            new_threshold_ci[coverage_key] = [cast_np_scalar(ci_min), 
+                                              cast_np_scalar(ci_max)]
 
         return new_threshold, new_threshold_ci
 
