@@ -119,16 +119,16 @@ class Result:
         """
         if return_ci:
             warnings.warn("""The confidence intervals computed by this method are only upper bounds. 
-                          To get a more accurate confidence interval at another level of proportion 
-                          correct, you need to redefine the threshold, that is, redefine at which level
-                          the threshold parameter is set. You can do that by changing the argument 
-                          'thresh_PC', and call psignifit again. For an example, see documentation, 
+                          To get a more accurate confidence interval at a level of proportion
+                          correct other than `thresh_PC`, you need to redefine the threshold, that is, redefine at
+                          which level the threshold parameter is set. You can do that by changing the argument
+                          'thresh_PC', and call psignifit again. For an example, see documentation,
                           page "Advanced options").
                           
                           If instead you want to get the range of uncertainty for the psychometric 
                           function fit, then you need to sample from the posterior and visualize those 
-                          samples. The function plot_posterior_samples in psigniplot does exactly that.
-                          You find an example of that visualization in the documentation, page Plotting""")
+                          samples. The function `plot_posterior_samples` in psigniplot does exactly that.
+                          You find an example of that visualization in the documentation, page Plotting.""")
 
         proportion_correct = np.asarray(proportion_correct)
         sigmoid = self.configuration.make_sigmoid()
