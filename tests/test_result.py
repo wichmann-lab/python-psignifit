@@ -104,8 +104,8 @@ def test_threshold_slope_ci_scaled(result):
     _, threshold_cis = result.threshold(proportion_correct, return_ci=True, unscaled=False)
 
     expected = {
-        '0.95': [[1.000918, 1.001, 1.001171], [1.00454 , 1.005, 1.005969]],
-        '0.9': [[1.004661, 1.005112, 1.006097], [1.008691, 1.01, 1.012941]],
+        '0.95': [[1.00059, 1.001, 1.001171], [1.004908 , 1.005, 1.005969]],
+        '0.9': [[1.004322, 1.005224, 1.006097], [1.009345, 1.01, 1.012941]],
     }
     assert list(threshold_cis.keys()) == ['0.95', '0.9']
     for coverage_key, cis in threshold_cis.items():
@@ -129,8 +129,8 @@ def test_threshold_slope_ci_unscaled(result):
     _, threshold_cis = result.threshold(proportion_correct, return_ci=True, unscaled=True)
 
     expected = {
-        '0.95': [[1.000923, 1.001, 1.001159], [1.004615, 1.005, 1.005797]],
-        '0.9': [[1.004615, 1.005, 1.005797], [1.00923, 1.01, 1.011594]],
+        '0.95': [[1.000615, 1.001, 1.001159], [1.004923, 1.005, 1.005797]],
+        '0.9': [[1.00423, 1.005, 1.005797], [1.009615, 1.01, 1.011594]],
     }
     assert list(threshold_cis.keys()) == ['0.95', '0.9']
     for coverage_key, cis in threshold_cis.items():

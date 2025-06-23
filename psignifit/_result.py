@@ -2,12 +2,14 @@ import dataclasses
 import json
 from typing import Any, Dict, Tuple, List, Optional, TextIO, Union
 from pathlib import Path
+import warnings
 
 import numpy as np
 from numpy.typing import NDArray
 
 from ._configuration import Configuration
 from ._typing import EstimateType
+from ._utils import cast_np_scalar
 from .tools import psychometric_with_eta
 
 class NumpyEncoder(json.JSONEncoder):
@@ -115,14 +117,29 @@ class Result:
             (thresholds, ci): stimulus values along with confidence intervals
 
         """
+        if return_ci:
+            warnings.warn("""The confidence intervals computed by this method are only upper bounds. 
+                          To get a more accurate confidence interval at a level of proportion
+                          correct other than `thresh_PC`, you need to redefine the threshold, that is, redefine at
+                          which level the threshold parameter is set. You can do that by changing the argument
+                          'thresh_PC', and call psignifit again. For an example, see documentation,
+                          page "Advanced options").
+                          
+                          If instead you want to get the range of uncertainty for the psychometric 
+                          function fit, then you need to sample from the posterior and visualize those 
+                          samples. The function `plot_posterior_samples` in psigniplot does exactly that.
+                          You find an example of that visualization in the documentation, page Plotting.""")
+
         proportion_correct = np.asarray(proportion_correct)
         sigmoid = self.configuration.make_sigmoid()
 
         estimate = self.get_parameter_estimate(estimate_type)
         if unscaled:  # set asymptotes to 0 for everything.
             lambd, gamma = 0, 0
+            proportion_correct_unscaled = proportion_correct
         else:
             lambd, gamma = estimate['lambda'], estimate['gamma']
+            proportion_correct_unscaled = (proportion_correct - gamma) / (1- lambd - gamma)
         new_threshold = sigmoid.inverse(proportion_correct, estimate['threshold'],
                                         estimate['width'], gamma, lambd)
         if not return_ci:
@@ -138,9 +155,24 @@ class Result:
             else:
                 gamma_ci = self.confidence_intervals['gamma'][coverage_key]
                 lambd_ci = self.confidence_intervals['lambda'][coverage_key]
-            ci_min = sigmoid.inverse(proportion_correct, thres_ci[0], width_ci[0], gamma_ci[0], lambd_ci[0])
-            ci_max = sigmoid.inverse(proportion_correct, thres_ci[1], width_ci[1], gamma_ci[1], lambd_ci[1])
-            new_threshold_ci[coverage_key] = [ci_min, ci_max]
+
+            mask_above = proportion_correct_unscaled > self.configuration.thresh_PC
+
+            ci_min = np.zeros(proportion_correct.shape)
+            ci_max = np.zeros(proportion_correct.shape)
+
+            ci_min[mask_above] = sigmoid.inverse(proportion_correct[mask_above],
+                                                 thres_ci[0], width_ci[0], gamma_ci[0], lambd_ci[0])
+            ci_max[mask_above] = sigmoid.inverse(proportion_correct[mask_above],
+                                                 thres_ci[1], width_ci[1], gamma_ci[1], lambd_ci[1])
+
+            ci_min[~mask_above] = sigmoid.inverse(proportion_correct[~mask_above],
+                                                 thres_ci[0], width_ci[1], gamma_ci[0], lambd_ci[0])
+            ci_max[~mask_above] = sigmoid.inverse(proportion_correct[~mask_above],
+                                                 thres_ci[1], width_ci[0], gamma_ci[1], lambd_ci[1])
+
+            new_threshold_ci[coverage_key] = [cast_np_scalar(ci_min),
+                                              cast_np_scalar(ci_max)]
 
         return new_threshold, new_threshold_ci
 
