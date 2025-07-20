@@ -125,8 +125,6 @@ def test_pooling_243():
         [400, 80, 80]
     ])
 
-    # Crashes with:
-    # TypeError: cannot unpack non-iterable numpy.float64 object
     pooled = pool_blocks(data, max_tol=50, max_gap=50, max_length=10)
     assert np.allclose(pooled, data)
 
