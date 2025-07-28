@@ -34,9 +34,11 @@ def pool_blocks(data: np.ndarray, max_tol=0, max_gap=np.inf, max_length=np.inf):
             block = []
             gap = 0
             for j in range(i, ndata):
-                if (cum_ntrials[j + 1] -
-                        cum_ntrials[i]) > max_length or gap > max_gap:
+                # j > i condition: make sure there is at least one data point per block
+                if ((cum_ntrials[j + 1] - cum_ntrials[i]) > max_length
+                        or gap > max_gap) and j > i:
                     break
+
                 level, ncorrect, ntrials = data[j, :]
                 if abs(level - current) <= max_tol and not seen[j]:
                     seen[j] = True

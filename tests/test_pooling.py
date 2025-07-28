@@ -112,6 +112,23 @@ def test_pooling_big_max_gap():
     assert np.allclose(exp, act, rtol=0, atol=1e-04)
 
 
+def test_pooling_243():
+    # Reproduces issue #243
+
+    data = np.array([
+        [100, 50, 50],
+        [101, 51, 51],
+        [200, 60, 60],
+        [201, 61, 61],
+        [300, 70, 70],
+        [301, 71, 71],
+        [400, 80, 80]
+    ])
+
+    pooled = pool_blocks(data, max_tol=50, max_gap=50, max_length=10)
+    assert np.allclose(pooled, data)
+
+
 data = np.array([
     [1.3262, 1, 1],
     [0.8534, 1, 1],
