@@ -2,4 +2,4 @@ sphinx
 numpy
 matplotlib
 sphinxcontrib-mermaid
-jupyter-book
+jupyter-book>=1.0,<2
