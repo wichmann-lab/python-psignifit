@@ -58,3 +58,6 @@ docs = [
     "ipywidgets",
     "sphinx-hoverxref",
 ]
+
+[tool.setuptools.packages.find]
+include = ["psignifit*"]
