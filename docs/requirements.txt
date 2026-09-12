@@ -1,5 +1,5 @@
-- sphinx
-- numpy
-- matplotlib
-- sphinxcontrib-mermaid
-- jupyter-book
+sphinx
+numpy
+matplotlib
+sphinxcontrib-mermaid
+jupyter-book
