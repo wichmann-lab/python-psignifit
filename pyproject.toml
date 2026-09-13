@@ -51,10 +51,13 @@ docs = [
     "sphinx-gallery",
     "sphinx_rtd_theme",
     "matplotlib",
-    "jupyter-book==0.14",
+    "jupyter-book>=1.0,<2",
     "jupytext>=1.13.3",
     "jupyterlab_myst",
     "myst_nb",
     "ipywidgets",
     "sphinx-hoverxref",
 ]
+
+[tool.setuptools.packages.find]
+include = ["psignifit*"]
